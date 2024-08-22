@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.client-container {
+    display: grid;
+    
+    height: 100vh;
+    grid-template-areas:
+        "head head"
+        "nav main";
+    grid-template-rows: 40px 1fr;
+    grid-template-columns: 70px 1fr;
+}
+
+.client-headbar {
+    grid-area: head;
+}
+
+.client-sidebar {
+    grid-area: nav;
+}
+
+.client-workspace-container {
+    grid-area: main;
+}
