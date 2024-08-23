@@ -10,6 +10,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class Workspace extends Model
 {
     use HasFactory;
+    protected $fillable=[
+        'name','user_id'
+    ];
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
