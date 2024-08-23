@@ -18,11 +18,11 @@ export default {
             colors: {
                 primary: "#340b37",
                 secondary: "#1b0e1e",
-                background:"#1a1d21",
-                foreground:"#222529"
+                background: "#1a1d21",
+                foreground: "#222529",
             },
         },
     },
 
-    plugins: [forms],
+    plugins: [forms, require("@tailwindcss/typography")],
 };

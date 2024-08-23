@@ -5,6 +5,8 @@ import { FaAngleDown } from "react-icons/fa6";
 import { FiHeadphones } from "react-icons/fi";
 import { CgFileDocument } from "react-icons/cg";
 import { FaPlus } from "react-icons/fa6";
+import TipTapEditor from "@/Components/TipTapEditor";
+
 export default function ChatArea({ channelName = "project", members = [] }) {
     const { auth } = usePage().props;
     return (
@@ -45,7 +47,10 @@ export default function ChatArea({ channelName = "project", members = [] }) {
                 </div>
             </div>
             <div>content</div>
-            <div className="h-32">chat input</div>
+            <div className="m-6 border border-white/50 pt-4 px-2 rounded-lg">
+                <TipTapEditor />
+                
+            </div>
         </div>
     );
 }
