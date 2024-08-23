@@ -143,47 +143,48 @@ const MenuBar = ({ editor }) => {
         </div>
     );
 };
-function submit(editor) {
-    console.log(editor.getJSON());
-    editor.commands.clearContent();
-    return true;
-}
-const ShiftEnterCreateExtension = Extension.create({
-    addKeyboardShortcuts() {
-        return {
-            "Shift-Enter": ({ editor }) => {
-                editor.commands.enter();
-                return true;
-            },
-            Enter: ({ editor }) => {
-                return submit(editor);
-            },
-        };
-    },
-});
-const extensions = [
-    StarterKit,
-    ShiftEnterCreateExtension,
-    Link.configure({
-        openOnClick: false,
-        autolink: true,
-        defaultProtocol: "https",
-    }),
-];
 
-const content = ``;
-const editorProps = {
-    attributes: {
-        class: "prose prose-sm sm:prose-base text-white/85 lg:prose-base xl:prose-base m-5 focus:outline-none m-2",
-    },
-    handleKeyDown: () => {},
-};
 import data from "@emoji-mart/data";
 import EmojiPicker from "@emoji-mart/react";
 import { CiFaceSmile } from "react-icons/ci";
 import { IoMdSend } from "react-icons/io";
 import { FaAngleDown } from "react-icons/fa6";
-export default function TipTapEditor() {
+export default function TipTapEditor({ onSubmit }) {
+    function submit(editor) {
+        onSubmit(editor.getHTML());
+        editor.commands.clearContent();
+        return true;
+    }
+    const ShiftEnterCreateExtension = Extension.create({
+        addKeyboardShortcuts() {
+            return {
+                "Shift-Enter": ({ editor }) => {
+                    editor.commands.enter();
+                    return true;
+                },
+                Enter: ({ editor }) => {
+                    return submit(editor);
+                },
+            };
+        },
+    });
+    const extensions = [
+        StarterKit,
+        ShiftEnterCreateExtension,
+        // Link.configure({
+        //     openOnClick: false,
+        //     autolink: true,
+        //     defaultProtocol: "https",
+        // }),
+    ];
+
+    const content = ``;
+    const editorProps = {
+        attributes: {
+            class: "prose prose-sm sm:prose-base text-white/85 lg:prose-base xl:prose-base m-5 focus:outline-none m-2",
+        },
+        handleKeyDown: () => {},
+    };
     const editor = useEditor({
         extensions,
         content,

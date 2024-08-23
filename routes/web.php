@@ -4,7 +4,7 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Application;
 use Laravel\Socialite\Facades\Socialite;
-use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ChannelController;
 
 Route::get('/auth/redirect', function () {
     return Socialite::driver('github')->redirect();
@@ -16,6 +16,8 @@ Route::get('/auth/callback', function () {
     // $user->token
 });
 
+use App\Http\Controllers\MessageController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WorkspaceController;
 use App\Http\Controllers\Auth\ProviderController;
 
@@ -37,7 +39,9 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::get("/workspace/{workspace}", [WorkspaceController::class, 'show']);
+    
+    Route::get("/workspace/{workspace}/{channel}", [ChannelController::class, 'show']);
+    Route::post("/workspace/{workspace}/{channel}/message", [MessageController::class, 'store']);
 });
 
 Route::get('/auth/{provider}/redirect', [ProviderController::class, 'redirect']);

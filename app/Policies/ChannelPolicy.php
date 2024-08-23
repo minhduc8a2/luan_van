@@ -3,11 +3,11 @@
 namespace App\Policies;
 
 use App\Models\User;
-use App\Models\Workspace;
+use App\Models\Channel;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Auth\Access\Response;
 
-class WorkspacePolicy
+class ChannelPolicy
 {
     /**
      * Determine whether the user can view any models.
@@ -20,11 +20,11 @@ class WorkspacePolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Workspace $workspace): bool
+    public function view(User $user, Channel $channel): bool
     {
-        $exists = DB::table('user_workspace')
+        $exists = DB::table('channel_user')
             ->where('user_id', '=', $user->id)
-            ->where('workspace_id', '=', $workspace->id)
+            ->where('channel_id', '=', $channel->id)
             ->count() > 0;
         return $exists;
     }
@@ -40,7 +40,7 @@ class WorkspacePolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Workspace $workspace): bool
+    public function update(User $user, Channel $channel): bool
     {
         //
     }
@@ -48,7 +48,7 @@ class WorkspacePolicy
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Workspace $workspace): bool
+    public function delete(User $user, Channel $channel): bool
     {
         //
     }
@@ -56,7 +56,7 @@ class WorkspacePolicy
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, Workspace $workspace): bool
+    public function restore(User $user, Channel $channel): bool
     {
         //
     }
@@ -64,7 +64,7 @@ class WorkspacePolicy
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, Workspace $workspace): bool
+    public function forceDelete(User $user, Channel $channel): bool
     {
         //
     }

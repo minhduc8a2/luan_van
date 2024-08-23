@@ -6,9 +6,23 @@ import { FiHeadphones } from "react-icons/fi";
 import { CgFileDocument } from "react-icons/cg";
 import { FaPlus } from "react-icons/fa6";
 import TipTapEditor from "@/Components/TipTapEditor";
+import { router } from "@inertiajs/react";
+import { generateHTML } from "@tiptap/core";
+import StarterKit from "@tiptap/starter-kit";
 
-export default function ChatArea({ channelName = "project", members = [] }) {
+export default function ChatArea({
+    channelName = "project",
+    members = [],
+    workspace,
+    channel,
+    messages = [],
+}) {
     const { auth } = usePage().props;
+    function onSubmit(content) {
+        router.post(`/workspace/${workspace.id}/${channel.id}/message`, {
+            content,
+        });
+    }
     return (
         <div className="bg-background h-full chat-area-container ">
             <div className="p-4 border-b border-b-white/10">
@@ -46,10 +60,27 @@ export default function ChatArea({ channelName = "project", members = [] }) {
                     <div className="text-sm">Add bookmarks</div>
                 </div>
             </div>
-            <div>content</div>
+            <div className="">
+                {messages.map((message) => {
+                    console.log(
+                        generateHTML(JSON.parse(message.content), [StarterKit])
+                    );
+                    return (
+                        <div
+                            className="prose text-white/85"
+                            key={message.id}
+                            dangerouslySetInnerHTML={{
+                                __html: generateHTML(
+                                    JSON.parse(message.content),
+                                    [StarterKit]
+                                ),
+                            }}
+                        ></div>
+                    );
+                })}
+            </div>
             <div className="m-6 border border-white/50 pt-4 px-2 rounded-lg">
-                <TipTapEditor />
-                
+                <TipTapEditor onSubmit={onSubmit} />
             </div>
         </div>
     );

@@ -4,19 +4,28 @@ import HeadBar from "./Partitals/Headbar";
 import Panel from "./Partitals/Panel";
 import ChatArea from "./Partitals/ChatArea";
 
-export default function Index({ auth, workspaceName }) {
+export default function Index({ auth, workspace, channels, channel ,messages}) {
     return (
         <div className="client-container bg-primary text-white">
             <div className="client-headbar ">
                 <HeadBar />
             </div>
             <div className="client-sidebar ">
-                <SideBar user={auth.user} workspaceName={workspaceName}/>
+                <SideBar user={auth.user} workspaceName={workspace.name} />
             </div>
             <div className="client-workspace-container grid grid-cols-4 rounded-lg border border-white/5 border-b-2">
-                <Panel />
+                <Panel
+                    channels={channels}
+                    currentChannel={channel}
+                    workspace={workspace}
+                />
                 <div className="col-span-3">
-                    <ChatArea />
+                    <ChatArea
+                        channelName={channel.name}
+                        workspace={workspace}
+                        channel={channel}
+                        messages={messages}
+                    />
                 </div>
             </div>
         </div>

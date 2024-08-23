@@ -3,10 +3,11 @@
 namespace App\Http\Controllers;
 
 use Inertia\Inertia;
+use App\Models\Channel;
 use App\Models\Workspace;
 use Illuminate\Http\Request;
 
-class WorkspaceController extends Controller
+class ChannelController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -35,21 +36,26 @@ class WorkspaceController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Request $request, Workspace $workspace)
+    public function show(Request $request, Workspace $workspace, Channel $channel)
     {
         if ($request->user()->cannot('view', $workspace)) {
-            abort(403);
+            return  abort(403);
+        }
+        if ($request->user()->cannot('view', $channel)) {
+            return  abort(403);
         }
 
+
         $channels = $workspace->channels;
-        
-        return Inertia::render("Workspace/Index", ['workspaceName' => $workspace->name, 'channels' => $channels]);
+        $messages = $channel->messages;
+      
+        return Inertia::render("Workspace/Index", ['workspace' => $workspace, 'channel' => $channel, 'channels' => $channels, 'messages' => $messages]);
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Workspace $workspace)
+    public function edit(Channel $channel)
     {
         //
     }
@@ -57,7 +63,7 @@ class WorkspaceController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Workspace $workspace)
+    public function update(Request $request, Channel $channel)
     {
         //
     }
@@ -65,7 +71,7 @@ class WorkspaceController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Workspace $workspace)
+    public function destroy(Channel $channel)
     {
         //
     }

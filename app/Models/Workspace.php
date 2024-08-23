@@ -6,12 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Workspace extends Model
 {
     use HasFactory;
-    protected $fillable=[
-        'name','user_id'
+    protected $fillable = [
+        'name',
+        'user_id'
     ];
     public function user(): BelongsTo
     {
@@ -21,5 +23,10 @@ class Workspace extends Model
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class);
+    }
+
+    public function channels(): HasMany
+    {
+        return $this->hasMany(Channel::class);
     }
 }
