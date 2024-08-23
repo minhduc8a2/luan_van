@@ -14,6 +14,7 @@ import { FaPlus } from "react-icons/fa6";
 import { VscMention } from "react-icons/vsc";
 import { PiVideoCamera } from "react-icons/pi";
 import { TiMicrophoneOutline } from "react-icons/ti";
+import { Extension } from "@tiptap/core";
 const MenuBar = ({ editor }) => {
     if (!editor) {
         return null;
@@ -142,9 +143,27 @@ const MenuBar = ({ editor }) => {
         </div>
     );
 };
-
+function submit(editor) {
+    console.log(editor.getJSON());
+    editor.commands.clearContent();
+    return true;
+}
+const ShiftEnterCreateExtension = Extension.create({
+    addKeyboardShortcuts() {
+        return {
+            "Shift-Enter": ({ editor }) => {
+                editor.commands.enter();
+                return true;
+            },
+            Enter: ({ editor }) => {
+                return submit(editor);
+            },
+        };
+    },
+});
 const extensions = [
     StarterKit,
+    ShiftEnterCreateExtension,
     Link.configure({
         openOnClick: false,
         autolink: true,
@@ -152,25 +171,26 @@ const extensions = [
     }),
 ];
 
-const content = `
- 
-  `;
+const content = ``;
 const editorProps = {
     attributes: {
         class: "prose prose-sm sm:prose-base text-white/85 lg:prose-base xl:prose-base m-5 focus:outline-none m-2",
     },
+    handleKeyDown: () => {},
 };
 import data from "@emoji-mart/data";
 import EmojiPicker from "@emoji-mart/react";
 import { CiFaceSmile } from "react-icons/ci";
+import { IoMdSend } from "react-icons/io";
+import { FaAngleDown } from "react-icons/fa6";
 export default function TipTapEditor() {
     const editor = useEditor({
         extensions,
         content,
         editorProps,
-        onUpdate({ editor }) {
-            console.log(editor.getJSON());
-        },
+        // onUpdate({ editor }) {
+        //     console.log(editor.getJSON());
+        // },
     });
 
     return (
@@ -179,14 +199,23 @@ export default function TipTapEditor() {
             <div className="max-h-96 overflow-y-auto ">
                 <EditorContent editor={editor} />
             </div>
-            <div className="py-2 flex items-center gap-x-4">
-                <div className="bg-white/10 rounded-full w-fit p-2">
-                    {" "}
-                    <FaPlus className="text-sm opacity-75" />
+            <div className="py-2 flex items-center justify-between">
+                <div className="flex items-center gap-x-4">
+                    <div className="bg-white/10 rounded-full w-fit p-2">
+                        {" "}
+                        <FaPlus className="text-sm opacity-75" />
+                    </div>
+                    <VscMention className="text-2xl opacity-75" />
+                    <PiVideoCamera className="text-xl opacity-75" />
+                    <TiMicrophoneOutline className="text-xl opacity-75" />
                 </div>
-                <VscMention className="text-2xl opacity-75"/>
-                <PiVideoCamera className="text-xl opacity-75"/>
-                <TiMicrophoneOutline className="text-xl opacity-75"/>
+                <div className="p-1 px-2 bg-green-800 rounded flex justify-center items-center gap-x-2">
+                    <button onClick={() => submit(editor)}>
+                        <IoMdSend className="text-base" />
+                    </button>
+                    <div className="opacity-75">|</div>
+                    <FaAngleDown className="text-sm" />
+                </div>
             </div>
         </div>
     );
