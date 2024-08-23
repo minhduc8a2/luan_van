@@ -25,7 +25,7 @@ class ProviderController extends Controller
 
                 $user->social_provider_id = $providerUser->id;
                 $user->social_provider = $provider;
-                $user->name = $providerUser->name;
+                // $user->name = $providerUser->name;
                 $user->social_provider_token = $providerUser->token;
                 $user->social_provider_refresh_token = $providerUser->refresh_token;
                 $user->avatar_url = $providerUser->avatar;

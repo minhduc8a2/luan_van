@@ -1,6 +1,8 @@
 import React from "react";
 import SideBar from "./Partitals/Sidebar";
 import HeadBar from "./Partitals/Headbar";
+import Panel from "./Partitals/Panel";
+import ChatArea from "./Partitals/ChatArea";
 
 export default function Index({ auth }) {
     return (
@@ -11,7 +13,12 @@ export default function Index({ auth }) {
             <div className="client-sidebar ">
                 <SideBar user={auth.user} />
             </div>
-            <div className="client-workspace-container ">Main</div>
+            <div className="client-workspace-container grid grid-cols-4 rounded-lg border border-white/5 border-b-2">
+                <Panel />
+                <div className="col-span-3">
+                    <ChatArea />
+                </div>
+            </div>
         </div>
     );
 }

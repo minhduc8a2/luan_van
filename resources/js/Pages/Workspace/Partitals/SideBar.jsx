@@ -9,40 +9,48 @@ import { LuPlus } from "react-icons/lu";
 import WorkspaceAvatar from "@/Components/WorkspaceAvatar";
 export default function SideBar({ user }) {
     const { url } = usePage();
-    const itemStyle = "flex flex-col items-center gap-y-2";
+    const itemStyle = "flex flex-col items-center gap-y-2 group";
     return (
         <div className="flex flex-col justify-between h-full pb-8">
             <div className="flex flex-col items-center gap-y-8 ">
                 <WorkspaceAvatar name={"Main"} />
                 <div className={itemStyle}>
                     {url == "/workspace" ? (
-                        <div className="p-2 rounded-lg bg-white/10">
+                        <div className="p-2 rounded-lg bg-white/10 group-hover:bg-white/10 group-hover:scale-105 transition">
                             {" "}
                             <PiHouseLineFill className="text-lg " />{" "}
                         </div>
                     ) : (
-                        <PiHouseLineBold className="text-lg " />
+                        <div className="p-2 rounded-lg group-hover:bg-white/10 group-hover:scale-105 transition">
+                            <PiHouseLineBold className="text-lg " />
+                        </div>
                     )}
                     <div className="text-xs font-semibold">Home</div>
                 </div>
                 <div className={itemStyle}>
-                    <FaRegMessage className="text-lg " />
+                    <div className="p-2 rounded-lg group-hover:bg-white/10 group-hover:scale-105 transition">
+                        <FaRegMessage className="text-lg " />
+                    </div>
                     <div className="text-xs font-semibold">DMs</div>
                 </div>
                 <div className={itemStyle}>
-                    <FaRegBell className="text-lg " />
+                    <div className="p-2 rounded-lg group-hover:bg-white/10 group-hover:scale-105 transition">
+                        <FaRegBell className="text-lg " />
+                    </div>
                     <div className="text-xs font-semibold">Activity</div>
                 </div>
                 <div className={itemStyle}>
-                    <IoIosMore className="text-lg " />
+                    <div className="p-2 rounded-lg group-hover:bg-white/10 group-hover:scale-105 transition">
+                        <IoIosMore className="text-lg " />
+                    </div>
                     <div className="text-xs font-semibold">More</div>
                 </div>
             </div>
             <div className="flex flex-col items-center gap-y-2">
                 <div className="p-2 bg-white/25 rounded-full">
-                    <LuPlus className="text-xl opacity-75"/>
+                    <LuPlus className="text-xl opacity-75" />
                 </div>
-                <Avatar src={user.avatar_url} className="mt-2" />
+                <Avatar src={user.avatar_url} className="mt-2" isOnline={true} />
             </div>
         </div>
     );

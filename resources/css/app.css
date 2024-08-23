@@ -4,7 +4,7 @@
 
 .client-container {
     display: grid;
-    
+
     height: 100vh;
     grid-template-areas:
         "head head"
@@ -23,4 +23,13 @@
 
 .client-workspace-container {
     grid-area: main;
+}
+.grid-item {
+    display: grid;
+    grid-template-columns: 28px 1fr;
+}
+
+.chat-area-container {
+    display: grid;
+    grid-template-rows: min-content 1fr min-content;
 }
