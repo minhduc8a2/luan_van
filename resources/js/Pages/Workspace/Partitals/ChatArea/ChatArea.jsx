@@ -7,10 +7,11 @@ import { CgFileDocument } from "react-icons/cg";
 import { FaPlus } from "react-icons/fa6";
 import TipTapEditor from "@/Components/TipTapEditor";
 import { router } from "@inertiajs/react";
-
 import { useEffect, useState, useRef } from "react";
 import { differenceInSeconds } from "@/helpers/dateTimeHelper";
+
 import Message from "./Partitals/Message";
+import axios from "axios";
 export default function ChatArea({
     channelName = "project",
     members = [],
@@ -19,13 +20,16 @@ export default function ChatArea({
     messages = [],
 }) {
     const { auth } = usePage().props;
+   
     const messageContainerRef = useRef(null);
     const [localMessages, setlocalMessages] = useState([...messages]);
-    function onSubmit(content) {
+    function onSubmit(content, fileObjects) {
         router.post(`/workspace/${workspace.id}/${channel.id}/message`, {
             content,
+            fileObjects,
         });
     }
+
     let preValue = null;
     let hasChanged = false;
     useEffect(() => {

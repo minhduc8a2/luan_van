@@ -36,6 +36,7 @@ class ChannelController extends Controller
     /**
      * Display the specified resource.
      */
+    
     public function show(Request $request, Workspace $workspace, Channel $channel)
     {
         if ($request->user()->cannot('view', $workspace)) {
@@ -48,9 +49,10 @@ class ChannelController extends Controller
 
         $channels = $workspace->channels;
         $messages = $channel->messages;
+       
         $users = $workspace->users;
         $members = $channel->users;
-        return Inertia::render("Workspace/Index", ['workspace' => $workspace, 'channel' => $channel, 'channels' => $channels, 'messages' => $messages, 'users' => $users, 'members' => $members]);
+        return Inertia::render("Workspace/Index", ['workspace' => $workspace, 'channel' => $channel, 'channels' => $channels, 'messages' => $messages->load('attachments'), 'users' => $users, 'members' => $members]);
     }
 
     /**

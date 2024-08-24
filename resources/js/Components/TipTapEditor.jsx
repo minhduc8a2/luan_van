@@ -160,17 +160,25 @@ import { CiFaceSmile } from "react-icons/ci";
 import { IoMdSend } from "react-icons/io";
 import { FaAngleDown } from "react-icons/fa6";
 import { useRef } from "react";
-export default function TipTapEditor({ onSubmit }) {
+import { router, usePage } from "@inertiajs/react";
+export default function TipTapEditor({ onSubmit, onFilePicked }) {
+    const { auth } = usePage().props;
     const fileList = useRef([]);
     function submit(editor) {
-        onSubmit(editor.getHTML());
+        onSubmit(editor.getHTML(),fileList.current);
         editor.commands.clearContent();
         return true;
     }
+
     function handleFilePicked(e) {
         const files = e.target.files;
-        fileList.current = [...fileList.current, ...e.target.files];
-        console.log(fileList.current);
+
+        axios
+            .postForm(`/upload_file/${auth.user.id}`, { files })
+            .then((response) => {
+                fileList.current = [...fileList.current, ...response.data];
+                
+            });
     }
     const ShiftEnterCreateExtension = Extension.create({
         addKeyboardShortcuts() {

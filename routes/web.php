@@ -22,6 +22,7 @@ use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WorkspaceController;
 use App\Http\Controllers\Auth\ProviderController;
+use App\Models\Attachment;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -41,17 +42,23 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    
+
     Route::get("/workspace/{workspace}/{channel}", [ChannelController::class, 'show']);
     Route::post("/workspace/{workspace}/{channel}/message", [MessageController::class, 'store']);
 
-    Route::post("/attachments/temporary",function (Request $request){
+    Route::post("/upload_file/{user}", function (Request $request, User $user) {
+
         $validated = $request->validate([
-            'title' => 'required|unique:posts|max:255',
-            'body' => 'required',
+            'files.*' => "max:" . (200 * 1024),
         ]);
-        $path = $request->file('avatar')->store('avatars');
-        return $path;
+        // dd($validated['files']);
+        $temporaryFileObjects = [];
+        foreach ($validated['files'] as $file) {
+            $path = $file->store('public/users_' . $user->id);
+            array_push($temporaryFileObjects, ['path' => $path, 'type' => $file->getMimeType(), 'name' => $file->getClientOriginalName()]);
+        }
+
+        return response()->json($temporaryFileObjects);
     });
 });
 

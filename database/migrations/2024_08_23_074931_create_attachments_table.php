@@ -14,10 +14,11 @@ return new class extends Migration
     {
         Schema::create('attachments', function (Blueprint $table) {
             $table->id();
-            $table->enum('type', Attachment::$type);
+            $table->string('type');
             $table->string('url', 2083);
+            $table->string('path')->nullable();
             $table->string('name');
-            $table->foreignId('message_id')->constrained()->cascadeOnDelete();
+            $table-> foreignId('message_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }
