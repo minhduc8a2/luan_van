@@ -12,6 +12,11 @@
     grid-template-rows: 40px 1fr;
     grid-template-columns: 70px 1fr;
 }
+.client-container > * {
+    min-height: 0;
+    max-height: 100%; /* Ensure children fit within the nested grid areas */
+    
+}
 
 .client-headbar {
     grid-area: head;
@@ -22,6 +27,7 @@
 }
 
 .client-workspace-container {
+    max-height: 100%;
     grid-area: main;
 }
 .grid-item {
@@ -31,5 +37,12 @@
 
 .chat-area-container {
     display: grid;
+    min-height: 0;
+    height: 100%;
     grid-template-rows: min-content 1fr min-content;
+}
+.chat-area-container > * {
+    min-height: 0;
+    max-height: 100%; /* Ensure children fit within the nested grid areas */
+    overflow-y: auto; /* Prevent overflow in nested grid children */
 }

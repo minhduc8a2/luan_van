@@ -9,6 +9,7 @@ import TipTapEditor from "@/Components/TipTapEditor";
 import { router } from "@inertiajs/react";
 import { generateHTML } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
+import { useEffect, useState, useRef } from "react";
 
 export default function ChatArea({
     channelName = "project",
@@ -18,13 +19,28 @@ export default function ChatArea({
     messages = [],
 }) {
     const { auth } = usePage().props;
+    const messageContainerRef = useRef(null);
+    const [localMessages, setlocalMessages] = useState([...messages]);
     function onSubmit(content) {
         router.post(`/workspace/${workspace.id}/${channel.id}/message`, {
             content,
         });
     }
+    useEffect(() => {
+        window.Echo.private(`channels.${channel.id}`).listen(
+            "MessageEvent",
+            (e) => {
+                setlocalMessages((pre) => [...pre, e.message]);
+            }
+        );
+    }, []);
+    useEffect(() => {
+        if (messageContainerRef.current)
+            messageContainerRef.current.scrollTop =
+                messageContainerRef.current.scrollHeight;
+    }, [localMessages]);
     return (
-        <div className="bg-background h-full chat-area-container ">
+        <div className="bg-background  chat-area-container col-span-3 ">
             <div className="p-4 border-b border-b-white/10">
                 <div className="flex justify-between font-bold text-lg opacity-75">
                     <div className="flex items-center gap-x-2">
@@ -60,8 +76,8 @@ export default function ChatArea({
                     <div className="text-sm">Add bookmarks</div>
                 </div>
             </div>
-            <div className="">
-                {messages.map((message) => {
+            <div className="overflow-y-auto " ref={messageContainerRef}>
+                {localMessages.map((message) => {
                     console.log(
                         generateHTML(JSON.parse(message.content), [StarterKit])
                     );

@@ -48,8 +48,9 @@ class ChannelController extends Controller
 
         $channels = $workspace->channels;
         $messages = $channel->messages;
+        $users = $workspace->users;
       
-        return Inertia::render("Workspace/Index", ['workspace' => $workspace, 'channel' => $channel, 'channels' => $channels, 'messages' => $messages]);
+        return Inertia::render("Workspace/Index", ['workspace' => $workspace, 'channel' => $channel, 'channels' => $channels, 'messages' => $messages, 'users'=>$users]);
     }
 
     /**

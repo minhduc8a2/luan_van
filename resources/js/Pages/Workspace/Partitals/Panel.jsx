@@ -7,7 +7,12 @@ import { LuLock } from "react-icons/lu";
 import { LuPlus } from "react-icons/lu";
 import Avatar from "@/Components/Avatar";
 import { Link, usePage } from "@inertiajs/react";
-export default function Panel({ workspace, channels = [], currentChannel }) {
+export default function Panel({
+    workspace,
+    channels = [],
+    currentChannel,
+    users,
+}) {
     const { auth } = usePage().props;
     return (
         <div className="bg-secondary h-full rounded-l-lg rounded-s-lg ">
@@ -89,21 +94,32 @@ export default function Panel({ workspace, channels = [], currentChannel }) {
                         <div className="">Direct messages</div>
                     </div>
                     <ul>
-                        <li className="flex mt-2 items-center justify-start gap-x-2 px-4 ">
-                            <div className="">
-                                <Avatar
-                                    src={auth.user.avatar_url}
-                                    className="w-5 h-5"
-                                    onlineClassName="scale-75"
-                                    offlineClassName="scale-75"
-                                    isOnline={true}
-                                />
-                            </div>
-                            <div className="">
-                                {auth.user.name}{" "}
-                                <span className="opacity-75 ml-2">you</span>
-                            </div>
-                        </li>
+                        {users.map((user) => (
+                            <li
+                                key={user.id}
+                                className="flex mt-2 items-center justify-start gap-x-2 px-4 "
+                            >
+                                <div className="">
+                                    <Avatar
+                                        src={user.avatar_url}
+                                        className="w-5 h-5"
+                                        onlineClassName="scale-75"
+                                        offlineClassName="scale-75"
+                                        isOnline={true}
+                                    />
+                                </div>
+                                <div className="">
+                                    {user.name}{" "}
+                                    {user.id == auth.user.id ? (
+                                        <span className="opacity-75 ml-2">
+                                            you
+                                        </span>
+                                    ) : (
+                                        ""
+                                    )}
+                                </div>
+                            </li>
+                        ))}
                     </ul>
                     <div className="grid-item mt-2 px-4">
                         <div className="flex items-center ">

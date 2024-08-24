@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use Tiptap\Editor;
 use App\Models\Channel;
 use App\Models\Message;
 use App\Models\Workspace;
 use Illuminate\Http\Request;
-use Tiptap\Editor;
+use App\Broadcasting\MessageChannel;
+use App\Events\MessageEvent;
+use Illuminate\Support\Facades\Broadcast;
 
 class MessageController extends Controller
 {
@@ -38,7 +41,11 @@ class MessageController extends Controller
             $editor = new Editor();
             $content = $editor->sanitize($content);
             $JSONContent = $editor->setContent($content)->getJSON();
-            Message::create(['content' => $JSONContent, 'channel_id' => $channel->id, 'user_id' => $request->user()->id]);
+            $message = Message::create(['content' => $JSONContent, 'channel_id' => $channel->id, 'user_id' => $request->user()->id]);
+            if (isset($message)) {
+              
+                broadcast(new MessageEvent($channel, $message))->toOthers();
+            }
         }
     }
 
