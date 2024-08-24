@@ -7,10 +7,10 @@ import { CgFileDocument } from "react-icons/cg";
 import { FaPlus } from "react-icons/fa6";
 import TipTapEditor from "@/Components/TipTapEditor";
 import { router } from "@inertiajs/react";
-import { generateHTML } from "@tiptap/core";
-import StarterKit from "@tiptap/starter-kit";
-import { useEffect, useState, useRef } from "react";
 
+import { useEffect, useState, useRef } from "react";
+import { differenceInSeconds } from "@/helpers/dateTimeHelper";
+import Message from "./Partitals/Message";
 export default function ChatArea({
     channelName = "project",
     members = [],
@@ -26,6 +26,8 @@ export default function ChatArea({
             content,
         });
     }
+    let preValue = null;
+    let hasChanged = false;
     useEffect(() => {
         window.Echo.private(`channels.${channel.id}`).listen(
             "MessageEvent",
@@ -76,22 +78,35 @@ export default function ChatArea({
                     <div className="text-sm">Add bookmarks</div>
                 </div>
             </div>
-            <div className="overflow-y-auto " ref={messageContainerRef}>
-                {localMessages.map((message) => {
-                    console.log(
-                        generateHTML(JSON.parse(message.content), [StarterKit])
-                    );
+            <div
+                className="overflow-y-auto max-w-full scrollbar"
+                ref={messageContainerRef}
+            >
+                {localMessages.map((message, index) => {
+                    const user = members.filter(
+                        (mem) => mem.id === message.user_id
+                    )[0];
+                    hasChanged = false;
+                    if (preValue) {
+                        if (
+                            preValue.user.id != user.id ||
+                            differenceInSeconds(
+                                preValue.message.updated_at,
+                                message.updated_at
+                            ) > 10
+                        ) {
+                            hasChanged = true;
+                            preValue = { user, message };
+                        }
+                    } else preValue = { user, message };
                     return (
-                        <div
-                            className="prose text-white/85"
+                        <Message
                             key={message.id}
-                            dangerouslySetInnerHTML={{
-                                __html: generateHTML(
-                                    JSON.parse(message.content),
-                                    [StarterKit]
-                                ),
-                            }}
-                        ></div>
+                            message={message}
+                            user={user}
+                            hasChanged={hasChanged}
+                            index={index}
+                        />
                     );
                 })}
             </div>

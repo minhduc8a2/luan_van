@@ -2,7 +2,7 @@ import React from "react";
 import SideBar from "./Partitals/Sidebar";
 import HeadBar from "./Partitals/Headbar";
 import Panel from "./Partitals/Panel";
-import ChatArea from "./Partitals/ChatArea";
+import ChatArea from "./Partitals/ChatArea/ChatArea";
 
 export default function Index({
     auth,
@@ -11,6 +11,7 @@ export default function Index({
     channel,
     messages,
     users,
+    members
 }) {
     return (
         <div className="client-container bg-primary text-white ">
@@ -33,6 +34,7 @@ export default function Index({
                     workspace={workspace}
                     channel={channel}
                     messages={messages}
+                    members={members}
                 />
             </div>
         </div>

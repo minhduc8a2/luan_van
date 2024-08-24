@@ -1,7 +1,26 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@layer utilities {
+    .scrollbar::-webkit-scrollbar {
+        width: 8px;
+        height: 20px;
+    }
 
+    .scrollbar::-webkit-scrollbar-track {
+        border-radius: 100vh;
+        background: #f7f4ed00;
+    }
+
+    .scrollbar::-webkit-scrollbar-thumb {
+        @apply bg-white/15;
+        border-radius: 100vh;
+    }
+
+    .scrollbar::-webkit-scrollbar-thumb:hover {
+        @apply bg-white/25;
+    }
+}
 .client-container {
     display: grid;
 
@@ -15,7 +34,6 @@
 .client-container > * {
     min-height: 0;
     max-height: 100%; /* Ensure children fit within the nested grid areas */
-    
 }
 
 .client-headbar {
@@ -45,4 +63,17 @@
     min-height: 0;
     max-height: 100%; /* Ensure children fit within the nested grid areas */
     overflow-y: auto; /* Prevent overflow in nested grid children */
+}
+
+.message-container {
+    display: grid;
+    grid-template-columns: 36px 1fr;
+}
+
+.prose {
+    @apply max-w-full;
+}
+
+.tiptap p {
+    @apply mx-2 my-2;
 }

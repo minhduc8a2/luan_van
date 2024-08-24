@@ -9,8 +9,8 @@ export default function Avatar({
     noStatus = false,
 }) {
     return (
-        <div className="relative w-fit">
-            <img src={src} className={`rounded-lg w-10 h-10 ${className}`} />
+        <div className="relative w-fit h-fit max-h-full">
+            <img src={src} className={`rounded-lg max-w-full max-h-10 ${className}`} />
             {noStatus ? (
                 ""
             ) : isOnline ? (

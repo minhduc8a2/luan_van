@@ -1,5 +1,15 @@
 import { EditorContent, useEditor } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
+import Paragraph from "@tiptap/extension-paragraph";
+import Document from "@tiptap/extension-document";
+import Text from "@tiptap/extension-text";
+import Bold from "@tiptap/extension-bold";
+import Italic from "@tiptap/extension-italic";
+import Code from "@tiptap/extension-code";
+import Strike from "@tiptap/extension-strike";
+import CodeBlock from "@tiptap/extension-code-block";
+import BulletList from "@tiptap/extension-bullet-list";
+import ListItem from "@tiptap/extension-list-item";
+import OrderedList from "@tiptap/extension-ordered-list";
 import Link from "@tiptap/extension-link";
 import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
 import { GoBold } from "react-icons/go";
@@ -149,19 +159,30 @@ import EmojiPicker from "@emoji-mart/react";
 import { CiFaceSmile } from "react-icons/ci";
 import { IoMdSend } from "react-icons/io";
 import { FaAngleDown } from "react-icons/fa6";
+import { useRef } from "react";
 export default function TipTapEditor({ onSubmit }) {
+    const fileList = useRef([]);
     function submit(editor) {
         onSubmit(editor.getHTML());
         editor.commands.clearContent();
         return true;
     }
+    function handleFilePicked(e) {
+        const files = e.target.files;
+        fileList.current = [...fileList.current, ...e.target.files];
+        console.log(fileList.current);
+    }
     const ShiftEnterCreateExtension = Extension.create({
         addKeyboardShortcuts() {
             return {
-                "Shift-Enter": ({ editor }) => {
-                    editor.commands.enter();
-                    return true;
-                },
+                "Shift-Enter": ({ editor }) =>
+                    editor.commands.first(({ commands }) => [
+                        () => commands.newlineInCode(),
+                        () => commands.splitListItem("listItem"), // This line added
+                        () => commands.createParagraphNear(),
+                        () => commands.liftEmptyBlock(),
+                        () => commands.splitBlock(),
+                    ]),
                 Enter: ({ editor }) => {
                     return submit(editor);
                 },
@@ -169,8 +190,19 @@ export default function TipTapEditor({ onSubmit }) {
         },
     });
     const extensions = [
-        StarterKit,
+        Document,
+        Paragraph,
+        Text,
+        Bold,
+        Italic,
+        Code,
+        Strike,
+        CodeBlock,
+        BulletList,
+        ListItem,
+        OrderedList,
         ShiftEnterCreateExtension,
+
         // Link.configure({
         //     openOnClick: false,
         //     autolink: true,
@@ -181,7 +213,7 @@ export default function TipTapEditor({ onSubmit }) {
     const content = ``;
     const editorProps = {
         attributes: {
-            class: "prose prose-sm sm:prose-base text-white/85 lg:prose-base xl:prose-base m-5 focus:outline-none m-2",
+            class: "prose prose-invert  text-white/85  focus:outline-none  ",
         },
         handleKeyDown: () => {},
     };
@@ -195,16 +227,29 @@ export default function TipTapEditor({ onSubmit }) {
     });
 
     return (
-        <div className="">
+        <div className="w-full">
             <MenuBar editor={editor} />
             <div className="max-h-96 overflow-y-auto ">
                 <EditorContent editor={editor} />
             </div>
             <div className="py-2 flex items-center justify-between">
                 <div className="flex items-center gap-x-4">
-                    <div className="bg-white/10 rounded-full w-fit p-2">
-                        {" "}
-                        <FaPlus className="text-sm opacity-75" />
+                    <div className="">
+                        <label
+                            className="bg-white/10 rounded-full w-fit p-2 block"
+                            htmlFor="file_upload"
+                        >
+                            {" "}
+                            <FaPlus className="text-sm opacity-75" />
+                        </label>
+                        <input
+                            type="file"
+                            name=""
+                            id="file_upload"
+                            multiple
+                            onChange={handleFilePicked}
+                            hidden
+                        />
                     </div>
                     <VscMention className="text-2xl opacity-75" />
                     <PiVideoCamera className="text-xl opacity-75" />
