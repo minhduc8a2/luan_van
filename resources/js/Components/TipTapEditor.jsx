@@ -159,25 +159,62 @@ import EmojiPicker from "@emoji-mart/react";
 import { CiFaceSmile } from "react-icons/ci";
 import { IoMdSend } from "react-icons/io";
 import { FaAngleDown } from "react-icons/fa6";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { router, usePage } from "@inertiajs/react";
+import { isImage } from "@/helpers/fileHelpers";
+import SquareImage from "./SquareImage";
+import FileItem from "./FileItem";
 export default function TipTapEditor({ onSubmit, onFilePicked }) {
     const { auth } = usePage().props;
-    const fileList = useRef([]);
+    const serverResponseFileList = useRef([]);
+    const [fileList, setFileList] = useState([]);
+    const [uploadProgress, setUploadProgress] = useState(0);
+    function handleRemoveFile(file) {
+        setFileList((pre) => pre.filter((f) => f.name != file.name));
+        serverResponseFileList.current = serverResponseFileList.current.filter(
+            (f) => f.name != file.name
+        );
+    }
+    function resetState() {
+        setFileList([]);
+        serverResponseFileList.current = [];
+    }
     function submit(editor) {
-        onSubmit(editor.getHTML(),fileList.current);
+        onSubmit(editor.getHTML(), serverResponseFileList.current);
         editor.commands.clearContent();
+        resetState();
         return true;
     }
 
     function handleFilePicked(e) {
         const files = e.target.files;
-
+        // console.log(files);
+        // return;
+        setFileList((pre) => {
+            let tempList = [...pre];
+            Object.values(files).forEach((file) => {
+                tempList.push(file);
+            });
+            return tempList;
+        });
         axios
-            .postForm(`/upload_file/${auth.user.id}`, { files })
+            .postForm(
+                `/upload_file/${auth.user.id}`,
+                { files },
+                {
+                    onUploadProgress: function (progressEvent) {
+                        const percentCompleted = Math.round(
+                            (progressEvent.loaded / progressEvent.total) * 100
+                        );
+                        setUploadProgress(percentCompleted);
+                    },
+                }
+            )
             .then((response) => {
-                fileList.current = [...fileList.current, ...response.data];
-                
+                serverResponseFileList.current = [
+                    ...serverResponseFileList.current,
+                    ...response.data,
+                ];
             });
     }
     const ShiftEnterCreateExtension = Extension.create({
@@ -236,9 +273,36 @@ export default function TipTapEditor({ onSubmit, onFilePicked }) {
 
     return (
         <div className="w-full">
+            {/* <progress id="progress-bar" value={uploadProgress} max="100"></progress> */}
             <MenuBar editor={editor} />
             <div className="max-h-96 overflow-y-auto ">
                 <EditorContent editor={editor} />
+            </div>
+            <div className="flex gap-x-2 flex-wrap">
+                {fileList.map((file, index) => {
+                    if (isImage(file.type)) {
+                        return (
+                            <SquareImage
+                                size="h-16"
+                                url={URL.createObjectURL(file)}
+                                key={"file_" + file.name}
+                                removable={true}
+                                remove={() => handleRemoveFile(file)}
+                            />
+                        );
+                    } else {
+                        return (
+                            <div className="" key={"file_" + file.name}>
+                                <FileItem
+                                    file={file}
+                                    maxWidth="max-w-36"
+                                    removable
+                                    remove={() => handleRemoveFile(file)}
+                                />
+                            </div>
+                        );
+                    }
+                })}
             </div>
             <div className="py-2 flex items-center justify-between">
                 <div className="flex items-center gap-x-4">
@@ -263,6 +327,7 @@ export default function TipTapEditor({ onSubmit, onFilePicked }) {
                     <PiVideoCamera className="text-xl opacity-75" />
                     <TiMicrophoneOutline className="text-xl opacity-75" />
                 </div>
+
                 <div className="p-1 px-2 bg-green-800 rounded flex justify-center items-center gap-x-2">
                     <button onClick={() => submit(editor)}>
                         <IoMdSend className="text-base" />

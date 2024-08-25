@@ -52,10 +52,18 @@ class MessageController extends Controller
             $content = $editor->sanitize($content);
             $JSONContent = $editor->setContent($content)->getJSON();
             $message = Message::create(['content' => $JSONContent, 'channel_id' => $channel->id, 'user_id' => $request->user()->id]);
-            $message->attachments()->saveMany($this->createAttachments($request->fileObjects));
+            $fileObjects = [];
+            foreach ($request->fileObjects as $i => $fileObject) {
+                $newPath = str_replace("temporary", "public", $fileObject['path']);
+                Storage::move($fileObject['path'], $newPath);
+                $fileObject['path'] = $newPath;
+                array_push($fileObjects, $fileObject);
+            }
+
+            $message->attachments()->saveMany($this->createAttachments($fileObjects));
             if (isset($message)) {
 
-                broadcast(new MessageEvent($channel, $message))->toOthers();
+                broadcast(new MessageEvent($channel, $message->load('attachments')))->toOthers();
             }
         }
     }

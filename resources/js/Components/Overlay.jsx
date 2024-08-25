@@ -26,7 +26,12 @@ export default function Overlay({
                 className="fixed  inset-0 flex  px-4  sm:px-0 items-center z-50 transform transition-all  justify-center"
                 onClose={close}
             >
-                <button className="absolute top-4 right-4 text-white z-[51]" onClick={close}><IoMdCloseCircleOutline className="text-3xl"/></button>
+                <button
+                    className="absolute top-4 right-4 text-white z-[51]"
+                    onClick={close}
+                >
+                    <IoMdCloseCircleOutline className="text-3xl" />
+                </button>
                 <TransitionChild
                     enter="ease-out duration-300"
                     enterFrom="opacity-0"
@@ -49,7 +54,6 @@ export default function Overlay({
                     <DialogPanel
                         className={`mb-6  rounded-lg overflow-hidden shadow-xl transform transition-all `}
                     >
-                        
                         {children}
                     </DialogPanel>
                 </TransitionChild>

@@ -3,7 +3,12 @@ import { UTCToTime } from "@/helpers/dateTimeHelper";
 import { generateHTML } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import Avatar from "@/Components/Avatar";
-import { isDocument, isImage } from "@/helpers/fileHelpers";
+import {
+    isDocument,
+    isImage,
+    getLogo,
+    getDocumentType,
+} from "@/helpers/fileHelpers";
 import "react-photo-view/dist/react-photo-view.css";
 import { PhotoProvider, PhotoView } from "react-photo-view";
 import { AiOutlineZoomIn } from "react-icons/ai";
@@ -13,17 +18,13 @@ import { IoMdCloudDownload } from "react-icons/io";
 import { useState } from "react";
 import Overlay from "@/Components/Overlay";
 import { usePage } from "@inertiajs/react";
+import FileItem from "@/Components/FileItem";
 
 export default function Message({ message, user, hasChanged, index }) {
     const { publicAppUrl } = usePage().props;
-    const attachments = message.attachments;
+    const attachments = message.attachments || [];
     const [openOverlay, setOpenOverlay] = useState(false);
-    const [numPages, setNumPages] = useState();
-    const [pageNumber, setPageNumber] = useState(1);
 
-    function onDocumentLoadSuccess({ numPages }) {
-        setNumPages(numPages);
-    }
     return (
         <div
             className={`message-container pl-8 pb-2  break-all hover:bg-white/10 ${
@@ -99,7 +100,10 @@ export default function Message({ message, user, hasChanged, index }) {
                         {attachments.map((attachment) => {
                             if (isImage(attachment.type)) {
                                 return (
-                                    <div className="h-64" key={attachment.id}>
+                                    <div
+                                        className="h-64"
+                                        key={"attachment_" + attachment.id}
+                                    >
                                         <PhotoView src={attachment.url}>
                                             <img
                                                 src={attachment.url}
@@ -111,16 +115,27 @@ export default function Message({ message, user, hasChanged, index }) {
                                 );
                             } else if (isDocument(attachment.type)) {
                                 return (
-                                    <div className="">
+                                    <div
+                                        className=""
+                                        key={"attachment_" + attachment.id}
+                                    >
                                         <button
                                             onClick={() => setOpenOverlay(true)}
                                         >
-                                            open
+                                            <FileItem file={attachment} />
                                         </button>
                                         <Overlay
                                             show={openOverlay}
                                             onClose={() =>
                                                 setOpenOverlay(false)
+                                            }
+                                            toolbars={
+                                                <a
+                                                    href={attachment.url}
+                                                    download={true}
+                                                >
+                                                    <IoMdCloudDownload className="text-3xl" />
+                                                </a>
                                             }
                                         >
                                             <div className="flex justify-center flex-col items-center max-h-[95vh] mt-4 w-fit ">
@@ -135,27 +150,11 @@ export default function Message({ message, user, hasChanged, index }) {
                                                     height={
                                                         window.innerHeight - 100
                                                     }
-                                                    src={`https://docs.google.com/gview?url=${publicAppUrl}/storage/script.docx&embedded=true`}
+                                                    src={`https://docs.google.com/gview?url=${
+                                                        publicAppUrl +
+                                                        attachment.url
+                                                    }&embedded=true`}
                                                 ></iframe>
-                                                {/* <object
-                                                    width={
-                                                        window.innerWidth > 900
-                                                            ? window.innerWidth -200
-                                                            : window.innerWidth -
-                                                              100
-                                                    }
-                                                    height={
-                                                        window.innerHeight - 100
-                                                    }
-                                                    type="application/pdf"
-                                                    data="/storage/pdffile.pdf"
-                                                >
-                                                    <p>
-                                                        Insert your error
-                                                        message here, if the PDF
-                                                        cannot be displayed.
-                                                    </p>
-                                                </object> */}
                                             </div>
                                             <button
                                                 onClick={() =>

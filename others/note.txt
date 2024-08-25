@@ -1,0 +1,1 @@
+post size in php.ini, upload size in php.ini = 200mb

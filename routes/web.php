@@ -22,6 +22,7 @@ use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WorkspaceController;
 use App\Http\Controllers\Auth\ProviderController;
+use App\Jobs\DeleteTemporaryFiles;
 use App\Models\Attachment;
 
 Route::get('/', function () {
@@ -54,10 +55,10 @@ Route::middleware('auth')->group(function () {
         // dd($validated['files']);
         $temporaryFileObjects = [];
         foreach ($validated['files'] as $file) {
-            $path = $file->store('public/users_' . $user->id);
+            $path = $file->store('temporary/users_' . $user->id);
             array_push($temporaryFileObjects, ['path' => $path, 'type' => $file->getMimeType(), 'name' => $file->getClientOriginalName()]);
         }
-
+        DeleteTemporaryFiles::dispatch($temporaryFileObjects)->delay(now()->addMinutes(30));
         return response()->json($temporaryFileObjects);
     });
 });
