@@ -50,14 +50,14 @@ Route::middleware('auth')->group(function () {
     Route::post("/upload_file/{user}", function (Request $request, User $user) {
 
         $validated = $request->validate([
-            'files.*' => "max:" . (200 * 1024),
+            'file' => "max:" . (200 * 1024),
         ]);
         // dd($validated['files']);
         $temporaryFileObjects = [];
-        foreach ($validated['files'] as $file) {
-            $path = $file->store('temporary/users_' . $user->id);
-            array_push($temporaryFileObjects, ['path' => $path, 'type' => $file->getMimeType(), 'name' => $file->getClientOriginalName()]);
-        }
+        $file = $validated['file'];
+        $path = $file->store('temporary/users_' . $user->id);
+        array_push($temporaryFileObjects, ['path' => $path, 'type' => $file->getMimeType(), 'name' => $file->getClientOriginalName()]);
+
         DeleteTemporaryFiles::dispatch($temporaryFileObjects)->delay(now()->addMinutes(30));
         return response()->json($temporaryFileObjects);
     });

@@ -23,6 +23,15 @@ import FileItem from "@/Components/FileItem";
 export default function Message({ message, user, hasChanged, index }) {
     const { publicAppUrl } = usePage().props;
     const attachments = message.attachments || [];
+    const imageAttachments = [];
+    const documentAttachments = [];
+    const otherAttachments = [];
+    attachments.forEach((attachment) => {
+        if (isImage(attachment.type)) imageAttachments.push(attachment);
+        else if (isDocument(attachment.type))
+            documentAttachments.push(attachment);
+        else otherAttachments.push(attachment);
+    });
     const [openOverlay, setOpenOverlay] = useState(false);
 
     return (
@@ -97,78 +106,75 @@ export default function Message({ message, user, hasChanged, index }) {
                             );
                         }}
                     >
-                        {attachments.map((attachment) => {
-                            if (isImage(attachment.type)) {
-                                return (
-                                    <div
-                                        className="h-64"
-                                        key={"attachment_" + attachment.id}
-                                    >
-                                        <PhotoView src={attachment.url}>
-                                            <img
-                                                src={attachment.url}
-                                                alt=""
-                                                className="max-h-full rounded-lg"
-                                            />
-                                        </PhotoView>
-                                    </div>
-                                );
-                            } else if (isDocument(attachment.type)) {
-                                return (
-                                    <div
-                                        className=""
-                                        key={"attachment_" + attachment.id}
-                                    >
-                                        <button
-                                            onClick={() => setOpenOverlay(true)}
-                                        >
-                                            <FileItem file={attachment} />
-                                        </button>
-                                        <Overlay
-                                            show={openOverlay}
-                                            onClose={() =>
-                                                setOpenOverlay(false)
-                                            }
-                                            toolbars={
-                                                <a
-                                                    href={attachment.url}
-                                                    download={true}
-                                                >
-                                                    <IoMdCloudDownload className="text-3xl" />
-                                                </a>
-                                            }
-                                        >
-                                            <div className="flex justify-center flex-col items-center max-h-[95vh] mt-4 w-fit ">
-                                                <iframe
-                                                    width={
-                                                        window.innerWidth > 900
-                                                            ? window.innerWidth /
-                                                              2
-                                                            : window.innerWidth -
-                                                              200
-                                                    }
-                                                    height={
-                                                        window.innerHeight - 100
-                                                    }
-                                                    src={`https://docs.google.com/gview?url=${
-                                                        publicAppUrl +
-                                                        attachment.url
-                                                    }&embedded=true`}
-                                                ></iframe>
-                                            </div>
-                                            <button
-                                                onClick={() =>
-                                                    setOpenOverlay(false)
-                                                }
-                                            >
-                                                close
-                                            </button>
-                                        </Overlay>
-                                    </div>
-                                );
-                            }
+                        {imageAttachments.map((attachment) => {
+                            return (
+                                <div
+                                    className="h-64"
+                                    key={"attachment_" + attachment.id}
+                                >
+                                    <PhotoView src={attachment.url}>
+                                        <img
+                                            src={attachment.url}
+                                            alt=""
+                                            className="max-h-full rounded-lg"
+                                        />
+                                    </PhotoView>
+                                </div>
+                            );
                         })}
                     </PhotoProvider>
+                </div>
+                <div className="flex gap-x-4 flex-wrap mt-4">
+                    {documentAttachments.map((attachment) => {
+                        return (
+                            <div
+                                className=""
+                                key={"attachment_" + attachment.id}
+                            >
+                                <button onClick={() => setOpenOverlay(true)}>
+                                    <FileItem file={attachment} />
+                                </button>
+                                <Overlay
+                                    show={openOverlay}
+                                    onClose={() => setOpenOverlay(false)}
+                                    toolbars={
+                                        <a
+                                            href={attachment.url}
+                                            download={true}
+                                        >
+                                            <IoMdCloudDownload className="text-3xl" />
+                                        </a>
+                                    }
+                                >
+                                    <div className="flex justify-center flex-col items-center max-h-[95vh] mt-4 w-fit ">
+                                        <iframe
+                                            width={
+                                                window.innerWidth > 900
+                                                    ? window.innerWidth / 2
+                                                    : window.innerWidth - 200
+                                            }
+                                            height={window.innerHeight - 100}
+                                            src={`https://docs.google.com/gview?url=${
+                                                publicAppUrl + attachment.url
+                                            }&embedded=true`}
+                                        ></iframe>
+                                    </div>
+                                    <button
+                                        onClick={() => setOpenOverlay(false)}
+                                    >
+                                        close
+                                    </button>
+                                </Overlay>
+                            </div>
+                        );
+                    })}
+                </div>
+                <div className="flex gap-x-4 flex-wrap mt-4">
+                    {otherAttachments.map((attachment) => (
+                        <a href={attachment.url} download={attachment.name}>
+                            <FileItem file={attachment} />
+                        </a>
+                    ))}
                 </div>
             </div>
         </div>

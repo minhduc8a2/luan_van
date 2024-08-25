@@ -168,8 +168,14 @@ export default function TipTapEditor({ onSubmit, onFilePicked }) {
     const { auth } = usePage().props;
     const serverResponseFileList = useRef([]);
     const [fileList, setFileList] = useState([]);
+    const abortControllers = useRef([]);
     const [uploadProgress, setUploadProgress] = useState(0);
+    const inputFileRef = useRef(null);
     function handleRemoveFile(file) {
+        const index = fileList.findIndex((f) => f.name == file.name);
+        const controller = abortControllers.current[index];
+        controller.abort();
+        abortControllers.current.splice(index, 1);
         setFileList((pre) => pre.filter((f) => f.name != file.name));
         serverResponseFileList.current = serverResponseFileList.current.filter(
             (f) => f.name != file.name
@@ -186,10 +192,11 @@ export default function TipTapEditor({ onSubmit, onFilePicked }) {
         return true;
     }
 
-    function handleFilePicked(e) {
+    async function handleFilePicked(e) {
         const files = e.target.files;
-        // console.log(files);
+
         // return;
+        setUploadProgress(0);
         setFileList((pre) => {
             let tempList = [...pre];
             Object.values(files).forEach((file) => {
@@ -197,25 +204,40 @@ export default function TipTapEditor({ onSubmit, onFilePicked }) {
             });
             return tempList;
         });
-        axios
-            .postForm(
-                `/upload_file/${auth.user.id}`,
-                { files },
-                {
-                    onUploadProgress: function (progressEvent) {
-                        const percentCompleted = Math.round(
-                            (progressEvent.loaded / progressEvent.total) * 100
-                        );
-                        setUploadProgress(percentCompleted);
-                    },
-                }
-            )
-            .then((response) => {
+        const filesValues = Object.values(files);
+        for (let index = 0; index < filesValues.length; index++) {
+            const file = filesValues[index];
+            const controller = new AbortController();
+            abortControllers.current.push(controller);
+            try {
+                const res = await axios.postForm(
+                    `/upload_file/${auth.user.id}`,
+                    { file },
+                    {
+                        signal: controller.signal,
+                        onUploadProgress: function (progressEvent) {
+                            const percentCompleted = Math.round(
+                                (progressEvent.loaded / progressEvent.total) *
+                                    100
+                            );
+                            setUploadProgress(percentCompleted);
+                            if (percentCompleted == 100) {
+                                console.log("Uploaded succuessfuly");
+                            }
+                        },
+                    }
+                );
+                const jsonRes = await res;
+                console.log(jsonRes);
                 serverResponseFileList.current = [
                     ...serverResponseFileList.current,
-                    ...response.data,
+                    ...jsonRes.data,
                 ];
-            });
+            } catch (error) {
+                console.log("abort, continue", error);
+            }
+        }
+        inputFileRef.current.value = null;
     }
     const ShiftEnterCreateExtension = Extension.create({
         addKeyboardShortcuts() {
@@ -287,6 +309,8 @@ export default function TipTapEditor({ onSubmit, onFilePicked }) {
                                 url={URL.createObjectURL(file)}
                                 key={"file_" + file.name}
                                 removable={true}
+                                uploadable={true}
+                                percentage={uploadProgress}
                                 remove={() => handleRemoveFile(file)}
                             />
                         );
@@ -298,6 +322,8 @@ export default function TipTapEditor({ onSubmit, onFilePicked }) {
                                     maxWidth="max-w-36"
                                     removable
                                     remove={() => handleRemoveFile(file)}
+                                    uploadable={true}
+                                    percentage={uploadProgress}
                                 />
                             </div>
                         );
@@ -315,6 +341,7 @@ export default function TipTapEditor({ onSubmit, onFilePicked }) {
                             <FaPlus className="text-sm opacity-75" />
                         </label>
                         <input
+                            ref={inputFileRef}
                             type="file"
                             name=""
                             id="file_upload"
@@ -326,6 +353,23 @@ export default function TipTapEditor({ onSubmit, onFilePicked }) {
                     <VscMention className="text-2xl opacity-75" />
                     <PiVideoCamera className="text-xl opacity-75" />
                     <TiMicrophoneOutline className="text-xl opacity-75" />
+
+                    {uploadProgress > 0 && uploadProgress < 100 && (
+                        <div className="flex gap-x-2 items-center">
+                            |<div className="text-xs">Uploading</div>
+                            <div className="w-64">
+                                <div className="w-full bg-gray-200 rounded-full dark:bg-gray-700">
+                                    <div
+                                        className="bg-purple-500 text-xs font-medium text-blue-100 text-center p-0.5 leading-none rounded-full"
+                                        style={{ width: `${uploadProgress}%` }}
+                                    >
+                                        {" "}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="text-xs">{uploadProgress}%</div>
+                        </div>
+                    )}
                 </div>
 
                 <div className="p-1 px-2 bg-green-800 rounded flex justify-center items-center gap-x-2">

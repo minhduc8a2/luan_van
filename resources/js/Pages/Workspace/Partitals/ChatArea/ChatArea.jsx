@@ -20,10 +20,11 @@ export default function ChatArea({
     messages = [],
 }) {
     const { auth } = usePage().props;
-   
+
     const messageContainerRef = useRef(null);
     const [localMessages, setlocalMessages] = useState([...messages]);
     function onSubmit(content, fileObjects) {
+        if (content == "<p></p>" && fileObjects.length == 0) return;
         router.post(`/workspace/${workspace.id}/${channel.id}/message`, {
             content,
             fileObjects,
