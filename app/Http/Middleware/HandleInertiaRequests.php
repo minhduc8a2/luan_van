@@ -33,11 +33,11 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'auth' => [
                 'user' => $request->user(),
-               
+                
                 'workspaces' => $request->user()?->workspaces,
 
             ],
-
+            'publicAppUrl'=> env('PUBLIC_APP_URL',''),
             'flash' => [
                 'message' => fn() => $request->session()->get('message')
             ],

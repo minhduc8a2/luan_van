@@ -1,29 +1,32 @@
-import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
-
-export default function Modal({ children, show = false, maxWidth = '2xl', closeable = true, onClose = () => {} }) {
+import {
+    Dialog,
+    DialogPanel,
+    Transition,
+    TransitionChild,
+} from "@headlessui/react";
+import { IoMdCloseCircleOutline } from "react-icons/io";
+export default function Overlay({
+    children,
+    show = false,
+    closeable = true,
+    onClose = () => {},
+}) {
     const close = () => {
         if (closeable) {
             onClose();
         }
     };
 
-    const maxWidthClass = {
-        sm: 'sm:max-w-sm',
-        md: 'sm:max-w-md',
-        lg: 'sm:max-w-lg',
-        xl: 'sm:max-w-xl',
-        '2xl': 'sm:max-w-2xl',
-    }[maxWidth];
-
     return (
         <Transition show={show} leave="duration-200">
             <Dialog
-               
+                open={show}
                 as="div"
                 id="modal"
-                className="fixed inset-0 flex overflow-y-auto px-4 py-6 sm:px-0 items-center z-50 transform transition-all"
+                className="fixed  inset-0 flex  px-4  sm:px-0 items-center z-50 transform transition-all  justify-center"
                 onClose={close}
             >
+                <button className="absolute top-4 right-4 text-white z-[51]" onClick={close}><IoMdCloseCircleOutline className="text-3xl"/></button>
                 <TransitionChild
                     enter="ease-out duration-300"
                     enterFrom="opacity-0"
@@ -32,7 +35,7 @@ export default function Modal({ children, show = false, maxWidth = '2xl', closea
                     leaveFrom="opacity-100"
                     leaveTo="opacity-0"
                 >
-                    <div className="absolute inset-0 bg-gray-500/75" />
+                    <div className="absolute inset-0 bg-black/75" />
                 </TransitionChild>
 
                 <TransitionChild
@@ -44,8 +47,9 @@ export default function Modal({ children, show = false, maxWidth = '2xl', closea
                     leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                 >
                     <DialogPanel
-                        className={`mb-6 bg-white rounded-lg overflow-hidden shadow-xl transform transition-all sm:w-full sm:mx-auto ${maxWidthClass}`}
+                        className={`mb-6  rounded-lg overflow-hidden shadow-xl transform transition-all `}
                     >
+                        
                         {children}
                     </DialogPanel>
                 </TransitionChild>

@@ -6,8 +6,24 @@ import Avatar from "@/Components/Avatar";
 import { isDocument, isImage } from "@/helpers/fileHelpers";
 import "react-photo-view/dist/react-photo-view.css";
 import { PhotoProvider, PhotoView } from "react-photo-view";
+import { AiOutlineZoomIn } from "react-icons/ai";
+import { AiOutlineZoomOut } from "react-icons/ai";
+import { MdOutlineRotate90DegreesCcw } from "react-icons/md";
+import { IoMdCloudDownload } from "react-icons/io";
+import { useState } from "react";
+import Overlay from "@/Components/Overlay";
+import { usePage } from "@inertiajs/react";
+
 export default function Message({ message, user, hasChanged, index }) {
+    const { publicAppUrl } = usePage().props;
     const attachments = message.attachments;
+    const [openOverlay, setOpenOverlay] = useState(false);
+    const [numPages, setNumPages] = useState();
+    const [pageNumber, setPageNumber] = useState(1);
+
+    function onDocumentLoadSuccess({ numPages }) {
+        setNumPages(numPages);
+    }
     return (
         <div
             className={`message-container pl-8 pb-2  break-all hover:bg-white/10 ${
@@ -41,17 +57,41 @@ export default function Message({ message, user, hasChanged, index }) {
                 ></div>
                 <div className="flex  gap-x-4 flex-wrap">
                     <PhotoProvider
-                        toolbarRender={({ onScale, scale }) => {
+                        toolbarRender={({
+                            onScale,
+                            scale,
+                            rotate,
+                            onRotate,
+                            images,
+                            index,
+                        }) => {
                             return (
                                 <>
-                                    <svg
+                                    <a
+                                        href={images[index].src}
+                                        className="PhotoView-Slider__toolbarIcon"
+                                        download={true}
+                                    >
+                                        <IoMdCloudDownload className="text-xl" />
+                                    </a>
+                                    <button
+                                        className="PhotoView-Slider__toolbarIcon"
+                                        onClick={() => onRotate(rotate + 90)}
+                                    >
+                                        <MdOutlineRotate90DegreesCcw className="text-xl" />
+                                    </button>
+                                    <button
                                         className="PhotoView-Slider__toolbarIcon"
                                         onClick={() => onScale(scale + 1)}
-                                    />
-                                    <svg
+                                    >
+                                        <AiOutlineZoomIn className="text-xl" />
+                                    </button>
+                                    <button
                                         className="PhotoView-Slider__toolbarIcon"
                                         onClick={() => onScale(scale - 1)}
-                                    />
+                                    >
+                                        <AiOutlineZoomOut className="text-xl" />
+                                    </button>
                                 </>
                             );
                         }}
@@ -59,11 +99,8 @@ export default function Message({ message, user, hasChanged, index }) {
                         {attachments.map((attachment) => {
                             if (isImage(attachment.type)) {
                                 return (
-                                    <div className="h-64">
-                                        <PhotoView
-                                            key={index}
-                                            src={attachment.url}
-                                        >
+                                    <div className="h-64" key={attachment.id}>
+                                        <PhotoView src={attachment.url}>
                                             <img
                                                 src={attachment.url}
                                                 alt=""
@@ -74,8 +111,60 @@ export default function Message({ message, user, hasChanged, index }) {
                                 );
                             } else if (isDocument(attachment.type)) {
                                 return (
-                                    <div className="" key={attachment.id}>
-                                        {attachment.name}
+                                    <div className="">
+                                        <button
+                                            onClick={() => setOpenOverlay(true)}
+                                        >
+                                            open
+                                        </button>
+                                        <Overlay
+                                            show={openOverlay}
+                                            onClose={() =>
+                                                setOpenOverlay(false)
+                                            }
+                                        >
+                                            <div className="flex justify-center flex-col items-center max-h-[95vh] mt-4 w-fit ">
+                                                <iframe
+                                                    width={
+                                                        window.innerWidth > 900
+                                                            ? window.innerWidth /
+                                                              2
+                                                            : window.innerWidth -
+                                                              200
+                                                    }
+                                                    height={
+                                                        window.innerHeight - 100
+                                                    }
+                                                    src={`https://docs.google.com/gview?url=${publicAppUrl}/storage/script.docx&embedded=true`}
+                                                ></iframe>
+                                                {/* <object
+                                                    width={
+                                                        window.innerWidth > 900
+                                                            ? window.innerWidth -200
+                                                            : window.innerWidth -
+                                                              100
+                                                    }
+                                                    height={
+                                                        window.innerHeight - 100
+                                                    }
+                                                    type="application/pdf"
+                                                    data="/storage/pdffile.pdf"
+                                                >
+                                                    <p>
+                                                        Insert your error
+                                                        message here, if the PDF
+                                                        cannot be displayed.
+                                                    </p>
+                                                </object> */}
+                                            </div>
+                                            <button
+                                                onClick={() =>
+                                                    setOpenOverlay(false)
+                                                }
+                                            >
+                                                close
+                                            </button>
+                                        </Overlay>
                                     </div>
                                 );
                             }
