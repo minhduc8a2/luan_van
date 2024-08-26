@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Channel extends Model
 {
-    static $type = ['PUBLIC', 'PRIVATE', 'DIRECT'];
+    static $type = ['PUBLIC', 'PRIVATE', 'DIRECT','SELF'];
     use HasFactory;
     protected $fillable = [
         'name',

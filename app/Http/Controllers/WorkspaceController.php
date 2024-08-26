@@ -46,10 +46,9 @@ class WorkspaceController extends Controller
             ['name' => "all-" . $workspace->name, 'type' => 'PUBLIC', 'user_id' => $user->id],
             ['name' => "social", 'type' => 'PUBLIC', 'user_id' => $user->id]
         ]);
-        $channels = $workspace->channels->toArray();
-        foreach ($channels as $channel) {
-            $user->channels()->attach($channel['id']);
-        }
+        $workspace->assignUserToPublicChannels($user);
+        $workspace->createAndAssignSelfChannelsForUser($user);
+
         return redirect(route('workspace.show', $workspace->id));
     }
 

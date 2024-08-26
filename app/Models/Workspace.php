@@ -29,7 +29,11 @@ class Workspace extends Model
     {
         return $this->hasMany(Channel::class);
     }
-
+    public function createAndAssignSelfChannelsForUser(User $user)
+    {
+        $selfChannel = $this->channels()->create(['name' => $user->name, 'type' => 'SELF', 'user_id' => $user->id]);
+        $user->channels()->attach($selfChannel->id);
+    }
     public  function assignUserToPublicChannels($user)
     {
         $channelIds = $this->channels()->where("type", '=', "PUBLIC")->pluck('id');
@@ -58,5 +62,8 @@ class Workspace extends Model
                 $otherUser->channels()->attach($newChannel->id);
             }
         }
+        //create self channel
+        $newChannel = $this->channels()->create(['user_id' => $user->id, 'name' => $user->name, "type" => "SELF"]);
+        $user->channels()->attach($newChannel->id);
     }
 }

@@ -6,6 +6,7 @@ use Inertia\Inertia;
 use App\Models\Channel;
 use App\Models\Workspace;
 use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\Builder;
 
 class ChannelController extends Controller
 {
@@ -47,13 +48,28 @@ class ChannelController extends Controller
         if ($request->user()->cannot('view', $workspace)) {
             return  abort(403);
         }
-        $channels = $workspace->channels;
-        $privateChannels = $workspace->channels()->where("type","=","DIRECT")->get();
+        $channels = $workspace->channels()->where(function (Builder $query) {
+            return $query->where("type", "=", "PUBLIC")
+                ->orWhere("type", "=", "PRIVATE");
+        })
+            ->get();
+        $directChannels = $workspace->channels()->where("type", "=", "DIRECT")->get();
+        $selfChannel = $workspace->channels()->where("type", "=", "SELF")->first();
         $messages = $channel->messages;
         $workspaces = $request->user()->workspaces;
         $users = $workspace->users;
         $members = $channel->users;
-        return Inertia::render("Workspace/Index", ['workspace' => $workspace, 'channel' => $channel, 'channels' => $channels, 'messages' => $messages->load('attachments'), 'users' => $users, 'members' => $members, 'workspaces' => $workspaces, "privateChannels"=> $privateChannels->load("users")]);
+        return Inertia::render("Workspace/Index", [
+            'workspace' => $workspace,
+            'channel' => $channel,
+            'channels' => $channels,
+            'messages' => $messages->load('attachments'),
+            'users' => $users,
+            'members' => $members,
+            'workspaces' => $workspaces,
+            "directChannels" => $directChannels->load("users"),
+            'selfChannel' => $selfChannel
+        ]);
     }
 
     /**

@@ -13,7 +13,8 @@ export default function Index({
     users,
     members,
     workspaces,
-    privateChannels
+    directChannels,
+    selfChannel,
 }) {
     return (
         <div className="client-container bg-primary text-white ">
@@ -33,7 +34,8 @@ export default function Index({
                     currentChannel={channel}
                     workspace={workspace}
                     users={users}
-                    privateChannels={privateChannels}
+                    directChannels={directChannels}
+                    selfChannel={selfChannel}
                 />
 
                 <ChatArea
@@ -42,7 +44,6 @@ export default function Index({
                     channel={channel}
                     messages={messages}
                     members={members}
-                   
                 />
             </div>
         </div>

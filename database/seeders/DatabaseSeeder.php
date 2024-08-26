@@ -49,6 +49,7 @@ class DatabaseSeeder extends Seeder
         $user->workspaces()->attach(2);
         $user->ownWorkspaces->map(function ($wsp, $key) {
             $workspace = Workspace::find($wsp->id);
+            $user = User::find(1);
             $workspace->channels()->createMany([
                 [
                     'name' => 'all-' . $workspace->name,
@@ -65,10 +66,11 @@ class DatabaseSeeder extends Seeder
                     'type' => 'PUBLIC',
                     'user_id' => 1
                 ],
+
             ]);
+
+            $workspace->assignUserToPublicChannels($user);
+            $workspace->createAndAssignSelfChannelsForUser($user);
         });
-        for ($i = 1; $i <= 6; $i++) {
-            $user->channels()->attach($i);
-        }
     }
 }

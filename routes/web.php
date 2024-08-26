@@ -2,9 +2,9 @@
 
 use App\Models\User;
 use Inertia\Inertia;
+use App\Models\Attachment;
+use App\Mail\InvitationMail;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Foundation\Application;
 
 Route::get('/auth/redirect', function () {
     return Socialite::driver('github')->redirect();
@@ -16,15 +16,16 @@ Route::get('/auth/callback', function () {
     // $user->token
 });
 
+use App\Jobs\DeleteTemporaryFiles;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Foundation\Application;
 use Laravel\Socialite\Facades\Socialite;
 use App\Http\Controllers\ChannelController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WorkspaceController;
-use App\Http\Controllers\Auth\ProviderController;
 use App\Http\Controllers\InvitationController;
-use App\Jobs\DeleteTemporaryFiles;
-use App\Models\Attachment;
+use App\Http\Controllers\Auth\ProviderController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -72,3 +73,6 @@ require __DIR__ . '/auth.php';
 
 Route::post("/{workspace}/invitations", [InvitationController::class, 'store'])->name('invitation.store');
 Route::get("/invitations/{code}", [InvitationController::class, 'index'])->name('invitation.index');
+Route::get('/mailable', function () {
+    return new  InvitationMail("https://simpcity.su/", "company A", "A", "B");
+});

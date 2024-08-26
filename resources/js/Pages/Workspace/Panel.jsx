@@ -7,10 +7,7 @@ import { LuLock } from "react-icons/lu";
 import { LuPlus } from "react-icons/lu";
 import Avatar from "@/Components/Avatar";
 import { Link, router, usePage } from "@inertiajs/react";
-import FormFrameWork from "@/Components/FormFrameWork";
-import TextInput from "@/Components/TextInput";
 import TextArea from "@/Components/TextArea";
-import Button from "@/Components/Button";
 import { FaLink } from "react-icons/fa6";
 import Form1 from "@/Components/Form1";
 export default function Panel({
@@ -18,7 +15,8 @@ export default function Panel({
     channels = [],
     currentChannel,
     users,
-    privateChannels = { privateChannels },
+    directChannels = [],
+    selfChannel,
 }) {
     const { auth } = usePage().props;
     return (
@@ -104,42 +102,19 @@ export default function Panel({
                         <div className="">Direct messages</div>
                     </div>
                     <ul>
-                        {privateChannels.map((privateCn) => {
-                            const user = privateCn.users.find(
+                        {directChannels.map((directCn) => {
+                            const user = directCn.users.find(
                                 (user) => user.id != auth.user.id
                             );
                             return (
-                                <li key={user.id}>
-                                    <Link
-                                        href={route(
-                                            "channel.show",
-                                            privateCn.id
-                                        )}
-                                        className="flex mt-2 items-center justify-start gap-x-2 px-4 "
-                                    >
-                                        <div className="">
-                                            <Avatar
-                                                src={user.avatar_url}
-                                                className="w-5 h-5"
-                                                onlineClassName="scale-75"
-                                                offlineClassName="scale-75"
-                                                isOnline={true}
-                                            />
-                                        </div>
-                                        <div className="">
-                                            {user.name}{" "}
-                                            {user.id == auth.user.id ? (
-                                                <span className="opacity-75 ml-2">
-                                                    you
-                                                </span>
-                                            ) : (
-                                                ""
-                                            )}
-                                        </div>
-                                    </Link>
-                                </li>
+                                <DirectChannel
+                                    key={user.id}
+                                    user={user}
+                                    channel={directCn}
+                                />
                             );
                         })}
+                        <DirectChannel user={auth.user} channel={selfChannel} />
                     </ul>
                     <InviteForm workspace={workspace} />
                 </div>
@@ -208,5 +183,36 @@ function InviteForm({ workspace }) {
                 placeholder="name@gmail.com"
             />
         </Form1>
+    );
+}
+
+function DirectChannel({ channel, user }) {
+    const { auth } = usePage().props;
+
+    return (
+        <li>
+            <Link
+                href={route("channel.show", channel.id)}
+                className="flex mt-2 items-center justify-start gap-x-2 px-4 "
+            >
+                <div className="">
+                    <Avatar
+                        src={user.avatar_url}
+                        className="w-5 h-5"
+                        onlineClassName="scale-75"
+                        offlineClassName="scale-75"
+                        isOnline={true}
+                    />
+                </div>
+                <div className="">
+                    {user.name}{" "}
+                    {user.id == auth.user.id ? (
+                        <span className="opacity-75 ml-2">you</span>
+                    ) : (
+                        ""
+                    )}
+                </div>
+            </Link>
+        </li>
     );
 }
