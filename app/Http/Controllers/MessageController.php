@@ -42,7 +42,7 @@ class MessageController extends Controller
         }
         return $attachments;
     }
-    public function store(Request $request, Workspace $workspace, Channel $channel)
+    public function store(Request $request,  Channel $channel)
     {
         if ($request->user()->cannot('create', [Message::class, $channel])) return abort(403);
         $content = $request->content;

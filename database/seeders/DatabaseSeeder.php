@@ -37,32 +37,38 @@ class DatabaseSeeder extends Seeder
             'email' => 'captain@gmail.com',
             'password' => '12345678'
         ]);
-        Workspace::create([
-            'name' => 'Main',
-            'user_id' => 1
+
+
+
+        $user = User::find(1);
+        $user->ownWorkspaces()->createMany([
+            ['name' => 'Main'],
+            ['name' => 'Duc Company'],
         ]);
-        Workspace::create([
-            'name' => 'Duc Company',
-            'user_id' => 1
-        ]);
-        Channel::create([
-            'name' => "Data project",
-            'type' => 'PUBLIC',
-            'workspace_id' => 1,
-            'user_id' => 1
-        ]);
-        Channel::create([
-            'name' => "Traffic Model project",
-            'type' => 'PRIVATE',
-            'workspace_id' => 1,
-            'user_id' => 1
-        ]);
-        for ($i = 1; $i <= 3; $i++) {
-            $user = User::find($i);
-            $user->workspaces()->attach(1);
-            $user->workspaces()->attach(2);
-            $user->channels()->attach(1);
-            $user->channels()->attach(2);
+        $user->workspaces()->attach(1);
+        $user->workspaces()->attach(2);
+        $user->ownWorkspaces->map(function ($wsp, $key) {
+            $workspace = Workspace::find($wsp->id);
+            $workspace->channels()->createMany([
+                [
+                    'name' => 'all-' . $workspace->name,
+                    'type' => 'PUBLIC',
+                    'user_id' => 1
+                ],
+                [
+                    'name' => 'work',
+                    'type' => 'PUBLIC',
+                    'user_id' => 1
+                ],
+                [
+                    'name' => 'social',
+                    'type' => 'PUBLIC',
+                    'user_id' => 1
+                ],
+            ]);
+        });
+        for ($i = 1; $i <= 6; $i++) {
+            $user->channels()->attach($i);
         }
     }
 }

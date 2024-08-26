@@ -20,6 +20,7 @@ export default {
                 secondary: "#1b0e1e",
                 background: "#1a1d21",
                 foreground: "#222529",
+                link: "#1d9bd1",
             },
         },
     },

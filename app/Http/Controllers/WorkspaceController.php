@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use Inertia\Inertia;
 use App\Models\Workspace;
+use App\Policies\WorkspacePolicy;
 use Illuminate\Http\Request;
+
+use function PHPSTORM_META\type;
 
 class WorkspaceController extends Controller
 {
@@ -29,7 +32,15 @@ class WorkspaceController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        if ($request->user()->cannot('create', Workspace::class)) {
+            abort(403);
+        }
+        $validated = $request->validate(['name' => 'required|max:255|string', 'channel' => 'required|max:255|string']);
+
+        $user = $request->user();
+        $workspace = $user->ownWorkspaces()->create(['name' => $validated['name']]);
+        $workspace->channels()->createMany(['name' => $validated['channel'], 'type' => 'PUBLIC', 'user_id' => $user->id], ['name' => "all-" . $workspace->name, 'type' => 'PUBLIC', 'user_id' => $user->id], ['name' => "social", 'type' => 'PUBLIC', 'user_id' => $user->id]);
+        return redirect();
     }
 
     /**
@@ -41,9 +52,9 @@ class WorkspaceController extends Controller
             abort(403);
         }
 
-        $channels = $workspace->channels;
-        
-        return Inertia::render("Workspace/Index", ['workspaceName' => $workspace->name, 'channels' => $channels]);
+        $firstChannel = $workspace->channels->first();
+
+        return redirect(route('channel.show', [$workspace->id, $firstChannel->id]));
     }
 
     /**

@@ -11,7 +11,8 @@ export default function Index({
     channel,
     messages,
     users,
-    members
+    members,
+    workspaces,
 }) {
     return (
         <div className="client-container bg-primary text-white ">
@@ -19,7 +20,11 @@ export default function Index({
                 <HeadBar />
             </div>
             <div className="client-sidebar ">
-                <SideBar user={auth.user} workspaceName={workspace.name} />
+                <SideBar
+                    user={auth.user}
+                    workspace={workspace}
+                    workspaces={workspaces}
+                />
             </div>
             <div className="client-workspace-container grid grid-cols-4 rounded-lg border border-white/5 border-b-2">
                 <Panel

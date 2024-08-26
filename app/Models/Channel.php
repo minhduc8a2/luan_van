@@ -10,14 +10,21 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Channel extends Model
 {
-    static $type = ['PUBLIC','PRIVATE','MUTUAL'];
+    static $type = ['PUBLIC', 'PRIVATE', 'MUTUAL'];
     use HasFactory;
-    protected $fillable=[
-        'name','type','workspace_id','user_id'
+    protected $fillable = [
+        'name',
+        'type',
+        'workspace_id',
+        'user_id'
     ];
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+    public function workspace(): BelongsTo
+    {
+        return $this->belongsTo(Workspace::class);
     }
     public function users(): BelongsToMany
     {

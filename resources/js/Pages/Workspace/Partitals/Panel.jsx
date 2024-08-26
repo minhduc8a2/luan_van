@@ -7,6 +7,12 @@ import { LuLock } from "react-icons/lu";
 import { LuPlus } from "react-icons/lu";
 import Avatar from "@/Components/Avatar";
 import { Link, usePage } from "@inertiajs/react";
+import FormFrameWork from "@/Components/FormFrameWork";
+import TextInput from "@/Components/TextInput";
+import TextArea from "@/Components/TextArea";
+import Button from "@/Components/Button";
+import { FaLink } from "react-icons/fa6";
+import Form1 from "@/Components/Form1";
 export default function Panel({
     workspace,
     channels = [],
@@ -42,7 +48,10 @@ export default function Panel({
                                 return (
                                     <li key={channel.id}>
                                         <Link
-                                            href={`/workspace/${workspace.id}/${channel.id}`}
+                                            href={route(
+                                                "channel.show",
+                                                channel.id
+                                            )}
                                             className={`grid-item mt-2 px-4  rounded-lg ${
                                                 channel.id == currentChannel.id
                                                     ? "bg-primary"
@@ -121,14 +130,38 @@ export default function Panel({
                             </li>
                         ))}
                     </ul>
-                    <div className="grid-item mt-2 px-4">
-                        <div className="flex items-center ">
-                            <LuPlus className="text-sm" />
-                        </div>
-                        <div className="">Add coworkers</div>
-                    </div>
+                    <InviteForm workspace={workspace} />
                 </div>
             </div>
         </div>
+    );
+}
+function InviteForm({ workspace }) {
+    return (
+        <Form1
+            buttonName="Send"
+            activateButtonNode={
+                <div className="grid-item mt-2 px-4 w-fit">
+                    <div className="flex items-center ">
+                        <LuPlus className="text-sm" />
+                    </div>
+                    <div className="">Add coworkers</div>
+                </div>
+            }
+            title={`Invite people to ${workspace.name}`}
+            sameButtonRow={
+                <div className="flex gap-x-2 items-center text-link font-bold">
+                    <FaLink className="text-lg" /> Copy invite link
+                </div>
+            }
+        >
+            {" "}
+            <TextArea
+                id="name"
+                rows="2"
+                label="To:"
+                placeholder="name@gmail.com"
+            />
+        </Form1>
     );
 }

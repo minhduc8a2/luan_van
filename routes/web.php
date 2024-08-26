@@ -43,9 +43,10 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-
-    Route::get("/workspace/{workspace}/{channel}", [ChannelController::class, 'show']);
-    Route::post("/workspace/{workspace}/{channel}/message", [MessageController::class, 'store']);
+    Route::post("/workspaces", [WorkspaceController::class, 'store'])->name('workspace.store');
+    Route::get("/workspaces/{workspace}", [WorkspaceController::class, 'show'])->name('workspace.show');
+    Route::get("/channels/{channel}", [ChannelController::class, 'show'])->name('channel.show');
+    Route::post("/channels/{channel}/message", [MessageController::class, 'store'])->name('message.store');
 
     Route::post("/upload_file/{user}", function (Request $request, User $user) {
 
