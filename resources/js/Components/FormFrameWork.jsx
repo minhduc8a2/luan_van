@@ -1,8 +1,16 @@
 import React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Overlay from "./Overlay";
-export default function FormFrameWork({ children, buttonNode, submit }) {
+export default function FormFrameWork({
+    children,
+    buttonNode,
+    submit,
+    success = false,
+}) {
     const [openOverlay, setOpenOverlay] = useState(false);
+    useEffect(() => {
+        if (success) setOpenOverlay(false);
+    }, [success]);
     return (
         <div className="">
             <button
@@ -22,7 +30,9 @@ export default function FormFrameWork({ children, buttonNode, submit }) {
                 }}
             >
                 <div className=" text-white  p-4 rounded-lg bg-background">
-                    <form action="" onSubmit={submit}>{children}</form>
+                    <form action="" onSubmit={submit}>
+                        {children}
+                    </form>
                 </div>
             </Overlay>
         </div>

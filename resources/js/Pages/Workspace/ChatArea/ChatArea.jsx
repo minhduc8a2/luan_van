@@ -10,7 +10,7 @@ import { router } from "@inertiajs/react";
 import { useEffect, useState, useRef } from "react";
 import { differenceInSeconds } from "@/helpers/dateTimeHelper";
 
-import Message from "./Partitals/Message";
+import Message from "./Message";
 import axios from "axios";
 export default function ChatArea({
     channelName = "project",
@@ -20,12 +20,12 @@ export default function ChatArea({
     messages = [],
 }) {
     const { auth } = usePage().props;
-
+    const otherUser = members.find((u) => u.id != auth.user.id);
     const messageContainerRef = useRef(null);
     const [localMessages, setlocalMessages] = useState([...messages]);
     function onSubmit(content, fileObjects) {
         if (content == "<p></p>" && fileObjects.length == 0) return;
-        router.post(`/workspace/${workspace.id}/${channel.id}/message`, {
+        router.post(route("message.store", { channel: channel.id }), {
             content,
             fileObjects,
         });
@@ -51,7 +51,12 @@ export default function ChatArea({
             <div className="p-4 border-b border-b-white/10">
                 <div className="flex justify-between font-bold text-lg opacity-75">
                     <div className="flex items-center gap-x-2">
-                        <div className=""># {channelName}</div>
+                        <div className="">
+                            #{" "}
+                            {channel.type == "DIRECT"
+                                ? otherUser.name
+                                : channelName}
+                        </div>
                         <FaAngleDown className="text-sm" />
                     </div>
                     <div className="flex items-center gap-x-4">

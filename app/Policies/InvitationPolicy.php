@@ -2,12 +2,12 @@
 
 namespace App\Policies;
 
+use App\Models\Invitation;
 use App\Models\User;
 use App\Models\Workspace;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Auth\Access\Response;
 
-class WorkspacePolicy
+class InvitationPolicy
 {
     /**
      * Determine whether the user can view any models.
@@ -20,23 +20,23 @@ class WorkspacePolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Workspace $workspace): bool
+    public function view(User $user, Invitation $invitation): bool
     {
-        return $user->isWorkspaceMember($workspace);
+        //
     }
 
     /**
      * Determine whether the user can create models.
      */
-    public function create(User $user): bool
+    public function create(User $user, Workspace $workspace): bool
     {
-        return true;
+        return $user->isWorkspaceMember($workspace);
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Workspace $workspace): bool
+    public function update(User $user, Invitation $invitation): bool
     {
         //
     }
@@ -44,7 +44,7 @@ class WorkspacePolicy
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Workspace $workspace): bool
+    public function delete(User $user, Invitation $invitation): bool
     {
         //
     }
@@ -52,7 +52,7 @@ class WorkspacePolicy
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, Workspace $workspace): bool
+    public function restore(User $user, Invitation $invitation): bool
     {
         //
     }
@@ -60,7 +60,7 @@ class WorkspacePolicy
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, Workspace $workspace): bool
+    public function forceDelete(User $user, Invitation $invitation): bool
     {
         //
     }

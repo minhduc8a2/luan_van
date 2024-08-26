@@ -25,21 +25,22 @@ export default function SideBar({ user, workspace, workspaces }) {
 
                     <Dropdown.Content
                         align="left"
-                        contentClasses="bg-background w-96 pb-4"
+                        contentClasses="bg-background w-96 pb-4 "
                     >
                         <h2 className="text-lg p-4 pb-2 font-bold">
                             Workspace
                         </h2>
                         <hr className="opacity-10" />
-
-                        {workspaces.map((wsp) => (
-                            <Link href={route("workspace.show", wsp.id)}>
-                                <WorkspaceListItem
-                                    workspace={wsp}
-                                    current={wsp.id == workspace.id}
-                                />
-                            </Link>
-                        ))}
+                        <div className="max-h-[50vh] overflow-y-auto scrollbar">
+                            {workspaces.map((wsp) => (
+                                <Link href={route("workspace.show", wsp.id)}>
+                                    <WorkspaceListItem
+                                        workspace={wsp}
+                                        current={wsp.id == workspace.id}
+                                    />
+                                </Link>
+                            ))}
+                        </div>
                         <hr className="opacity-10" />
 
                         <AddWorkspace />
@@ -91,20 +92,26 @@ export default function SideBar({ user, workspace, workspaces }) {
         </div>
     );
 }
-
+import { useState } from "react";
 import { useForm } from "@inertiajs/react";
 function AddWorkspace() {
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, processing, errors, reset } = useForm({
         name: "",
         channel: "",
     });
-
+    const [success, setSuccess] = useState(false);
     function submit(e) {
         e.preventDefault();
-        post(route("workspace.store"));
+        post(route("workspace.store"), {
+            onSuccess: () => {
+                reset();
+                setSuccess(true);
+            },
+        });
     }
     return (
         <Form1
+            success={success}
             submit={submit}
             buttonName="Create"
             activateButtonNode={

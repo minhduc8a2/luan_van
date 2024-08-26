@@ -35,12 +35,22 @@ class WorkspaceController extends Controller
         if ($request->user()->cannot('create', Workspace::class)) {
             abort(403);
         }
+
         $validated = $request->validate(['name' => 'required|max:255|string', 'channel' => 'required|max:255|string']);
 
         $user = $request->user();
         $workspace = $user->ownWorkspaces()->create(['name' => $validated['name']]);
-        $workspace->channels()->createMany(['name' => $validated['channel'], 'type' => 'PUBLIC', 'user_id' => $user->id], ['name' => "all-" . $workspace->name, 'type' => 'PUBLIC', 'user_id' => $user->id], ['name' => "social", 'type' => 'PUBLIC', 'user_id' => $user->id]);
-        return redirect();
+        $user->workspaces()->attach($workspace->id);
+        $workspace->channels()->createMany([
+            ['name' => $validated['channel'], 'type' => 'PUBLIC', 'user_id' => $user->id],
+            ['name' => "all-" . $workspace->name, 'type' => 'PUBLIC', 'user_id' => $user->id],
+            ['name' => "social", 'type' => 'PUBLIC', 'user_id' => $user->id]
+        ]);
+        $channels = $workspace->channels->toArray();
+        foreach ($channels as $channel) {
+            $user->channels()->attach($channel['id']);
+        }
+        return redirect(route('workspace.show', $workspace->id));
     }
 
     /**
@@ -52,9 +62,9 @@ class WorkspaceController extends Controller
             abort(403);
         }
 
-        $firstChannel = $workspace->channels->first();
+        $firstChannel = $workspace->channels()->where('type', 'PUBLIC')->first();
 
-        return redirect(route('channel.show', [$workspace->id, $firstChannel->id]));
+        return redirect(route('channel.show', [$firstChannel->id]));
     }
 
     /**

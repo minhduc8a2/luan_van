@@ -6,7 +6,7 @@ import { FaCaretDown } from "react-icons/fa";
 import { LuLock } from "react-icons/lu";
 import { LuPlus } from "react-icons/lu";
 import Avatar from "@/Components/Avatar";
-import { Link, usePage } from "@inertiajs/react";
+import { Link, router, usePage } from "@inertiajs/react";
 import FormFrameWork from "@/Components/FormFrameWork";
 import TextInput from "@/Components/TextInput";
 import TextArea from "@/Components/TextArea";
@@ -18,6 +18,7 @@ export default function Panel({
     channels = [],
     currentChannel,
     users,
+    privateChannels = { privateChannels },
 }) {
     const { auth } = usePage().props;
     return (
@@ -103,32 +104,42 @@ export default function Panel({
                         <div className="">Direct messages</div>
                     </div>
                     <ul>
-                        {users.map((user) => (
-                            <li
-                                key={user.id}
-                                className="flex mt-2 items-center justify-start gap-x-2 px-4 "
-                            >
-                                <div className="">
-                                    <Avatar
-                                        src={user.avatar_url}
-                                        className="w-5 h-5"
-                                        onlineClassName="scale-75"
-                                        offlineClassName="scale-75"
-                                        isOnline={true}
-                                    />
-                                </div>
-                                <div className="">
-                                    {user.name}{" "}
-                                    {user.id == auth.user.id ? (
-                                        <span className="opacity-75 ml-2">
-                                            you
-                                        </span>
-                                    ) : (
-                                        ""
-                                    )}
-                                </div>
-                            </li>
-                        ))}
+                        {privateChannels.map((privateCn) => {
+                            const user = privateCn.users.find(
+                                (user) => user.id != auth.user.id
+                            );
+                            return (
+                                <li key={user.id}>
+                                    <Link
+                                        href={route(
+                                            "channel.show",
+                                            privateCn.id
+                                        )}
+                                        className="flex mt-2 items-center justify-start gap-x-2 px-4 "
+                                    >
+                                        <div className="">
+                                            <Avatar
+                                                src={user.avatar_url}
+                                                className="w-5 h-5"
+                                                onlineClassName="scale-75"
+                                                offlineClassName="scale-75"
+                                                isOnline={true}
+                                            />
+                                        </div>
+                                        <div className="">
+                                            {user.name}{" "}
+                                            {user.id == auth.user.id ? (
+                                                <span className="opacity-75 ml-2">
+                                                    you
+                                                </span>
+                                            ) : (
+                                                ""
+                                            )}
+                                        </div>
+                                    </Link>
+                                </li>
+                            );
+                        })}
                     </ul>
                     <InviteForm workspace={workspace} />
                 </div>
@@ -136,7 +147,33 @@ export default function Panel({
         </div>
     );
 }
+
+import { v4 as uuidv4 } from "uuid";
+import { useState, useEffect } from "react";
+import copy from "copy-to-clipboard";
 function InviteForm({ workspace }) {
+    const { flash } = usePage().props;
+    const [invitationLink, setInvitationLink] = useState("");
+    function generateInviteLink(e) {
+        e.preventDefault();
+        if (flash.invitation_link) {
+            copy(flash.invitation_link);
+            setInvitationLink(flash.invitation_link);
+            return;
+        }
+        const uuid = uuidv4();
+        router.post(route("invitation.store", { workspace: workspace.id }), {
+            code: uuid,
+            workspace_id: workspace.id,
+        });
+    }
+    useEffect(() => {
+        if (flash.invitation_link) {
+            copy(flash.invitation_link);
+            setInvitationLink(flash.invitation_link);
+        }
+        console.log(flash.invitation_link);
+    }, [flash.invitation_link]);
     return (
         <Form1
             buttonName="Send"
@@ -150,8 +187,16 @@ function InviteForm({ workspace }) {
             }
             title={`Invite people to ${workspace.name}`}
             sameButtonRow={
-                <div className="flex gap-x-2 items-center text-link font-bold">
-                    <FaLink className="text-lg" /> Copy invite link
+                <div className="flex gap-x-2 items-center">
+                    <button
+                        className="flex gap-x-2 items-center text-link font-bold"
+                        onClick={generateInviteLink}
+                    >
+                        <FaLink className="text-lg" /> Copy invite link
+                    </button>
+                    {invitationLink && (
+                        <div className="text-sm text-white/50">Link copied</div>
+                    )}
                 </div>
             }
         >

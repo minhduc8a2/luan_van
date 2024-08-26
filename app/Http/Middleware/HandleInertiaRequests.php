@@ -39,7 +39,8 @@ class HandleInertiaRequests extends Middleware
             ],
             'publicAppUrl'=> env('PUBLIC_APP_URL',''),
             'flash' => [
-                'message' => fn() => $request->session()->get('message')
+                'message' => fn() => $request->session()->get('message'),
+                'invitation_link' => fn() => $request->session()->get('invitation_link')
             ],
         ];
     }

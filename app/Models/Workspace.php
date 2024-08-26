@@ -29,4 +29,34 @@ class Workspace extends Model
     {
         return $this->hasMany(Channel::class);
     }
+
+    public  function assignUserToPublicChannels($user)
+    {
+        $channelIds = $this->channels()->where("type", '=', "PUBLIC")->pluck('id');
+        foreach ($channelIds as $channelId) {
+
+            if (!$user->isChannelMember(null, $channelId)) {
+                $user->channels()->attach($channelId);
+            }
+        }
+    }
+
+    public function addUserToWorkspace($user)
+    {
+        if ($user->isWorkspaceMember($this)) return;
+
+        $otherUsers = $this->users->pluck('name', 'id');
+        $user->workspaces()->attach($this->id);
+        $this->assignUserToPublicChannels($user);
+
+        //create private channels
+        foreach ($otherUsers as $id => $name) {
+            $newChannel = $this->channels()->create(['user_id' => $user->id, 'name' => $user->name . "_" . $name, "type" => "DIRECT"]);
+            $user->channels()->attach($newChannel->id);
+            $otherUser = User::find($id);
+            if ($otherUser) {
+                $otherUser->channels()->attach($newChannel->id);
+            }
+        }
+    }
 }

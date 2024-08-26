@@ -48,11 +48,12 @@ class ChannelController extends Controller
             return  abort(403);
         }
         $channels = $workspace->channels;
+        $privateChannels = $workspace->channels()->where("type","=","DIRECT")->get();
         $messages = $channel->messages;
         $workspaces = $request->user()->workspaces;
         $users = $workspace->users;
         $members = $channel->users;
-        return Inertia::render("Workspace/Index", ['workspace' => $workspace, 'channel' => $channel, 'channels' => $channels, 'messages' => $messages->load('attachments'), 'users' => $users, 'members' => $members, 'workspaces' => $workspaces]);
+        return Inertia::render("Workspace/Index", ['workspace' => $workspace, 'channel' => $channel, 'channels' => $channels, 'messages' => $messages->load('attachments'), 'users' => $users, 'members' => $members, 'workspaces' => $workspaces, "privateChannels"=> $privateChannels->load("users")]);
     }
 
     /**

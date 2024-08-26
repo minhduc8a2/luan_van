@@ -22,6 +22,7 @@ use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WorkspaceController;
 use App\Http\Controllers\Auth\ProviderController;
+use App\Http\Controllers\InvitationController;
 use App\Jobs\DeleteTemporaryFiles;
 use App\Models\Attachment;
 
@@ -68,3 +69,6 @@ Route::get('/auth/{provider}/redirect', [ProviderController::class, 'redirect'])
 
 Route::get('/auth/{provider}/callback', [ProviderController::class, 'callback']);
 require __DIR__ . '/auth.php';
+
+Route::post("/{workspace}/invitations", [InvitationController::class, 'store'])->name('invitation.store');
+Route::get("/invitations/{code}", [InvitationController::class, 'index'])->name('invitation.index');

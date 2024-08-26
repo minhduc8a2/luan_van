@@ -2,6 +2,7 @@ import React from "react";
 import FormFrameWork from "./FormFrameWork";
 import Button from "./Button";
 export default function Form1({
+    success=false,
     children,
     buttonName,
     activateButtonNode,
@@ -10,7 +11,7 @@ export default function Form1({
     submit,
 }) {
     return (
-        <FormFrameWork buttonNode={activateButtonNode} submit={submit}>
+        <FormFrameWork buttonNode={activateButtonNode} submit={submit} success={success}>
             <div className="w-[500px] max-w-screen-sm m-4 ">
                 <h2 className="text-2xl my-4 font-bold text-white/85">
                     {title}

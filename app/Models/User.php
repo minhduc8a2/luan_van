@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Models\Workspace;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -76,5 +77,23 @@ class User extends Authenticatable
     public function messages(): HasMany
     {
         return $this->hasMany(Message::class);
+    }
+
+    public  function isWorkspaceMember(Workspace $workspace): bool
+    {
+        $exists = DB::table('user_workspace')
+            ->where('user_id', '=', $this->id)
+            ->where('workspace_id', '=', $workspace->id)
+            ->count() > 0;
+        return $exists;
+    }
+
+    public  function isChannelMember(?Channel $channel, ?string $channelId): bool
+    {
+        $exists = DB::table('channel_user')
+            ->where('user_id', '=', $this->id)
+            ->where('channel_id', '=', $channel ? $channel->id : $channelId)
+            ->count() > 0;
+        return $exists;
     }
 }
