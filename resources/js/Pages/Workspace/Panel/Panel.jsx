@@ -5,11 +5,9 @@ import { BiMessageRoundedDetail } from "react-icons/bi";
 import { FaCaretDown } from "react-icons/fa";
 import { LuLock } from "react-icons/lu";
 import { LuPlus } from "react-icons/lu";
-import Avatar from "@/Components/Avatar";
-import { Link, router, usePage } from "@inertiajs/react";
-import TextArea from "@/Components/TextArea";
-import { FaLink } from "react-icons/fa6";
-import Form1 from "@/Components/Form1";
+import { Link,  usePage } from "@inertiajs/react";
+import { InvitationForm } from "./InvitationForm";
+import { DirectChannel } from "./DirectChannel";
 export default function Panel({
     workspace,
     channels = [],
@@ -116,103 +114,10 @@ export default function Panel({
                         })}
                         <DirectChannel user={auth.user} channel={selfChannel} />
                     </ul>
-                    <InviteForm workspace={workspace} />
+                    <InvitationForm workspace={workspace} />
                 </div>
             </div>
         </div>
     );
 }
 
-import { v4 as uuidv4 } from "uuid";
-import { useState, useEffect } from "react";
-import copy from "copy-to-clipboard";
-function InviteForm({ workspace }) {
-    const { flash } = usePage().props;
-    const [invitationLink, setInvitationLink] = useState("");
-    function generateInviteLink(e) {
-        e.preventDefault();
-        if (flash.invitation_link) {
-            copy(flash.invitation_link);
-            setInvitationLink(flash.invitation_link);
-            return;
-        }
-        const uuid = uuidv4();
-        router.post(route("invitation.store", { workspace: workspace.id }), {
-            code: uuid,
-            workspace_id: workspace.id,
-        });
-    }
-    useEffect(() => {
-        if (flash.invitation_link) {
-            copy(flash.invitation_link);
-            setInvitationLink(flash.invitation_link);
-        }
-        console.log(flash.invitation_link);
-    }, [flash.invitation_link]);
-    return (
-        <Form1
-            buttonName="Send"
-            activateButtonNode={
-                <div className="grid-item mt-2 px-4 w-fit">
-                    <div className="flex items-center ">
-                        <LuPlus className="text-sm" />
-                    </div>
-                    <div className="">Add coworkers</div>
-                </div>
-            }
-            title={`Invite people to ${workspace.name}`}
-            sameButtonRow={
-                <div className="flex gap-x-2 items-center">
-                    <button
-                        className="flex gap-x-2 items-center text-link font-bold"
-                        onClick={generateInviteLink}
-                    >
-                        <FaLink className="text-lg" /> Copy invite link
-                    </button>
-                    {invitationLink && (
-                        <div className="text-sm text-white/50">Link copied</div>
-                    )}
-                </div>
-            }
-        >
-            {" "}
-            <TextArea
-                id="name"
-                rows="2"
-                label="To:"
-                placeholder="name@gmail.com"
-            />
-        </Form1>
-    );
-}
-
-function DirectChannel({ channel, user }) {
-    const { auth } = usePage().props;
-
-    return (
-        <li>
-            <Link
-                href={route("channel.show", channel.id)}
-                className="flex mt-2 items-center justify-start gap-x-2 px-4 "
-            >
-                <div className="">
-                    <Avatar
-                        src={user.avatar_url}
-                        className="w-5 h-5"
-                        onlineClassName="scale-75"
-                        offlineClassName="scale-75"
-                        isOnline={true}
-                    />
-                </div>
-                <div className="">
-                    {user.name}{" "}
-                    {user.id == auth.user.id ? (
-                        <span className="opacity-75 ml-2">you</span>
-                    ) : (
-                        ""
-                    )}
-                </div>
-            </Link>
-        </li>
-    );
-}

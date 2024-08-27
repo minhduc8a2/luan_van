@@ -71,7 +71,8 @@ Route::get('/auth/{provider}/redirect', [ProviderController::class, 'redirect'])
 Route::get('/auth/{provider}/callback', [ProviderController::class, 'callback']);
 require __DIR__ . '/auth.php';
 
-Route::post("/{workspace}/invitations", [InvitationController::class, 'store'])->name('invitation.store');
+Route::post("/{workspace}/invitation_link", [InvitationController::class, 'store'])->name('invitation.store');
+Route::post("/{workspace}/invitation_mail", [InvitationController::class, 'storeAndSendInvitationMail'])->name('invitation.mail');
 Route::get("/invitations/{code}", [InvitationController::class, 'index'])->name('invitation.index');
 Route::get('/mailable', function () {
     return new  InvitationMail("https://simpcity.su/", "company A", "A", "B");

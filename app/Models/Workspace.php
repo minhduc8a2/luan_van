@@ -66,4 +66,10 @@ class Workspace extends Model
         $newChannel = $this->channels()->create(['user_id' => $user->id, 'name' => $user->name, "type" => "SELF"]);
         $user->channels()->attach($newChannel->id);
     }
+    public   function isWorkspaceMemberByEmail(string $email): bool
+    {
+        $user = User::where('email', '=', $email)->first();
+        if (!isset($user)) return false;
+        return User::where('email', '=', $email)->first()->isWorkspaceMember($this);
+    }
 }

@@ -1,23 +1,23 @@
 import React from "react";
-import OverlayPanel from "./OverlayPanel";
+import Overlay from "./Overlay";
 import Button from "./Button";
-export default function Form1({
-    success = false,
+import { useState } from "react";
+export default function OverlayNotification({
+    title = "Notifications",
     children,
-    buttonName,
-    activateButtonNode,
-    title,
     sameButtonRow,
-    submit,
-    submitting = false,
+    buttonName = "Close",
+    show = false,
+    close = () => {},
 }) {
     return (
-        <OverlayPanel
-            buttonNode={activateButtonNode}
-            submit={submit}
-            success={success}
+        <Overlay
+            show={show}
+            onClose={() => {
+                close();
+            }}
         >
-            <form action="" onSubmit={submit}>
+            <div className=" text-white  p-4 rounded-lg bg-background">
                 <div className="w-[500px] max-w-screen-sm m-4 ">
                     <h2 className="text-2xl my-4 font-bold text-white/85">
                         {title}
@@ -34,14 +34,16 @@ export default function Form1({
                             {sameButtonRow}
                             <Button
                                 className="text-white/65"
-                                loading={submitting}
+                                onClick={() => {
+                                    close();
+                                }}
                             >
                                 {buttonName}
                             </Button>
                         </div>
                     </div>
                 </div>
-            </form>
-        </OverlayPanel>
+            </div>
+        </Overlay>
     );
 }

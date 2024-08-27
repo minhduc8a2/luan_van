@@ -1,10 +1,10 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import Overlay from "./Overlay";
-export default function FormFrameWork({
+export default function OverlayPanel({
     children,
     buttonNode,
-    submit,
+
     success = false,
 }) {
     const [openOverlay, setOpenOverlay] = useState(false);
@@ -30,9 +30,9 @@ export default function FormFrameWork({
                 }}
             >
                 <div className=" text-white  p-4 rounded-lg bg-background">
-                    <form action="" onSubmit={submit}>
+                   
                         {children}
-                    </form>
+                    
                 </div>
             </Overlay>
         </div>

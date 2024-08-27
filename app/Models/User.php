@@ -96,4 +96,5 @@ class User extends Authenticatable
             ->count() > 0;
         return $exists;
     }
+   
 }

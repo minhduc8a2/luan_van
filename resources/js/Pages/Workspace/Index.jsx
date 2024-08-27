@@ -1,7 +1,7 @@
 import React from "react";
 import SideBar from "./SideBar";
 import HeadBar from "./HeadBar";
-import Panel from "./Panel";
+import Panel from "./Panel/Panel";
 import ChatArea from "./ChatArea/ChatArea";
 
 export default function Index({

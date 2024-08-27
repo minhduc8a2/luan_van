@@ -54,7 +54,7 @@ class ChannelController extends Controller
         })
             ->get();
         $directChannels = $workspace->channels()->where("type", "=", "DIRECT")->get();
-        $selfChannel = $workspace->channels()->where("type", "=", "SELF")->first();
+        $selfChannel = $workspace->channels()->where("type", "=", "SELF")->where("user_id", "=", $request->user()->id)->first();
         $messages = $channel->messages;
         $workspaces = $request->user()->workspaces;
         $users = $workspace->users;
