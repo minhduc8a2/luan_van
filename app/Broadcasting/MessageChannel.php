@@ -6,7 +6,7 @@ use App\Models\User;
 use App\Models\Channel;
 use App\Models\Message;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Broadcasting\PrivateChannel;
+use Illuminate\Broadcasting\PresenceChannel;
 
 class MessageChannel
 {
@@ -23,18 +23,10 @@ class MessageChannel
      */
     public function join(User $user, Channel $channel): array|bool
     {
-        $exists = DB::table('channel_user')
-            ->where('user_id', '=', $user->id)
-            ->where('channel_id', '=', $channel->id)
-            ->count() > 0;
-        return true;
+        if ($user->isChannelMember($channel))
+            return ['id' => $user->id, 'name' => $user->name];
+        return false;
     }
 
-    public function broadcastOn(): array
-    {
-        return [
-            new PrivateChannel('channels.' . $this->channel->id),
-        ];
-    }
-  
+    
 }

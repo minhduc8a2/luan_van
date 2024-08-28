@@ -1,6 +1,6 @@
 import React from "react";
-import OverlayPanel from "./OverlayPanel";
-import Button from "./Button";
+import OverlayPanel from "@/Components/Overlay/OverlayPanel";
+import Button from "@/Components/Button";
 export default function Form1({
     success = false,
     children,

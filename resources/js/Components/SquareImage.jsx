@@ -1,7 +1,7 @@
 import React from "react";
 import { useState, useRef, useEffect } from "react";
 import { IoMdCloseCircle } from "react-icons/io";
-import OverlayLoadingSpinner from "./OverlayLoadingSpinner";
+import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
 
 export default function SquareImage({
     size = "h-20",

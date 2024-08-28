@@ -5,18 +5,23 @@ import { BiMessageRoundedDetail } from "react-icons/bi";
 import { FaCaretDown } from "react-icons/fa";
 import { LuLock } from "react-icons/lu";
 import { LuPlus } from "react-icons/lu";
-import { Link,  usePage } from "@inertiajs/react";
+import { Link, usePage } from "@inertiajs/react";
 import { InvitationForm } from "./InvitationForm";
 import { DirectChannel } from "./DirectChannel";
-export default function Panel({
-    workspace,
-    channels = [],
-    currentChannel,
-    users,
-    directChannels = [],
-    selfChannel,
-}) {
+import { useContext } from "react";
+import PageContext from "@/Contexts/PageContext";
+
+export default function Panel() {
     const { auth } = usePage().props;
+    const {
+        workspace,
+        channels = [],
+        channel: currentChannel,
+        users,
+        directChannels = [],
+        selfChannel,
+    } = useContext(PageContext);
+
     return (
         <div className="bg-secondary h-full rounded-l-lg rounded-s-lg ">
             <div className="flex justify-between items-center p-4">
@@ -101,9 +106,12 @@ export default function Panel({
                     </div>
                     <ul>
                         {directChannels.map((directCn) => {
-                            const user = directCn.users.find(
+                            const userId = directCn.users.find(
                                 (user) => user.id != auth.user.id
-                            );
+                            )?.id;
+                            let user;
+                            if (userId)
+                                user = users.find((u) => u.id == userId);
                             return (
                                 <DirectChannel
                                     key={user.id}
@@ -112,7 +120,10 @@ export default function Panel({
                                 />
                             );
                         })}
-                        <DirectChannel user={auth.user} channel={selfChannel} />
+                        <DirectChannel
+                            user={{ ...auth.user, online: true }}
+                            channel={selfChannel}
+                        />
                     </ul>
                     <InvitationForm workspace={workspace} />
                 </div>
@@ -120,4 +131,3 @@ export default function Panel({
         </div>
     );
 }
-

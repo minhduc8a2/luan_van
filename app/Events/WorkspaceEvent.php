@@ -2,8 +2,8 @@
 
 namespace App\Events;
 
-use App\Models\Channel;
-use App\Models\Message;
+use App\Models\Workspace;
+use Illuminate\Broadcasting\Channel;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Broadcasting\PresenceChannel;
@@ -12,14 +12,14 @@ use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 
-class MessageEvent implements ShouldBroadcastNow
+class WorkspaceEvent implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     /**
      * Create a new event instance.
      */
-    public function __construct(public Channel $channel, public Message $message)
+    public function __construct(public Workspace $workspace)
     {
         //
     }
@@ -32,12 +32,7 @@ class MessageEvent implements ShouldBroadcastNow
     public function broadcastOn(): array
     {
         return [
-
-            new PresenceChannel('channels.' . $this->channel->id),
+            new PresenceChannel('workspaces.' . $this->workspace->id),
         ];
-    }
-    public function broadcastWith(): array
-    {
-        return ['message' => $this->message];
     }
 }

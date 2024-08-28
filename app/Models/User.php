@@ -88,13 +88,13 @@ class User extends Authenticatable
         return $exists;
     }
 
-    public  function isChannelMember(?Channel $channel, ?string $channelId): bool
+    public  function isChannelMember($channel): bool
     {
+
         $exists = DB::table('channel_user')
             ->where('user_id', '=', $this->id)
-            ->where('channel_id', '=', $channel ? $channel->id : $channelId)
+            ->where('channel_id', '=',  $channel->id)
             ->count() > 0;
         return $exists;
     }
-   
 }

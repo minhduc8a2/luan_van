@@ -1,6 +1,6 @@
 import React from "react";
 import Overlay from "./Overlay";
-import Button from "./Button";
+import Button from "@/Components/Button";
 import { useState } from "react";
 export default function OverlayNotification({
     title = "Notifications",

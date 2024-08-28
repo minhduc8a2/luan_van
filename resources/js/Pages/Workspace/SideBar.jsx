@@ -11,8 +11,13 @@ import WorkspaceAvatar from "@/Components/WorkspaceAvatar";
 import WorkspaceListItem from "@/Components/WorkspaceListItem";
 import { IoIosAdd } from "react-icons/io";
 import Form1 from "@/Components/Form1";
-import TextArea from "@/Components/TextArea";
-export default function SideBar({ user, workspace, workspaces }) {
+import TextArea from "@/Components/Input/TextArea";
+import { useContext } from "react";
+import PageContext from "@/Contexts/PageContext";
+
+export default function SideBar() {
+    const { workspace, workspaces } = useContext(PageContext);
+    const { auth } = usePage().props;
     const { url } = usePage();
     const itemStyle = "flex flex-col items-center gap-y-2 group";
     return (
@@ -33,7 +38,10 @@ export default function SideBar({ user, workspace, workspaces }) {
                         <hr className="opacity-10" />
                         <div className="max-h-[50vh] overflow-y-auto scrollbar">
                             {workspaces.map((wsp) => (
-                                <Link href={route("workspace.show", wsp.id)}>
+                                <Link
+                                    href={route("workspace.show", wsp.id)}
+                                    key={wsp.id}
+                                >
                                     <WorkspaceListItem
                                         workspace={wsp}
                                         current={wsp.id == workspace.id}
@@ -84,7 +92,7 @@ export default function SideBar({ user, workspace, workspaces }) {
                     <LuPlus className="text-xl opacity-75" />
                 </div>
                 <Avatar
-                    src={user.avatar_url}
+                    src={auth.user.avatar_url}
                     className="mt-2"
                     isOnline={true}
                 />

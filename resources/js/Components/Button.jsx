@@ -1,5 +1,5 @@
 import React from "react";
-import OverlayLoadingSpinner from "./OverlayLoadingSpinner";
+import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
 
 export default function Button({
     className = "",

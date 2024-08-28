@@ -2,7 +2,7 @@ import React from "react";
 import { getLogo, getDocumentType } from "@/helpers/fileHelpers";
 import { IoMdCloseCircle } from "react-icons/io";
 import { useState, useEffect } from "react";
-import OverlayLoadingSpinner from "./OverlayLoadingSpinner";
+import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
 
 export default function FileItem({
     file,

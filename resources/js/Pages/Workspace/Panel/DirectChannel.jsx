@@ -1,8 +1,8 @@
-import { usePage,Link } from "@inertiajs/react";
+import { usePage, Link } from "@inertiajs/react";
 import Avatar from "@/Components/Avatar";
 export function DirectChannel({ channel, user }) {
     const { auth } = usePage().props;
-
+    console.log(user);
     return (
         <li>
             <Link
@@ -15,7 +15,7 @@ export function DirectChannel({ channel, user }) {
                         className="w-5 h-5"
                         onlineClassName="scale-75"
                         offlineClassName="scale-75"
-                        isOnline={true}
+                        isOnline={user.online}
                     />
                 </div>
                 <div className="">

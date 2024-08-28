@@ -12,16 +12,22 @@ import { differenceInSeconds } from "@/helpers/dateTimeHelper";
 
 import Message from "./Message";
 import axios from "axios";
-export default function ChatArea({
-    channelName = "project",
-    members = [],
-    workspace,
-    channel,
-    messages = [],
-}) {
+import { useContext } from "react";
+import PageContext from "@/Contexts/PageContext";
+
+export default function ChatArea() {
+    const {
+        channelName = "project",
+
+        channel,
+        channelUsers = [],
+        messages = [],
+    } = useContext(PageContext);
+
     const { auth } = usePage().props;
-    const otherUser = members.find((u) => u.id != auth.user.id);
+    const otherUser = channelUsers.find((u) => u.id != auth.user.id);
     const messageContainerRef = useRef(null);
+
     const [localMessages, setlocalMessages] = useState([...messages]);
     function onSubmit(content, fileObjects) {
         if (content == "<p></p>" && fileObjects.length == 0) return;
@@ -34,12 +40,17 @@ export default function ChatArea({
     let preValue = null;
     let hasChanged = false;
     useEffect(() => {
-        window.Echo.private(`channels.${channel.id}`).listen(
-            "MessageEvent",
-            (e) => {
+        Echo.join(`channels.${channel.id}`)
+            .here((users) => {})
+            .joining((user) => {})
+            .leaving((user) => {})
+            .listen("MessageEvent", (e) => {
                 setlocalMessages((pre) => [...pre, e.message]);
-            }
-        );
+                // console.log(e);
+            })
+            .error((error) => {
+                console.error(error);
+            });
     }, []);
     useEffect(() => {
         if (messageContainerRef.current)
@@ -93,7 +104,7 @@ export default function ChatArea({
                 ref={messageContainerRef}
             >
                 {localMessages.map((message, index) => {
-                    const user = members.filter(
+                    const user = channelUsers.filter(
                         (mem) => mem.id === message.user_id
                     )[0];
                     hasChanged = false;

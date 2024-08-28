@@ -16,7 +16,7 @@ import { AiOutlineZoomOut } from "react-icons/ai";
 import { MdOutlineRotate90DegreesCcw } from "react-icons/md";
 import { IoMdCloudDownload } from "react-icons/io";
 import { useState } from "react";
-import Overlay from "@/Components/Overlay";
+import Overlay from "@/Components/Overlay/Overlay";
 import { usePage } from "@inertiajs/react";
 import FileItem from "@/Components/FileItem";
 

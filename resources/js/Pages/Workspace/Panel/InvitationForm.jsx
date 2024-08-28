@@ -2,12 +2,12 @@ import { useForm } from "@inertiajs/react";
 import { v4 as uuidv4 } from "uuid";
 import { useState, useEffect, useRef } from "react";
 import copy from "copy-to-clipboard";
-import TextArea from "@/Components/TextArea";
+import TextArea from "@/Components/Input/TextArea";
 import { FaLink } from "react-icons/fa6";
 import Form1 from "@/Components/Form1";
 import { Link, router, usePage } from "@inertiajs/react";
 import { LuPlus } from "react-icons/lu";
-import OverlayNotification from "@/Components/OverlayNotification";
+import OverlayNotification from "@/Components/Overlay/OverlayNotification";
 
 export function InvitationForm({ workspace }) {
     const { flash } = usePage().props;
@@ -51,7 +51,7 @@ export function InvitationForm({ workspace }) {
             copy(flash.invitation_link);
             setInvitationLink(flash.invitation_link);
         }
-        console.log(flash.invitation_link);
+        // console.log(flash.invitation_link);
     }, [flash.invitation_link]);
     useEffect(() => {
         if (flash.invitation_sent) {
@@ -61,7 +61,10 @@ export function InvitationForm({ workspace }) {
     return (
         <div className="">
             {invitationSent && (
-                <OverlayNotification show={invitationSent} close={()=>setInvitationSent(null)}>
+                <OverlayNotification
+                    show={invitationSent}
+                    close={() => setInvitationSent(null)}
+                >
                     {flash.invitation_sent.length != 0 && (
                         <div className="">
                             <p className="text-lg">You've invited:</p>

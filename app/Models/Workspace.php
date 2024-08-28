@@ -36,10 +36,9 @@ class Workspace extends Model
     }
     public  function assignUserToPublicChannels($user)
     {
-        $channelIds = $this->channels()->where("type", '=', "PUBLIC")->pluck('id');
+        $channelIds = $this->channels()->where("type", '=', "PUBLIC")->get();
         foreach ($channelIds as $channelId) {
-
-            if (!$user->isChannelMember(null, $channelId)) {
+            if (!$user->isChannelMember($channelId)) {
                 $user->channels()->attach($channelId);
             }
         }

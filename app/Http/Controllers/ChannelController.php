@@ -58,14 +58,14 @@ class ChannelController extends Controller
         $messages = $channel->messages;
         $workspaces = $request->user()->workspaces;
         $users = $workspace->users;
-        $members = $channel->users;
+        $channelUsers = $channel->users;
         return Inertia::render("Workspace/Index", [
             'workspace' => $workspace,
             'channel' => $channel,
             'channels' => $channels,
             'messages' => $messages->load('attachments'),
             'users' => $users,
-            'members' => $members,
+            'channelUsers' => $channelUsers,
             'workspaces' => $workspaces,
             "directChannels" => $directChannels->load("users"),
             'selfChannel' => $selfChannel
