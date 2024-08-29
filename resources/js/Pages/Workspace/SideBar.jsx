@@ -12,16 +12,20 @@ import WorkspaceListItem from "@/Components/WorkspaceListItem";
 import { IoIosAdd } from "react-icons/io";
 import Form1 from "@/Components/Form1";
 import TextArea from "@/Components/Input/TextArea";
-import { useContext } from "react";
+import { useContext, useEffect, useRef } from "react";
 import PageContext from "@/Contexts/PageContext";
 
 export default function SideBar() {
-    const { workspace, workspaces } = useContext(PageContext);
+    const { workspace, workspaces, setSideBarWidth } = useContext(PageContext);
     const { auth } = usePage().props;
     const { url } = usePage();
+    const boxRef = useRef(null);
     const itemStyle = "flex flex-col items-center gap-y-2 group";
+    useEffect(() => {
+        setSideBarWidth(boxRef.current.offsetWidth);
+    }, []);
     return (
-        <div className="flex flex-col justify-between h-full pb-8">
+        <div className="flex flex-col justify-between h-full pb-8" ref={boxRef}>
             <div className="flex flex-col items-center gap-y-8 ">
                 <Dropdown>
                     <Dropdown.Trigger>

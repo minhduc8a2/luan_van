@@ -11,7 +11,7 @@ export default function Button({
         <button
             {...props}
             className={
-                " rounded-xl bg-foreground relative hover:bg-white/10 transition text-white/85 py-2 px-4 hover:text-white" +
+                " rounded-xl bg-foreground relative hover:bg-white/10 transition text-white/85 py-2 px-4 hover:text-white " +
                 className
             }
         >

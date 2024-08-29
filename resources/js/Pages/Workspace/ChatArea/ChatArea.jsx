@@ -11,7 +11,7 @@ import { useEffect, useState, useRef } from "react";
 import { differenceInSeconds } from "@/helpers/dateTimeHelper";
 
 import Message from "./Message";
-import axios from "axios";
+
 import { useContext } from "react";
 import PageContext from "@/Contexts/PageContext";
 
@@ -70,25 +70,30 @@ export default function ChatArea() {
                         </div>
                         <FaAngleDown className="text-sm" />
                     </div>
-                    <div className="flex items-center gap-x-4">
+                    <div className="flex items-center gap-x-4 ">
                         <div className="flex items-center p-1 border  border-white/15 rounded-lg px-2">
-                            <Avatar
-                                src={auth.user.avatar_url}
-                                noStatus={true}
-                                className="w-4 h-4"
-                            />
-                            <div className="text-xs ml-2">1</div>
-                        </div>
-                        <div className="flex items-center p-1 border border-white/15 rounded-lg px-2 gap-x-3 font-normal">
-                            <div className="flex items-center gap-x-1">
-                                <FiHeadphones className="text-xl" />
-                                <div className="text-sm ">Huddle</div>
+                            <ul className="flex">
+                                {channelUsers.map((user) => (
+                                    <li
+                                        key={user.id}
+                                        className="-ml-2 first:ml-0  "
+                                    >
+                                        <Avatar
+                                            src={user.avatar_url}
+                                            noStatus={true}
+                                            className="w-6 h-6 border-2  border-background"
+                                            roundedClassName="rounded-lg"
+                                        />
+                                    </li>
+                                ))}
+                            </ul>
+
+                            <div className="text-xs ml-2">
+                                {channelUsers.length}
                             </div>
-                            <div className="flex items-center gap-x-1">
-                                <span className="text-sm opacity-25 ">|</span>
-                                <FaAngleDown className="text-xs" />
-                            </div>
                         </div>
+                        <Huddle />
+
                         <div className="p-1 border border-white/15 rounded-lg ">
                             <CgFileDocument className="text-xl" />
                         </div>
@@ -134,6 +139,92 @@ export default function ChatArea() {
             <div className="m-6 border border-white/50 pt-4 px-2 rounded-lg">
                 <TipTapEditor onSubmit={onSubmit} />
             </div>
+        </div>
+    );
+}
+
+import { MdOutlineZoomOutMap } from "react-icons/md";
+import { GrMicrophone } from "react-icons/gr";
+import { PiVideoCameraSlash } from "react-icons/pi";
+import { CgScreen } from "react-icons/cg";
+import { IoMdPersonAdd } from "react-icons/io";
+import { RiMore2Fill } from "react-icons/ri";
+import Button from "@/Components/Button";
+import IconButton from "@/Components/IconButton";
+function Huddle() {
+    const [show, setShow] = useState(false);
+    const { sideBarWidth, channel } = useContext(PageContext);
+    const { auth } = usePage().props;
+    return (
+        <div className=" ">
+            <div
+                className={`flex items-center p-1 border border-white/15 rounded-lg px-2 gap-x-3 font-normal  ${
+                    show ? "bg-green-700" : ""
+                }`}
+            >
+                <button
+                    className={`flex items-center gap-x-1`}
+                    onClick={() => setShow((pre) => !pre)}
+                >
+                    <FiHeadphones className="text-xl" />
+                    <div className="text-sm ">Huddle</div>
+                </button>
+                {/* <div className="flex items-center gap-x-1">
+                              <span className="text-sm opacity-25 ">|</span>
+                              <FaAngleDown className="text-xs" />
+                          </div> */}
+            </div>
+            {show && (
+                <div
+                    className="bg-primary-light w-96     fixed bottom-12 rounded-xl"
+                    style={{ left: sideBarWidth + 16 }}
+                >
+                    <div className="flex justify-between p-4 items-center">
+                        <div className="text-sm">{channel.name}</div>
+                        <MdOutlineZoomOutMap />
+                    </div>
+                    <div className="p-4 flex justify-center gap-x-2 bg-white/10 mx-4 rounded-lg">
+                        <Avatar src={auth.user.avatar_url} noStatus />
+                    </div>
+                    <ul className="flex gap-x-2 items-center p-4 justify-center">
+                        <IconButton
+                            description="Mute mic"
+                            activeDescription="Unmute mic"
+                        >
+                            <GrMicrophone />
+                        </IconButton>
+                        <IconButton
+                            description="Turn on video"
+                            activeDescription="Turn off video"
+                        >
+                            <PiVideoCameraSlash />
+                        </IconButton>
+                        <IconButton
+                            description="Share screen"
+                            activeDescription="Stop sharing"
+                        >
+                            <CgScreen />
+                        </IconButton>
+                        <IconButton
+                            description="Invite people"
+                            activable={false}
+                        >
+                            <IoMdPersonAdd />
+                        </IconButton>
+                        <IconButton
+                            description="More options"
+                            activable={false}
+                        >
+                            <RiMore2Fill />
+                        </IconButton>
+                        <li>
+                            <Button className="bg-pink-600 text-sm">
+                                Leave
+                            </Button>
+                        </li>
+                    </ul>
+                </div>
+            )}
         </div>
     );
 }

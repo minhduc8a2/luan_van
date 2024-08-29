@@ -17,6 +17,7 @@ export default function Index({
     directChannels,
     selfChannel,
 }) {
+    const [sideBarWidth,setSideBarWidth] = useState(0)
     const [workspaceUsers, setWorkspaceUsers] = useState(
         users.map((user) => ({ ...user, online: false }))
     );
@@ -77,6 +78,8 @@ export default function Index({
                 workspaces,
                 directChannels,
                 selfChannel,
+                sideBarWidth,
+                setSideBarWidth
             }}
         >
             <div className="client-container bg-primary text-white ">

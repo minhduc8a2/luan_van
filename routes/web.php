@@ -75,5 +75,5 @@ Route::post("/{workspace}/invitation_link", [InvitationController::class, 'store
 Route::post("/{workspace}/invitation_mail", [InvitationController::class, 'storeAndSendInvitationMail'])->name('invitation.mail');
 Route::get("/invitations/{code}", [InvitationController::class, 'index'])->name('invitation.index');
 Route::get('/mailable', function () {
-    return new  InvitationMail("https://simpcity.su/", "company A", "A", "B");
+    return new  InvitationMail("https://google.com", "company A", "A", "B");
 });

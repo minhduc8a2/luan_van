@@ -7,10 +7,11 @@ export default function Avatar({
     onlineClassName = "",
     offlineClassName = "",
     noStatus = false,
+    roundedClassName = "rounded-lg",
 }) {
     return (
         <div className="relative w-fit h-fit max-h-full">
-            <img src={src} className={`rounded-lg max-w-full max-h-10 ${className}`} />
+            <img src={src} className={`${roundedClassName} max-w-full max-h-10 ${className}`} />
             {noStatus ? (
                 ""
             ) : isOnline ? (

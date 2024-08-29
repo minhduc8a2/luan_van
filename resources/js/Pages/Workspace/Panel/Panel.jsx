@@ -54,6 +54,7 @@ export default function Panel() {
                                                 "channel.show",
                                                 channel.id
                                             )}
+                                            only={["channel", "channelUsers"]}
                                             className={`grid-item mt-2 px-4  rounded-lg ${
                                                 channel.id == currentChannel.id
                                                     ? "bg-primary"

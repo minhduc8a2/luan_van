@@ -77,3 +77,19 @@
 .tiptap p {
     @apply mx-2 my-2;
 }
+
+@position-try --custom-bottom {
+    top: calc(anchor(bottom));
+    bottom: unset;
+}
+
+.anchor {
+    anchor-name: --tooltip;
+}
+.tooltip {
+    position: fixed;
+    position-anchor: --tooltip;
+    bottom: calc(anchor(top) + 8px);
+    justify-self: anchor-center;
+    position-try-fallbacks: --custom-bottom;
+}
