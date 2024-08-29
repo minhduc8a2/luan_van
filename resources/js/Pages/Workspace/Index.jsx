@@ -11,6 +11,7 @@ import { setWorkspaceProfile } from "@/Store/Slices/workspaceProfileSlice";
 import { makeStore } from "@/Store/store";
 import { Provider } from "react-redux";
 import Event from "./Event";
+import Huddle from "./Huddle";
 export default function Index({
     workspace,
     channels,
@@ -54,6 +55,7 @@ export default function Index({
                     <ChatArea />
                 </div>
             </div>
+            <Huddle />
         </Provider>
     );
 }

@@ -3,12 +3,7 @@ import { UTCToTime } from "@/helpers/dateTimeHelper";
 import { generateHTML } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import Avatar from "@/Components/Avatar";
-import {
-    isDocument,
-    isImage,
-    getLogo,
-    getDocumentType,
-} from "@/helpers/fileHelpers";
+import { isDocument, isImage, isVideo } from "@/helpers/fileHelpers";
 import "react-photo-view/dist/react-photo-view.css";
 import { PhotoProvider, PhotoView } from "react-photo-view";
 import { AiOutlineZoomIn } from "react-icons/ai";
@@ -16,20 +11,22 @@ import { AiOutlineZoomOut } from "react-icons/ai";
 import { MdOutlineRotate90DegreesCcw } from "react-icons/md";
 import { IoMdCloudDownload } from "react-icons/io";
 import { useState } from "react";
-import Overlay from "@/Components/Overlay/Overlay";
+
 import { usePage } from "@inertiajs/react";
 import FileItem from "@/Components/FileItem";
+import DocumentAttachment from "./DocumentAttachment";
 
 export default function Message({ message, user, hasChanged, index }) {
-    const { publicAppUrl } = usePage().props;
     const attachments = message.attachments || [];
     const imageAttachments = [];
+    const videoAttachments = [];
     const documentAttachments = [];
     const otherAttachments = [];
     attachments.forEach((attachment) => {
         if (isImage(attachment.type)) imageAttachments.push(attachment);
         else if (isDocument(attachment.type))
             documentAttachments.push(attachment);
+        else if (isVideo(attachment.type)) videoAttachments.push(attachment);
         else otherAttachments.push(attachment);
     });
     const [openOverlay, setOpenOverlay] = useState(false);
@@ -128,57 +125,38 @@ export default function Message({ message, user, hasChanged, index }) {
                         </PhotoProvider>
                     </div>
                 )}
+                {videoAttachments.length != 0 && (
+                    <div className="flex gap-x-4 flex-wrap mt-4">
+                        {videoAttachments.map((attachment) => {
+                            return (
+                                <div
+                                    className="h-64"
+                                    key={"attachment_" + attachment.id}
+                                >
+                                    <video
+                                        controls
+                                        muted
+                                        src={attachment.url}
+                                        alt=""
+                                        className="max-h-full rounded-lg"
+                                    />
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
                 {documentAttachments.length != 0 && (
                     <div className="flex gap-x-4 flex-wrap mt-4">
                         {documentAttachments.map((attachment) => {
                             return (
-                                <div
-                                    className=""
-                                    key={"attachment_" + attachment.id}
-                                >
-                                    <button
-                                        onClick={() => setOpenOverlay(true)}
-                                    >
-                                        <FileItem file={attachment} />
-                                    </button>
-                                    <Overlay
-                                        show={openOverlay}
-                                        onClose={() => setOpenOverlay(false)}
-                                        toolbars={
-                                            <a
-                                                href={attachment.url}
-                                                download={true}
-                                            >
-                                                <IoMdCloudDownload className="text-3xl" />
-                                            </a>
-                                        }
-                                    >
-                                        <div className="flex justify-center flex-col items-center max-h-[95vh] mt-4 w-fit ">
-                                            <iframe
-                                                width={
-                                                    window.innerWidth > 900
-                                                        ? window.innerWidth / 2
-                                                        : window.innerWidth -
-                                                          200
-                                                }
-                                                height={
-                                                    window.innerHeight - 100
-                                                }
-                                                src={`https://docs.google.com/gview?url=${
-                                                    publicAppUrl +
-                                                    attachment.url
-                                                }&embedded=true`}
-                                            ></iframe>
-                                        </div>
-                                        <button
-                                            onClick={() =>
-                                                setOpenOverlay(false)
-                                            }
-                                        >
-                                            close
-                                        </button>
-                                    </Overlay>
-                                </div>
+                                <DocumentAttachment
+                                    key={attachment.id}
+                                    attachment={attachment}
+                                    openOverlay={openOverlay}
+                                    setOpenOverlay={(status) =>
+                                        setOpenOverlay(status)
+                                    }
+                                />
                             );
                         })}
                     </div>

@@ -32,7 +32,7 @@ class HuddleEvent implements ShouldBroadcastNow
     public function broadcastOn(): array
     {
         return [
-            new PresenceChannel('huddle.'.$this->channel->id),
+            new PresenceChannel('huddles.'.$this->channel->id),
         ];
     }
 

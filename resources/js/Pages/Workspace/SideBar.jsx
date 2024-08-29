@@ -12,19 +12,20 @@ import WorkspaceListItem from "@/Components/WorkspaceListItem";
 import { IoIosAdd } from "react-icons/io";
 import Form1 from "@/Components/Form1";
 import TextArea from "@/Components/Input/TextArea";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useRef, useEffect } from "react";
 import { setSideBarWidth } from "@/Store/Slices/workspaceProfileSlice";
 export default function SideBar() {
     const { workspace, workspaces } = useSelector(
         (state) => state.workspaceProfile
     );
+    const dispatch = useDispatch();
     const { auth } = usePage().props;
     const { url } = usePage();
     const boxRef = useRef(null);
     const itemStyle = "flex flex-col items-center gap-y-2 group";
     useEffect(() => {
-        setSideBarWidth(boxRef.current.offsetWidth);
+        dispatch(setSideBarWidth(boxRef.current.offsetWidth));
     }, []);
     return (
         <div className="flex flex-col justify-between h-full pb-8" ref={boxRef}>

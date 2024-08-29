@@ -5,7 +5,7 @@ export const channelUsersSlice = createSlice({
     initialState: [],
     reducers: {
         setChannelUsers(state, action) {
-            state = action.payload;
+            return action.payload;
         },
        
     },

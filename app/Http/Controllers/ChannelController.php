@@ -44,11 +44,10 @@ class ChannelController extends Controller
         if ($request->user()->cannot('view', $channel)) {
             return  abort(403);
         }
-        return back()->with('data', [
-            'channel' => $channel,
-            'messages' => fn() => $channel->messages->load('attachments'),
-            'channelUsers' => fn() => $channel->users,
-        ]);
+        return [
+            'messages' => $channel->messages->load('attachments'),
+            'channelUsers' => $channel->users,
+        ];
     }
 
     /**

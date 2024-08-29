@@ -45,6 +45,18 @@ export function isPlainText(type) {
 }
 export function getDocumentType(type) {
     switch (type) {
+        case "video/mp4":
+            return "MP4 video";
+        case "video/webm":
+            return "WebM video";
+        case "video/ogg":
+            return "OGG video";
+        case "video/x-msvideo":
+            return "AVI video";
+        case "video/mpeg":
+            return "MPEG video";
+        case "video/quicktime":
+            return "QuickTime video";
         case "application/msword":
         case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
             return "Word document";
@@ -52,7 +64,7 @@ export function getDocumentType(type) {
         case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
             return "Excel spreadsheet";
         case "application/pdf":
-            return "PDF";
+            return "PDF document";
         case "text/plain":
             return "Text file";
         case "application/vnd.ms-powerpoint":
@@ -67,8 +79,11 @@ export function getDocumentType(type) {
         case "image/tiff":
             return "Image file";
         default:
-            return "Unknown type";
+            return "Unknown file type";
     }
+}
+export function isVideo(type) {
+    return type.startsWith("video/");
 }
 export function getLogo(type) {
     if (isWord(type)) return "word_jpg.jpg";

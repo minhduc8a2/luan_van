@@ -10,21 +10,21 @@ import { router } from "@inertiajs/react";
 import { useEffect, useState, useRef } from "react";
 import { differenceInSeconds } from "@/helpers/dateTimeHelper";
 
-import Message from "./Message";
-
-import { useContext } from "react";
-import PageContext from "@/Contexts/PageContext";
-import { useSelector } from "react-redux";
+import Message from "./Message/Message";
+import { setChannelUsers } from "@/Store/Slices/channelUsersSlice";
+import { toggleHuddle } from "@/Store/Slices/huddleSlice";
+import { setMessages, addMessage } from "@/Store/Slices/messagesSlice";
+import { useSelector, useDispatch } from "react-redux";
 
 export default function ChatArea() {
+    const dispatch = useDispatch();
     const channel = useSelector((state) => state.channel);
     const channelUsers = useSelector((state) => state.channelUsers);
     const messages = useSelector((state) => state.messages);
-    const { auth } = usePage().props;
-    const otherUser = channelUsers.find((u) => u.id != auth.user.id);
+    const { show } = useSelector((state) => state.huddle);
+
     const messageContainerRef = useRef(null);
 
-    const [localMessages, setlocalMessages] = useState([...messages]);
     function onSubmit(content, fileObjects) {
         if (content == "<p></p>" && fileObjects.length == 0) return;
         router.post(route("message.store", { channel: channel.id }), {
@@ -35,36 +35,50 @@ export default function ChatArea() {
 
     let preValue = null;
     let hasChanged = false;
+
+    async function getChannelData() {
+        const res = await axios.get(route("channel.show", channel.id));
+        const jsonRes = await res;
+        console.log(jsonRes.data);
+        dispatch(setChannelUsers(jsonRes.data.channelUsers));
+        dispatch(setMessages(jsonRes.data.messages));
+    }
+    useEffect(() => {
+        dispatch(setMessages([]));
+        getChannelData();
+    }, [channel]);
     useEffect(() => {
         Echo.join(`channels.${channel.id}`)
             .here((users) => {})
-            .joining((user) => {})
-            .leaving((user) => {})
+            .joining((user) => {
+                console.log("join", user, channel.name);
+            })
+            .leaving((user) => {
+                console.log("leaving", user);
+            })
             .listen("MessageEvent", (e) => {
-                setlocalMessages((pre) => [...pre, e.message]);
+                dispatch(addMessage(e.message));
                 // console.log(e);
             })
             .error((error) => {
                 console.error(error);
             });
-    }, []);
+        return () => {
+            Echo.leave(`channels.${channel.id}`);
+        };
+    }, [channel]);
     useEffect(() => {
         if (messageContainerRef.current)
             messageContainerRef.current.scrollTop =
                 messageContainerRef.current.scrollHeight;
-    }, [localMessages]);
+    }, [messages]);
 
     return (
         <div className="bg-background  chat-area-container col-span-3 ">
             <div className="p-4 border-b border-b-white/10">
                 <div className="flex justify-between font-bold text-lg opacity-75">
                     <div className="flex items-center gap-x-2">
-                        <div className="">
-                            #{" "}
-                            {channel.type == "DIRECT"
-                                ? otherUser.name
-                                : channel.name}
-                        </div>
+                        <div className=""># {channel.name}</div>
                         <FaAngleDown className="text-sm" />
                     </div>
                     <div className="flex items-center gap-x-4 ">
@@ -89,7 +103,23 @@ export default function ChatArea() {
                                 {channelUsers.length}
                             </div>
                         </div>
-                        <Huddle />
+                        <div
+                            className={`flex items-center p-1 border border-white/15 rounded-lg px-2 gap-x-3 font-normal  ${
+                                show ? "bg-green-700" : ""
+                            }`}
+                        >
+                            <button
+                                className={`flex items-center gap-x-1`}
+                                onClick={() => dispatch(toggleHuddle())}
+                            >
+                                <FiHeadphones className="text-xl" />
+                                <div className="text-sm ">Huddle</div>
+                            </button>
+                            {/* <div className="flex items-center gap-x-1">
+                              <span className="text-sm opacity-25 ">|</span>
+                              <FaAngleDown className="text-xs" />
+                          </div> */}
+                        </div>
 
                         <div className="p-1 border border-white/15 rounded-lg ">
                             <CgFileDocument className="text-xl" />
@@ -105,7 +135,7 @@ export default function ChatArea() {
                 className="overflow-y-auto max-w-full scrollbar"
                 ref={messageContainerRef}
             >
-                {localMessages.map((message, index) => {
+                {messages.map((message, index) => {
                     const user = channelUsers.filter(
                         (mem) => mem.id === message.user_id
                     )[0];
@@ -136,94 +166,6 @@ export default function ChatArea() {
             <div className="m-6 border border-white/50 pt-4 px-2 rounded-lg">
                 <TipTapEditor onSubmit={onSubmit} />
             </div>
-        </div>
-    );
-}
-
-import { MdOutlineZoomOutMap } from "react-icons/md";
-import { GrMicrophone } from "react-icons/gr";
-import { PiVideoCameraSlash } from "react-icons/pi";
-import { CgScreen } from "react-icons/cg";
-import { IoMdPersonAdd } from "react-icons/io";
-import { RiMore2Fill } from "react-icons/ri";
-import Button from "@/Components/Button";
-import IconButton from "@/Components/IconButton";
-function Huddle() {
-    const [show, setShow] = useState(false);
-    const { sideBarWidth, channel } = useSelector(
-        (state) => state.workspaceProfile
-    );
-    const { auth } = usePage().props;
-    return (
-        <div className=" ">
-            <div
-                className={`flex items-center p-1 border border-white/15 rounded-lg px-2 gap-x-3 font-normal  ${
-                    show ? "bg-green-700" : ""
-                }`}
-            >
-                <button
-                    className={`flex items-center gap-x-1`}
-                    onClick={() => setShow((pre) => !pre)}
-                >
-                    <FiHeadphones className="text-xl" />
-                    <div className="text-sm ">Huddle</div>
-                </button>
-                {/* <div className="flex items-center gap-x-1">
-                              <span className="text-sm opacity-25 ">|</span>
-                              <FaAngleDown className="text-xs" />
-                          </div> */}
-            </div>
-            {show && (
-                <div
-                    className="bg-primary-light w-96     fixed bottom-12 rounded-xl"
-                    style={{ left: sideBarWidth + 16 }}
-                >
-                    <div className="flex justify-between p-4 items-center">
-                        <div className="text-sm">{channel.name}</div>
-                        <MdOutlineZoomOutMap />
-                    </div>
-                    <div className="p-4 flex justify-center gap-x-2 bg-white/10 mx-4 rounded-lg">
-                        <Avatar src={auth.user.avatar_url} noStatus />
-                    </div>
-                    <ul className="flex gap-x-2 items-center p-4 justify-center">
-                        <IconButton
-                            description="Mute mic"
-                            activeDescription="Unmute mic"
-                        >
-                            <GrMicrophone />
-                        </IconButton>
-                        <IconButton
-                            description="Turn on video"
-                            activeDescription="Turn off video"
-                        >
-                            <PiVideoCameraSlash />
-                        </IconButton>
-                        <IconButton
-                            description="Share screen"
-                            activeDescription="Stop sharing"
-                        >
-                            <CgScreen />
-                        </IconButton>
-                        <IconButton
-                            description="Invite people"
-                            activable={false}
-                        >
-                            <IoMdPersonAdd />
-                        </IconButton>
-                        <IconButton
-                            description="More options"
-                            activable={false}
-                        >
-                            <RiMore2Fill />
-                        </IconButton>
-                        <li>
-                            <Button className="bg-pink-600 text-sm">
-                                Leave
-                            </Button>
-                        </li>
-                    </ul>
-                </div>
-            )}
         </div>
     );
 }
