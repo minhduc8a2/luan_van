@@ -12,11 +12,13 @@ import WorkspaceListItem from "@/Components/WorkspaceListItem";
 import { IoIosAdd } from "react-icons/io";
 import Form1 from "@/Components/Form1";
 import TextArea from "@/Components/Input/TextArea";
-import { useContext, useEffect, useRef } from "react";
-import PageContext from "@/Contexts/PageContext";
-
+import { useSelector } from "react-redux";
+import { useRef, useEffect } from "react";
+import { setSideBarWidth } from "@/Store/Slices/workspaceProfileSlice";
 export default function SideBar() {
-    const { workspace, workspaces, setSideBarWidth } = useContext(PageContext);
+    const { workspace, workspaces } = useSelector(
+        (state) => state.workspaceProfile
+    );
     const { auth } = usePage().props;
     const { url } = usePage();
     const boxRef = useRef(null);
@@ -106,6 +108,7 @@ export default function SideBar() {
 }
 import { useState } from "react";
 import { useForm } from "@inertiajs/react";
+
 function AddWorkspace() {
     const { data, setData, post, processing, errors, reset } = useForm({
         name: "",

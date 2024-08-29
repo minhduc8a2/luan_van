@@ -1,12 +1,17 @@
 import { usePage, Link } from "@inertiajs/react";
 import Avatar from "@/Components/Avatar";
+import { useDispatch } from "react-redux";
+import { setChannel } from "@/Store/Slices/channelSlice";
 export function DirectChannel({ channel, user }) {
     const { auth } = usePage().props;
-    console.log(user);
+    const dispatch = useDispatch();
+    function changeChannel() {
+        dispatch(setChannel(channel));
+    }
     return (
         <li>
-            <Link
-                href={route("channel.show", channel.id)}
+            <button
+                onClick={changeChannel}
                 className="flex mt-2 items-center justify-start gap-x-2 px-4 "
             >
                 <div className="">
@@ -26,7 +31,7 @@ export function DirectChannel({ channel, user }) {
                         ""
                     )}
                 </div>
-            </Link>
+            </button>
         </li>
     );
 }

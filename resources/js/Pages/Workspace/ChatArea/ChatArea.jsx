@@ -14,16 +14,12 @@ import Message from "./Message";
 
 import { useContext } from "react";
 import PageContext from "@/Contexts/PageContext";
+import { useSelector } from "react-redux";
 
 export default function ChatArea() {
-    const {
-        channelName = "project",
-
-        channel,
-        channelUsers = [],
-        messages = [],
-    } = useContext(PageContext);
-
+    const channel = useSelector((state) => state.channel);
+    const channelUsers = useSelector((state) => state.channelUsers);
+    const messages = useSelector((state) => state.messages);
     const { auth } = usePage().props;
     const otherUser = channelUsers.find((u) => u.id != auth.user.id);
     const messageContainerRef = useRef(null);
@@ -57,6 +53,7 @@ export default function ChatArea() {
             messageContainerRef.current.scrollTop =
                 messageContainerRef.current.scrollHeight;
     }, [localMessages]);
+
     return (
         <div className="bg-background  chat-area-container col-span-3 ">
             <div className="p-4 border-b border-b-white/10">
@@ -66,7 +63,7 @@ export default function ChatArea() {
                             #{" "}
                             {channel.type == "DIRECT"
                                 ? otherUser.name
-                                : channelName}
+                                : channel.name}
                         </div>
                         <FaAngleDown className="text-sm" />
                     </div>
@@ -153,7 +150,9 @@ import Button from "@/Components/Button";
 import IconButton from "@/Components/IconButton";
 function Huddle() {
     const [show, setShow] = useState(false);
-    const { sideBarWidth, channel } = useContext(PageContext);
+    const { sideBarWidth, channel } = useSelector(
+        (state) => state.workspaceProfile
+    );
     const { auth } = usePage().props;
     return (
         <div className=" ">

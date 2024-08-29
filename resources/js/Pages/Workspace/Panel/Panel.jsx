@@ -8,20 +8,25 @@ import { LuPlus } from "react-icons/lu";
 import { Link, usePage } from "@inertiajs/react";
 import { InvitationForm } from "./InvitationForm";
 import { DirectChannel } from "./DirectChannel";
-import { useContext } from "react";
-import PageContext from "@/Contexts/PageContext";
+import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { setChannel } from "@/Store/Slices/channelSlice";
 
 export default function Panel() {
     const { auth } = usePage().props;
+    const dispatch = useDispatch();
+    const currentChannel = useSelector((state) => state.channel);
     const {
         workspace,
         channels = [],
-        channel: currentChannel,
         users,
         directChannels = [],
         selfChannel,
-    } = useContext(PageContext);
-
+    } = useSelector((state) => state.workspaceProfile);
+    function changeChannel(channel) {
+        dispatch(setChannel(channel));
+    }
+  
     return (
         <div className="bg-secondary h-full rounded-l-lg rounded-s-lg ">
             <div className="flex justify-between items-center p-4">
@@ -49,13 +54,11 @@ export default function Panel() {
                             if (channel.type === "PUBLIC")
                                 return (
                                     <li key={channel.id}>
-                                        <Link
-                                            href={route(
-                                                "channel.show",
-                                                channel.id
-                                            )}
-                                            only={["channel", "channelUsers"]}
-                                            className={`grid-item mt-2 px-4  rounded-lg ${
+                                        <button
+                                            onClick={() =>
+                                                changeChannel(channel)
+                                            }
+                                            className={`grid-item mt-2 w-full px-4 block  rounded-lg ${
                                                 channel.id == currentChannel.id
                                                     ? "bg-primary"
                                                     : "hover:bg-white/10"
@@ -65,15 +68,17 @@ export default function Panel() {
                                             <div className="flex items-center">
                                                 {channel.name}
                                             </div>
-                                        </Link>
+                                        </button>
                                     </li>
                                 );
                             else if (channel.type === "PRIVATE")
                                 return (
                                     <li key={channel.id}>
-                                        <Link
-                                            href={`/workspace/${workspace.id}/${channel.id}`}
-                                            className={`grid-item mt-2 px-4 rounded-lg ${
+                                        <button
+                                            onClick={() =>
+                                                changeChannel(channel)
+                                            }
+                                            className={`grid-item mt-2 px-4 w-full rounded-lg ${
                                                 channel.id == currentChannel.id
                                                     ? "bg-primary"
                                                     : "hover:bg-white/10"
@@ -85,7 +90,7 @@ export default function Panel() {
                                             <div className="font-semibold flex items-center leading-7">
                                                 {channel.name}
                                             </div>
-                                        </Link>
+                                        </button>
                                     </li>
                                 );
                             else return "";

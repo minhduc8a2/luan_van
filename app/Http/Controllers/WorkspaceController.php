@@ -4,10 +4,10 @@ namespace App\Http\Controllers;
 
 use Inertia\Inertia;
 use App\Models\Workspace;
-use App\Policies\WorkspacePolicy;
 use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\Builder;
 
-use function PHPSTORM_META\type;
+
 
 class WorkspaceController extends Controller
 {
@@ -61,9 +61,27 @@ class WorkspaceController extends Controller
             abort(403);
         }
 
-        $firstChannel = $workspace->channels()->where('type', 'PUBLIC')->first();
 
-        return redirect(route('channel.show', [$firstChannel->id]));
+
+        $channels = $workspace->channels()->where(function (Builder $query) {
+            return $query->where("type", "=", "PUBLIC")
+                ->orWhere("type", "=", "PRIVATE");
+        })
+            ->get();
+        $directChannels = $workspace->channels()->where("type", "=", "DIRECT")->get();
+        $selfChannel = $workspace->channels()->where("type", "=", "SELF")->where("user_id", "=", $request->user()->id)->first();
+
+        $workspaces = $request->user()->workspaces;
+        $users = $workspace->users;
+
+        return Inertia::render("Workspace/Index", [
+            'workspace' => $workspace,
+            'channels' => $channels,
+            'users' => $users,
+            'workspaces' => $workspaces,
+            "directChannels" => $directChannels->load("users"),
+            'selfChannel' => $selfChannel
+        ]);
     }
 
     /**

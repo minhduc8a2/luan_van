@@ -2,11 +2,10 @@ import React from "react";
 import { IoIosSearch } from "react-icons/io";
 import { IoArrowBack } from "react-icons/io5";
 import { IoArrowForward } from "react-icons/io5";
-import PageContext from "@/Contexts/PageContext";
-import { useContext } from "react";
+import { useSelector } from "react-redux";
 
 export default function HeadBar() {
-    const { workspace } = useContext(PageContext);
+    const { workspace } = useSelector((state) => state.workspaceProfile);
 
     return (
         <div className="flex items-center h-full">
