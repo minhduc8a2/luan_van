@@ -9,8 +9,18 @@ export const huddleSlice = createSlice({
     reducers: {
         toggleHuddle(state, action) {
             if (state.channel) {
-                state.channel = null;
-                state.users = [];
+                if (action.payload?.channel) {
+                    if (action.payload.channel.id == state.channel.id) {
+                        state.channel = null;
+                        state.users = [];
+                    } else {
+                        state.channel = action.payload.channel;
+                        state.users = [action.payload.user];
+                    }
+                } else {
+                    state.channel = null;
+                    state.users = [];
+                }
             } else {
                 state.channel = action.payload.channel;
                 state.users.push(action.payload.user);
@@ -23,7 +33,7 @@ export const huddleSlice = createSlice({
         addManyHuddleUsers(state, action) {
             action.payload.forEach((user) => {
                 if (!state.users.find((u) => u.id === user.id))
-                    state.users.push(action.payload);
+                    state.users.push(user);
             });
         },
         removeHuddleUser(state, action) {

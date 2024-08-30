@@ -25,7 +25,7 @@ export default function IconButton({
                 ))
             }
         >
-            <button
+            <div
                 onClick={() => {
                     setActive((pre) => !pre);
                     onClick();
@@ -38,8 +38,8 @@ export default function IconButton({
                 {((activeIconNode != null && !active) ||
                     activeIconNode == null) &&
                     children}
-                {active &&activable && activeIconNode}
-            </button>
+                {active && activable && activeIconNode}
+            </div>
         </Tooltip>
     );
 }

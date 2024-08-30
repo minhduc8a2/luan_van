@@ -9,7 +9,7 @@ import TipTapEditor from "@/Components/TipTapEditor";
 import { router } from "@inertiajs/react";
 import { useEffect, useRef } from "react";
 import { differenceInSeconds } from "@/helpers/dateTimeHelper";
-import {usePage} from "@inertiajs/react";
+import { usePage } from "@inertiajs/react";
 import Message from "./Message/Message";
 import { setChannelUsers } from "@/Store/Slices/channelUsersSlice";
 import { toggleHuddle } from "@/Store/Slices/huddleSlice";
@@ -20,6 +20,7 @@ export default function ChatArea() {
     const { auth } = usePage().props;
     const dispatch = useDispatch();
     const channel = useSelector((state) => state.channel);
+    const { channel: huddleChannel } = useSelector((state) => state.huddle);
     const channelUsers = useSelector((state) => state.channelUsers);
     const messages = useSelector((state) => state.messages);
     const { show } = useSelector((state) => state.huddle);
@@ -113,12 +114,26 @@ export default function ChatArea() {
                             <button
                                 className={`flex items-center gap-x-1`}
                                 onClick={() => {
-                                    dispatch(
-                                        toggleHuddle({
-                                            channel,
-                                            user: auth.user,
-                                        })
-                                    );
+                                    if (huddleChannel) {
+                                        if (
+                                            confirm(
+                                                "Are you sure you want to switch to other huddle"
+                                            )
+                                        )
+                                            dispatch(
+                                                toggleHuddle({
+                                                    channel,
+                                                    user: auth.user,
+                                                })
+                                            );
+                                    } else {
+                                        dispatch(
+                                            toggleHuddle({
+                                                channel,
+                                                user: auth.user,
+                                            })
+                                        );
+                                    }
                                 }}
                             >
                                 <FiHeadphones className="text-xl" />
