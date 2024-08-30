@@ -6,7 +6,7 @@ export function DirectChannel({ channel, user }) {
     const { auth } = usePage().props;
     const dispatch = useDispatch();
     function changeChannel() {
-        dispatch(setChannel(channel));
+        dispatch(setChannel({ ...channel, name: user.name }));
     }
     return (
         <li>

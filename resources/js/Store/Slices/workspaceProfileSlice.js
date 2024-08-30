@@ -39,6 +39,13 @@ export const workspaceProfileSlice = createSlice({
         setSideBarWidth(state, action) {
             state.sideBarWidth = action.payload;
         },
+
+        setChannels(state, action) {
+            state.channels = action.payload;
+        },
+        setDirectChannels(state, action) {
+            state.directChannels = action.payload;
+        },
     },
 });
 
@@ -49,7 +56,8 @@ export const {
     updateUsersOnlineStatus,
     addJustJoinedUserToWorkspace,
     removeJustLeavedUserToWorkspace,
-    
+    setChannels,
+    setDirectChannels,
 } = workspaceProfileSlice.actions;
 
 export default workspaceProfileSlice.reducer;

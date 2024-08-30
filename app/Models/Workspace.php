@@ -54,7 +54,7 @@ class Workspace extends Model
 
         //create private channels
         foreach ($otherUsers as $id => $name) {
-            $newChannel = $this->channels()->create(['user_id' => $user->id, 'name' => $name, "type" => "DIRECT"]);
+            $newChannel = $this->channels()->create(['user_id' => $user->id, 'name' => $user->id . "_" . $id, "type" => "DIRECT"]);
             $user->channels()->attach($newChannel->id);
             $otherUser = User::find($id);
             if ($otherUser) {

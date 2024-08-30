@@ -21,7 +21,7 @@ class WorkspaceChannel
     public function join(User $user, Workspace $workspace): array|bool
     {
         if ($user->isWorkspaceMember($workspace))
-            return ['id' => $user->id, 'name' => $user->name];
+            return ['id' => $user->id, 'name' => $user->name, 'avatar_url' => $user->avatar_url];
         return false;
     }
 }

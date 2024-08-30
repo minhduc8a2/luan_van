@@ -1,5 +1,5 @@
 import Avatar from "@/Components/Avatar";
-import { usePage } from "@inertiajs/react";
+
 import React from "react";
 import { FaAngleDown } from "react-icons/fa6";
 import { FiHeadphones } from "react-icons/fi";
@@ -9,23 +9,24 @@ import TipTapEditor from "@/Components/TipTapEditor";
 import { router } from "@inertiajs/react";
 import { useEffect, useRef } from "react";
 import { differenceInSeconds } from "@/helpers/dateTimeHelper";
-
+import {usePage} from "@inertiajs/react";
 import Message from "./Message/Message";
 import { setChannelUsers } from "@/Store/Slices/channelUsersSlice";
-import {toggleHuddle } from "@/Store/Slices/huddleSlice";
+import { toggleHuddle } from "@/Store/Slices/huddleSlice";
 import { setMessages, addMessage } from "@/Store/Slices/messagesSlice";
 import { useSelector, useDispatch } from "react-redux";
 
 export default function ChatArea() {
+    const { auth } = usePage().props;
     const dispatch = useDispatch();
     const channel = useSelector((state) => state.channel);
     const channelUsers = useSelector((state) => state.channelUsers);
     const messages = useSelector((state) => state.messages);
     const { show } = useSelector((state) => state.huddle);
-
     const messageContainerRef = useRef(null);
 
     function onSubmit(content, fileObjects) {
+        console.log("submit on channel: ", channel);
         if (content == "<p></p>" && fileObjects.length == 0) return;
         router.post(route("message.store", { channel: channel.id }), {
             content,
@@ -48,6 +49,7 @@ export default function ChatArea() {
         getChannelData();
     }, [channel]);
     useEffect(() => {
+        console.log("Channel: ", channel.name);
         Echo.join(`channels.${channel.id}`)
             .here((users) => {})
             .joining((user) => {
@@ -111,8 +113,12 @@ export default function ChatArea() {
                             <button
                                 className={`flex items-center gap-x-1`}
                                 onClick={() => {
-                                    dispatch(toggleHuddle(channel));
-                                    
+                                    dispatch(
+                                        toggleHuddle({
+                                            channel,
+                                            user: auth.user,
+                                        })
+                                    );
                                 }}
                             >
                                 <FiHeadphones className="text-xl" />
@@ -167,7 +173,7 @@ export default function ChatArea() {
                 })}
             </div>
             <div className="m-6 border border-white/50 pt-4 px-2 rounded-lg">
-                <TipTapEditor onSubmit={onSubmit} />
+                <TipTapEditor onSubmit={(a, b) => onSubmit(a, b)} />
             </div>
         </div>
     );

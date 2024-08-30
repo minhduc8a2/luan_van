@@ -112,9 +112,10 @@ export default function Panel() {
                     </div>
                     <ul>
                         {directChannels.map((directCn) => {
-                            const userId = directCn.users.find(
-                                (user) => user.id != auth.user.id
-                            )?.id;
+                            const userIds = directCn.name.split("_")
+                            const userId = userIds.find(
+                                (id) => id != auth.user.id
+                            );
                             let user;
                             if (userId)
                                 user = users.find((u) => u.id == userId);

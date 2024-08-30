@@ -164,8 +164,11 @@ import { router, usePage } from "@inertiajs/react";
 import { isImage } from "@/helpers/fileHelpers";
 import SquareImage from "./SquareImage";
 import FileItem from "./FileItem";
+import { useCallback } from "react";
+import { useSelector } from "react-redux";
 export default function TipTapEditor({ onSubmit, onFilePicked }) {
     const { auth } = usePage().props;
+    const channel = useSelector((state) => state.channel);
     const serverResponseFileList = useRef([]);
     const [fileList, setFileList] = useState([]);
     const abortControllers = useRef([]);
@@ -186,13 +189,11 @@ export default function TipTapEditor({ onSubmit, onFilePicked }) {
         serverResponseFileList.current = [];
     }
     function submit(editor) {
-        console.log("dmm");
         onSubmit(editor.getHTML(), serverResponseFileList.current);
         editor.commands.clearContent();
         resetState();
         return true;
     }
-
     async function handleFilePicked(e) {
         const files = e.target.files;
 
@@ -285,14 +286,17 @@ export default function TipTapEditor({ onSubmit, onFilePicked }) {
         },
         handleKeyDown: () => {},
     };
-    const editor = useEditor({
-        extensions,
-        content,
-        editorProps,
-        // onUpdate({ editor }) {
-        //     console.log(editor.getJSON());
-        // },
-    });
+    const editor = useEditor(
+        {
+            extensions,
+            content,
+            editorProps,
+            // onUpdate({ editor }) {
+            //     console.log(editor.getJSON());
+            // },
+        },
+        [channel]
+    );
 
     return (
         <div className="w-full">

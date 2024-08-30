@@ -10,20 +10,28 @@ import { useSelector } from "react-redux";
 import { usePage } from "@inertiajs/react";
 import Avatar from "@/Components/Avatar";
 import { useEffect } from "react";
+import {
+    addHuddleUser,
+    removeHuddleUser,
+    addManyHuddleUsers,
+} from "@/Store/Slices/huddleSlice";
+import { useDispatch } from "react-redux";
 export default function Huddle() {
     const { auth } = usePage().props;
-    const { channel } = useSelector((state) => state.huddle);
+    const { channel, users } = useSelector((state) => state.huddle);
     const { sideBarWidth } = useSelector((state) => state.workspaceProfile);
-
+    const dispatch = useDispatch();
     useEffect(() => {
         if (channel)
             Echo.join(`huddles.${channel.id}`)
-                .here((users) => {})
+                .here((users) => {
+                    dispatch(addManyHuddleUsers(users));
+                })
                 .joining((user) => {
-                    console.log(user);
+                    dispatch(addHuddleUser(user));
                 })
                 .leaving((user) => {
-                    console.log("leaved", user);
+                    dispatch(removeHuddleUser(user));
                 })
                 .listen("HuddleEvent", (e) => {
                     // setlocalMessages((pre) => [...pre, e.message]);
@@ -34,7 +42,7 @@ export default function Huddle() {
                 });
 
         return () => {
-            Echo.leave(`huddles.${channel.id}`);
+            if (channel) Echo.leave(`huddles.${channel.id}`);
         };
     }, [channel]);
     if (!channel) return "";
@@ -48,7 +56,9 @@ export default function Huddle() {
                 <MdOutlineZoomOutMap />
             </div>
             <div className="p-4 flex justify-center gap-x-2 bg-white/10 mx-4 rounded-lg">
-                <Avatar src={auth.user.avatar_url} noStatus />
+                {users.map((user) => (
+                    <Avatar key={user.id} src={user.avatar_url} noStatus />
+                ))}
             </div>
             <ul className="flex gap-x-2 items-center p-4 justify-center">
                 <IconButton

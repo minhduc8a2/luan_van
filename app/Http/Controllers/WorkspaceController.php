@@ -84,6 +84,14 @@ class WorkspaceController extends Controller
         ]);
     }
 
+    public function getDirectChannels(Request $request, Workspace $workspace)
+    {
+        if ($request->user()->cannot('view', $workspace)) {
+            abort(403);
+        }
+        $directChannels = $workspace->channels()->where("type", "=", "DIRECT")->get();
+        return $directChannels;
+    }
     /**
      * Show the form for editing the specified resource.
      */
