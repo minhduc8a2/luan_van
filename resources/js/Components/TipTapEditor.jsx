@@ -186,6 +186,7 @@ export default function TipTapEditor({ onSubmit, onFilePicked }) {
         serverResponseFileList.current = [];
     }
     function submit(editor) {
+        console.log("dmm");
         onSubmit(editor.getHTML(), serverResponseFileList.current);
         editor.commands.clearContent();
         resetState();

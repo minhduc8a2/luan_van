@@ -7,12 +7,12 @@ import { CgFileDocument } from "react-icons/cg";
 import { FaPlus } from "react-icons/fa6";
 import TipTapEditor from "@/Components/TipTapEditor";
 import { router } from "@inertiajs/react";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { differenceInSeconds } from "@/helpers/dateTimeHelper";
 
 import Message from "./Message/Message";
 import { setChannelUsers } from "@/Store/Slices/channelUsersSlice";
-import { toggleHuddle } from "@/Store/Slices/huddleSlice";
+import {toggleHuddle } from "@/Store/Slices/huddleSlice";
 import { setMessages, addMessage } from "@/Store/Slices/messagesSlice";
 import { useSelector, useDispatch } from "react-redux";
 
@@ -110,7 +110,10 @@ export default function ChatArea() {
                         >
                             <button
                                 className={`flex items-center gap-x-1`}
-                                onClick={() => dispatch(toggleHuddle())}
+                                onClick={() => {
+                                    dispatch(toggleHuddle(channel));
+                                    
+                                }}
                             >
                                 <FiHeadphones className="text-xl" />
                                 <div className="text-sm ">Huddle</div>

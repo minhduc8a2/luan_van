@@ -15,6 +15,7 @@ import { useState } from "react";
 import { usePage } from "@inertiajs/react";
 import FileItem from "@/Components/FileItem";
 import DocumentAttachment from "./DocumentAttachment";
+import Video from "@/Components/Video";
 
 export default function Message({ message, user, hasChanged, index }) {
     const attachments = message.attachments || [];
@@ -126,24 +127,39 @@ export default function Message({ message, user, hasChanged, index }) {
                     </div>
                 )}
                 {videoAttachments.length != 0 && (
-                    <div className="flex gap-x-4 flex-wrap mt-4">
-                        {videoAttachments.map((attachment) => {
-                            return (
-                                <div
-                                    className="h-64"
-                                    key={"attachment_" + attachment.id}
-                                >
-                                    <video
-                                        controls
-                                        muted
-                                        src={attachment.url}
-                                        alt=""
-                                        className="max-h-full rounded-lg"
-                                    />
-                                </div>
-                            );
-                        })}
-                    </div>
+                    <PhotoProvider>
+                        <div className="flex gap-x-4 flex-wrap mt-4">
+                            {videoAttachments.map((attachment) => {
+                                return (
+                                    <PhotoView
+                                        key={"attachment_" + attachment.id}
+                                        width={window.innerWidth}
+                                        height={window.innerHeight}
+                                        render={({ scale, attrs }) => {
+                                            return (
+                                                <div {...attrs}>
+                                                    <Video
+                                                        autoPlay
+                                                        controls
+                                                        muted
+                                                        src={attachment.url}
+                                                        className="h-full mx-auto rounded-lg"
+                                                    />
+                                                </div>
+                                            );
+                                        }}
+                                    >
+                                        <Video
+                                            controls
+                                            muted
+                                            src={attachment.url}
+                                            className="h-64 rounded-lg  "
+                                        />
+                                    </PhotoView>
+                                );
+                            })}
+                        </div>
+                    </PhotoProvider>
                 )}
                 {documentAttachments.length != 0 && (
                     <div className="flex gap-x-4 flex-wrap mt-4">

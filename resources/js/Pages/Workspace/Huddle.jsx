@@ -12,12 +12,11 @@ import Avatar from "@/Components/Avatar";
 import { useEffect } from "react";
 export default function Huddle() {
     const { auth } = usePage().props;
-    const { show } = useSelector((state) => state.huddle);
+    const { channel } = useSelector((state) => state.huddle);
     const { sideBarWidth } = useSelector((state) => state.workspaceProfile);
-    const channel = useSelector((state) => state.channel);
 
     useEffect(() => {
-        if (show)
+        if (channel)
             Echo.join(`huddles.${channel.id}`)
                 .here((users) => {})
                 .joining((user) => {
@@ -33,12 +32,12 @@ export default function Huddle() {
                 .error((error) => {
                     console.error(error);
                 });
-        else Echo.leave(`huddles.${channel.id}`);
+
         return () => {
             Echo.leave(`huddles.${channel.id}`);
         };
-    }, [show]);
-    if (!show) return "";
+    }, [channel]);
+    if (!channel) return "";
     return (
         <div
             className="bg-primary-light w-96  text-white/85  fixed bottom-12 rounded-xl"
