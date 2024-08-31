@@ -26,30 +26,75 @@ import Peer from "simple-peer";
 import { useDispatch } from "react-redux";
 import {
     getConnectedDevices,
-    openCamera,
-    stopStream,
+    getAudioStream,
+    getVideoStream,
+    checkDeviceInUse,
 } from "@/helpers/mediaHelper";
 
 export default function Huddle() {
     const { auth } = usePage().props;
+    const [refresh, setRefresh] = useState(0);
+    const [enableAudio, setEnableAudio] = useState(true);
     const joinObject = useRef(null);
     const userVideoRef = useRef(null);
+    const userAudioRef = useRef(null);
+    const currentStreamRef = useRef(null);
     const [cameraDevices, setCameraDevices] = useState([]);
     const [audioDevices, setAudioDevices] = useState([]);
-    const currentCamera = useRef(null);
-    const currentAudio = useRef(null);
+    const currentVideoRef = useRef(null);
+    const currentAudioRef = useRef(null);
     const [showUserVideo, setShowUserVideo] = useState(false);
     const { channel, users } = useSelector((state) => state.huddle);
     const { sideBarWidth } = useSelector((state) => state.workspaceProfile);
     const dispatch = useDispatch();
-
-    function initStream() {
-        openCamera(currentCamera.current?.deviceId, 500, 500).then((stream) => {
-            userVideoRef.current.srcObject = stream;
-            console.log("open stream");
-        });
+    function shouldRerender() {
+        setRefresh(refresh + 1);
     }
+    function addTrackToStream(type) {
+        if (type == "audio") {
+            getAudioStream(currentAudioRef.current?.deviceId).then((stream) => {
+                const audioTrack = stream.getAudioTracks()[0];
+                currentStreamRef.current.addTrack(audioTrack);
+                shouldRerender();
+            });
+        } else if (type == "video") {
+            getVideoStream(currentVideoRef.current?.deviceId, 500, 500).then(
+                (stream) => {
+                    const videoTrack = stream.getVideoTracks()[0];
+                    currentStreamRef.current.addTrack(videoTrack);
+                    //add stream to user video elements
+                    userVideoRef.current.srcObject = currentStreamRef.current;
+                    shouldRerender();
+                }
+            );
+        }
+    }
+    function removeTrackTFromStream(type) {
+        if (type == "audio") {
+            const audioTracks = currentStreamRef.current.getAudioTracks();
+            audioTracks.forEach((track) => {
+                currentStreamRef.current.removeTrack(track);
+                track.stop();
+            });
+            shouldRerender();
+        } else if (type == "video") {
+            const videoTracks = currentStreamRef.current.getVideoTracks();
+            videoTracks.forEach((track) => {
+                currentStreamRef.current.removeTrack(track);
+                track.stop();
+            });
+            shouldRerender();
+        }
+    }
+    useEffect(() => {
+        if (!channel) return;
+        getAudioStream(currentAudioRef.current?.deviceId).then((stream) => {
+            currentStreamRef.current = stream;
+            userAudioRef.current.srcObject = currentStreamRef.current;
 
+            shouldRerender();
+        });
+    }, [channel]);
     useEffect(() => {
         if (!channel) return;
         async function getMediaDevices() {
@@ -105,7 +150,9 @@ export default function Huddle() {
                 {users.map((user) => (
                     <Avatar key={user.id} src={user.avatar_url} noStatus />
                 ))}
-
+                {enableAudio && !showUserVideo && (
+                    <audio ref={userAudioRef}></audio>
+                )}
                 {showUserVideo && (
                     <video
                         ref={userVideoRef}
@@ -119,6 +166,17 @@ export default function Huddle() {
                 <IconButton
                     description="Mute mic"
                     activeDescription="Unmute mic"
+                    initActiveState={true}
+                    onClick={() => {
+                        setEnableAudio((pre) => {
+                            return !pre;
+                        });
+                        if (!enableAudio) {
+                            addTrackToStream("audio");
+                        } else {
+                            removeTrackTFromStream("audio");
+                        }
+                    }}
                 >
                     <GrMicrophone />
                 </IconButton>
@@ -126,10 +184,11 @@ export default function Huddle() {
                     description="Turn on video"
                     activeDescription="Turn off video"
                     onClick={() => {
-                        setShowUserVideo((pre) => !pre);
-                        if (userVideoRef.current?.srcObject)
-                            stopStream(userVideoRef.current.srcObject);
-                        if (!showUserVideo) initStream();
+                        setShowUserVideo((pre) => {
+                            return !pre;
+                        });
+                        if (!showUserVideo) addTrackToStream("video");
+                        else removeTrackTFromStream("video");
                     }}
                 >
                     <PiVideoCameraSlash />
@@ -154,16 +213,56 @@ export default function Huddle() {
                         </IconButton>
                     </PopoverButton>
                     <PopoverPanel anchor="bottom start">
-                        <div className="flex flex-col py-2 bg-background rounded-lg text-white/85 mb-4 min-w-60 max-w-80 border border-white/15">
+                        <div className="flex flex-col py-2 bg-background rounded-lg text-white/85 mb-4 min-w-60 max-w-80 border border-white/15 ">
+                            <h5 className="text-lg px-4 font-bold">
+                                Audio devices
+                            </h5>
+                            {audioDevices.map((au) => (
+                                <CloseButton
+                                    className="px-6 py-2 hover:bg-white/10 text-left text-sm"
+                                    key={au.deviceId}
+                                    onClick={() => {
+                                        currentAudioRef.current = au;
+                                        removeTrackTFromStream("audio");
+                                        addTrackToStream("audio");
+                                    }}
+                                >
+                                    {au.label}
+                                    {checkDeviceInUse(
+                                        "audio",
+                                        currentStreamRef.current,
+                                        au.deviceId
+                                    ) && (
+                                        <span className="font-bold text-cyan-400">
+                                            {" - In use"}
+                                        </span>
+                                    )}
+                                </CloseButton>
+                            ))}
+                            <hr className="my-2 opacity-15" />
+                            <h5 className="text-lg px-4 font-bold">
+                                Video devices
+                            </h5>
                             {cameraDevices.map((cam) => (
                                 <CloseButton
-                                    className="px-4 py-2 hover:bg-white/10 text-left"
+                                    className="px-6 py-2 hover:bg-white/10 text-left text-sm"
                                     key={cam.deviceId}
                                     onClick={() => {
-                                        currentCamera.current = cam;
+                                        currentVideoRef.current = cam;
+                                        removeTrackTFromStream("video");
+                                        addTrackToStream("video");
                                     }}
                                 >
                                     {cam.label}
+                                    {checkDeviceInUse(
+                                        "video",
+                                        currentStreamRef.current,
+                                        cam.deviceId
+                                    ) && (
+                                        <span className="font-bold text-cyan-400">
+                                            {" - In use"}
+                                        </span>
+                                    )}
                                 </CloseButton>
                             ))}
                         </div>
@@ -173,7 +272,11 @@ export default function Huddle() {
                 <li>
                     <Button
                         className="bg-pink-600 text-sm"
-                        onClick={() => dispatch(toggleHuddle())}
+                        onClick={() => {
+                            removeTrackTFromStream("video");
+                            removeTrackTFromStream("audio");
+                            dispatch(toggleHuddle());
+                        }}
                     >
                         Leave
                     </Button>

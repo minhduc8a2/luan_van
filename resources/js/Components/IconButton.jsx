@@ -10,9 +10,10 @@ export default function IconButton({
     description = "",
     activeDescription = "",
     activable = true,
+    initActiveState=false,
     ...props
 }) {
-    const [active, setActive] = useState(false);
+    const [active, setActive] = useState(initActiveState);
 
     return (
         <Tooltip
