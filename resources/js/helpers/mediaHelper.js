@@ -79,3 +79,9 @@ export function checkDeviceInUse(type, stream, deviceId) {
         return result;
     }
 }
+export function streamHasVideoTracks(stream) {
+    return stream.getVideoTracks().length > 0;
+}
+export function streamHasAudioTracks(stream) {
+    return stream.getAudioTracks().length > 0;
+}

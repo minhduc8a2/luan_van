@@ -29,6 +29,8 @@ import {
     getAudioStream,
     getVideoStream,
     checkDeviceInUse,
+    streamHasVideoTracks,
+    streamHasAudioTracks,
 } from "@/helpers/mediaHelper";
 
 export default function Huddle() {
@@ -36,26 +38,29 @@ export default function Huddle() {
     const [refresh, setRefresh] = useState(0);
     const [enableAudio, setEnableAudio] = useState(true);
     const joinObject = useRef(null);
-    const userVideoRef = useRef(null);
-    const userAudioRef = useRef(null);
+
     const currentStreamRef = useRef(null);
     const [cameraDevices, setCameraDevices] = useState([]);
     const [audioDevices, setAudioDevices] = useState([]);
     const currentVideoRef = useRef(null);
     const currentAudioRef = useRef(null);
+    const peersRef = useRef(new Map());
+    const otherUserStreams = useRef(new Map());
     const [showUserVideo, setShowUserVideo] = useState(false);
     const { channel, users } = useSelector((state) => state.huddle);
     const { sideBarWidth } = useSelector((state) => state.workspaceProfile);
     const dispatch = useDispatch();
     function shouldRerender() {
-        setRefresh(refresh + 1);
+        setRefresh((pre) => pre + 1);
     }
     function addTrackToStream(type) {
         if (type == "audio") {
             getAudioStream(currentAudioRef.current?.deviceId).then((stream) => {
                 const audioTrack = stream.getAudioTracks()[0];
                 currentStreamRef.current.addTrack(audioTrack);
-                shouldRerender();
+                peersRef.current.forEach((value, key) => {
+                    value.addTrack(audioTrack, currentStreamRef.current);
+                });
             });
         } else if (type == "video") {
             getVideoStream(currentVideoRef.current?.deviceId, 500, 500).then(
@@ -63,8 +68,9 @@ export default function Huddle() {
                     const videoTrack = stream.getVideoTracks()[0];
                     currentStreamRef.current.addTrack(videoTrack);
                     //add stream to user video elements
-                    userVideoRef.current.srcObject = currentStreamRef.current;
-                    shouldRerender();
+                    peersRef.current.forEach((value, key) => {
+                        value.addTrack(videoTrack, currentStreamRef.current);
+                    });
                 }
             );
         }
@@ -76,25 +82,21 @@ export default function Huddle() {
                 currentStreamRef.current.removeTrack(track);
                 track.stop();
             });
-            shouldRerender();
+            peersRef.current.forEach((value, key) => {
+                value.send({ type: "removeAudioTrack" });
+            });
         } else if (type == "video") {
             const videoTracks = currentStreamRef.current.getVideoTracks();
             videoTracks.forEach((track) => {
                 currentStreamRef.current.removeTrack(track);
                 track.stop();
             });
-            shouldRerender();
+            peersRef.current.forEach((value, key) => {
+                value.send({ type: "removeVideoTrack" });
+            });
         }
     }
-    useEffect(() => {
-        if (!channel) return;
-        getAudioStream(currentAudioRef.current?.deviceId).then((stream) => {
-            currentStreamRef.current = stream;
-            userAudioRef.current.srcObject = currentStreamRef.current;
 
-            shouldRerender();
-        });
-    }, [channel]);
     useEffect(() => {
         if (!channel) return;
         async function getMediaDevices() {
@@ -107,35 +109,101 @@ export default function Huddle() {
         // navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
         //     userVideoRef.current.srcObject = stream;
         // });
-    }, [channel]);
+    }, [channel?.id]);
+    function addPeer(user, initiator) {
+        var peer = new Peer({
+            initiator,
+            stream: currentStreamRef.current,
+        });
+        peer.on("signal", (data) => {
+            joinObject.current.whisper("signal." + user.id, {
+                fromUserId: auth.user.id,
+                signal: data,
+            });
+        });
+        peer.on("connect", () => {
+            console.log("CONNECT");
+        });
+
+        peer.on("stream", (stream) => {
+            otherUserStreams.current.set(user.id, stream);
+            console.log("Received stream." + user.id);
+            shouldRerender();
+        });
+        peer.on("track", (track, stream) => {
+            otherUserStreams.current.set(user.id, stream);
+            console.log("Received track." + user.id + " - type: " + track.kind);
+
+            shouldRerender();
+        });
+        peer.on("data", (data) => {
+            if (data.type) {
+                const tracks =
+                    data.type == "removeAudioTrack"
+                        ? otherUserStreams.current.get(user.id).getAudioTracks()
+                        : otherUserStreams.current
+                              .get(user.id)
+                              .getVideoTracks();
+                tracks.forEach((track) => {
+                    otherUserStreams.current.get(user.id).removeTrack(track);
+                    track.stop();
+                });
+                shouldRerender();
+            }
+        });
+        peer.on("close", () => {
+            peersRef.current.get(user.id)?.destroy();
+            peersRef.current.delete(user.id);
+            otherUserStreams.current.delete(user.id);
+            shouldRerender();
+        });
+        peersRef.current.set(user.id, peer);
+    }
     useEffect(() => {
         if (!channel) return;
-        joinObject.current = Echo.join(`huddles.${channel.id}`);
-        joinObject.current
-            .here((users) => {
-                dispatch(addManyHuddleUsers(users));
-            })
-            .joining((user) => {
-                dispatch(addHuddleUser(user));
-            })
-            .leaving((user) => {
-                dispatch(removeHuddleUser(user));
-            })
-            .listen("HuddleEvent", (e) => {
-                // setlocalMessages((pre) => [...pre, e.message]);
-                console.log(e);
-            })
-            .error((error) => {
-                console.error(error);
-            });
+        getAudioStream(currentAudioRef.current?.deviceId).then((stream) => {
+            currentStreamRef.current = stream;
+            //
+            joinObject.current = Echo.join(`huddles.${channel.id}`);
+            joinObject.current.listenForWhisper(
+                "signal." + auth.user.id,
+                (e) => {
+                    const peer = peersRef.current.get(e.fromUserId);
+                    peer.signal(e.signal);
+                }
+            );
+            joinObject.current
+                .here((users) => {
+                    dispatch(addManyHuddleUsers(users));
+                    users
+                        .filter((user) => user.id != auth.user.id)
+                        .forEach((user) => {
+                            addPeer(user, true);
+                        });
+                })
+                .joining((user) => {
+                    dispatch(addHuddleUser(user));
+                    addPeer(user, false);
+                })
+                .leaving((user) => {
+                    dispatch(removeHuddleUser(user));
+                })
+                .listen("HuddleEvent", (e) => {
+                    // setlocalMessages((pre) => [...pre, e.message]);
+                })
+                .error((error) => {
+                    console.error(error);
+                });
+        });
 
         return () => {
             if (channel) {
                 Echo.leave(`huddles.${channel.id}`);
+
                 joinObject.current = null;
             }
         };
-    }, [channel]);
+    }, [channel?.id]);
     if (!channel) return "";
     return (
         <div
@@ -146,20 +214,62 @@ export default function Huddle() {
                 <div className="text-sm">{channel.name}</div>
                 <MdOutlineZoomOutMap />
             </div>
-            <div className="p-4 flex justify-center gap-x-2 bg-white/10 mx-4 rounded-lg">
+            <div className="p-4 flex justify-center gap-x-2 bg-white/10 mx-4 rounded-lg flex-wrap">
                 {users.map((user) => (
                     <Avatar key={user.id} src={user.avatar_url} noStatus />
                 ))}
-                {enableAudio && !showUserVideo && (
-                    <audio ref={userAudioRef}></audio>
-                )}
+
                 {showUserVideo && (
                     <video
-                        ref={userVideoRef}
+                        ref={(videoElement) => {
+                            if (videoElement) {
+                                videoElement.srcObject =
+                                    currentStreamRef.current;
+                            }
+                        }}
                         autoPlay
                         muted
-                        className="w-24"
+                        className="w-48 rounded-lg"
                     ></video>
+                )}
+                {Array.from(otherUserStreams.current.entries()).map(
+                    ([userId, stream]) => {
+                        if (
+                            streamHasAudioTracks(stream) &&
+                            !streamHasVideoTracks(stream)
+                        )
+                            return (
+                                <audio
+                                    key={userId}
+                                    ref={(videoElement) => {
+                                        if (videoElement) {
+                                            videoElement.srcObject = stream;
+                                        }
+                                    }}
+                                    autoPlay
+                                    hidden
+                                ></audio>
+                            );
+                        else return "";
+                    }
+                )}
+                {Array.from(otherUserStreams.current.entries()).map(
+                    ([userId, stream]) => {
+                        if (streamHasVideoTracks(stream))
+                            return (
+                                <video
+                                    key={userId}
+                                    ref={(videoElement) => {
+                                        if (videoElement) {
+                                            videoElement.srcObject = stream;
+                                        }
+                                    }}
+                                    autoPlay
+                                    className="w-48 rounded-lg"
+                                ></video>
+                            );
+                        else return "";
+                    }
                 )}
             </div>
             <ul className="flex gap-x-2 items-center p-4 justify-center">
@@ -223,8 +333,6 @@ export default function Huddle() {
                                     key={au.deviceId}
                                     onClick={() => {
                                         currentAudioRef.current = au;
-                                        removeTrackTFromStream("audio");
-                                        addTrackToStream("audio");
                                     }}
                                 >
                                     {au.label}
@@ -249,8 +357,6 @@ export default function Huddle() {
                                     key={cam.deviceId}
                                     onClick={() => {
                                         currentVideoRef.current = cam;
-                                        removeTrackTFromStream("video");
-                                        addTrackToStream("video");
                                     }}
                                 >
                                     {cam.label}
