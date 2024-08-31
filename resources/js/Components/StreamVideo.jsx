@@ -1,9 +1,12 @@
 import React, { forwardRef } from "react";
 
-const StreamVideo = forwardRef(function ({ className = "", ...props }, ref) {
+const StreamVideo = forwardRef(function (
+    { size = "w-48 h-48", className = "", ...props },
+    ref
+) {
     return (
         <div
-            className={`w-48 rounded-lg aspect-square overflow-hidden relative ${className}`}
+            className={`${size} rounded-lg  overflow-hidden relative ${className}`}
         >
             <video
                 ref={ref}

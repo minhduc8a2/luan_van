@@ -28,9 +28,11 @@ import {
     getConnectedDevices,
     getAudioStream,
     getVideoStream,
+    getScreenStream,
     checkDeviceInUse,
     streamHasVideoTracks,
     streamHasAudioTracks,
+    removeVideoTracks,
 } from "@/helpers/mediaHelper";
 import SquareImage from "@/Components/SquareImage";
 import StreamVideo from "@/Components/StreamVideo";
@@ -49,12 +51,14 @@ export default function Huddle() {
     const peersRef = useRef(new Map());
     const otherUserStreams = useRef(new Map());
     const [showUserVideo, setShowUserVideo] = useState(false);
+    const [showShareScreen, setShowShareScreen] = useState(false);
     const { channel, users } = useSelector((state) => state.huddle);
     const { sideBarWidth } = useSelector((state) => state.workspaceProfile);
     const dispatch = useDispatch();
     function shouldRerender() {
         setRefresh((pre) => pre + 1);
     }
+
     const hasAnyVideoTrack = useMemo(
         function () {
             for (const [key, stream] of otherUserStreams.current) {
@@ -65,29 +69,74 @@ export default function Huddle() {
             if (streamHasVideoTracks(currentStreamRef.current)) return true;
             return false;
         },
-        [refresh, showUserVideo]
+        [refresh]
     );
 
     function addTrackToStream(type) {
         if (type == "audio") {
-            getAudioStream(currentAudioRef.current?.deviceId).then((stream) => {
-                const audioTrack = stream.getAudioTracks()[0];
-                currentStreamRef.current.addTrack(audioTrack);
-                peersRef.current.forEach((value, key) => {
-                    value.addTrack(audioTrack, currentStreamRef.current);
-                });
-            });
-        } else if (type == "video") {
-            getVideoStream(currentVideoRef.current?.deviceId, 500, 500).then(
-                (stream) => {
-                    const videoTrack = stream.getVideoTracks()[0];
-                    currentStreamRef.current.addTrack(videoTrack);
-                    //add stream to user video elements
+            getAudioStream(currentAudioRef.current?.deviceId)
+                .then((stream) => {
+                    const audioTrack = stream.getAudioTracks()[0];
+                    currentStreamRef.current.addTrack(audioTrack);
                     peersRef.current.forEach((value, key) => {
-                        value.addTrack(videoTrack, currentStreamRef.current);
+                        value.addTrack(audioTrack, currentStreamRef.current);
                     });
-                }
-            );
+                })
+                .catch((error) => {
+                    setEnableAudio(false);
+                    console.error(error);
+                });
+        } else if (type == "video") {
+            getVideoStream(currentVideoRef.current?.deviceId, 500, 500)
+                .then((stream) => {
+                    const videoTrack = stream.getVideoTracks()[0];
+                    shouldRerender();
+                    //add stream to user video elements
+                    peersRef.current.forEach((peer, key) => {
+                        const oldTracks =
+                            currentStreamRef.current.getVideoTracks();
+                        if (oldTracks.length > 0) {
+                            peer.replaceTrack(
+                                oldTracks[0],
+                                videoTrack,
+                                currentStreamRef.current
+                            );
+                        } else
+                            peer.addTrack(videoTrack, currentStreamRef.current);
+                    });
+                    removeVideoTracks(currentStreamRef.current);
+                    currentStreamRef.current.addTrack(videoTrack);
+                })
+                .catch((error) => {
+                    alert(error.message);
+                    setShowUserVideo(false);
+                });
+        } else if (type == "screen") {
+            getScreenStream()
+                .then((stream) => {
+                    const videoTrack = stream.getVideoTracks()[0];
+
+                    shouldRerender();
+                    //add stream to user video elements
+                    peersRef.current.forEach((peer, key) => {
+                        const oldTracks =
+                            currentStreamRef.current.getVideoTracks();
+                        if (oldTracks.length > 0) {
+                            peer.replaceTrack(
+                                oldTracks[0],
+                                videoTrack,
+                                currentStreamRef.current
+                            );
+                        } else
+                            peer.addTrack(videoTrack, currentStreamRef.current);
+                    });
+                    removeVideoTracks(currentStreamRef.current);
+                    currentStreamRef.current.addTrack(videoTrack);
+                })
+                .catch((error) => {
+                    alert(error.message);
+                    setShowShareScreen(false);
+                });
         }
     }
     function removeTrackTFromStream(type) {
@@ -97,18 +146,37 @@ export default function Huddle() {
                 currentStreamRef.current.removeTrack(track);
                 track.stop();
             });
-            peersRef.current.forEach((value, key) => {
-                value.send({ type: "removeAudioTrack" });
+            peersRef.current.forEach((peer, key) => {
+                peer.send(JSON.stringify({ type: "removeAudioTrack" }));
             });
         } else if (type == "video") {
-            const videoTracks = currentStreamRef.current.getVideoTracks();
-            videoTracks.forEach((track) => {
-                currentStreamRef.current.removeTrack(track);
-                track.stop();
-            });
-            peersRef.current.forEach((value, key) => {
-                value.send({ type: "removeVideoTrack" });
-            });
+            if (showShareScreen) {
+                addTrackToStream("screen");
+            } else {
+                const videoTracks = currentStreamRef.current.getVideoTracks();
+                videoTracks.forEach((track) => {
+                    currentStreamRef.current.removeTrack(track);
+                    track.stop();
+                });
+                peersRef.current.forEach((peer, key) => {
+                    peer.send(JSON.stringify({ type: "removeVideoTrack" }));
+                });
+                shouldRerender();
+            }
+        } else if (type == "screen") {
+            if (showShareScreen) {
+                addTrackToStream("video");
+            } else {
+                const videoTracks = currentStreamRef.current.getVideoTracks();
+                videoTracks.forEach((track) => {
+                    currentStreamRef.current.removeTrack(track);
+                    track.stop();
+                });
+                peersRef.current.forEach((peer, key) => {
+                    peer.send(JSON.stringify({ type: "removeVideoTrack" }));
+                });
+                shouldRerender();
+            }
         }
     }
 
@@ -152,18 +220,29 @@ export default function Huddle() {
             shouldRerender();
         });
         peer.on("data", (data) => {
-            if (data.type) {
-                const tracks =
-                    data.type == "removeAudioTrack"
-                        ? otherUserStreams.current.get(user.id).getAudioTracks()
-                        : otherUserStreams.current
-                              .get(user.id)
-                              .getVideoTracks();
-                tracks.forEach((track) => {
-                    otherUserStreams.current.get(user.id).removeTrack(track);
-                    track.stop();
-                });
-                shouldRerender();
+            const jsonString = new TextDecoder().decode(data);
+
+            try {
+                data = JSON.parse(jsonString);
+                if (data.type) {
+                    const tracks =
+                        data.type == "removeAudioTrack"
+                            ? otherUserStreams.current
+                                  .get(user.id)
+                                  .getAudioTracks()
+                            : otherUserStreams.current
+                                  .get(user.id)
+                                  .getVideoTracks();
+                    tracks.forEach((track) => {
+                        otherUserStreams.current
+                            .get(user.id)
+                            .removeTrack(track);
+                        track.stop();
+                    });
+                    shouldRerender();
+                }
+            } catch (error) {
+                console.error(error);
             }
         });
         peer.on("close", () => {
@@ -230,9 +309,9 @@ export default function Huddle() {
                 <MdOutlineZoomOutMap />
             </div>
             <div className="p-4 flex justify-center gap-2 bg-white/10 mx-4 rounded-lg flex-wrap">
-                {showUserVideo && (
+                {(showUserVideo || showShareScreen) && (
                     <StreamVideo
-                        className="w-36"
+                        size="w-36 h-36"
                         ref={(videoElement) => {
                             if (videoElement) {
                                 videoElement.srcObject =
@@ -269,7 +348,7 @@ export default function Huddle() {
                         if (streamHasVideoTracks(stream))
                             return (
                                 <StreamVideo
-                                    className="w-36"
+                                    size="w-36 h-36"
                                     key={userId}
                                     ref={(videoElement) => {
                                         if (videoElement) {
@@ -284,14 +363,18 @@ export default function Huddle() {
                 )}
                 {users.map((user) => {
                     if (user.id == auth.user.id)
-                        if (showUserVideo) return "";
+                        if (showUserVideo || showShareScreen) return "";
                         else
                             return (
                                 <SquareImage
                                     key={user.id}
                                     url={user.avatar_url}
                                     removable={false}
-                                    size={hasAnyVideoTrack ? "w-36" : "w-10"}
+                                    size={
+                                        hasAnyVideoTrack
+                                            ? "w-36 h-36"
+                                            : "w-10 h-10"
+                                    }
                                 />
                             );
                     return (
@@ -302,7 +385,9 @@ export default function Huddle() {
                                 key={user.id}
                                 url={user.avatar_url}
                                 removable={false}
-                                size={hasAnyVideoTrack ? "w-36" : "w-10"}
+                                size={
+                                    hasAnyVideoTrack ? "w-36 h-36" : "w-10 h-10"
+                                }
                             />
                         )
                     );
@@ -329,6 +414,8 @@ export default function Huddle() {
                 <IconButton
                     description="Turn on video"
                     activeDescription="Turn off video"
+                    selfActive={false}
+                    show={showUserVideo}
                     onClick={() => {
                         setShowUserVideo((pre) => {
                             return !pre;
@@ -342,6 +429,15 @@ export default function Huddle() {
                 <IconButton
                     description="Share screen"
                     activeDescription="Stop sharing"
+                    selfActive={false}
+                    show={showShareScreen}
+                    onClick={() => {
+                        setShowShareScreen((pre) => {
+                            return !pre;
+                        });
+                        if (!showShareScreen) addTrackToStream("screen");
+                        else removeTrackTFromStream("screen");
+                    }}
                 >
                     <CgScreen />
                 </IconButton>

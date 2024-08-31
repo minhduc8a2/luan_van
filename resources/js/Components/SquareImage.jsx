@@ -4,7 +4,7 @@ import { IoMdCloseCircle } from "react-icons/io";
 import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
 
 export default function SquareImage({
-    size = "h-20",
+    size = "h-20 w-20",
     url,
     removable = false,
     remove = () => {},
@@ -30,7 +30,7 @@ export default function SquareImage({
                 <OverlayLoadingSpinner />
             )}
             <div
-                className={` aspect-square relative overflow-hidden flex justify-center items-center rounded-lg group-hover:brightness-50 ${
+                className={`  relative overflow-hidden flex justify-center items-center rounded-lg group-hover:brightness-50 ${
                     !uploaded && uploadable && percentage < 100
                         ? "brightness-50"
                         : ""

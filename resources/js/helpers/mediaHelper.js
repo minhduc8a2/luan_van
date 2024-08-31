@@ -13,6 +13,13 @@ export async function getVideoStream(cameraId, minWidth, minHeight) {
 
     return navigator.mediaDevices.getUserMedia(constraints);
 }
+export async function getScreenStream() {
+    const constraints = {
+        video: true,
+    };
+
+    return navigator.mediaDevices.getDisplayMedia(constraints);
+}
 export async function getAudioStream(audioId) {
     const constraints = {
         audio: audioId
@@ -86,4 +93,13 @@ export function streamHasVideoTracks(stream) {
 export function streamHasAudioTracks(stream) {
     if (!stream) return false;
     return stream.getAudioTracks().length > 0;
+}
+
+export function removeVideoTracks(stream) {
+    if (!stream) return;
+    const videoTracks = stream.getVideoTracks();
+    videoTracks.forEach((track) => {
+        stream.removeTrack(track);
+        track.stop();
+    });
 }
