@@ -15,7 +15,7 @@ import {
     PopoverPanel,
     CloseButton,
 } from "@headlessui/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
     addHuddleUser,
     removeHuddleUser,
@@ -32,6 +32,8 @@ import {
     streamHasVideoTracks,
     streamHasAudioTracks,
 } from "@/helpers/mediaHelper";
+import SquareImage from "@/Components/SquareImage";
+import StreamVideo from "@/Components/StreamVideo";
 
 export default function Huddle() {
     const { auth } = usePage().props;
@@ -53,6 +55,19 @@ export default function Huddle() {
     function shouldRerender() {
         setRefresh((pre) => pre + 1);
     }
+    const hasAnyVideoTrack = useMemo(
+        function () {
+            for (const [key, stream] of otherUserStreams.current) {
+                if (streamHasVideoTracks(stream)) {
+                    return true;
+                }
+            }
+            if (streamHasVideoTracks(currentStreamRef.current)) return true;
+            return false;
+        },
+        [refresh, showUserVideo]
+    );
+
     function addTrackToStream(type) {
         if (type == "audio") {
             getAudioStream(currentAudioRef.current?.deviceId).then((stream) => {
@@ -214,13 +229,10 @@ export default function Huddle() {
                 <div className="text-sm">{channel.name}</div>
                 <MdOutlineZoomOutMap />
             </div>
-            <div className="p-4 flex justify-center gap-x-2 bg-white/10 mx-4 rounded-lg flex-wrap">
-                {users.map((user) => (
-                    <Avatar key={user.id} src={user.avatar_url} noStatus />
-                ))}
-
+            <div className="p-4 flex justify-center gap-2 bg-white/10 mx-4 rounded-lg flex-wrap">
                 {showUserVideo && (
-                    <video
+                    <StreamVideo
+                        className="w-36"
                         ref={(videoElement) => {
                             if (videoElement) {
                                 videoElement.srcObject =
@@ -229,8 +241,7 @@ export default function Huddle() {
                         }}
                         autoPlay
                         muted
-                        className="w-48 rounded-lg"
-                    ></video>
+                    />
                 )}
                 {Array.from(otherUserStreams.current.entries()).map(
                     ([userId, stream]) => {
@@ -257,7 +268,8 @@ export default function Huddle() {
                     ([userId, stream]) => {
                         if (streamHasVideoTracks(stream))
                             return (
-                                <video
+                                <StreamVideo
+                                    className="w-36"
                                     key={userId}
                                     ref={(videoElement) => {
                                         if (videoElement) {
@@ -265,12 +277,36 @@ export default function Huddle() {
                                         }
                                     }}
                                     autoPlay
-                                    className="w-48 rounded-lg"
-                                ></video>
+                                />
                             );
                         else return "";
                     }
                 )}
+                {users.map((user) => {
+                    if (user.id == auth.user.id)
+                        if (showUserVideo) return "";
+                        else
+                            return (
+                                <SquareImage
+                                    key={user.id}
+                                    url={user.avatar_url}
+                                    removable={false}
+                                    size={hasAnyVideoTrack ? "w-36" : "w-10"}
+                                />
+                            );
+                    return (
+                        !streamHasVideoTracks(
+                            otherUserStreams.current.get(user.id)
+                        ) && (
+                            <SquareImage
+                                key={user.id}
+                                url={user.avatar_url}
+                                removable={false}
+                                size={hasAnyVideoTrack ? "w-36" : "w-10"}
+                            />
+                        )
+                    );
+                })}
             </div>
             <ul className="flex gap-x-2 items-center p-4 justify-center">
                 <IconButton

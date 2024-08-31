@@ -80,8 +80,10 @@ export function checkDeviceInUse(type, stream, deviceId) {
     }
 }
 export function streamHasVideoTracks(stream) {
+    if (!stream) return false;
     return stream.getVideoTracks().length > 0;
 }
 export function streamHasAudioTracks(stream) {
+    if (!stream) return false;
     return stream.getAudioTracks().length > 0;
 }

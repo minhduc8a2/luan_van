@@ -68,7 +68,10 @@ class WorkspaceController extends Controller
                 ->orWhere("type", "=", "PRIVATE");
         })
             ->get();
-        $directChannels = $workspace->channels()->where("type", "=", "DIRECT")->get();
+        $user = $request->user();
+        $directChannels = $workspace->channels()->where("type", "=", "DIRECT")->whereHas('users', function ($query) use ($user) {
+            $query->where('user_id', $user->id);
+        })->get();
         $selfChannel = $workspace->channels()->where("type", "=", "SELF")->where("user_id", "=", $request->user()->id)->first();
 
         $workspaces = $request->user()->workspaces;
@@ -89,7 +92,10 @@ class WorkspaceController extends Controller
         if ($request->user()->cannot('view', $workspace)) {
             abort(403);
         }
-        $directChannels = $workspace->channels()->where("type", "=", "DIRECT")->get();
+        $user = $request->user();
+        $directChannels = $workspace->channels()->where("type", "=", "DIRECT")->whereHas('users', function ($query) use ($user) {
+            $query->where('user_id', $user->id);
+        })->get();
         return $directChannels;
     }
     /**

@@ -12,18 +12,6 @@ export default function SquareImage({
     percentage = 0,
 }) {
     const [uploaded, setUploaded] = useState(false);
-    const [dimensions, setDimensions] = useState(null);
-    const imgRef = useRef(null);
-    useEffect(() => {
-        imgRef.current.src = url;
-        imgRef.current.onload = () => {
-            URL.revokeObjectURL(url);
-            let width = imgRef.current.naturalWidth;
-            let height = imgRef.current.naturalHeight;
-
-            setDimensions({ height, width });
-        };
-    }, []);
 
     useEffect(() => {
         if (percentage == 100) setUploaded(true);
@@ -42,21 +30,16 @@ export default function SquareImage({
                 <OverlayLoadingSpinner />
             )}
             <div
-                className={` aspect-square overflow-hidden flex justify-center items-center rounded-lg group-hover:brightness-50 ${
+                className={` aspect-square relative overflow-hidden flex justify-center items-center rounded-lg group-hover:brightness-50 ${
                     !uploaded && uploadable && percentage < 100
                         ? "brightness-50"
                         : ""
                 }  ${size}`}
             >
                 <img
-                    src=""
+                    src={url}
                     alt=""
-                    ref={imgRef}
-                    className={`  ${dimensions ? "" : "hidden"} ${
-                        dimensions && dimensions.height >= dimensions.width
-                            ? "w-full"
-                            : "h-full"
-                    }`}
+                    className="object-cover w-full h-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
                 />
             </div>
         </div>
