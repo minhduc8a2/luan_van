@@ -1,12 +1,13 @@
 import { usePage, Link } from "@inertiajs/react";
 import Avatar from "@/Components/Avatar";
-import { useDispatch } from "react-redux";
-import { setChannel } from "@/Store/Slices/channelSlice";
+import { router } from "@inertiajs/react";
 export function DirectChannel({ channel, user }) {
     const { auth } = usePage().props;
-    const dispatch = useDispatch();
+
     function changeChannel() {
-        dispatch(setChannel({ ...channel, name: user.name }));
+        router.get(route("channel.show", channel.id), {}, {
+            preserveState: true,
+        });
     }
     return (
         <li>

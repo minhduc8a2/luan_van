@@ -310,7 +310,7 @@ export default function TipTapEditor({ onSubmit, onFilePicked }) {
                     if (isImage(file.type)) {
                         return (
                             <SquareImage
-                                size="h-16"
+                                size="h-16 w-16"
                                 url={URL.createObjectURL(file)}
                                 key={"file_" + file.name}
                                 removable={true}

@@ -1,32 +1,29 @@
-import React from "react";
+import React, { useContext } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { HiOutlinePencilAlt } from "react-icons/hi";
 import { BiMessageRoundedDetail } from "react-icons/bi";
 import { FaCaretDown } from "react-icons/fa";
 import { LuLock } from "react-icons/lu";
 import { LuPlus } from "react-icons/lu";
-import { Link, usePage } from "@inertiajs/react";
+import { Link, router, usePage } from "@inertiajs/react";
 import { InvitationForm } from "./InvitationForm";
 import { DirectChannel } from "./DirectChannel";
-import { useSelector } from "react-redux";
-import { useDispatch } from "react-redux";
-import { setChannel } from "@/Store/Slices/channelSlice";
 
-export default function Panel() {
-    const { auth } = usePage().props;
-    const dispatch = useDispatch();
-    const currentChannel = useSelector((state) => state.channel);
+export default function Panel({}) {
     const {
+        auth,
+        channel: currentChannel,
         workspace,
         channels = [],
         users,
         directChannels = [],
         selfChannel,
-    } = useSelector((state) => state.workspaceProfile);
+    } = usePage().props;
+
     function changeChannel(channel) {
-        dispatch(setChannel(channel));
+        router.get(route("channel.show", channel.id),  {}, { preserveState:true });
     }
-  
+
     return (
         <div className="bg-secondary h-full rounded-l-lg rounded-s-lg ">
             <div className="flex justify-between items-center p-4">
@@ -112,7 +109,7 @@ export default function Panel() {
                     </div>
                     <ul>
                         {directChannels.map((directCn) => {
-                            const userIds = directCn.name.split("_")
+                            const userIds = directCn.name.split("_");
                             const userId = userIds.find(
                                 (id) => id != auth.user.id
                             );

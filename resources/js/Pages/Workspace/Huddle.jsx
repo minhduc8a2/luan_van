@@ -6,24 +6,22 @@ import { IoMdPersonAdd } from "react-icons/io";
 import { RiMore2Fill } from "react-icons/ri";
 import Button from "@/Components/Button";
 import IconButton from "@/Components/IconButton";
-import { useSelector } from "react-redux";
-import { usePage } from "@inertiajs/react";
-import Avatar from "@/Components/Avatar";
+
 import {
     Popover,
     PopoverButton,
     PopoverPanel,
     CloseButton,
 } from "@headlessui/react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
     addHuddleUser,
     removeHuddleUser,
     addManyHuddleUsers,
     toggleHuddle,
-} from "@/Store/Slices/huddleSlice";
+} from "@/Store/huddleSlice";
 import Peer from "simple-peer";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
     getConnectedDevices,
     getAudioStream,
@@ -36,13 +34,15 @@ import {
 } from "@/helpers/mediaHelper";
 import SquareImage from "@/Components/SquareImage";
 import StreamVideo from "@/Components/StreamVideo";
-
+import { usePage } from "@inertiajs/react";
 export default function Huddle() {
     const { auth } = usePage().props;
+    const {channel, users} = useSelector(state=>state.huddle)
+    const { sideBarWidth } = useSelector((state) => state.sideBar);
     const [refresh, setRefresh] = useState(0);
     const [enableAudio, setEnableAudio] = useState(true);
     const joinObject = useRef(null);
-
+    const dispatch = useDispatch();
     const currentStreamRef = useRef(null);
     const [cameraDevices, setCameraDevices] = useState([]);
     const [audioDevices, setAudioDevices] = useState([]);
@@ -52,9 +52,7 @@ export default function Huddle() {
     const otherUserStreams = useRef(new Map());
     const [showUserVideo, setShowUserVideo] = useState(false);
     const [showShareScreen, setShowShareScreen] = useState(false);
-    const { channel, users } = useSelector((state) => state.huddle);
-    const { sideBarWidth } = useSelector((state) => state.workspaceProfile);
-    const dispatch = useDispatch();
+
     function shouldRerender() {
         setRefresh((pre) => pre + 1);
     }

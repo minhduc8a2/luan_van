@@ -3,45 +3,29 @@ import SideBar from "./SideBar";
 import HeadBar from "./HeadBar";
 import Panel from "./Panel/Panel";
 import ChatArea from "./ChatArea/ChatArea";
-
 import { useRef } from "react";
+import Huddle from "./Huddle";
 
-import { setChannel } from "@/Store/Slices/channelSlice";
-import { setWorkspaceProfile } from "@/Store/Slices/workspaceProfileSlice";
 import { makeStore } from "@/Store/store";
 import { Provider } from "react-redux";
-import Event from "./Event";
-import Huddle from "./Huddle";
 export default function Index({
     workspace,
     channels,
     users,
+    channel,
     workspaces,
     directChannels,
     selfChannel,
+    messages,
+    channelUsers,
 }) {
-    const storeRef = useRef(null);
+    const storeRef = useRef();
     if (!storeRef.current) {
+        // Create the store instance the first time this renders
         storeRef.current = makeStore();
-        storeRef.current.dispatch(
-            setChannel(channels.find((channel) => channel.type == "PUBLIC"))
-        );
-        storeRef.current.dispatch(
-            setWorkspaceProfile({
-                workspace,
-                channels,
-                users: users.map((user) => ({ ...user, online: false })),
-                workspaces,
-                directChannels,
-                selfChannel,
-                sideBarWidth: 0,
-            })
-        );
     }
-
     return (
         <Provider store={storeRef.current}>
-            <Event />
             <div className="client-container bg-primary text-white ">
                 <div className="client-headbar ">
                     <HeadBar />

@@ -4,7 +4,7 @@ import { FaRegMessage } from "react-icons/fa6";
 import { PiHouseLineBold, PiHouseLineFill } from "react-icons/pi";
 import { FaRegBell } from "react-icons/fa6";
 import { IoIosMore } from "react-icons/io";
-import { Link, usePage } from "@inertiajs/react";
+import { Link } from "@inertiajs/react";
 import { LuPlus } from "react-icons/lu";
 import Dropdown from "@/Components/Dropdown";
 import WorkspaceAvatar from "@/Components/WorkspaceAvatar";
@@ -12,16 +12,17 @@ import WorkspaceListItem from "@/Components/WorkspaceListItem";
 import { IoIosAdd } from "react-icons/io";
 import Form1 from "@/Components/Form1";
 import TextArea from "@/Components/Input/TextArea";
-import { useDispatch, useSelector } from "react-redux";
 import { useRef, useEffect } from "react";
-import { setSideBarWidth } from "@/Store/Slices/workspaceProfileSlice";
-export default function SideBar() {
-    const { workspace, workspaces } = useSelector(
-        (state) => state.workspaceProfile
-    );
+
+import { useDispatch } from "react-redux";
+import { setSideBarWidth } from "@/Store/sideBarSlice";
+
+import {usePage} from "@inertiajs/react";
+export default function SideBar({}) {
+    const { auth, url, workspace, workspaces  } = usePage().props;
+    
     const dispatch = useDispatch();
-    const { auth } = usePage().props;
-    const { url } = usePage();
+
     const boxRef = useRef(null);
     const itemStyle = "flex flex-col items-center gap-y-2 group";
     useEffect(() => {

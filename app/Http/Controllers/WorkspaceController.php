@@ -57,47 +57,11 @@ class WorkspaceController extends Controller
      */
     public function show(Request $request, Workspace $workspace)
     {
-        if ($request->user()->cannot('view', $workspace)) {
-            abort(403);
-        }
-
-
-
-        $channels = $workspace->channels()->where(function (Builder $query) {
-            return $query->where("type", "=", "PUBLIC")
-                ->orWhere("type", "=", "PRIVATE");
-        })
-            ->get();
-        $user = $request->user();
-        $directChannels = $workspace->channels()->where("type", "=", "DIRECT")->whereHas('users', function ($query) use ($user) {
-            $query->where('user_id', $user->id);
-        })->get();
-        $selfChannel = $workspace->channels()->where("type", "=", "SELF")->where("user_id", "=", $request->user()->id)->first();
-
-        $workspaces = $request->user()->workspaces;
-        $users = $workspace->users;
-
-        return Inertia::render("Workspace/Index", [
-            'workspace' => $workspace,
-            'channels' => $channels,
-            'users' => $users,
-            'workspaces' => $workspaces,
-            "directChannels" => $directChannels->load("users"),
-            'selfChannel' => $selfChannel
-        ]);
+        $firstPublicChannel = $workspace->channels->where('type','=','PUBLIC')->first();
+       return redirect()->route('channel.show',$firstPublicChannel->id);
     }
 
-    public function getDirectChannels(Request $request, Workspace $workspace)
-    {
-        if ($request->user()->cannot('view', $workspace)) {
-            abort(403);
-        }
-        $user = $request->user();
-        $directChannels = $workspace->channels()->where("type", "=", "DIRECT")->whereHas('users', function ($query) use ($user) {
-            $query->where('user_id', $user->id);
-        })->get();
-        return $directChannels;
-    }
+   
     /**
      * Show the form for editing the specified resource.
      */

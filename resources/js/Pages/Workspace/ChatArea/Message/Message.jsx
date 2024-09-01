@@ -12,7 +12,7 @@ import { MdOutlineRotate90DegreesCcw } from "react-icons/md";
 import { IoMdCloudDownload } from "react-icons/io";
 import { useState } from "react";
 
-import { usePage } from "@inertiajs/react";
+
 import FileItem from "@/Components/FileItem";
 import DocumentAttachment from "./DocumentAttachment";
 import Video from "@/Components/Video";

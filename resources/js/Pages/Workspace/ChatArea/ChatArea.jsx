@@ -1,31 +1,34 @@
 import Avatar from "@/Components/Avatar";
 
-import React from "react";
+import React, { useContext } from "react";
 import { FaAngleDown } from "react-icons/fa6";
 import { FiHeadphones } from "react-icons/fi";
 import { CgFileDocument } from "react-icons/cg";
 import { FaPlus } from "react-icons/fa6";
 import TipTapEditor from "@/Components/TipTapEditor";
-import { router } from "@inertiajs/react";
-import { useEffect, useRef } from "react";
+import { router, usePage } from "@inertiajs/react";
+import { useEffect, useRef, useState } from "react";
 import { differenceInSeconds } from "@/helpers/dateTimeHelper";
-import { usePage } from "@inertiajs/react";
+
 import Message from "./Message/Message";
-import { setChannelUsers } from "@/Store/Slices/channelUsersSlice";
-import { toggleHuddle } from "@/Store/Slices/huddleSlice";
-import { setMessages, addMessage } from "@/Store/Slices/messagesSlice";
+
+import { toggleHuddle } from "@/Store/huddleSlice";
+
 import { useSelector, useDispatch } from "react-redux";
 
 export default function ChatArea() {
-    const { auth } = usePage().props;
+    const {
+        auth,
+        channel,
+        channelUsers,
+        messages: initMessages,
+    } = usePage().props;
     const dispatch = useDispatch();
-    const channel = useSelector((state) => state.channel);
     const { channel: huddleChannel } = useSelector((state) => state.huddle);
-    const channelUsers = useSelector((state) => state.channelUsers);
-    const messages = useSelector((state) => state.messages);
+
     const { show } = useSelector((state) => state.huddle);
     const messageContainerRef = useRef(null);
-
+    const [messages, setMessages] = useState(initMessages);
     function onSubmit(content, fileObjects) {
         console.log("submit on channel: ", channel);
         if (content == "<p></p>" && fileObjects.length == 0) return;
@@ -37,18 +40,9 @@ export default function ChatArea() {
 
     let preValue = null;
     let hasChanged = false;
-
-    async function getChannelData() {
-        const res = await axios.get(route("channel.show", channel.id));
-        const jsonRes = await res;
-        console.log(jsonRes.data);
-        dispatch(setChannelUsers(jsonRes.data.channelUsers));
-        dispatch(setMessages(jsonRes.data.messages));
-    }
     useEffect(() => {
-        dispatch(setMessages([]));
-        getChannelData();
-    }, [channel]);
+        setMessages(initMessages);
+    }, [initMessages]);
     useEffect(() => {
         console.log("Channel: ", channel.name);
         Echo.join(`channels.${channel.id}`)
@@ -60,7 +54,7 @@ export default function ChatArea() {
                 console.log("leaving", user);
             })
             .listen("MessageEvent", (e) => {
-                dispatch(addMessage(e.message));
+                setMessages((pre) => [...pre, e.message]);
                 // console.log(e);
             })
             .error((error) => {
