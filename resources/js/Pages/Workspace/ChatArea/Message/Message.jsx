@@ -39,7 +39,7 @@ export default function Message({ message, user, hasChanged, index }) {
             }`}
         >
             {hasChanged || index == 0 ? (
-                <Avatar src={user.avatar_url} noStatus={true} />
+                <Avatar src={user.avatar_url} className="w-10 h-10" noStatus={true} />
             ) : (
                 <div></div>
             )}

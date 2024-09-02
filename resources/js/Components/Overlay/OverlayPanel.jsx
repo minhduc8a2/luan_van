@@ -13,15 +13,15 @@ export default function OverlayPanel({
     }, [success]);
     return (
         <div className="">
-            <button
+            <div
                 onClick={() => {
                     setOpenOverlay(true);
                     console.log("open");
                 }}
-                className="w-full"
+                className="w-full cursor-pointer"
             >
                 {buttonNode}
-            </button>
+            </div>
             <Overlay
                 show={openOverlay}
                 onClose={() => {

@@ -13,7 +13,7 @@ import {
     PopoverPanel,
     CloseButton,
 } from "@headlessui/react";
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
     addHuddleUser,
     removeHuddleUser,
@@ -35,9 +35,11 @@ import {
 import SquareImage from "@/Components/SquareImage";
 import StreamVideo from "@/Components/StreamVideo";
 import { usePage } from "@inertiajs/react";
+import OverlayPanel from "@/Components/Overlay/OverlayPanel";
+import HuddleInvitation from "./HuddleInvitation";
 export default function Huddle() {
     const { auth } = usePage().props;
-    const {channel, users} = useSelector(state=>state.huddle)
+    const { channel, users } = useSelector((state) => state.huddle);
     const { sideBarWidth } = useSelector((state) => state.sideBar);
     const [refresh, setRefresh] = useState(0);
     const [enableAudio, setEnableAudio] = useState(true);
@@ -177,7 +179,18 @@ export default function Huddle() {
             }
         }
     }
-
+    function leaveHuddle() {
+        if (channel) {
+            Echo.leave(`huddles.${channel.id}`);
+            removeTrackTFromStream("video");
+            removeTrackTFromStream("audio");
+            otherUserStreams.current.clear();
+            peersRef.current.clear();
+            joinObject.current = null;
+            setShowUserVideo(false);
+            setShowShareScreen(false);
+        }
+    }
     useEffect(() => {
         if (!channel) return;
         async function getMediaDevices() {
@@ -289,11 +302,7 @@ export default function Huddle() {
         });
 
         return () => {
-            if (channel) {
-                Echo.leave(`huddles.${channel.id}`);
-
-                joinObject.current = null;
-            }
+            leaveHuddle();
         };
     }, [channel?.id]);
     if (!channel) return "";
@@ -439,9 +448,18 @@ export default function Huddle() {
                 >
                     <CgScreen />
                 </IconButton>
-                <IconButton description="Invite people" activable={false}>
-                    <IoMdPersonAdd />
-                </IconButton>
+                <OverlayPanel
+                    buttonNode={
+                        <IconButton
+                            description="Invite people"
+                            activable={false}
+                        >
+                            <IoMdPersonAdd />
+                        </IconButton>
+                    }
+                >
+                    <HuddleInvitation />
+                </OverlayPanel>
                 <Popover className="relative">
                     <PopoverButton>
                         {" "}
@@ -487,6 +505,7 @@ export default function Huddle() {
                                     key={cam.deviceId}
                                     onClick={() => {
                                         currentVideoRef.current = cam;
+                                        addTrackToStream("video");
                                     }}
                                 >
                                     {cam.label}
@@ -509,8 +528,7 @@ export default function Huddle() {
                     <Button
                         className="bg-pink-600 text-sm"
                         onClick={() => {
-                            removeTrackTFromStream("video");
-                            removeTrackTFromStream("audio");
+                            leaveHuddle();
                             dispatch(toggleHuddle());
                         }}
                     >

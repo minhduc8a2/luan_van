@@ -108,7 +108,7 @@ export default function ChatArea() {
                             <button
                                 className={`flex items-center gap-x-1`}
                                 onClick={() => {
-                                    if (huddleChannel) {
+                                    if (huddleChannel && huddleChannel.id!=channel.id) {
                                         if (
                                             confirm(
                                                 "Are you sure you want to switch to other huddle"

@@ -10,8 +10,11 @@ export default function Avatar({
     roundedClassName = "rounded-lg",
 }) {
     return (
-        <div className="relative w-fit h-fit max-h-full">
-            <img src={src} className={`${roundedClassName} max-w-full max-h-10 ${className}`} />
+        <div className={"relative  " + className}>
+            <img
+                src={src}
+                className={`${roundedClassName} w-full h-full object-cover absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 `}
+            />
             {noStatus ? (
                 ""
             ) : isOnline ? (

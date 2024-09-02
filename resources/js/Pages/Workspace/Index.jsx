@@ -4,21 +4,11 @@ import HeadBar from "./HeadBar";
 import Panel from "./Panel/Panel";
 import ChatArea from "./ChatArea/ChatArea";
 import { useRef } from "react";
-import Huddle from "./Huddle";
-
+import Huddle from "./Huddle/Huddle";
+import Event from "./Event";
 import { makeStore } from "@/Store/store";
 import { Provider } from "react-redux";
-export default function Index({
-    workspace,
-    channels,
-    users,
-    channel,
-    workspaces,
-    directChannels,
-    selfChannel,
-    messages,
-    channelUsers,
-}) {
+export default function Index() {
     const storeRef = useRef();
     if (!storeRef.current) {
         // Create the store instance the first time this renders
@@ -26,6 +16,7 @@ export default function Index({
     }
     return (
         <Provider store={storeRef.current}>
+            <Event />
             <div className="client-container bg-primary text-white ">
                 <div className="client-headbar ">
                     <HeadBar />

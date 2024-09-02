@@ -3,15 +3,36 @@ export async function getConnectedDevices(type) {
     return devices.filter((device) => device.kind === type);
 }
 export async function getVideoStream(cameraId, minWidth, minHeight) {
-    const constraints = {
-        video: {
-            deviceId: cameraId,
-            width: { min: minWidth },
-            height: { min: minHeight },
-        },
-    };
+    const videoDevices = await getConnectedDevices("videoinput");
+    if (cameraId) {
+        const constraints = {
+            video: {
+                deviceId: cameraId,
+                width: { min: minWidth },
+                height: { min: minHeight },
+            },
+        };
 
-    return navigator.mediaDevices.getUserMedia(constraints);
+        try {
+            return await navigator.mediaDevices.getUserMedia(constraints);
+        } catch (error) {
+            alert("Device is not available.");
+        }
+    }
+    let i = 0;
+    while (i++ < videoDevices.length) {
+        const constraints = {
+            video: {
+                deviceId: videoDevices[i].deviceId,
+                width: { min: minWidth },
+                height: { min: minHeight },
+            },
+        };
+        try {
+            return await navigator.mediaDevices.getUserMedia(constraints);
+        } catch (error) {}
+    }
+    throw new Error("Could not access any video device.");
 }
 export async function getScreenStream() {
     const constraints = {
@@ -21,14 +42,37 @@ export async function getScreenStream() {
     return navigator.mediaDevices.getDisplayMedia(constraints);
 }
 export async function getAudioStream(audioId) {
-    const constraints = {
-        audio: audioId
-            ? { deviceId: audioId, echoCancellation: true }
-            : { echoCancellation: true },
-    };
+    const audioDevices = await getConnectedDevices("audioinput");
+    if (audioId) {
+        const constraints = {
+            audio: {
+                deviceId: audioId,
+                echoCancellation: true,
+            },
+        };
 
-    return navigator.mediaDevices.getUserMedia(constraints);
+        try {
+            return await navigator.mediaDevices.getUserMedia(constraints);
+        } catch (error) {
+            alert("Device is not available.");
+        }
+    }
+
+    for (let i = 0; i < audioDevices.length; i++) {
+        const constraints = {
+            audio: {
+                deviceId: audioDevices[i].deviceId,
+                echoCancellation: true,
+            },
+        };
+        try {
+            return await navigator.mediaDevices.getUserMedia(constraints);
+        } catch (error) {}
+    }
+
+    throw new Error("Could not access any audio device.");
 }
+
 export function stopStream(stream) {
     const tracks = stream.getTracks();
     tracks.forEach((track) => {
@@ -68,7 +112,6 @@ export function checkDeviceInUse(type, stream, deviceId) {
         let result = false;
         audioTracks.forEach((track, index) => {
             if (deviceId == track.getSettings().deviceId) {
-                console.log("in use", track.label);
                 result = true;
             }
         });
@@ -79,7 +122,6 @@ export function checkDeviceInUse(type, stream, deviceId) {
         let result = false;
         videoTracks.forEach((track, index) => {
             if (deviceId == track.getSettings().deviceId) {
-                console.log("in use", track.label);
                 result = true;
             }
         });

@@ -23,7 +23,7 @@ export default function Panel({}) {
     function changeChannel(channel) {
         router.get(route("channel.show", channel.id),  {}, { preserveState:true });
     }
-
+   
     return (
         <div className="bg-secondary h-full rounded-l-lg rounded-s-lg ">
             <div className="flex justify-between items-center p-4">

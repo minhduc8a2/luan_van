@@ -101,7 +101,7 @@ export default function SideBar({}) {
                 </div>
                 <Avatar
                     src={auth.user.avatar_url}
-                    className="mt-2"
+                    className="mt-2 h-10 w-10"
                     isOnline={true}
                 />
             </div>
