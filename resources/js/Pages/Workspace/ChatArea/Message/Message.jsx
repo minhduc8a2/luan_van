@@ -45,11 +45,11 @@ export default function Message({ message, user, hasChanged, index }) {
             )}
             <div className="mx-3">
                 {hasChanged || index == 0 ? (
-                    <div className="flex gap-x-2">
-                        <div className="text-sm font-bold">{user.name}</div>
-                        <div className="text-xs">
+                    <div className="flex gap-x-2 items-end">
+                        <div className="text-base font-bold leading-tight">{user.name}</div>
+                        <span className="text-xs leading-tight text-white/75 font-extralight">
                             {UTCToTime(message.updated_at)}
-                        </div>
+                        </span>
                     </div>
                 ) : (
                     ""

@@ -14,15 +14,14 @@ import Form1 from "@/Components/Form1";
 import TextArea from "@/Components/Input/TextArea";
 import { useRef, useEffect } from "react";
 
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setSideBarWidth } from "@/Store/sideBarSlice";
-
-import {usePage} from "@inertiajs/react";
+import { setPanelType } from "@/Store/panelSlice";
+import { usePage } from "@inertiajs/react";
 export default function SideBar({}) {
-    const { auth, url, workspace, workspaces  } = usePage().props;
-    
+    const { auth, url, workspace, workspaces } = usePage().props;
+    const { type: panelType } = useSelector((state) => state.panel);
     const dispatch = useDispatch();
-
     const boxRef = useRef(null);
     const itemStyle = "flex flex-col items-center gap-y-2 group";
     useEffect(() => {
@@ -63,8 +62,11 @@ export default function SideBar({}) {
                     </Dropdown.Content>
                 </Dropdown>
 
-                <div className={itemStyle}>
-                    {url == "/workspace" ? (
+                <button
+                    onClick={() => dispatch(setPanelType("home"))}
+                    className={itemStyle}
+                >
+                    {panelType == "home" ? (
                         <div className="p-2 rounded-lg bg-white/10 group-hover:bg-white/10 group-hover:scale-105 transition">
                             {" "}
                             <PiHouseLineFill className="text-lg " />{" "}
@@ -75,19 +77,25 @@ export default function SideBar({}) {
                         </div>
                     )}
                     <div className="text-xs font-semibold">Home</div>
-                </div>
-                <div className={itemStyle}>
+                </button>
+                <button
+                    onClick={() => dispatch(setPanelType("direct_messages"))}
+                    className={itemStyle}
+                >
                     <div className="p-2 rounded-lg group-hover:bg-white/10 group-hover:scale-105 transition">
                         <FaRegMessage className="text-lg " />
                     </div>
                     <div className="text-xs font-semibold">DMs</div>
-                </div>
-                <div className={itemStyle}>
+                </button>
+                <button
+                    onClick={() => dispatch(setPanelType("activity"))}
+                    className={itemStyle}
+                >
                     <div className="p-2 rounded-lg group-hover:bg-white/10 group-hover:scale-105 transition">
                         <FaRegBell className="text-lg " />
                     </div>
                     <div className="text-xs font-semibold">Activity</div>
-                </div>
+                </button>
                 <div className={itemStyle}>
                     <div className="p-2 rounded-lg group-hover:bg-white/10 group-hover:scale-105 transition">
                         <IoIosMore className="text-lg " />

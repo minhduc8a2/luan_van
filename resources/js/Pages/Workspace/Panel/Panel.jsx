@@ -8,6 +8,8 @@ import { LuPlus } from "react-icons/lu";
 import { Link, router, usePage } from "@inertiajs/react";
 import { InvitationForm } from "./InvitationForm";
 import { DirectChannel } from "./DirectChannel";
+import { useSelector } from "react-redux";
+import Activity from "./Activity";
 
 export default function Panel({}) {
     const {
@@ -19,7 +21,7 @@ export default function Panel({}) {
         directChannels = [],
         selfChannel,
     } = usePage().props;
-
+    const { type } = useSelector((state) => state.panel);
     function changeChannel(channel) {
         router.get(
             route("channel.show", channel.id),
@@ -27,6 +29,7 @@ export default function Panel({}) {
             { preserveState: true }
         );
     }
+    if (type == "activity") return <Activity />;
 
     return (
         <div className="bg-secondary h-full rounded-l-lg rounded-s-lg ">

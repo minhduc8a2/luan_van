@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use App\Models\Channel;
 use App\Models\User;
+use App\Models\Workspace;
 use Illuminate\Bus\Queueable;
 
 use Illuminate\Notifications\Notification;
@@ -17,7 +18,7 @@ class HuddleInvitationNotification extends Notification
     /**
      * Create a new notification instance.
      */
-    public function __construct(public Channel $channel, public User $fromUser, public User $toUser)
+    public function __construct(public Channel $channel,public Workspace $workspace, public User $fromUser, public User $toUser)
     {
         //
     }
@@ -54,6 +55,8 @@ class HuddleInvitationNotification extends Notification
             "channel" => $this->channel,
             "fromUser" => $this->fromUser,
             "toUser" => $this->toUser,
+            "workspace" => $this->workspace
+
         ];
     }
 
