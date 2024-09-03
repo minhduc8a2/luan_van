@@ -61,7 +61,7 @@ class ChannelController extends Controller
 
         $workspaces = $request->user()->workspaces;
         $users = $workspace->users;
-
+        $notifications = $user->notifications;
         return Inertia::render("Workspace/Index", [
             'workspace' => $workspace,
             'channels' => $channels,
@@ -72,6 +72,7 @@ class ChannelController extends Controller
             'selfChannel' => $selfChannel,
             'messages' => $channel->messages->load('attachments'),
             'channelUsers' => $channel->users,
+            'notifications' => $notifications
         ]);
     }
 

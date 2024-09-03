@@ -20,6 +20,7 @@ use App\Jobs\DeleteTemporaryFiles;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Application;
 use Laravel\Socialite\Facades\Socialite;
+use App\Http\Controllers\HuddleController;
 use App\Http\Controllers\ChannelController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ProfileController;
@@ -47,7 +48,7 @@ Route::middleware('auth')->group(function () {
     Route::get("/workspaces/{workspace}/direct_channels", [WorkspaceController::class, 'getDirectChannels'])->name('workspace.direct_channels');
     Route::get("/channels/{channel}", [ChannelController::class, 'show'])->name('channel.show');
     Route::post("/channels/{channel}/message", [MessageController::class, 'store'])->name('message.store');
-
+    Route::post("/channels/{channel}/huddle_invitation", [HuddleController::class, 'invite'])->name("huddle.invitation");
     Route::post("/upload_file/{user}", function (Request $request, User $user) {
 
         $validated = $request->validate([

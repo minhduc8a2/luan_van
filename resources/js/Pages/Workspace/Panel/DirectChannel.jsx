@@ -2,13 +2,17 @@ import { usePage, Link } from "@inertiajs/react";
 import Avatar from "@/Components/Avatar";
 import { router } from "@inertiajs/react";
 import { useSelector } from "react-redux";
-export function DirectChannel({ channel, user }) {
+export function DirectChannel({ channel, user, isOnline = false }) {
     const { auth } = usePage().props;
-    const onlineStatusMap = useSelector(state=>state.onlineStatus)
+    const onlineStatusMap = useSelector((state) => state.onlineStatus);
     function changeChannel() {
-        router.get(route("channel.show", channel.id), {}, {
-            preserveState: true,
-        });
+        router.get(
+            route("channel.show", channel.id),
+            {},
+            {
+                preserveState: true,
+            }
+        );
     }
     return (
         <li>
@@ -22,7 +26,7 @@ export function DirectChannel({ channel, user }) {
                         className="w-5 h-5"
                         onlineClassName="scale-75"
                         offlineClassName="scale-75"
-                        isOnline={onlineStatusMap[user.id]}
+                        isOnline={isOnline || onlineStatusMap[user.id]}
                     />
                 </div>
                 <div className="">

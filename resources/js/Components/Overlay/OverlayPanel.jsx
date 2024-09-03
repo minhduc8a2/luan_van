@@ -11,6 +11,9 @@ export default function OverlayPanel({
     useEffect(() => {
         if (success) setOpenOverlay(false);
     }, [success]);
+    function close() {
+        setOpenOverlay(false);
+    }
     return (
         <div className="">
             <div
@@ -30,9 +33,9 @@ export default function OverlayPanel({
                 }}
             >
                 <div className=" text-white  p-4 rounded-lg bg-background">
-                   
-                        {children}
-                    
+                    {typeof children === "function"
+                        ? children({ close })
+                        : children}
                 </div>
             </Overlay>
         </div>

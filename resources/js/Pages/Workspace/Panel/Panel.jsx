@@ -21,9 +21,13 @@ export default function Panel({}) {
     } = usePage().props;
 
     function changeChannel(channel) {
-        router.get(route("channel.show", channel.id),  {}, { preserveState:true });
+        router.get(
+            route("channel.show", channel.id),
+            {},
+            { preserveState: true }
+        );
     }
-   
+
     return (
         <div className="bg-secondary h-full rounded-l-lg rounded-s-lg ">
             <div className="flex justify-between items-center p-4">
@@ -57,7 +61,7 @@ export default function Panel({}) {
                                             }
                                             className={`grid-item mt-2 w-full px-4 block  rounded-lg ${
                                                 channel.id == currentChannel.id
-                                                    ? "bg-primary"
+                                                    ? "bg-primary-lighter"
                                                     : "hover:bg-white/10"
                                             }`}
                                         >
@@ -77,7 +81,7 @@ export default function Panel({}) {
                                             }
                                             className={`grid-item mt-2 px-4 w-full rounded-lg ${
                                                 channel.id == currentChannel.id
-                                                    ? "bg-primary"
+                                                    ? "bg-primary-lighter"
                                                     : "hover:bg-white/10"
                                             }`}
                                         >
@@ -125,6 +129,7 @@ export default function Panel({}) {
                             );
                         })}
                         <DirectChannel
+                            isOnline={true}
                             user={{ ...auth.user, online: true }}
                             channel={selfChannel}
                         />

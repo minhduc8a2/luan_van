@@ -3,8 +3,11 @@ import { useState, useRef } from "react";
 import Avatar from "@/Components/Avatar";
 import AvatarAndName from "@/Components/AvatarAndName";
 import { IoMdClose } from "react-icons/io";
-export default function AutocompleInput({ users }) {
-    const [choosenUsers, setChoosenUsers] = useState({});
+export default function AutocompleInput({
+    users,
+    choosenUsers,
+    setChoosenUsers,
+}) {
     const [showSuggested, setShowSuggested] = useState(false);
     const [inputValue, setInputValue] = useState("");
     return (
@@ -18,13 +21,13 @@ export default function AutocompleInput({ users }) {
                         >
                             <AvatarAndName user={user} className="h-4 w-4" />
                             <button
+                                className=""
                                 onClick={() => {
                                     setChoosenUsers((pre) => {
                                         const temp = { ...pre };
                                         delete temp[user.id];
                                         return temp;
                                     });
-                                   
                                 }}
                             >
                                 <IoMdClose />
@@ -35,7 +38,8 @@ export default function AutocompleInput({ users }) {
             </div>
             <input
                 type="text"
-                className="bg-transparent border-none focus:border-none focus:ring-0"
+                placeholder="Search by name"
+                className="bg-transparent border-none focus:border-none focus:ring-0 w-full"
                 value={inputValue}
                 onChange={(e) => {
                     const value = e.target.value;
@@ -55,8 +59,9 @@ export default function AutocompleInput({ users }) {
                                 .includes(inputValue.toLowerCase())
                         )
                         .map((user) => (
-                            <li key={user.id} className="p-1">
+                            <li key={user.id} className="p-1 w-full">
                                 <button
+                                    className="w-full"
                                     onClick={() => {
                                         setChoosenUsers((pre) => ({
                                             ...pre,

@@ -63,6 +63,7 @@ export default function ChatArea() {
             .here((users) => {})
             .joining((user) => {
                 console.log("join", user, channel.name);
+                
             })
             .leaving((user) => {
                 console.log("leaving", user);

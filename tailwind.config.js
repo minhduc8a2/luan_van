@@ -8,8 +8,6 @@ export default {
         "./storage/framework/views/*.php",
         "./resources/views/**/*.blade.php",
         "./resources/js/**/*.jsx",
-       
-        
     ],
 
     theme: {
@@ -24,6 +22,7 @@ export default {
                 foreground: "#222529",
                 link: "#1d9bd1",
                 "primary-light": "#431248",
+                "primary-lighter": "#7d3986",
             },
         },
     },

@@ -458,7 +458,7 @@ export default function Huddle() {
                         </IconButton>
                     }
                 >
-                    <HuddleInvitation />
+                    {({ close }) => <HuddleInvitation close={close}/>}
                 </OverlayPanel>
                 <Popover className="relative">
                     <PopoverButton>

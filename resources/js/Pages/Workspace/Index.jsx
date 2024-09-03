@@ -8,7 +8,8 @@ import Huddle from "./Huddle/Huddle";
 import Event from "./Event";
 import { makeStore } from "@/Store/store";
 import { Provider } from "react-redux";
-export default function Index() {
+export default function Index({notifications}) {
+    console.log(notifications);
     const storeRef = useRef();
     if (!storeRef.current) {
         // Create the store instance the first time this renders
