@@ -164,8 +164,7 @@ import { router, usePage } from "@inertiajs/react";
 import { isImage } from "@/helpers/fileHelpers";
 import SquareImage from "./SquareImage";
 import FileItem from "./FileItem";
-import { useCallback } from "react";
-import { useSelector } from "react-redux";
+
 export default function TipTapEditor({ onSubmit, onFilePicked }) {
     const { auth, channel } = usePage().props;
 

@@ -18,6 +18,7 @@ import { useSelector, useDispatch } from "react-redux";
 
 export default function ChatArea() {
     const {
+        users,
         auth,
         channel,
         channelUsers,
@@ -40,6 +41,19 @@ export default function ChatArea() {
 
     let preValue = null;
     let hasChanged = false;
+
+    let isDirectChannel = channel.type == "DIRECT";
+    if (isDirectChannel) {
+        try {
+            const userId = channel.name
+                .split("_")
+                .find((id) => id != auth.user.id);
+
+            const user = users.find((user) => user.id == userId);
+            channel.name = user.name;
+        } catch (error) {}
+    }
+
     useEffect(() => {
         setMessages(initMessages);
     }, [channel.id]);
@@ -108,7 +122,10 @@ export default function ChatArea() {
                             <button
                                 className={`flex items-center gap-x-1`}
                                 onClick={() => {
-                                    if (huddleChannel && huddleChannel.id!=channel.id) {
+                                    if (
+                                        huddleChannel &&
+                                        huddleChannel.id != channel.id
+                                    ) {
                                         if (
                                             confirm(
                                                 "Are you sure you want to switch to other huddle"
