@@ -167,8 +167,8 @@ import FileItem from "./FileItem";
 import { useCallback } from "react";
 import { useSelector } from "react-redux";
 export default function TipTapEditor({ onSubmit, onFilePicked }) {
-    const { auth } = usePage().props;
-    const channel = useSelector((state) => state.channel);
+    const { auth, channel } = usePage().props;
+
     const serverResponseFileList = useRef([]);
     const [fileList, setFileList] = useState([]);
     const abortControllers = useRef([]);
@@ -295,7 +295,7 @@ export default function TipTapEditor({ onSubmit, onFilePicked }) {
             //     console.log(editor.getJSON());
             // },
         },
-        [channel]
+        [channel.id]
     );
 
     return (

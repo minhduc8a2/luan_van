@@ -42,7 +42,7 @@ export default function ChatArea() {
     let hasChanged = false;
     useEffect(() => {
         setMessages(initMessages);
-    }, [initMessages]);
+    }, [channel.id]);
     useEffect(() => {
         console.log("Channel: ", channel.name);
         Echo.join(`channels.${channel.id}`)
@@ -63,7 +63,7 @@ export default function ChatArea() {
         return () => {
             Echo.leave(`channels.${channel.id}`);
         };
-    }, [channel]);
+    }, [channel.id]);
     useEffect(() => {
         if (messageContainerRef.current)
             messageContainerRef.current.scrollTop =

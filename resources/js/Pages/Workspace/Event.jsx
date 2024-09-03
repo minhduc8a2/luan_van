@@ -1,7 +1,7 @@
 import { usePage } from "@inertiajs/react";
 import React from "react";
 import { useEffect } from "react";
-import { setManyOnline, setOnlineStatus } from "@/Store/OnlineStatusSlice";
+import { setManyOnline, setOnlineStatus } from "@/Store/onlineStatusSlice";
 import { useDispatch } from "react-redux";
 export default function Event() {
     const { workspace } = usePage().props;
