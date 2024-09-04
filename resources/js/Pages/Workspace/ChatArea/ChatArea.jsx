@@ -27,7 +27,7 @@ export default function ChatArea() {
     const dispatch = useDispatch();
     const { channel: huddleChannel } = useSelector((state) => state.huddle);
 
-    const { show } = useSelector((state) => state.huddle);
+    
     const messageContainerRef = useRef(null);
     const [messages, setMessages] = useState(initMessages);
     function onSubmit(content, fileObjects) {
@@ -63,7 +63,6 @@ export default function ChatArea() {
             .here((users) => {})
             .joining((user) => {
                 console.log("join", user, channel.name);
-                
             })
             .leaving((user) => {
                 console.log("leaving", user);
@@ -117,11 +116,11 @@ export default function ChatArea() {
                         </div>
                         <div
                             className={`flex items-center p-1 border border-white/15 rounded-lg px-2 gap-x-3 font-normal  ${
-                                show ? "bg-green-700" : ""
+                                huddleChannel ? "bg-green-700 " : ""
                             }`}
                         >
                             <button
-                                className={`flex items-center gap-x-1`}
+                                className={`flex items-center gap-x-1 `}
                                 onClick={() => {
                                     if (
                                         huddleChannel &&
@@ -149,7 +148,7 @@ export default function ChatArea() {
                                 }}
                             >
                                 <FiHeadphones className="text-xl" />
-                                <div className="text-sm ">Huddle</div>
+                                <div className={`text-sm `}>Huddle</div>
                             </button>
                             {/* <div className="flex items-center gap-x-1">
                               <span className="text-sm opacity-25 ">|</span>

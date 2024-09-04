@@ -3,12 +3,22 @@ import React, { useRef } from "react";
 import { useEffect } from "react";
 import { setManyOnline, setOnlineStatus } from "@/Store/onlineStatusSlice";
 import { useDispatch } from "react-redux";
-
+import { addActivity } from "@/Store/activitySlice";
 export default function Event() {
-    const { workspace, channel } = usePage().props;
+    const { workspace, channel, auth } = usePage().props;
     const dispatch = useDispatch();
     const connectionRef = useRef(null);
-
+    useEffect(() => {
+        Echo.private("App.Models.User." + auth.user.id).notification(
+            (notification) => {
+                
+                dispatch(addActivity(notification));
+            }
+        );
+        return () => {
+            Echo.leave("App.Models.User." + auth.user.id);
+        };
+    }, [workspace.id]);
     useEffect(() => {
         connectionRef.current = Echo.join(`workspaces.${workspace.id}`);
         connectionRef.current

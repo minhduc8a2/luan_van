@@ -5,6 +5,7 @@ import AutocompleInput from "./AutocompleInput";
 import Button from "@/Components/Button";
 import { useState } from "react";
 export default function HuddleInvitation({ close }) {
+    const { flash } = usePage().props;
     const { channelUsers, auth, channel, data } = usePage().props;
     const [choosenUsers, setChoosenUsers] = useState({});
     function submit() {
@@ -16,9 +17,44 @@ export default function HuddleInvitation({ close }) {
             }
         );
     }
+
+    if (flash.data && flash.data.type == "HUDDLE_INVITATION_RESPONSE") {
+        const invitedUsers = [...Object.values(choosenUsers)];
+
+        return (
+            <div className="min-w-96 p-4 text-white/85 max-w-lg">
+                <h3 className="font-bold text-xl">
+                    Invite people to your huddle
+                </h3>
+                <div className="mt-4">
+                    Invitations has been sent to{" "}
+                    {invitedUsers.map((user, index) => {
+                        return (
+                            <span key={user.id} className="text-link">
+                                {`${user.name}${
+                                    index != invitedUsers.length - 1 ? ", " : ""
+                                }`}
+                            </span>
+                        );
+                    })}
+                </div>
+                <div className="flex justify-end gap-x-4 mt-8">
+                    <Button
+                        onClick={() => {
+                            close();
+                            flash.data = null;
+                        }}
+                    >
+                        Close
+                    </Button>
+                </div>
+            </div>
+        );
+    }
     return (
         <div className="min-w-96 p-4 text-white/85 max-w-lg">
             <h3 className="font-bold text-xl">Invite people to your huddle</h3>
+
             <p className="text-sm max-w-[90%]">
                 {
                     "You can invite whomever you’d like to the huddle, and they’ll receive a notification to join."

@@ -10,8 +10,15 @@ class Attachment extends Model
 {
     static $type = ['doc', 'pdf', 'image', 'video', 'other'];
     use HasFactory;
-    protected $fillable=[
-        'type','url','name','message_id', 'path'
+    protected $fillable = [
+        'type',
+        'url',
+        'name',
+        'message_id',
+        'path'
+    ];
+    protected $hidden = [
+        'path'
     ];
     public function message(): BelongsTo
     {

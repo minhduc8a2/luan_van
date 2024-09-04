@@ -12,6 +12,31 @@ export function UTCToTime(utcTime) {
         .replace("CH", "PM");
     return formattedTime;
 }
+export function UTCToDateTime(utcTime) {
+    const localDate = new Date(utcTime);
+    
+   
+    const dateOptions = {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+    };
+
+    const timeOptions = {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+    };
+
+    
+    const formattedDate = localDate.toLocaleDateString('vi-VN', dateOptions);
+    const formattedTime = localDate.toLocaleTimeString('vi-VN', timeOptions)
+        .replace('SA', 'AM')
+        .replace('CH', 'PM');
+
+    
+    return `${formattedDate}, ${formattedTime}`;
+}
 export function differenceInSeconds(utcTime_1, utcTime_2) {
     const date1 = new Date(utcTime_1);
     const date2 = new Date(utcTime_2);

@@ -46,8 +46,12 @@
 
 .client-workspace-container {
     max-height: 100%;
+    min-height: 0;
     grid-area: main;
+    display: grid;
+    grid-template-columns:repeat(4,1fr);
 }
+
 .grid-item {
     display: grid;
     grid-template-columns: 28px 1fr;

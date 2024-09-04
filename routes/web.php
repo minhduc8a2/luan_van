@@ -27,6 +27,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WorkspaceController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\Auth\ProviderController;
+use App\Http\Controllers\NotificationController;
 
 Route::get('/', function (Request $request) {
     return Inertia::render('Welcome', [
@@ -49,6 +50,8 @@ Route::middleware('auth')->group(function () {
     Route::get("/channels/{channel}", [ChannelController::class, 'show'])->name('channel.show');
     Route::post("/channels/{channel}/message", [MessageController::class, 'store'])->name('message.store');
     Route::post("/channels/{channel}/huddle_invitation", [HuddleController::class, 'invite'])->name("huddle.invitation");
+    Route::post("/notifications/mark_read",[NotificationController::class,"markRead"])->name("notifications.mark_read");
+    Route::post("/notifications/{notificationId}/mark_view",[NotificationController::class,"markView"])->name("notifications.mark_view");
     Route::post("/upload_file/{user}", function (Request $request, User $user) {
 
         $validated = $request->validate([

@@ -1,5 +1,5 @@
 import Avatar from "@/Components/Avatar";
-import React from "react";
+import React, { useMemo } from "react";
 import { FaRegMessage } from "react-icons/fa6";
 import { PiHouseLineBold, PiHouseLineFill } from "react-icons/pi";
 import { FaRegBell } from "react-icons/fa6";
@@ -13,7 +13,7 @@ import { IoIosAdd } from "react-icons/io";
 import Form1 from "@/Components/Form1";
 import TextArea from "@/Components/Input/TextArea";
 import { useRef, useEffect } from "react";
-
+import { FaBell } from "react-icons/fa6";
 import { useDispatch, useSelector } from "react-redux";
 import { setSideBarWidth } from "@/Store/sideBarSlice";
 import { setPanelType } from "@/Store/panelSlice";
@@ -21,12 +21,19 @@ import { usePage } from "@inertiajs/react";
 export default function SideBar({}) {
     const { auth, url, workspace, workspaces } = usePage().props;
     const { type: panelType } = useSelector((state) => state.panel);
+    const { notifications } = useSelector((state) => state.activity);
+    const newNotificationsLength = useMemo(()=>{
+        return notifications.filter(
+            (no) => !no.read_at
+        ).length;
+    },[notifications])
     const dispatch = useDispatch();
     const boxRef = useRef(null);
     const itemStyle = "flex flex-col items-center gap-y-2 group";
     useEffect(() => {
         dispatch(setSideBarWidth(boxRef.current.offsetWidth));
     }, []);
+
     return (
         <div className="flex flex-col justify-between h-full pb-8" ref={boxRef}>
             <div className="flex flex-col items-center gap-y-8 ">
@@ -89,12 +96,24 @@ export default function SideBar({}) {
                 </button>
                 <button
                     onClick={() => dispatch(setPanelType("activity"))}
-                    className={itemStyle}
+                    className={itemStyle + " relative"}
                 >
-                    <div className="p-2 rounded-lg group-hover:bg-white/10 group-hover:scale-105 transition">
-                        <FaRegBell className="text-lg " />
-                    </div>
+                    {panelType == "activity" ? (
+                        <div className="p-2 rounded-lg bg-white/10 group-hover:bg-white/10 group-hover:scale-105 transition">
+                            {" "}
+                            <FaBell className="text-lg " />
+                        </div>
+                    ) : (
+                        <div className="p-2 rounded-lg group-hover:bg-white/10 group-hover:scale-105 transition">
+                            <FaRegBell className="text-lg " />
+                        </div>
+                    )}
                     <div className="text-xs font-semibold">Activity</div>
+                    {newNotificationsLength>0 && (
+                        <div className="bg-red-500 rounded-lg text-white w-4 h-4 text-xs absolute -top-2 -right-1">
+                            {newNotificationsLength}
+                        </div>
+                    )}
                 </button>
                 <div className={itemStyle}>
                     <div className="p-2 rounded-lg group-hover:bg-white/10 group-hover:scale-105 transition">

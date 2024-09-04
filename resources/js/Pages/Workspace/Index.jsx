@@ -8,12 +8,14 @@ import Huddle from "./Huddle/Huddle";
 import Event from "./Event";
 import { makeStore } from "@/Store/store";
 import { Provider } from "react-redux";
+import { setActivity } from "@/Store/activitySlice";
 export default function Index({notifications}) {
     console.log(notifications);
     const storeRef = useRef();
     if (!storeRef.current) {
         // Create the store instance the first time this renders
         storeRef.current = makeStore();
+        storeRef.current.dispatch(setActivity(notifications))
     }
     return (
         <Provider store={storeRef.current}>
@@ -26,7 +28,7 @@ export default function Index({notifications}) {
                     <SideBar />
                 </div>
 
-                <div className="client-workspace-container grid grid-cols-4 rounded-lg border border-white/5 border-b-2">
+                <div className="client-workspace-container grid grid-cols-4  rounded-lg border border-white/5 border-b-2">
                     <Panel />
                     <ChatArea />
                 </div>

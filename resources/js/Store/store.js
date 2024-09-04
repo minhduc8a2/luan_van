@@ -3,6 +3,7 @@ import huddleReducer from "@/Store/huddleSlice";
 import sideBarReducer from "@/Store/sideBarSlice";
 import OnlineStatusReducer from "./onlineStatusSlice";
 import panelReducer from "./panelSlice";
+import activityReducer from "./activitySlice";
 export const makeStore = () => {
     return configureStore({
         reducer: {
@@ -10,6 +11,7 @@ export const makeStore = () => {
             sideBar: sideBarReducer,
             onlineStatus: OnlineStatusReducer,
             panel: panelReducer,
+            activity: activityReducer,
         },
     });
 };
