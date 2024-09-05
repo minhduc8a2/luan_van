@@ -9,7 +9,9 @@ import TipTapEditor from "@/Components/TipTapEditor";
 import { router, usePage } from "@inertiajs/react";
 import { useEffect, useRef, useState } from "react";
 import {
+    compareDateTime,
     differenceInSeconds,
+    formatDDMMYYY,
     groupMessagesByDate,
 } from "@/helpers/dateTimeHelper";
 
@@ -18,6 +20,7 @@ import Message from "./Message/Message";
 import { toggleHuddle } from "@/Store/huddleSlice";
 
 import { useSelector, useDispatch } from "react-redux";
+import { EditDescriptionForm } from "./EditDescriptionForm";
 
 export default function ChatArea() {
     const {
@@ -56,7 +59,16 @@ export default function ChatArea() {
         } catch (error) {}
     }
     const groupedMessages = useMemo(() => {
-        return groupMessagesByDate(messages);
+        const gMessages = groupMessagesByDate(messages);
+
+        return Object.keys(gMessages)
+            .sort((a, b) => {
+                return compareDateTime(a, b);
+            })
+            .map((key) => ({
+                date: formatDDMMYYY(new Date(key)),
+                mgs: gMessages[key],
+            }));
     }, [messages]);
     useEffect(() => {
         setMessages(initMessages);
@@ -106,6 +118,17 @@ export default function ChatArea() {
             );
         }
     }
+
+    const welcomeMessage = useMemo(() => {
+        const welcomeMessages = [
+            `📣You’re looking at the #${channel.name} channel`,
+            `👋 Welcome to the #${channel.name} channel`,
+            `🥳 You’ve found the #${channel.name} channel`,
+        ];
+        if (channel.name.includes("all-")) return welcomeMessages[0];
+        if (channel.name.includes("social")) return welcomeMessages[2];
+        return welcomeMessages[1];
+    }, [channel.id]);
     return (
         <div className="bg-background  chat-area-container col-span-3 ">
             <div className="p-4 border-b border-b-white/10 z-10">
@@ -169,16 +192,25 @@ export default function ChatArea() {
                 ref={messageContainerRef}
             >
                 <div className="p-8">
-                    <h1 className="text-3xl">Welcome to {channel.name}</h1>
+                    <h1 className="text-3xl font-extrabold text-white/85">
+                        {" "}
+                        {welcomeMessage}
+                    </h1>
+                    <div className="text-white/85 mt-2">
+                        {channel.description}{" "}
+                        <div className="inline-block">
+                            <EditDescriptionForm />
+                        </div>
+                    </div>
                 </div>
-                {Object.entries(groupedMessages).map(([date, mgs]) => {
+                {groupedMessages.map(({ date, mgs }) => {
                     return (
-                        <div className="relative " key={date}>
+                        <div className="relative pb-4" key={date}>
                             <div className="border-t border-white/15 translate-y-3"></div>
-                            <div className="text-sm border border-white/15 rounded-full h-6 flex items-center px-4 sticky top-0 left-1/2 -translate-x-1/2  w-fit bg-background z-20">
+                            <div className="text-xs border border-white/15 rounded-full h-6 flex items-center px-4 sticky top-0 left-1/2 -translate-x-1/2  w-fit bg-background z-20">
                                 {date}
                             </div>
-                            
+
                             <ul className="">
                                 {mgs.map((message, index) => {
                                     const user = channelUsers.filter(

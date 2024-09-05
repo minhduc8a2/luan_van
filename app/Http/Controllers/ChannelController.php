@@ -92,6 +92,19 @@ class ChannelController extends Controller
         //
     }
 
+    public function editDescription(Request $request, Channel $channel){
+        if ($request->user()->cannot('update', $channel)) {
+            return  abort(403);
+        }
+        $validated = $request->validate(['description'=>"string"]);
+        try {
+            $channel->description = $validated['description'];
+            $channel->save();
+            return back()->with('data',['statusCode'=>201]);
+        } catch (\Throwable $th) {
+            return back()->with('data',['statusCode'=>500]);
+        }
+    }
     /**
      * Remove the specified resource from storage.
      */

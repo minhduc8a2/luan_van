@@ -58,7 +58,13 @@ export function differenceInDate(utcTime_1, utcTime_2) {
 
     return diffInDays;
 }
+export function formatDDMMYYY(dateObj) {
+    const day = String(dateObj.getDate()).padStart(2, "0"); // Get the day and add leading zero if needed
+    const month = String(dateObj.getMonth() + 1).padStart(2, "0"); // Months are zero-based in JS, so add 1
+    const year = dateObj.getFullYear();
 
+    return `${day}/${month}/${year}`;
+}
 export function groupMessagesByDate(messages) {
     return messages.reduce((grouped, message) => {
         // Convert the timestamp to a Date object
@@ -69,7 +75,7 @@ export function groupMessagesByDate(messages) {
         const month = String(dateObj.getMonth() + 1).padStart(2, "0"); // Months are zero-based in JS, so add 1
         const year = dateObj.getFullYear();
 
-        const formattedDate = `${day}/${month}/${year}`; // Construct the "dd/mm/yyyy" format
+        const formattedDate = `${year}-${month}-${day}`; // Construct the "dd/mm/yyyy" format
 
         // If the date is not already a key in the grouped object, create it
         if (!grouped[formattedDate]) {
@@ -81,4 +87,11 @@ export function groupMessagesByDate(messages) {
 
         return grouped;
     }, {});
+}
+
+export function compareDateTime(dateString1, dateString2) {
+    const date1 = new Date(dateString1);
+    const date2 = new Date(dateString2);
+   
+    return date1.getTime() - date2.getTime();
 }

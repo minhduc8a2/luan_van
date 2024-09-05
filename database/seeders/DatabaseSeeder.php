@@ -53,16 +53,19 @@ class DatabaseSeeder extends Seeder
             $workspace->channels()->createMany([
                 [
                     'name' => 'all-' . $workspace->name,
+                    'description' => Channel::createChannelDescription('all', ''),
                     'type' => 'PUBLIC',
                     'user_id' => 1
                 ],
                 [
                     'name' => 'work',
+                    'description' => Channel::createChannelDescription('','work'),
                     'type' => 'PUBLIC',
                     'user_id' => 1
                 ],
                 [
                     'name' => 'social',
+                    'description' => Channel::createChannelDescription('social', ''),
                     'type' => 'PUBLIC',
                     'user_id' => 1
                 ],
@@ -72,5 +75,6 @@ class DatabaseSeeder extends Seeder
             $workspace->assignUserToPublicChannels($user);
             $workspace->createAndAssignSelfChannelsForUser($user);
         });
+        $this->call(MessageSeeder::class);
     }
 }

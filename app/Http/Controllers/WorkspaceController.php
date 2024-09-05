@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Channel;
 use Inertia\Inertia;
 use App\Models\Workspace;
 use Illuminate\Http\Request;
@@ -42,9 +43,24 @@ class WorkspaceController extends Controller
         $workspace = $user->ownWorkspaces()->create(['name' => $validated['name']]);
         $user->workspaces()->attach($workspace->id);
         $workspace->channels()->createMany([
-            ['name' => $validated['channel'], 'type' => 'PUBLIC', 'user_id' => $user->id],
-            ['name' => "all-" . $workspace->name, 'type' => 'PUBLIC', 'user_id' => $user->id],
-            ['name' => "social", 'type' => 'PUBLIC', 'user_id' => $user->id]
+            [
+                'name' => $validated['channel'],
+                'description' => Channel::createChannelDescription('', $validated['channel']),
+                'type' => 'PUBLIC',
+                'user_id' => $user->id
+            ],
+            [
+                'name' => "all-" . $workspace->name,
+                'description' => Channel::createChannelDescription('all', ''),
+                'type' => 'PUBLIC',
+                'user_id' => $user->id
+            ],
+            [
+                'name' => "social",
+                'description' => Channel::createChannelDescription('social', ''),
+                'type' => 'PUBLIC',
+                'user_id' => $user->id
+            ]
         ]);
         $workspace->assignUserToPublicChannels($user);
         $workspace->createAndAssignSelfChannelsForUser($user);
@@ -57,11 +73,11 @@ class WorkspaceController extends Controller
      */
     public function show(Request $request, Workspace $workspace)
     {
-        $firstPublicChannel = $workspace->channels->where('type','=','PUBLIC')->first();
-       return redirect()->route('channel.show',$firstPublicChannel->id);
+        $firstPublicChannel = $workspace->channels->where('type', '=', 'PUBLIC')->first();
+        return redirect()->route('channel.show', $firstPublicChannel->id);
     }
 
-   
+
     /**
      * Show the form for editing the specified resource.
      */

@@ -42,7 +42,11 @@ class ChannelPolicy
      */
     public function update(User $user, Channel $channel): bool
     {
-        //
+        $exists = DB::table('channel_user')
+            ->where('user_id', '=', $user->id)
+            ->where('channel_id', '=', $channel->id)
+            ->count() > 0;
+        return $exists;
     }
 
     /**

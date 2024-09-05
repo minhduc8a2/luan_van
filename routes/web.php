@@ -48,6 +48,7 @@ Route::middleware('auth')->group(function () {
     Route::get("/workspaces/{workspace}", [WorkspaceController::class, 'show'])->name('workspace.show');
     Route::get("/workspaces/{workspace}/direct_channels", [WorkspaceController::class, 'getDirectChannels'])->name('workspace.direct_channels');
     Route::get("/channels/{channel}", [ChannelController::class, 'show'])->name('channel.show');
+    Route::post("/channels/{channel}/edit_description", [ChannelController::class, 'editDescription'])->name("channel.edit_description");
     Route::post("/channels/{channel}/message", [MessageController::class, 'store'])->name('message.store');
     Route::post("/channels/{channel}/huddle_invitation", [HuddleController::class, 'invite'])->name("huddle.invitation");
     Route::post("/notifications/mark_read",[NotificationController::class,"markRead"])->name("notifications.mark_read");
