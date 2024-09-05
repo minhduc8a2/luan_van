@@ -16,6 +16,7 @@ import { useState } from "react";
 import FileItem from "@/Components/FileItem";
 import DocumentAttachment from "./DocumentAttachment";
 import Video from "@/Components/Video";
+import MessageToolbar from "./MessageToolbar";
 
 export default function Message({ message, user, hasChanged, index }) {
     const attachments = message.attachments || [];
@@ -34,10 +35,11 @@ export default function Message({ message, user, hasChanged, index }) {
 
     return (
         <div
-            className={`message-container pl-8 pb-2  break-all hover:bg-white/10 ${
+            className={`message-container pl-8 pb-2 relative break-all group hover:bg-white/10 ${
                 hasChanged || index == 0 ? "pt-4" : "mt-0"
             }`}
         >
+            <MessageToolbar message={message}/>
             {hasChanged || index == 0 ? (
                 <Avatar src={user.avatar_url} className="w-10 h-10" noStatus={true} />
             ) : (

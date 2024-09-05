@@ -60,15 +60,18 @@ export default function ChatArea() {
     }
     const groupedMessages = useMemo(() => {
         const gMessages = groupMessagesByDate(messages);
-
+        const currentDate = formatDDMMYYY(new Date());
         return Object.keys(gMessages)
             .sort((a, b) => {
                 return compareDateTime(a, b);
             })
-            .map((key) => ({
-                date: formatDDMMYYY(new Date(key)),
-                mgs: gMessages[key],
-            }));
+            .map((key) => {
+                const formatedDate = formatDDMMYYY(new Date(key));
+                return {
+                    date: formatedDate == currentDate ? "Today" : formatedDate,
+                    mgs: gMessages[key],
+                };
+            });
     }, [messages]);
     useEffect(() => {
         setMessages(initMessages);
