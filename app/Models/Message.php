@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Message extends Model
 {
     use HasFactory;
-    protected $fillable = ['content', 'user_id', 'channel_id'];
+    protected $fillable = ['content', 'user_id', 'channel_id','created_at'];
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

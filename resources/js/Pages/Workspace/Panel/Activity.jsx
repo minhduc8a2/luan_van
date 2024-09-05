@@ -10,13 +10,16 @@ import { FiHeadphones } from "react-icons/fi";
 import Avatar from "@/Components/Avatar";
 import { useDispatch, useSelector } from "react-redux";
 import { UTCToDateTime } from "@/helpers/dateTimeHelper";
-import { setAsRead , setAsView} from "@/Store/activitySlice";
+import { setAsRead, setAsView } from "@/Store/activitySlice";
+import { toggleHuddle } from "@/Store/huddleSlice";
 export default function Activity() {
-    const { auth } = usePage().props;
+    const { auth, workspace: currentWorkspace } = usePage().props;
     const { notifications } = useSelector((state) => state.activity);
     const { type: panelType } = useSelector((state) => state.panel);
+    const { channel: huddleChannel } = useSelector((state) => state.huddle);
+
     const dispatch = useDispatch();
-    function handleNotificationClick(notification) {
+    function handleNotificationClick(notification, channel, workspace) {
         if (notification.view_at == null)
             router.post(
                 route("notifications.mark_view", notification.id),
@@ -26,6 +29,7 @@ export default function Activity() {
                     preserveScroll: true,
                     onSuccess: () => {
                         dispatch(setAsView(notification.id));
+                        handleNotificationClickedPart(channel, notification);
                     },
                 }
             );
@@ -52,6 +56,57 @@ export default function Activity() {
             }
         };
     }, [panelType]);
+    function handleNotificationClickedPart(channel, workspace) {
+        if (huddleChannel && huddleChannel.id != channel.id) {
+            if (confirm("Are you sure you want to switch to other huddle")) {
+                if (workspace.id != currentWorkspace.id) {
+                    router.get(
+                        route("channel.show", channel.id),
+                        {},
+                        {
+                            preserveState: true,
+                            onSuccess: () =>
+                                dispatch(
+                                    toggleHuddle({
+                                        channel,
+                                        user: auth.user,
+                                    })
+                                ),
+                        }
+                    );
+                } else
+                    dispatch(
+                        toggleHuddle({
+                            channel,
+                            user: auth.user,
+                        })
+                    );
+            }
+        } else {
+            if (workspace.id != currentWorkspace.id) {
+                router.get(
+                    route("channel.show", channel.id),
+                    {},
+                    {
+                        preserveState: true,
+                        onSuccess: () =>
+                            dispatch(
+                                toggleHuddle({
+                                    channel,
+                                    user: auth.user,
+                                })
+                            ),
+                    }
+                );
+            } else
+                dispatch(
+                    toggleHuddle({
+                        channel,
+                        user: auth.user,
+                    })
+                );
+        }
+    }
     return (
         <div className="bg-secondary flex flex-col max-h-full min-h-0 rounded-l-lg rounded-s-lg pb-4">
             <div className="flex justify-between items-end p-4">
@@ -83,9 +138,13 @@ export default function Activity() {
                                             ? ""
                                             : "bg-primary-lighter/15"
                                     }`}
-                                    onClick={() =>
-                                        handleNotificationClick(notification)
-                                    }
+                                    onClick={() => {
+                                        handleNotificationClick(
+                                            notification,
+                                            channel,
+                                            workspace
+                                        );
+                                    }}
                                 >
                                     <div className="flex gap-x-2 items-center mb-4">
                                         <FiHeadphones />
