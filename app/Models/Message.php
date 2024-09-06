@@ -31,4 +31,9 @@ class Message extends Model
     {
         return $this->hasOne(Thread::class);
     }
+
+    public function reactions(): HasMany
+    {
+        return $this->hasMany(Reaction::class);
+    }
 }

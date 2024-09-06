@@ -29,6 +29,7 @@ use App\Http\Controllers\WorkspaceController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Auth\ProviderController;
+use App\Http\Controllers\ReactionController;
 
 Route::get('/', function (Request $request) {
     return Inertia::render('Welcome', [
@@ -80,6 +81,9 @@ require __DIR__ . '/auth.php';
 Route::post("/{workspace}/invitation_link", [InvitationController::class, 'store'])->name('invitation.store');
 Route::post("/{workspace}/invitation_mail", [InvitationController::class, 'storeAndSendInvitationMail'])->name('invitation.mail');
 Route::get("/invitations/{code}", [InvitationController::class, 'index'])->name('invitation.index');
-Route::get('/mailable', function () {
-    return new  InvitationMail("https://google.com", "company A", "A", "B");
-});
+
+Route::post("/channels/{channel}/messages/{message}/reactions", [ReactionController::class, 'store'])->name('reaction.store');
+
+// Route::get('/mailable', function () {
+//     return new  InvitationMail("https://google.com", "company A", "A", "B");
+// });

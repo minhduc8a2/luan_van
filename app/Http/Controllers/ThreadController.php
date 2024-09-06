@@ -17,6 +17,6 @@ class ThreadController extends Controller
         $thread = $message->thread;
         if (!$thread) return [];
 
-        return ['messages' => $thread->messages()->with('attachments')->latest()->simplePaginate(10)];
+        return ['messages' => $thread->messages()->with(['attachments','reactions'])->latest()->simplePaginate(10)];
     }
 }

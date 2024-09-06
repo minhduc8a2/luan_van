@@ -47,7 +47,7 @@ class ChannelController extends Controller
         }
 
         if ($request->expectsJson()) {
-            return ['messages' => $channel->messages()->with('attachments')->latest()->simplePaginate(10)];
+            return ['messages' => $channel->messages()->with(['attachments', 'reactions'])->latest()->simplePaginate(10)];
         }
 
         $workspace = $channel->workspace;
@@ -77,7 +77,7 @@ class ChannelController extends Controller
             'workspaces' => $workspaces,
             "directChannels" => $directChannels->load("users"),
             'selfChannel' => $selfChannel,
-            'messages' => $channel->messages()->with('attachments')->latest()->simplePaginate(10),
+            'messages' => $channel->messages()->with(['attachments', 'reactions'])->latest()->simplePaginate(10),
             'channelUsers' => $channel->users,
             'notifications' => $notifications
         ]);

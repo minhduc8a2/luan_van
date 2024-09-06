@@ -11,11 +11,13 @@ import { AiOutlineZoomOut } from "react-icons/ai";
 import { MdOutlineRotate90DegreesCcw } from "react-icons/md";
 import { IoMdCloudDownload } from "react-icons/io";
 import { useState } from "react";
-
+import { LuSmilePlus } from "react-icons/lu";
 import FileItem from "@/Components/FileItem";
 import DocumentAttachment from "./DocumentAttachment";
 import Video from "@/Components/Video";
 import MessageToolbar from "./MessageToolbar";
+import { router, usePage } from "@inertiajs/react";
+import { findNativeEmoji } from "@/helpers/reactionHelper";
 
 export default function Message({
     message,
@@ -24,7 +26,9 @@ export default function Message({
     index,
     threadStyle = false,
 }) {
-    const attachments = message.attachments || [];
+    const { auth, channel } = usePage().props;
+    const attachments = message.attachments;
+    const [reactions, setReactions] = useState(message.reactions);
     const imageAttachments = [];
     const videoAttachments = [];
     const documentAttachments = [];
@@ -37,14 +41,38 @@ export default function Message({
         else otherAttachments.push(attachment);
     });
     const [openOverlay, setOpenOverlay] = useState(false);
-
+    function reactToMessage(emoji) {
+        router.post(
+            route("reaction.store", {
+                channel: channel.id,
+                message: message.id,
+            }),
+            {
+                emoji_id: emoji.id,
+            },
+            {
+                preserveScroll: true,
+                preserveState: true,
+                onSuccess: () => {
+                    setReactions((pre) => [
+                        ...pre,
+                        { emoji_id: emoji.id, user_id: auth.user.id },
+                    ]);
+                },
+            }
+        );
+    }
     return (
         <div
             className={`message-container pl-8 pr-4 pb-2 relative break-all group hover:bg-white/10 ${
                 hasChanged || index == 0 ? "pt-4" : "mt-0"
             }`}
         >
-            <MessageToolbar message={message} threadStyle={threadStyle} />
+            <MessageToolbar
+                message={message}
+                threadStyle={threadStyle}
+                reactToMessage={reactToMessage}
+            />
             {hasChanged || index == 0 ? (
                 <Avatar
                     src={user.avatar_url}
@@ -201,6 +229,21 @@ export default function Message({
                         ))}
                     </div>
                 )}
+                <div className="flex gap-x-2 mt-4 items-center">
+                    {reactions.map((reaction) => (
+                        <div className="bg-white/15 rounded-full px-[6px] flex items-center gap-x-1 py-[2px]">
+                            <div className="text-sm">
+                                {findNativeEmoji(reaction.emoji_id)}
+                            </div>
+                            <div className="text-sm w-2 font-semibold">1</div>
+                        </div>
+                    ))}
+                    {reactions.length > 0 && (
+                        <div className="bg-white/15 rounded-full px-[8px] flex items-center gap-x-1 py-[4px]">
+                            <LuSmilePlus />
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );

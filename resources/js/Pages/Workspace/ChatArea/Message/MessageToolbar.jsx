@@ -9,7 +9,8 @@ import data from "@emoji-mart/data";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { setThreadMessage } from "@/Store/threadSlice";
-export default function MessageToolbar({ message, threadStyle = false }) {
+export default function MessageToolbar({ message, threadStyle = false , reactToMessage}) {
+    console.log(data);
     const dispatch = useDispatch();
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     return (
@@ -75,9 +76,10 @@ export default function MessageToolbar({ message, threadStyle = false }) {
                                             <EmojiPicker
                                                 data={data}
                                                 onEmojiSelect={(emoji) => {
-                                                    console.log(emoji);
+                                                   
                                                     close();
                                                     setShowEmojiPicker(false);
+                                                    reactToMessage(emoji)
                                                 }}
                                             />
                                         )}
