@@ -22,7 +22,7 @@ class MessageFactory extends Factory
             "content" => Helper::contentToJSONContent(fake()->sentence()),
             "user_id" => 1,
             "channel_id" => 1,
-            "created_at" => Carbon::now()->subDays(random_int(1, 10))
+            "created_at" => Carbon::now()->subDays(random_int(1, 100))
         ];
     }
 }

@@ -1,5 +1,5 @@
 import React from "react";
-import { UTCToTime } from "@/helpers/dateTimeHelper";
+import { UTCToDateTime, UTCToTime } from "@/helpers/dateTimeHelper";
 import { generateHTML } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import Avatar from "@/Components/Avatar";
@@ -12,13 +12,18 @@ import { MdOutlineRotate90DegreesCcw } from "react-icons/md";
 import { IoMdCloudDownload } from "react-icons/io";
 import { useState } from "react";
 
-
 import FileItem from "@/Components/FileItem";
 import DocumentAttachment from "./DocumentAttachment";
 import Video from "@/Components/Video";
 import MessageToolbar from "./MessageToolbar";
 
-export default function Message({ message, user, hasChanged, index }) {
+export default function Message({
+    message,
+    user,
+    hasChanged,
+    index,
+    threadStyle = false,
+}) {
     const attachments = message.attachments || [];
     const imageAttachments = [];
     const videoAttachments = [];
@@ -39,18 +44,26 @@ export default function Message({ message, user, hasChanged, index }) {
                 hasChanged || index == 0 ? "pt-4" : "mt-0"
             }`}
         >
-            <MessageToolbar message={message}/>
+            <MessageToolbar message={message} />
             {hasChanged || index == 0 ? (
-                <Avatar src={user.avatar_url} className="w-10 h-10" noStatus={true} />
+                <Avatar
+                    src={user.avatar_url}
+                    className="w-10 h-10"
+                    noStatus={true}
+                />
             ) : (
                 <div></div>
             )}
             <div className="mx-3">
                 {hasChanged || index == 0 ? (
                     <div className="flex gap-x-2 items-end">
-                        <div className="text-base font-bold leading-tight">{user.name}</div>
+                        <div className="text-base font-bold leading-tight">
+                            {user.name}
+                        </div>
                         <span className="text-xs leading-tight text-white/75 font-extralight">
-                            {UTCToTime(message.updated_at)}
+                            {threadStyle
+                                ? UTCToDateTime(message.updated_at)
+                                : UTCToTime(message.updated_at)}
                         </span>
                     </div>
                 ) : (

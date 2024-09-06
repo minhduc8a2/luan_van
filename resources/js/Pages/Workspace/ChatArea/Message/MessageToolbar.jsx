@@ -7,7 +7,10 @@ import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
 import { CiFaceSmile } from "react-icons/ci";
 import data from "@emoji-mart/data";
 import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { setThreadMessage } from "@/Store/threadSlice";
 export default function MessageToolbar({ message }) {
+    const dispatch = useDispatch()
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     return (
         <div
@@ -22,9 +25,9 @@ export default function MessageToolbar({ message }) {
                     </div>
                 }
             >
-                <div className="rounded p-2 hover:bg-white/15">
+                <button className="rounded p-2 hover:bg-white/15" onClick={()=>dispatch(setThreadMessage(message))}>
                     <BiMessageRoundedDetail className="text-lg" />
-                </div>
+                </button>
             </Tooltip>
             <Tooltip
                 content={

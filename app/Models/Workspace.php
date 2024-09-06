@@ -62,7 +62,7 @@ class Workspace extends Model
             }
         }
         //create self channel
-        $newChannel = $this->channels()->create(['user_id' => $user->id, 'name' => $user->name, "type" => "SELF"]);
+        $newChannel = $this->channels()->create(['user_id' => $user->id, 'name' => $user->name, "description" => "This is your space. Draft messages, list your to-dos, or keep links and files handy. You can also talk to yourself here, but please bear in mind you’ll have to supply both sides of the conversation.", "type" => "SELF"]);
         $user->channels()->attach($newChannel->id);
     }
     public   function isWorkspaceMemberByEmail(string $email): bool

@@ -4,6 +4,7 @@ import sideBarReducer from "@/Store/sideBarSlice";
 import OnlineStatusReducer from "./onlineStatusSlice";
 import panelReducer from "./panelSlice";
 import activityReducer from "./activitySlice";
+import threadReducer from "./threadSlice";
 export const makeStore = () => {
     return configureStore({
         reducer: {
@@ -12,6 +13,7 @@ export const makeStore = () => {
             onlineStatus: OnlineStatusReducer,
             panel: panelReducer,
             activity: activityReducer,
+            thread: threadReducer,
         },
     });
 };
