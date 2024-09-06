@@ -22,12 +22,12 @@ export default function IconButton({
             content={
                 (description &&
                     (!(selfActive ? active : show) || !activable) && (
-                        <p className="text-sm max-w-36">{description}</p>
+                        <p className="text-sm  whitespace-nowrap">{description}</p>
                     )) ||
                 (activeDescription &&
                     (selfActive ? active : show) &&
                     activable && (
-                        <p className="text-sm max-w-36">{activeDescription}</p>
+                        <p className="text-sm whitespace-nowrap">{activeDescription}</p>
                     ))
             }
         >

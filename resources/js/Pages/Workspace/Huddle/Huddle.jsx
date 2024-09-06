@@ -460,9 +460,9 @@ export default function Huddle() {
                 >
                     {({ close }) => <HuddleInvitation close={close}/>}
                 </OverlayPanel>
-                <Popover className="relative">
-                    <PopoverButton>
-                        {" "}
+                <Popover className="relative ">
+                    <PopoverButton className="block">
+                       
                         <IconButton
                             description="More options"
                             activable={false}

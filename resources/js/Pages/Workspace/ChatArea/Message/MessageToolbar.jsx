@@ -21,7 +21,7 @@ export default function MessageToolbar({ message, threadStyle = false }) {
             {!threadStyle && (
                 <Tooltip
                     content={
-                        <div className="min-w-24 p-1 text-center text-sm ">
+                        <div className="whitespace-nowrap p-1 text-center text-sm ">
                             Reply in thread
                         </div>
                     }
@@ -36,7 +36,7 @@ export default function MessageToolbar({ message, threadStyle = false }) {
             )}
             <Tooltip
                 content={
-                    <div className="min-w-24 p-1 text-center text-sm ">
+                    <div className="whitespace-nowrap p-1 text-center text-sm ">
                         Save for later
                     </div>
                 }
@@ -47,7 +47,7 @@ export default function MessageToolbar({ message, threadStyle = false }) {
             </Tooltip>
             <Tooltip
                 content={
-                    <div className="min-w-24 p-1 text-center text-sm ">
+                    <div className="whitespace-nowrap p-1 text-center text-sm ">
                         Find a reaction
                     </div>
                 }
