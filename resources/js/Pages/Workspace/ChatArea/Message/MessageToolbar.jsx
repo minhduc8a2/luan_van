@@ -47,7 +47,9 @@ export default function MessageToolbar({ message }) {
                 <div className="rounded p-2 hover:bg-white/15">
                     <Popover className="relative flex items-center">
                         {({ open }) => {
-                            setShowEmojiPicker(open);
+                            if (open !== showEmojiPicker) {
+                                setShowEmojiPicker(open);
+                            }
                             return (
                                 <>
                                     <PopoverButton>

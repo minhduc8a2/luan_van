@@ -8,6 +8,7 @@ import { FaPlus } from "react-icons/fa6";
 import TipTapEditor from "@/Components/TipTapEditor";
 import { router, usePage } from "@inertiajs/react";
 import { useEffect, useRef, useState } from "react";
+import { InView } from "react-intersection-observer";
 import {
     compareDateTime,
     differenceInSeconds,
@@ -21,6 +22,8 @@ import { toggleHuddle } from "@/Store/huddleSlice";
 
 import { useSelector, useDispatch } from "react-redux";
 import { EditDescriptionForm } from "./EditDescriptionForm";
+import axios from "axios";
+import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
 
 export default function ChatArea() {
     const {
@@ -30,11 +33,15 @@ export default function ChatArea() {
         channelUsers,
         messages: initMessages,
     } = usePage().props;
+
     const dispatch = useDispatch();
     const { channel: huddleChannel } = useSelector((state) => state.huddle);
-
+    const [infiniteScroll, setInfiniteScroll] = useState(false);
     const messageContainerRef = useRef(null);
-    const [messages, setMessages] = useState(initMessages);
+    const [nextPageUrl, setNextPageUrl] = useState(initMessages.next_page_url);
+    const [messages, setMessages] = useState(initMessages?.data);
+    const [loadingMessages, setLoadingMessages] = useState(false);
+    const prevScrollHeightRef = useRef(0);
     function onSubmit(content, fileObjects) {
         console.log("submit on channel: ", channel);
         if (content == "<p></p>" && fileObjects.length == 0) return;
@@ -74,8 +81,10 @@ export default function ChatArea() {
             });
     }, [messages]);
     useEffect(() => {
-        setMessages(initMessages);
+        setMessages(initMessages?.data);
+        setNextPageUrl(initMessages?.next_page_url);
     }, [channel.id]);
+
     useEffect(() => {
         console.log("Channel: ", channel.name);
         Echo.join(`channels.${channel.id}`)
@@ -99,8 +108,18 @@ export default function ChatArea() {
     }, [channel.id]);
     useEffect(() => {
         if (messageContainerRef.current)
-            messageContainerRef.current.scrollTop =
-                messageContainerRef.current.scrollHeight;
+            if (!infiniteScroll) {
+                messageContainerRef.current.scrollTop =
+                    messageContainerRef.current.scrollHeight;
+            } else {
+                setInfiniteScroll(false);
+                const newScrollHeight =
+                    messageContainerRef.current.scrollHeight;
+                messageContainerRef.current.scrollTop =
+                    newScrollHeight -
+                    prevScrollHeightRef.current +
+                    messageContainerRef.current.scrollTop;
+            }
     }, [messages]);
 
     function handleHuddleButtonClicked() {
@@ -206,7 +225,37 @@ export default function ChatArea() {
                         </div>
                     </div>
                 </div>
-                {groupedMessages.map(({ date, mgs }) => {
+                {loadingMessages && (
+                    <div className="flex justify-center items-center">
+                        <div className="h-12 w-12 relative">
+                            <OverlayLoadingSpinner spinerStyle="border-link" />
+                        </div>
+                        Loading messages ...
+                    </div>
+                )}
+                <InView
+                    onChange={(inView, entry) => {
+                        if (inView && nextPageUrl) {
+                            setInfiniteScroll(true);
+                            setLoadingMessages(true);
+                            prevScrollHeightRef.current =
+                                messageContainerRef.current.scrollHeight;
+                            axios.get(nextPageUrl).then((response) => {
+                                if (response.status == 200) {
+                                    setLoadingMessages(false);
+                                    setNextPageUrl(
+                                        response.data.messages.next_page_url
+                                    );
+                                    setMessages((pre) => [
+                                        ...response.data.messages.data,
+                                        ...pre,
+                                    ]);
+                                }
+                            });
+                        }
+                    }}
+                ></InView>
+                {groupedMessages.map(({ date, mgs }, pIndex) => {
                     return (
                         <div className="relative pb-4" key={date}>
                             <div className="border-t border-white/15 translate-y-3"></div>

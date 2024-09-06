@@ -45,6 +45,11 @@ class ChannelController extends Controller
         if ($request->user()->cannot('view', $channel)) {
             return  abort(403);
         }
+
+        if ($request->expectsJson()) {
+            return ['messages' => $channel->messages()->with('attachments')->latest()->simplePaginate(10)];
+        }
+
         $workspace = $channel->workspace;
 
 
@@ -62,6 +67,8 @@ class ChannelController extends Controller
         $workspaces = $request->user()->workspaces;
         $users = $workspace->users;
         $notifications = $user->notifications;
+
+
         return Inertia::render("Workspace/Index", [
             'workspace' => $workspace,
             'channels' => $channels,
@@ -70,7 +77,7 @@ class ChannelController extends Controller
             'workspaces' => $workspaces,
             "directChannels" => $directChannels->load("users"),
             'selfChannel' => $selfChannel,
-            'messages' => $channel->messages->load('attachments'),
+            'messages' => $channel->messages()->with('attachments')->latest()->simplePaginate(10),
             'channelUsers' => $channel->users,
             'notifications' => $notifications
         ]);
@@ -92,17 +99,18 @@ class ChannelController extends Controller
         //
     }
 
-    public function editDescription(Request $request, Channel $channel){
+    public function editDescription(Request $request, Channel $channel)
+    {
         if ($request->user()->cannot('update', $channel)) {
             return  abort(403);
         }
-        $validated = $request->validate(['description'=>"string"]);
+        $validated = $request->validate(['description' => "string"]);
         try {
             $channel->description = $validated['description'];
             $channel->save();
-            return back()->with('data',['statusCode'=>201]);
+            return back()->with('data', ['statusCode' => 201]);
         } catch (\Throwable $th) {
-            return back()->with('data',['statusCode'=>500]);
+            return back()->with('data', ['statusCode' => 500]);
         }
     }
     /**
