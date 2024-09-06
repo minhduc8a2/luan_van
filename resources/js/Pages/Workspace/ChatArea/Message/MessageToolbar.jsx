@@ -9,8 +9,8 @@ import data from "@emoji-mart/data";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { setThreadMessage } from "@/Store/threadSlice";
-export default function MessageToolbar({ message }) {
-    const dispatch = useDispatch()
+export default function MessageToolbar({ message, threadStyle = false }) {
+    const dispatch = useDispatch();
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     return (
         <div
@@ -18,17 +18,22 @@ export default function MessageToolbar({ message }) {
                 showEmojiPicker ? "flex" : "hidden"
             }`}
         >
-            <Tooltip
-                content={
-                    <div className="min-w-24 p-1 text-center text-sm ">
-                        Reply in thread
-                    </div>
-                }
-            >
-                <button className="rounded p-2 hover:bg-white/15" onClick={()=>dispatch(setThreadMessage(message))}>
-                    <BiMessageRoundedDetail className="text-lg" />
-                </button>
-            </Tooltip>
+            {!threadStyle && (
+                <Tooltip
+                    content={
+                        <div className="min-w-24 p-1 text-center text-sm ">
+                            Reply in thread
+                        </div>
+                    }
+                >
+                    <button
+                        className="rounded p-2 hover:bg-white/15"
+                        onClick={() => dispatch(setThreadMessage(message))}
+                    >
+                        <BiMessageRoundedDetail className="text-lg" />
+                    </button>
+                </Tooltip>
+            )}
             <Tooltip
                 content={
                     <div className="min-w-24 p-1 text-center text-sm ">

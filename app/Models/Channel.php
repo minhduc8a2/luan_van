@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
@@ -29,7 +30,7 @@ class Channel extends Model
                 return "Other channels are for work. This one’s just for fun. Get to know your teammates and show your lighter side. 🎈";
 
             default:
-                return "This channel is for everything #".$channelName.". Hold meetings, share docs, and make decisions together with your team.";
+                return "This channel is for everything #" . $channelName . ". Hold meetings, share docs, and make decisions together with your team.";
         }
     }
     public function user(): BelongsTo
@@ -44,8 +45,8 @@ class Channel extends Model
     {
         return $this->belongsToMany(User::class);
     }
-    public function messages(): HasMany
+    public function messages(): MorphMany
     {
-        return $this->hasMany(Message::class);
+        return $this->morphMany(Message::class, 'messagable');
     }
 }

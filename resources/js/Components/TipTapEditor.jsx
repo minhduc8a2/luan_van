@@ -159,15 +159,19 @@ import EmojiPicker from "@emoji-mart/react";
 import { CiFaceSmile } from "react-icons/ci";
 import { IoMdSend } from "react-icons/io";
 import { FaAngleDown } from "react-icons/fa6";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect, useId } from "react";
 import { router, usePage } from "@inertiajs/react";
 import { isImage } from "@/helpers/fileHelpers";
 import SquareImage from "./SquareImage";
 import FileItem from "./FileItem";
 
-export default function TipTapEditor({ onSubmit, onFilePicked }) {
+export default function TipTapEditor({
+    onSubmit,
+    onFilePicked,
+    message = null,
+}) {
     const { auth, channel } = usePage().props;
-
+    const inputId = useId();
     const serverResponseFileList = useRef([]);
     const [fileList, setFileList] = useState([]);
     const abortControllers = useRef([]);
@@ -183,6 +187,9 @@ export default function TipTapEditor({ onSubmit, onFilePicked }) {
             (f) => f.name != file.name
         );
     }
+    useEffect(() => {
+        console.log("Tiptap editor new instance created");
+    }, []);
     function resetState() {
         setFileList([]);
         serverResponseFileList.current = [];
@@ -294,7 +301,7 @@ export default function TipTapEditor({ onSubmit, onFilePicked }) {
             //     console.log(editor.getJSON());
             // },
         },
-        [channel.id]
+        message ? [channel.id, message.id] : [channel.id]
     );
 
     return (
@@ -339,7 +346,7 @@ export default function TipTapEditor({ onSubmit, onFilePicked }) {
                     <div className="">
                         <label
                             className="bg-white/10 rounded-full w-fit p-2 block"
-                            htmlFor="file_upload"
+                            htmlFor={inputId}
                         >
                             {" "}
                             <FaPlus className="text-sm opacity-75" />
@@ -348,7 +355,7 @@ export default function TipTapEditor({ onSubmit, onFilePicked }) {
                             ref={inputFileRef}
                             type="file"
                             name=""
-                            id="file_upload"
+                            id={inputId}
                             multiple
                             onChange={handleFilePicked}
                             hidden

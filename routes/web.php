@@ -21,13 +21,14 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Application;
 use Laravel\Socialite\Facades\Socialite;
 use App\Http\Controllers\HuddleController;
+use App\Http\Controllers\ThreadController;
 use App\Http\Controllers\ChannelController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WorkspaceController;
 use App\Http\Controllers\InvitationController;
-use App\Http\Controllers\Auth\ProviderController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\Auth\ProviderController;
 
 Route::get('/', function (Request $request) {
     return Inertia::render('Welcome', [
@@ -49,10 +50,12 @@ Route::middleware('auth')->group(function () {
     Route::get("/workspaces/{workspace}/direct_channels", [WorkspaceController::class, 'getDirectChannels'])->name('workspace.direct_channels');
     Route::get("/channels/{channel}", [ChannelController::class, 'show'])->name('channel.show');
     Route::post("/channels/{channel}/edit_description", [ChannelController::class, 'editDescription'])->name("channel.edit_description");
-    Route::post("/channels/{channel}/message", [MessageController::class, 'store'])->name('message.store');
+    Route::post("/channels/{channel}/messages", [MessageController::class, 'store'])->name('message.store');
+    Route::post("/channels/{channel}/messages/{message}", [MessageController::class, 'storeThreadMessage'])->name('thread_message.store');
+    Route::get("/channels/{channel}/messages/{message}/thread_messages", [ThreadController::class, 'getMessages'])->name("thread.messages");
     Route::post("/channels/{channel}/huddle_invitation", [HuddleController::class, 'invite'])->name("huddle.invitation");
-    Route::post("/notifications/mark_read",[NotificationController::class,"markRead"])->name("notifications.mark_read");
-    Route::post("/notifications/{notificationId}/mark_view",[NotificationController::class,"markView"])->name("notifications.mark_view");
+    Route::post("/notifications/mark_read", [NotificationController::class, "markRead"])->name("notifications.mark_read");
+    Route::post("/notifications/{notificationId}/mark_view", [NotificationController::class, "markView"])->name("notifications.mark_view");
     Route::post("/upload_file/{user}", function (Request $request, User $user) {
 
         $validated = $request->validate([

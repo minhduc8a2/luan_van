@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Helpers\Helper;
+use App\Models\Channel;
 use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -21,7 +22,8 @@ class MessageFactory extends Factory
         return [
             "content" => Helper::contentToJSONContent(fake()->sentence()),
             "user_id" => 1,
-            "channel_id" => 1,
+            "messagable_id" => 1,
+            "messagable_type" => Channel::class,
             "created_at" => Carbon::now()->subDays(random_int(1, 100))
         ];
     }

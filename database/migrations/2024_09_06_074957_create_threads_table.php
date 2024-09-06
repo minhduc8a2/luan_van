@@ -11,12 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('messages', function (Blueprint $table) {
+        Schema::create('threads', function (Blueprint $table) {
             $table->id();
-            $table->string('content',12000);
-            $table->unsignedBigInteger('messagable_id'); 
-            $table->string('messagable_type');   
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('message_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }
@@ -26,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('messages');
+        Schema::dropIfExists('threads');
     }
 };

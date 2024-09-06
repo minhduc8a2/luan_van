@@ -10,6 +10,8 @@ use App\Models\Attachment;
 use App\Events\MessageEvent;
 use Illuminate\Http\Request;
 use App\Broadcasting\MessageChannel;
+use App\Events\ThreadMessageEvent;
+use App\Models\Thread;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Broadcast;
 
@@ -51,7 +53,12 @@ class MessageController extends Controller
             $editor = new Editor();
             $content = $editor->sanitize($content);
             $JSONContent = $editor->setContent($content)->getJSON();
-            $message = Message::create(['content' => $JSONContent, 'channel_id' => $channel->id, 'user_id' => $request->user()->id]);
+            $message = Message::create([
+                'content' => $JSONContent,
+                'messagable_id' => $channel->id,
+                'messagable_type' => Channel::class,
+                'user_id' => $request->user()->id
+            ]);
             $fileObjects = [];
             foreach ($request->fileObjects as $i => $fileObject) {
                 $newPath = str_replace("temporary", "public", $fileObject['path']);
@@ -64,6 +71,41 @@ class MessageController extends Controller
             if (isset($message)) {
 
                 broadcast(new MessageEvent($channel, $message->load('attachments')))->toOthers();
+            }
+        }
+    }
+
+    public function storeThreadMessage(Request $request, Channel $channel, Message $message)
+    {
+        if ($request->user()->cannot('create', [Message::class, $channel])) return abort(403);
+        $content = $request->content;
+        if (isset($content)) {
+            $editor = new Editor();
+            $content = $editor->sanitize($content);
+            $JSONContent = $editor->setContent($content)->getJSON();
+            //check thread is created already
+            $thread = $message->thread;
+            if (!$thread) {
+                $thread = $message->thread()->create([]);
+            }
+            $newMessage = Message::create([
+                'content' => $JSONContent,
+                'messagable_id' => $thread->id,
+                'messagable_type' => Thread::class,
+                'user_id' => $request->user()->id
+            ]);
+            $fileObjects = [];
+            foreach ($request->fileObjects as $i => $fileObject) {
+                $newPath = str_replace("temporary", "public", $fileObject['path']);
+                Storage::move($fileObject['path'], $newPath);
+                $fileObject['path'] = $newPath;
+                array_push($fileObjects, $fileObject);
+            }
+
+            $newMessage->attachments()->saveMany($this->createAttachments($fileObjects));
+            if (isset($newMessage)) {
+
+                broadcast(new ThreadMessageEvent($message, $newMessage->load('attachments')))->toOthers();
             }
         }
     }

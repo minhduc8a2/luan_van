@@ -40,11 +40,11 @@ export default function Message({
 
     return (
         <div
-            className={`message-container pl-8 pb-2 relative break-all group hover:bg-white/10 ${
+            className={`message-container pl-8 pr-4 pb-2 relative break-all group hover:bg-white/10 ${
                 hasChanged || index == 0 ? "pt-4" : "mt-0"
             }`}
         >
-            <MessageToolbar message={message} />
+            <MessageToolbar message={message} threadStyle={threadStyle} />
             {hasChanged || index == 0 ? (
                 <Avatar
                     src={user.avatar_url}

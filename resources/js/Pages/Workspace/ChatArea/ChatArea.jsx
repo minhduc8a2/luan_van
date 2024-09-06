@@ -42,6 +42,7 @@ export default function ChatArea() {
     const [nextPageUrl, setNextPageUrl] = useState(initMessages.next_page_url);
     const [messages, setMessages] = useState(initMessages?.data);
     const [loadingMessages, setLoadingMessages] = useState(false);
+    const channelConnectionRef = useRef(null);
     const prevScrollHeightRef = useRef(0);
     function onSubmit(content, fileObjects) {
         console.log("submit on channel: ", channel);
@@ -87,8 +88,8 @@ export default function ChatArea() {
     }, [channel.id]);
 
     useEffect(() => {
-        console.log("Channel: ", channel.name);
-        Echo.join(`channels.${channel.id}`)
+        channelConnectionRef.current = Echo.join(`channels.${channel.id}`);
+        channelConnectionRef.current
             .here((users) => {})
             .joining((user) => {
                 console.log("join", user, channel.name);
@@ -104,6 +105,7 @@ export default function ChatArea() {
                 console.error(error);
             });
         return () => {
+            channelConnectionRef.current = null;
             Echo.leave(`channels.${channel.id}`);
         };
     }, [channel.id]);
