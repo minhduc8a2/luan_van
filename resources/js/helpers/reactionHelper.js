@@ -6,7 +6,6 @@ export function findNativeEmoji(emojiId) {
 export function groupReactions(reactions, channelUsers, currentUser) {
     return Object.values(
         reactions.reduce((pre, reaction) => {
-            console.log("pre",pre);
             const user = channelUsers.find(
                 (user) => user.id === reaction.user_id
             );

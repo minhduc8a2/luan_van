@@ -72,7 +72,7 @@ export default function Thread() {
             }
     }, [messages]);
     function onSubmit(content, fileObjects) {
-        console.log(content);
+        
 
         if (content == "<p></p>" && fileObjects.length == 0) return;
         router.post(

@@ -11,15 +11,14 @@ import { AiOutlineZoomOut } from "react-icons/ai";
 import { MdOutlineRotate90DegreesCcw } from "react-icons/md";
 import { IoMdCloudDownload } from "react-icons/io";
 import { useState } from "react";
-import { LuSmilePlus } from "react-icons/lu";
 import FileItem from "@/Components/FileItem";
 import DocumentAttachment from "./DocumentAttachment";
 import Video from "@/Components/Video";
 import MessageToolbar from "./MessageToolbar";
 import { router, usePage } from "@inertiajs/react";
 import { groupReactions } from "@/helpers/reactionHelper";
-import Tooltip from "@/Components/Tooltip";
 import { useEffect } from "react";
+import Reactions from "./Reactions";
 export default function Message({
     message,
     user,
@@ -257,42 +256,7 @@ export default function Message({
                         ))}
                     </div>
                 )}
-                <div className="flex gap-x-2 mt-4 items-center">
-                    {groupedReactions.map((reaction) => (
-                        <Tooltip
-                            key={reaction.emoji_id}
-                            content={
-                                <ul className="whitespace-nowrap p-1">
-                                    {reaction.users.map((user) => (
-                                        <li key={user.id} className="text-xs">
-                                            {user.name}
-                                        </li>
-                                    ))}
-                                </ul>
-                            }
-                        >
-                            <button
-                                className={`${
-                                    reaction.hasReacted
-                                        ? "bg-blue-500/25"
-                                        : "bg-white/15"
-                                } rounded-full px-[6px] flex items-center gap-x-1 py-[2px]`}
-                            >
-                                <div className="text-sm">
-                                    {reaction.nativeEmoji}
-                                </div>
-                                <div className="text-sm w-2 font-semibold">
-                                    {reaction.users.length}
-                                </div>
-                            </button>
-                        </Tooltip>
-                    ))}
-                    {groupedReactions.length > 0 && (
-                        <div className="bg-white/15 rounded-full px-[8px] flex items-center gap-x-1 py-[4px]">
-                            <LuSmilePlus />
-                        </div>
-                    )}
-                </div>
+                <Reactions groupedReactions={groupedReactions}  reactToMessage={reactToMessage}/>
             </div>
         </div>
     );

@@ -105,7 +105,7 @@ class MessageController extends Controller
             $newMessage->attachments()->saveMany($this->createAttachments($fileObjects));
             if (isset($newMessage)) {
 
-                broadcast(new ThreadMessageEvent($message, $newMessage->load('attachments')))->toOthers();
+                broadcast(new ThreadMessageEvent($message, $newMessage->load(['attachments','reactions'])))->toOthers();
             }
         }
     }
