@@ -5,7 +5,11 @@ import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
 import EmojiPicker from "@emoji-mart/react";
 import data from "@emoji-mart/data";
 import { useState } from "react";
-export default function Reactions({ groupedReactions, reactToMessage }) {
+export default function Reactions({
+    groupedReactions,
+    reactToMessage,
+    removeMessageReaction,
+}) {
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
     return (
@@ -24,6 +28,13 @@ export default function Reactions({ groupedReactions, reactToMessage }) {
                     }
                 >
                     <button
+                        onClick={() => {
+                            if (reaction.hasReacted) {
+                               
+                                removeMessageReaction(reaction.emoji_id);
+                            }
+                            else reactToMessage(reaction.emoji_id)
+                        }}
                         className={`${
                             reaction.hasReacted
                                 ? "bg-blue-500/25"
@@ -76,7 +87,7 @@ export default function Reactions({ groupedReactions, reactToMessage }) {
                                                                 false
                                                             );
                                                             reactToMessage(
-                                                                emoji
+                                                                emoji.id
                                                             );
                                                         }}
                                                     />

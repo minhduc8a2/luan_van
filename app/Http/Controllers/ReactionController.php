@@ -40,4 +40,27 @@ class ReactionController extends Controller
             return back()->withErrors(["fail" => "Failed to make reaction on the message"]);
         }
     }
+
+    public function delete(Request $request, Channel $channel, Message $message)
+    {
+
+        if ($request->user()->cannot('delete', [Reaction::class, $channel])) {
+            abort(403);
+        }
+        $validated = $request->validate([
+            'emoji_id' => "required:string"
+        ]);
+
+        try {
+            $forCheckExistedReaction = $message->reactions()->where("user_id", "=", $request->user()->id)->where("emoji_id", "=", $validated['emoji_id'])->first();
+
+            if ($forCheckExistedReaction)
+                $forCheckExistedReaction->delete();
+            else  return back()->withErrors(["fail" => "Already to delete the reaction on the message"]);
+
+            return back();
+        } catch (\Throwable $th) {
+            return back()->withErrors(["fail" => "Failed to make reaction on the message"]);
+        }
+    }
 }

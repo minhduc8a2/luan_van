@@ -47,30 +47,49 @@ export default function Message({
     const groupedReactions = useMemo(() => {
         return groupReactions(reactions, channelUsers, auth.user);
     }, [reactions]);
-
+    useEffect(() => {
+        setReactions([...message.reactions]);
+    }, [message]);
     useEffect(() => {
         if (
             newMessageReactionReceive &&
             newMessageReactionReceive.id == message.id
         ) {
-            setReactions((pre) => [
-                ...pre,
-                {
-                    emoji_id: newMessageReactionReceive.emoji_id,
-                    user_id: newMessageReactionReceive.user_id,
-                },
-            ]);
+            if (
+                newMessageReactionReceive.method &&
+                newMessageReactionReceive.method == "DELETE"
+            ) {
+                setReactions((pre) =>
+                    pre.filter(
+                        (reaction) =>
+                            !(
+                                reaction.emoji_id ===
+                                    newMessageReactionReceive.emoji_id &&
+                                reaction.user_id ===
+                                    newMessageReactionReceive.user_id
+                            )
+                    )
+                );
+            } else
+                setReactions((pre) => [
+                    ...pre,
+                    {
+                        emoji_id: newMessageReactionReceive.emoji_id,
+                        user_id: newMessageReactionReceive.user_id,
+                    },
+                ]);
             resetNewMessageReactionReceive();
         }
     }, [newMessageReactionReceive]);
-    function reactToMessage(emoji) {
+
+    function reactToMessage(emojiId) {
         router.post(
             route("reaction.store", {
                 channel: channel.id,
                 message: message.id,
             }),
             {
-                emoji_id: emoji.id,
+                emoji_id: emojiId,
             },
             {
                 preserveScroll: true,
@@ -78,13 +97,49 @@ export default function Message({
                 onSuccess: () => {
                     setReactions((pre) => [
                         ...pre,
-                        { emoji_id: emoji.id, user_id: auth.user.id },
+                        { emoji_id: emojiId, user_id: auth.user.id },
                     ]);
                     channelConnectionRef.current.whisper("messageReaction", {
-                        emoji_id: emoji.id,
+                        method: "STORE",
+                        emoji_id: emojiId,
                         user_id: auth.user.id,
                         id: message.id,
                     });
+                },
+            }
+        );
+    }
+    function removeMessageReaction(emojiId) {
+        router.post(
+            route("reaction.delete", {
+                channel: channel.id,
+                message: message.id,
+            }),
+            {
+                emoji_id: emojiId,
+            },
+            {
+                preserveScroll: true,
+                preserveState: true,
+                onSuccess: () => {
+                    setReactions((pre) =>
+                        pre.filter(
+                            (reaction) =>
+                                !(
+                                    reaction.emoji_id === emojiId &&
+                                    reaction.user_id === auth.user.id
+                                )
+                        )
+                    );
+                    channelConnectionRef.current.whisper("messageReaction", {
+                        method: "DELETE",
+                        emoji_id: emojiId,
+                        user_id: auth.user.id,
+                        id: message.id,
+                    });
+                },
+                onError: (errors) => {
+                    console.log(errors);
                 },
             }
         );
@@ -256,7 +311,11 @@ export default function Message({
                         ))}
                     </div>
                 )}
-                <Reactions groupedReactions={groupedReactions}  reactToMessage={reactToMessage}/>
+                <Reactions
+                    groupedReactions={groupedReactions}
+                    reactToMessage={reactToMessage}
+                    removeMessageReaction={removeMessageReaction}
+                />
             </div>
         </div>
     );

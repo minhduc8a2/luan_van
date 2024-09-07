@@ -10,8 +10,11 @@ import data from "@emoji-mart/data";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { setThreadMessage } from "@/Store/threadSlice";
-export default function MessageToolbar({ message, threadStyle = false , reactToMessage}) {
-  
+export default function MessageToolbar({
+    message,
+    threadStyle = false,
+    reactToMessage,
+}) {
     const dispatch = useDispatch();
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     return (
@@ -20,6 +23,48 @@ export default function MessageToolbar({ message, threadStyle = false , reactToM
                 showEmojiPicker ? "flex" : "hidden"
             }`}
         >
+            <Tooltip
+                content={
+                    <div className="whitespace-nowrap p-1 text-center text-sm ">
+                        Completed
+                    </div>
+                }
+            >
+                <button
+                    className="rounded p-2 hover:bg-white/15"
+                    onClick={() => reactToMessage("white_check_mark")}
+                >
+                    ✅
+                </button>
+            </Tooltip>
+            <Tooltip
+                content={
+                    <div className="whitespace-nowrap p-1 text-center text-sm ">
+                        Take a look
+                    </div>
+                }
+            >
+                <button
+                    className="rounded p-2 hover:bg-white/15"
+                    onClick={() => reactToMessage("eyes")}
+                >
+                    👀
+                </button>
+            </Tooltip>
+            <Tooltip
+                content={
+                    <div className="whitespace-nowrap p-1 text-center text-sm ">
+                        Nicely done
+                    </div>
+                }
+            >
+                <button
+                    className="rounded p-2 hover:bg-white/15"
+                    onClick={() => reactToMessage("open_hands")}
+                >
+                    🤲
+                </button>
+            </Tooltip>
             {!threadStyle && (
                 <Tooltip
                     content={
@@ -77,10 +122,9 @@ export default function MessageToolbar({ message, threadStyle = false , reactToM
                                             <EmojiPicker
                                                 data={data}
                                                 onEmojiSelect={(emoji) => {
-                                                   
                                                     close();
                                                     setShowEmojiPicker(false);
-                                                    reactToMessage(emoji)
+                                                    reactToMessage(emoji.id);
                                                 }}
                                             />
                                         )}

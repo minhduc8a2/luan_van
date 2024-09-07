@@ -11,6 +11,8 @@ export function groupReactions(reactions, channelUsers, currentUser) {
             );
             const userHasReacted = reaction.user_id == currentUser.id;
             if (pre.hasOwnProperty(reaction.emoji_id)) {
+                if (!pre[reaction.emoji_id].hasReacted)
+                    pre[reaction.emoji_id].hasReacted = userHasReacted;
                 pre[reaction.emoji_id].users.push({
                     id: reaction.user_id,
                     name: user?.name,

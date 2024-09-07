@@ -1,5 +1,5 @@
 import { setThreadMessage } from "@/Store/threadSlice";
-import React from "react";
+import React, { useMemo } from "react";
 import { IoClose } from "react-icons/io5";
 import { useDispatch, useSelector } from "react-redux";
 import Message from "./Message/Message";
@@ -7,7 +7,7 @@ import { router, usePage } from "@inertiajs/react";
 import { useEffect, useState, useRef } from "react";
 import TipTapEditor from "@/Components/TipTapEditor";
 import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
-import { differenceInSeconds } from "@/helpers/dateTimeHelper";
+import { compareDateTime, differenceInSeconds } from "@/helpers/dateTimeHelper";
 export default function Thread() {
     const dispatch = useDispatch();
     const { channel } = usePage().props;
@@ -71,9 +71,12 @@ export default function Thread() {
                     messageContainerRef.current.scrollTop;
             }
     }, [messages]);
+    const sortedMessages = useMemo(() => {
+        const temp = [...messages];
+        temp.sort((a, b) => compareDateTime(a.created_at, b.created_at))
+        return temp;
+    }, [messages]);
     function onSubmit(content, fileObjects) {
-        
-
         if (content == "<p></p>" && fileObjects.length == 0) return;
         router.post(
             route("thread_message.store", {
@@ -103,18 +106,17 @@ export default function Thread() {
                     </button>
                 </div>
             </div>
-           
-            <div className="max-h-[30%] overflow-y-auto scrollbar">
 
-            <Message
-                threadStyle={true}
-                message={message}
-                user={user}
-                hasChanged={true}
-                index={0}
-            />
+            <div className="max-h-[30%] overflow-y-auto scrollbar">
+                <Message
+                    threadStyle={true}
+                    message={message}
+                    user={user}
+                    hasChanged={true}
+                    index={0}
+                />
             </div>
-           
+
             <div className="flex items-center gap-x-4 my-4">
                 <h3>{messages.length} Replies</h3>{" "}
                 <hr className="border-white/15 flex-1" />
@@ -132,7 +134,7 @@ export default function Thread() {
                 ref={messageContainerRef}
             >
                 <ul className="">
-                    {messages.map((message, index) => {
+                    {sortedMessages.map((message, index) => {
                         const user = channelUsers.filter(
                             (mem) => mem.id === message.user_id
                         )[0];

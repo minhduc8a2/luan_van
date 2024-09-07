@@ -89,9 +89,9 @@ export function groupMessagesByDate(messages) {
     }, {});
 }
 
-export function compareDateTime(dateString1, dateString2) {
+export function compareDateTime(dateString1, dateString2, desc=false) {
     const date1 = new Date(dateString1);
     const date2 = new Date(dateString2);
-   
+    if (desc) return date2.getTime() - date1.getTime();
     return date1.getTime() - date2.getTime();
 }

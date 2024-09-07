@@ -5,17 +5,6 @@ use Inertia\Inertia;
 use App\Models\Attachment;
 use App\Mail\InvitationMail;
 use Illuminate\Http\Request;
-
-Route::get('/auth/redirect', function () {
-    return Socialite::driver('github')->redirect();
-});
-
-Route::get('/auth/callback', function () {
-    $user = Socialite::driver('github')->user();
-
-    // $user->token
-});
-
 use App\Jobs\DeleteTemporaryFiles;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Application;
@@ -31,6 +20,16 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Auth\ProviderController;
 use App\Http\Controllers\ReactionController;
 
+
+Route::get('/auth/redirect', function () {
+    return Socialite::driver('github')->redirect();
+});
+
+Route::get('/auth/callback', function () {
+    $user = Socialite::driver('github')->user();
+
+    // $user->token
+});
 Route::get('/', function (Request $request) {
     return Inertia::render('Welcome', [
         "workspaces" => $request->user()->workspaces
@@ -83,6 +82,7 @@ Route::post("/{workspace}/invitation_mail", [InvitationController::class, 'store
 Route::get("/invitations/{code}", [InvitationController::class, 'index'])->name('invitation.index');
 
 Route::post("/channels/{channel}/messages/{message}/reactions", [ReactionController::class, 'store'])->name('reaction.store');
+Route::post("/channels/{channel}/messages/{message}/reactions/delete", [ReactionController::class, 'delete'])->name('reaction.delete');
 
 // Route::get('/mailable', function () {
 //     return new  InvitationMail("https://google.com", "company A", "A", "B");
