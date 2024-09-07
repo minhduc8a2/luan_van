@@ -168,6 +168,7 @@ import { ReactRenderer } from "@tiptap/react";
 import tippy from "tippy.js";
 import Mention from "@tiptap/extension-mention";
 import { MentionList } from "./MentionList.jsx";
+import { getMentionsFromContent } from "@/helpers/tiptapHelper";
 export default function TipTapEditor({
     onSubmit,
     onFilePicked,
@@ -177,6 +178,7 @@ export default function TipTapEditor({
     const inputId = useId();
     const serverResponseFileList = useRef([]);
     const [fileList, setFileList] = useState([]);
+    const mentionsListRef = useRef({});
     const abortControllers = useRef([]);
     const [uploadProgress, setUploadProgress] = useState(0);
     const inputFileRef = useRef(null);
@@ -194,9 +196,15 @@ export default function TipTapEditor({
     function resetState() {
         setFileList([]);
         serverResponseFileList.current = [];
+        mentionsListRef.current = [];
     }
+
     function submit(editor) {
-        onSubmit(editor.getHTML(), serverResponseFileList.current);
+        onSubmit(
+            editor.getHTML(),
+            serverResponseFileList.current,
+            editor.getJSON()
+        );
         editor.commands.clearContent();
         resetState();
         return true;
@@ -279,9 +287,21 @@ export default function TipTapEditor({
         OrderedList,
         ShiftEnterCreateExtension,
         Mention.configure({
-            HTMLAttributes: {
-                class: "mention",
+            // HTMLAttributes: {
+            //     class: "mention",
+            // },
+
+            renderHTML({ node }) {
+                return [
+                    "span",
+                    {
+                        "data-mention-id": node.attrs.id,
+                        class: "mention",
+                    },
+                    `@${node.attrs.label}`,
+                ];
             },
+
             suggestion: {
                 items: ({ query }) => {
                     return channelUsers

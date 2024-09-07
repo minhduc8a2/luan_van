@@ -12,7 +12,7 @@ export const MentionList = forwardRef((props, ref) => {
         const item = props.items[index];
 
         if (item) {
-            props.command({ id: item.name });
+            props.command({ id: item.id, label: item.name });
         }
     };
 
@@ -59,7 +59,7 @@ export const MentionList = forwardRef((props, ref) => {
                 props.items.map((item, index) => (
                     <button
                         className={index === selectedIndex ? "is-selected" : ""}
-                        key={index}
+                        key={item.id}
                         onClick={() => selectItem(index)}
                     >
                         {item.name}

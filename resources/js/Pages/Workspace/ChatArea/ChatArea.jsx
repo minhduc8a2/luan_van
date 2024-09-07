@@ -25,6 +25,7 @@ import { EditDescriptionForm } from "./EditDescriptionForm";
 import axios from "axios";
 import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
 import Thread from "./Thread";
+import { getMentionsFromContent } from "@/helpers/tiptapHelper";
 
 export default function ChatArea() {
     const {
@@ -46,12 +47,17 @@ export default function ChatArea() {
         useState(null);
     const channelConnectionRef = useRef(null);
     const prevScrollHeightRef = useRef(0);
-    function onSubmit(content, fileObjects) {
-        console.log("submit on channel: ", channel);
-        if (content == "<p></p>" && fileObjects.length == 0) return;
+    function onSubmit(content, fileObjects, JSONContent) {
+        if (
+            content == "<p></p>" &&
+            fileObjects.length == 0 &&
+            mentionsList.length == 0
+        )
+            return;
         router.post(route("message.store", { channel: channel.id }), {
             content,
             fileObjects,
+            mentionsList: getMentionsFromContent(JSONContent),
         });
     }
 
@@ -318,7 +324,7 @@ export default function ChatArea() {
                     })}
                 </div>
                 <div className="m-6 border border-white/15 pt-4 px-2 rounded-lg">
-                    <TipTapEditor onSubmit={(a, b) => onSubmit(a, b)} />
+                    <TipTapEditor onSubmit={onSubmit} />
                 </div>
             </div>
             {threadMessage && <Thread />}

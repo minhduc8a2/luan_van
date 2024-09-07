@@ -68,6 +68,10 @@ class MessageController extends Controller
             }
 
             $message->attachments()->saveMany($this->createAttachments($fileObjects));
+
+            //handle mentions list
+            $mentionsList = $request->mentionsList;
+            
             if (isset($message)) {
 
                 broadcast(new MessageEvent($channel, $message->load('attachments')))->toOthers();
