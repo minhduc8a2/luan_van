@@ -19,6 +19,9 @@ import { router, usePage } from "@inertiajs/react";
 import { groupReactions } from "@/helpers/reactionHelper";
 import { useEffect } from "react";
 import Reactions from "./Reactions";
+import { FaAngleRight } from "react-icons/fa6";
+import { useDispatch } from "react-redux";
+import { setThreadMessage } from "@/Store/threadSlice";
 export default function Message({
     message,
     user,
@@ -30,6 +33,7 @@ export default function Message({
     resetNewMessageReactionReceive,
 }) {
     const { auth, channel, channelUsers } = usePage().props;
+    const dispatch = useDispatch();
     const attachments = message.attachments;
     const [reactions, setReactions] = useState([...message.reactions]);
     const imageAttachments = [];
@@ -149,6 +153,7 @@ export default function Message({
             className={`message-container pl-8 pr-4 pb-2 relative break-all group hover:bg-white/10 ${
                 hasChanged || index == 0 ? "pt-4" : "mt-0"
             }`}
+            id={message.id}
         >
             <MessageToolbar
                 message={message}
@@ -242,7 +247,7 @@ export default function Message({
                                             <img
                                                 src={attachment.url}
                                                 alt=""
-                                                className="max-h-full rounded-lg"
+                                                className="max-h-full rounded-lg cursor-pointer"
                                             />
                                         </PhotoView>
                                     </div>
@@ -316,6 +321,20 @@ export default function Message({
                     reactToMessage={reactToMessage}
                     removeMessageReaction={removeMessageReaction}
                 />
+                {message.thread && !threadStyle && (
+                    <button
+                        className="border hover:bg-black/25 flex justify-between items-center border-white/15 w-96 rounded-lg mt-4 py-1 px-4"
+                        onClick={() => dispatch(setThreadMessage(message))}
+                    >
+                        <div className="">
+                            <span className="text-link text-sm">
+                                {message.thread.messages_count} replies
+                            </span>
+                            <span className="text-sm ml-2">View thread</span>
+                        </div>
+                        <FaAngleRight className="text-sm text-white/50" />
+                    </button>
+                )}
             </div>
         </div>
     );

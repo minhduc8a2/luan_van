@@ -77,7 +77,13 @@ class ChannelController extends Controller
             'workspaces' => $workspaces,
             "directChannels" => $directChannels->load("users"),
             'selfChannel' => $selfChannel,
-            'messages' => $channel->messages()->with(['attachments', 'reactions'])->latest()->simplePaginate(10),
+            'messages' => $channel->messages()->with([
+                'attachments',
+                'reactions',
+                'thread' => function ($query) {
+                    $query->withCount('messages');
+                }
+            ])->latest()->simplePaginate(10),
             'channelUsers' => $channel->users,
             'notifications' => $notifications
         ]);
