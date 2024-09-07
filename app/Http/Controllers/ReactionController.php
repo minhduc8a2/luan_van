@@ -26,10 +26,15 @@ class ReactionController extends Controller
         ]);
 
         try {
-            $message->reactions()->create([
-                "emoji_id" => $validated['emoji_id'],
-                'user_id' => $request->user()->id
-            ]);
+            $forCheckExistedReaction = $message->reactions()->where("user_id", "=", $request->user()->id)->where("emoji_id", "=", $validated['emoji_id'])->first();
+
+            if (!$forCheckExistedReaction)
+                $message->reactions()->create([
+                    "emoji_id" => $validated['emoji_id'],
+                    'user_id' => $request->user()->id
+                ]);
+            else  return back()->withErrors(["fail" => "Already to make reaction on the message"]);
+
             return back();
         } catch (\Throwable $th) {
             return back()->withErrors(["fail" => "Failed to make reaction on the message"]);

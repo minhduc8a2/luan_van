@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { UTCToDateTime, UTCToTime } from "@/helpers/dateTimeHelper";
 import { generateHTML } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
@@ -17,18 +17,22 @@ import DocumentAttachment from "./DocumentAttachment";
 import Video from "@/Components/Video";
 import MessageToolbar from "./MessageToolbar";
 import { router, usePage } from "@inertiajs/react";
-import { findNativeEmoji } from "@/helpers/reactionHelper";
-
+import { groupReactions } from "@/helpers/reactionHelper";
+import Tooltip from "@/Components/Tooltip";
+import { useEffect } from "react";
 export default function Message({
     message,
     user,
     hasChanged,
     index,
     threadStyle = false,
+    channelConnectionRef,
+    newMessageReactionReceive,
+    resetNewMessageReactionReceive,
 }) {
-    const { auth, channel } = usePage().props;
+    const { auth, channel, channelUsers } = usePage().props;
     const attachments = message.attachments;
-    const [reactions, setReactions] = useState(message.reactions);
+    const [reactions, setReactions] = useState([...message.reactions]);
     const imageAttachments = [];
     const videoAttachments = [];
     const documentAttachments = [];
@@ -41,6 +45,25 @@ export default function Message({
         else otherAttachments.push(attachment);
     });
     const [openOverlay, setOpenOverlay] = useState(false);
+    const groupedReactions = useMemo(() => {
+        return groupReactions(reactions, channelUsers, auth.user);
+    }, [reactions]);
+
+    useEffect(() => {
+        if (
+            newMessageReactionReceive &&
+            newMessageReactionReceive.id == message.id
+        ) {
+            setReactions((pre) => [
+                ...pre,
+                {
+                    emoji_id: newMessageReactionReceive.emoji_id,
+                    user_id: newMessageReactionReceive.user_id,
+                },
+            ]);
+            resetNewMessageReactionReceive();
+        }
+    }, [newMessageReactionReceive]);
     function reactToMessage(emoji) {
         router.post(
             route("reaction.store", {
@@ -58,6 +81,11 @@ export default function Message({
                         ...pre,
                         { emoji_id: emoji.id, user_id: auth.user.id },
                     ]);
+                    channelConnectionRef.current.whisper("messageReaction", {
+                        emoji_id: emoji.id,
+                        user_id: auth.user.id,
+                        id: message.id,
+                    });
                 },
             }
         );
@@ -230,15 +258,36 @@ export default function Message({
                     </div>
                 )}
                 <div className="flex gap-x-2 mt-4 items-center">
-                    {reactions.map((reaction) => (
-                        <div className="bg-white/15 rounded-full px-[6px] flex items-center gap-x-1 py-[2px]">
-                            <div className="text-sm">
-                                {findNativeEmoji(reaction.emoji_id)}
-                            </div>
-                            <div className="text-sm w-2 font-semibold">1</div>
-                        </div>
+                    {groupedReactions.map((reaction) => (
+                        <Tooltip
+                            key={reaction.emoji_id}
+                            content={
+                                <ul className="whitespace-nowrap p-1">
+                                    {reaction.users.map((user) => (
+                                        <li key={user.id} className="text-xs">
+                                            {user.name}
+                                        </li>
+                                    ))}
+                                </ul>
+                            }
+                        >
+                            <button
+                                className={`${
+                                    reaction.hasReacted
+                                        ? "bg-blue-500/25"
+                                        : "bg-white/15"
+                                } rounded-full px-[6px] flex items-center gap-x-1 py-[2px]`}
+                            >
+                                <div className="text-sm">
+                                    {reaction.nativeEmoji}
+                                </div>
+                                <div className="text-sm w-2 font-semibold">
+                                    {reaction.users.length}
+                                </div>
+                            </button>
+                        </Tooltip>
                     ))}
-                    {reactions.length > 0 && (
+                    {groupedReactions.length > 0 && (
                         <div className="bg-white/15 rounded-full px-[8px] flex items-center gap-x-1 py-[4px]">
                             <LuSmilePlus />
                         </div>

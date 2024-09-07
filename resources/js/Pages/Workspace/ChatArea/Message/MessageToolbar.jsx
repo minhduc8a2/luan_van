@@ -4,13 +4,14 @@ import { BiMessageRoundedDetail } from "react-icons/bi";
 import { FaRegBookmark } from "react-icons/fa";
 import EmojiPicker from "@emoji-mart/react";
 import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
-import { CiFaceSmile } from "react-icons/ci";
+import { LuSmilePlus } from "react-icons/lu";
+
 import data from "@emoji-mart/data";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { setThreadMessage } from "@/Store/threadSlice";
 export default function MessageToolbar({ message, threadStyle = false , reactToMessage}) {
-    console.log(data);
+  
     const dispatch = useDispatch();
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     return (
@@ -62,7 +63,7 @@ export default function MessageToolbar({ message, threadStyle = false , reactToM
                             return (
                                 <>
                                     <PopoverButton>
-                                        <CiFaceSmile
+                                        <LuSmilePlus
                                             onClick={() =>
                                                 setShowEmojiPicker(true)
                                             }

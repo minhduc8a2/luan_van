@@ -42,6 +42,8 @@ export default function ChatArea() {
     const [nextPageUrl, setNextPageUrl] = useState(initMessages.next_page_url);
     const [messages, setMessages] = useState(initMessages?.data);
     const [loadingMessages, setLoadingMessages] = useState(false);
+    const [newMessageReactionReceive, setNewMessageReactionReceive] =
+        useState(null);
     const channelConnectionRef = useRef(null);
     const prevScrollHeightRef = useRef(0);
     function onSubmit(content, fileObjects) {
@@ -101,9 +103,13 @@ export default function ChatArea() {
                 setMessages((pre) => [...pre, e.message]);
                 // console.log(e);
             })
+            .listenForWhisper("messageReaction", (e) => {
+                setNewMessageReactionReceive(e);
+            })
             .error((error) => {
                 console.error(error);
             });
+
         return () => {
             channelConnectionRef.current = null;
             Echo.leave(`channels.${channel.id}`);
@@ -292,6 +298,17 @@ export default function ChatArea() {
                                                 user={user}
                                                 hasChanged={hasChanged}
                                                 index={index}
+                                                channelConnectionRef={
+                                                    channelConnectionRef
+                                                }
+                                                newMessageReactionReceive={
+                                                    newMessageReactionReceive
+                                                }
+                                                resetNewMessageReactionReceive={() =>
+                                                    setNewMessageReactionReceive(
+                                                        null
+                                                    )
+                                                }
                                             />
                                         );
                                     })}
