@@ -164,13 +164,16 @@ import { router, usePage } from "@inertiajs/react";
 import { isImage } from "@/helpers/fileHelpers";
 import SquareImage from "./SquareImage";
 import FileItem from "./FileItem";
-
+import { ReactRenderer } from "@tiptap/react";
+import tippy from "tippy.js";
+import Mention from "@tiptap/extension-mention";
+import { MentionList } from "./MentionList.jsx";
 export default function TipTapEditor({
     onSubmit,
     onFilePicked,
     message = null,
 }) {
-    const { auth, channel } = usePage().props;
+    const { auth, channel, channelUsers } = usePage().props;
     const inputId = useId();
     const serverResponseFileList = useRef([]);
     const [fileList, setFileList] = useState([]);
@@ -187,9 +190,7 @@ export default function TipTapEditor({
             (f) => f.name != file.name
         );
     }
-    useEffect(() => {
-        console.log("Tiptap editor new instance created");
-    }, []);
+
     function resetState() {
         setFileList([]);
         serverResponseFileList.current = [];
@@ -277,6 +278,76 @@ export default function TipTapEditor({
         ListItem,
         OrderedList,
         ShiftEnterCreateExtension,
+        Mention.configure({
+            HTMLAttributes: {
+                class: "mention",
+            },
+            suggestion: {
+                items: ({ query }) => {
+                    return channelUsers
+                        .filter((item) =>
+                            item.name
+                                .toLowerCase()
+                                .startsWith(query.toLowerCase())
+                        )
+                        .slice(0, 5);
+                },
+                render: () => {
+                    let reactRenderer;
+                    let popup;
+
+                    return {
+                        onStart: (props) => {
+                            if (!props.clientRect) {
+                                return;
+                            }
+
+                            reactRenderer = new ReactRenderer(MentionList, {
+                                props,
+                                editor: props.editor,
+                            });
+
+                            popup = tippy("body", {
+                                getReferenceClientRect: props.clientRect,
+                                appendTo: () => document.body,
+                                content: reactRenderer.element,
+                                showOnCreate: true,
+                                interactive: true,
+                                trigger: "manual",
+                                placement: "bottom-start",
+                            });
+                        },
+
+                        onUpdate(props) {
+                            reactRenderer.updateProps(props);
+
+                            if (!props.clientRect) {
+                                return;
+                            }
+
+                            popup[0].setProps({
+                                getReferenceClientRect: props.clientRect,
+                            });
+                        },
+
+                        onKeyDown(props) {
+                            if (props.event.key === "Escape") {
+                                popup[0].hide();
+
+                                return true;
+                            }
+
+                            return reactRenderer.ref?.onKeyDown(props);
+                        },
+
+                        onExit() {
+                            popup[0].destroy();
+                            reactRenderer.destroy();
+                        },
+                    };
+                },
+            },
+        }),
 
         // Link.configure({
         //     openOnClick: false,
@@ -292,11 +363,13 @@ export default function TipTapEditor({
         },
         handleKeyDown: () => {},
     };
+
     const editor = useEditor(
         {
             extensions,
             content,
             editorProps,
+
             // onUpdate({ editor }) {
             //     console.log(editor.getJSON());
             // },

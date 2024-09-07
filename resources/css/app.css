@@ -49,7 +49,7 @@
     min-height: 0;
     grid-area: main;
     display: grid;
-    grid-template-columns:repeat(4,1fr);
+    grid-template-columns: repeat(4, 1fr);
 }
 
 .grid-item {
@@ -96,4 +96,24 @@
     bottom: calc(anchor(top) + 8px);
     justify-self: anchor-center;
     position-try-fallbacks: --custom-bottom;
+}
+
+.tiptap-dropdown-menu {
+    @apply bg-background text-white/85 py-2 w-64 border border-white/15 rounded-xl gap-y-2 flex flex-col overflow-y-auto;
+}
+
+.tiptap-dropdown-menu button {
+    @apply flex items-center w-full px-4 py-2;
+}
+.tiptap-dropdown-menu button:hover,
+.tiptap-dropdown-menu button:hover.is-selected {
+    @apply bg-link;
+}
+
+.tiptap-dropdown-menu button.is-selected {
+    @apply bg-link;
+}
+
+.tiptap .mention {
+    @apply bg-link/15 text-link p-1 rounded;
 }
