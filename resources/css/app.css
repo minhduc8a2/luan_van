@@ -113,7 +113,7 @@
 .tiptap-dropdown-menu button.is-selected {
     @apply bg-link;
 }
-
+.prose .mention,
 .tiptap .mention {
     @apply bg-link/15 text-link p-1 rounded;
 }

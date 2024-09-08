@@ -9,7 +9,7 @@ import { Link, router, usePage } from "@inertiajs/react";
 import { InvitationForm } from "./InvitationForm";
 import { DirectChannel } from "./DirectChannel";
 import { useSelector } from "react-redux";
-import Activity from "./Activity";
+import Activity from "./Activity/Activity";
 
 export default function Panel({}) {
     const {

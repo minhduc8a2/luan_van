@@ -168,7 +168,7 @@ import { ReactRenderer } from "@tiptap/react";
 import tippy from "tippy.js";
 import Mention from "@tiptap/extension-mention";
 import { MentionList } from "./MentionList.jsx";
-import { getMentionsFromContent } from "@/helpers/tiptapHelper";
+
 export default function TipTapEditor({
     onSubmit,
     onFilePicked,
@@ -295,7 +295,7 @@ export default function TipTapEditor({
                 return [
                     "span",
                     {
-                        "data-mention-id": node.attrs.id,
+                        "data-type": "mention",
                         class: "mention",
                     },
                     `@${node.attrs.label}`,
@@ -305,10 +305,12 @@ export default function TipTapEditor({
             suggestion: {
                 items: ({ query }) => {
                     return channelUsers
-                        .filter((item) =>
-                            item.name
-                                .toLowerCase()
-                                .startsWith(query.toLowerCase())
+                        .filter(
+                            (item) =>
+                                item.id !== auth.user.id &&
+                                item.name
+                                    .toLowerCase()
+                                    .startsWith(query.toLowerCase())
                         )
                         .slice(0, 5);
                 },

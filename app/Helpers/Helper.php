@@ -13,10 +13,14 @@ class Helper
         return  $localPart;
     }
 
-    public static function contentToJSONContent($content)
+    public static function sanitizeContent($content)
     {
-        $editor = new Editor();
-        $content = $editor->sanitize($content);
-        return $editor->setContent($content)->getJSON();
+        $editor = new Editor([
+            'extensions' => [
+                new \Tiptap\Extensions\StarterKit,
+                new CustomMention,
+            ]
+        ]);
+        return  $editor->sanitize($content);
     }
 }

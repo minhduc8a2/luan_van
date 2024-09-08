@@ -73,7 +73,7 @@ export default function Thread() {
     }, [messages]);
     const sortedMessages = useMemo(() => {
         const temp = [...messages];
-        temp.sort((a, b) => compareDateTime(a.created_at, b.created_at))
+        temp.sort((a, b) => compareDateTime(a.created_at, b.created_at));
         return temp;
     }, [messages]);
     function onSubmit(content, fileObjects) {
@@ -118,7 +118,10 @@ export default function Thread() {
             </div>
 
             <div className="flex items-center gap-x-4 my-4">
-                <h3>{messages.length} Replies</h3>{" "}
+                <h3 className="text-sm text-white/75">
+                    {messages.length}{" "}
+                    {messages.length > 1 ? "replies" : "reply"}
+                </h3>{" "}
                 <hr className="border-white/15 flex-1" />
             </div>
             {loadingMessages && (

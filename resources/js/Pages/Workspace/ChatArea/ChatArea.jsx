@@ -25,7 +25,8 @@ import { EditDescriptionForm } from "./EditDescriptionForm";
 import axios from "axios";
 import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
 import Thread from "./Thread";
-import { getMentionsFromContent } from "@/helpers/tiptapHelper";
+import { getMentionsFromContent,} from "@/helpers/tiptapHelper";
+import { getChannelName } from "@/helpers/channelHelper";
 
 export default function ChatArea() {
     const {
@@ -64,17 +65,6 @@ export default function ChatArea() {
     let preValue = null;
     let hasChanged = false;
 
-    let isDirectChannel = channel.type == "DIRECT";
-    if (isDirectChannel) {
-        try {
-            const userId = channel.name
-                .split("_")
-                .find((id) => id != auth.user.id);
-
-            const user = users.find((user) => user.id == userId);
-            channel.name = user.name;
-        } catch (error) {}
-    }
     const groupedMessages = useMemo(() => {
         const gMessages = groupMessagesByDate(messages);
         const currentDate = formatDDMMYYY(new Date());
@@ -156,14 +146,18 @@ export default function ChatArea() {
         }
     }
 
+    const channelName = useMemo(
+        () => getChannelName(channel, auth.user, users),
+        [channel]
+    );
     const welcomeMessage = useMemo(() => {
         const welcomeMessages = [
-            `📣You’re looking at the #${channel.name} channel`,
-            `👋 Welcome to the #${channel.name} channel`,
-            `🥳 You’ve found the #${channel.name} channel`,
+            `📣You’re looking at the #${channelName} channel`,
+            `👋 Welcome to the #${channelName} channel`,
+            `🥳 You’ve found the #${channelName} channel`,
         ];
-        if (channel.name.includes("all-")) return welcomeMessages[0];
-        if (channel.name.includes("social")) return welcomeMessages[2];
+        if (channelName.includes("all-")) return welcomeMessages[0];
+        if (channelName.includes("social")) return welcomeMessages[2];
         return welcomeMessages[1];
     }, [channel.id]);
     return (
@@ -172,7 +166,7 @@ export default function ChatArea() {
                 <div className="p-4 border-b border-b-white/10 z-10">
                     <div className="flex justify-between font-bold text-lg opacity-75">
                         <div className="flex items-center gap-x-2">
-                            <div className=""># {channel.name}</div>
+                            <div className=""># {channelName}</div>
                             <FaAngleDown className="text-sm" />
                         </div>
                         <div className="flex items-center gap-x-4 ">

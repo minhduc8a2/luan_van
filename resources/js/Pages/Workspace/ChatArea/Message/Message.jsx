@@ -22,6 +22,7 @@ import Reactions from "./Reactions";
 import { FaAngleRight } from "react-icons/fa6";
 import { useDispatch } from "react-redux";
 import { setThreadMessage } from "@/Store/threadSlice";
+
 export default function Message({
     message,
     user,
@@ -188,9 +189,7 @@ export default function Message({
                 <div
                     className="prose prose-invert "
                     dangerouslySetInnerHTML={{
-                        __html: generateHTML(JSON.parse(message.content), [
-                            StarterKit,
-                        ]),
+                        __html: message.content,
                     }}
                 ></div>
                 {imageAttachments.length != 0 && (

@@ -2,18 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use Tiptap\Editor;
+
+use App\Models\User;
+use App\Models\Thread;
 use App\Models\Channel;
 use App\Models\Message;
 use App\Models\Workspace;
 use App\Models\Attachment;
 use App\Events\MessageEvent;
 use Illuminate\Http\Request;
-use App\Broadcasting\MessageChannel;
 use App\Events\ThreadMessageEvent;
-use App\Models\Thread;
+use App\Helpers\Helper;
+use App\Notifications\MentionNotification;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Broadcast;
+
 
 class MessageController extends Controller
 {
@@ -50,11 +52,9 @@ class MessageController extends Controller
         $content = $request->content;
         // dd($request->fileObjects);
         if (isset($content)) {
-            $editor = new Editor();
-            $content = $editor->sanitize($content);
-            $JSONContent = $editor->setContent($content)->getJSON();
+            $content = Helper::sanitizeContent($content);
             $message = Message::create([
-                'content' => $JSONContent,
+                'content' => $content,
                 'messagable_id' => $channel->id,
                 'messagable_type' => Channel::class,
                 'user_id' => $request->user()->id
@@ -69,12 +69,23 @@ class MessageController extends Controller
 
             $message->attachments()->saveMany($this->createAttachments($fileObjects));
 
-            //handle mentions list
-            $mentionsList = $request->mentionsList;
-            
-            if (isset($message)) {
 
-                broadcast(new MessageEvent($channel, $message->load('attachments')))->toOthers();
+            if (isset($message)) {
+                //handle mentions list
+                $mentionsList = $request->mentionsList;
+
+                foreach ($mentionsList as $u) {
+                    $mentionedUser = User::find($u['id']);
+                    $mentionedUser->notify(new MentionNotification($channel, $channel->workspace, $request->user(), $mentionedUser, $message));
+                }
+                //notify others about new message
+                broadcast(new MessageEvent($channel, $message->load([
+                    'attachments',
+                    'reactions',
+                    'thread' => function ($query) {
+                        $query->withCount('messages');
+                    }
+                ])))->toOthers();
             }
         }
     }
@@ -84,16 +95,15 @@ class MessageController extends Controller
         if ($request->user()->cannot('create', [Message::class, $channel])) return abort(403);
         $content = $request->content;
         if (isset($content)) {
-            $editor = new Editor();
-            $content = $editor->sanitize($content);
-            $JSONContent = $editor->setContent($content)->getJSON();
+
+            $content = Helper::sanitizeContent($content);
             //check thread is created already
             $thread = $message->thread;
             if (!$thread) {
                 $thread = $message->thread()->create([]);
             }
             $newMessage = Message::create([
-                'content' => $JSONContent,
+                'content' =>  $content,
                 'messagable_id' => $thread->id,
                 'messagable_type' => Thread::class,
                 'user_id' => $request->user()->id
@@ -109,7 +119,16 @@ class MessageController extends Controller
             $newMessage->attachments()->saveMany($this->createAttachments($fileObjects));
             if (isset($newMessage)) {
 
-                broadcast(new ThreadMessageEvent($message, $newMessage->load(['attachments','reactions'])))->toOthers();
+                //handle mentions list
+                $mentionsList = $request->mentionsList;
+
+                foreach ($mentionsList as $u) {
+                    $mentionedUser = User::find($u['id']);
+                    $mentionedUser->notify(new MentionNotification($channel, $channel->workspace, $request->user(), $mentionedUser, $message));
+                }
+                //notify others about new message
+
+                broadcast(new ThreadMessageEvent($message, $newMessage->load(['attachments', 'reactions'])))->toOthers();
             }
         }
     }

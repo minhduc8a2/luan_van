@@ -37,8 +37,9 @@ import StreamVideo from "@/Components/StreamVideo";
 import { usePage } from "@inertiajs/react";
 import OverlayPanel from "@/Components/Overlay/OverlayPanel";
 import HuddleInvitation from "./HuddleInvitation";
+import { getChannelName } from "@/helpers/channelHelper";
 export default function Huddle() {
-    const { auth } = usePage().props;
+    const { auth, users: workspaceUsers } = usePage().props;
     const { channel, users } = useSelector((state) => state.huddle);
     const { width } = useSelector((state) => state.sideBar);
     const [refresh, setRefresh] = useState(0);
@@ -306,13 +307,17 @@ export default function Huddle() {
         };
     }, [channel?.id]);
     if (!channel) return "";
+   
+
     return (
         <div
             className="bg-primary-light w-96  text-white/85  fixed bottom-12 rounded-xl"
             style={{ left: width + 16 }}
         >
             <div className="flex justify-between p-4 items-center">
-                <div className="text-sm">{channel.name}</div>
+                <div className="text-sm">
+                    {getChannelName(channel,auth.user, workspaceUsers)}
+                </div>
                 <MdOutlineZoomOutMap />
             </div>
             <div className="p-4 flex justify-center gap-2 bg-white/10 mx-4 rounded-lg flex-wrap">
@@ -458,11 +463,10 @@ export default function Huddle() {
                         </IconButton>
                     }
                 >
-                    {({ close }) => <HuddleInvitation close={close}/>}
+                    {({ close }) => <HuddleInvitation close={close} />}
                 </OverlayPanel>
                 <Popover className="relative ">
                     <PopoverButton className="block">
-                       
                         <IconButton
                             description="More options"
                             activable={false}

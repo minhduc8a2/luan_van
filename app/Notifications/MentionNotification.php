@@ -54,7 +54,7 @@ class MentionNotification extends Notification
             "fromUser" => $this->fromUser,
             "toUser" => $this->toUser,
             "workspace" => $this->workspace,
-            "messageId"=>$this->message->id,
+            "message"=>$this->message,
             "created_at" => Carbon::now()
 
 
@@ -72,7 +72,7 @@ class MentionNotification extends Notification
             "fromUser" => $this->fromUser,
             "toUser" => $this->toUser,
             "workspace" => $this->workspace,
-            "messageId"=>$this->message->id,
+            "message"=>$this->message,
 
 
         ];

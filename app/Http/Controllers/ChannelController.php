@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Builder;
 class ChannelController extends Controller
 {
     /**
-     * Display a listing of the resource.
+ * Display a listing of the resource.
      */
     public function index()
     {
@@ -47,7 +47,13 @@ class ChannelController extends Controller
         }
 
         if ($request->expectsJson()) {
-            return ['messages' => $channel->messages()->with(['attachments', 'reactions'])->latest()->simplePaginate(10)];
+            return ['messages' => $channel->messages()->with([
+                'attachments',
+                'reactions',
+                'thread' => function ($query) {
+                    $query->withCount('messages');
+                }
+            ])->latest()->simplePaginate(10)];
         }
 
         $workspace = $channel->workspace;

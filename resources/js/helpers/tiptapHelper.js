@@ -1,4 +1,4 @@
-export  function getMentionsFromContent(content) {
+export function getMentionsFromContent(content) {
     const mentions = [];
 
     const findMentions = (node) => {
