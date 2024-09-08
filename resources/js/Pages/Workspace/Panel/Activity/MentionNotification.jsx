@@ -17,8 +17,9 @@ export default function MentionNotification({
         auth,
         users: workspaceUsers,
         messages: initMessages,
+        channel: currentChannel,
     } = usePage().props;
-
+    const { messages } = useSelector((state) => state.messages);
     const { fromUser, toUser, channel, workspace, message } =
         isMentionNotificationBroadcast(notification.type)
             ? notification
@@ -28,19 +29,39 @@ export default function MentionNotification({
     const view_at = notification.view_at;
     const dispatch = useDispatch();
     function handleNotificationClickedPart() {
-        router.get(
-            route("channel.show", channel.id),
-            { message_id: message.id },
-            {
-                preserveState: true,
-                preserveScroll: true,
-                onFinish: () => {
-                  
-                    dispatch(setMessageId(message.id));
-                   
-                },
+        if (
+            channel.id === currentChannel.id &&
+            messages.find((msg) => msg.id == message.id)
+        ) {
+            dispatch(setMessageId(message.id));
+            const targetMessage = document.getElementById(
+                `message-${message.id}`
+            );
+
+            if (targetMessage) {
+                targetMessage.classList.add("bg-link/15");
+
+                setTimeout(() => {
+                    targetMessage.classList.remove("bg-link/15");
+                }, 1000);
+                targetMessage.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center",
+                });
+                dispatch(setMessageId(null));
             }
-        );
+        } else
+            router.get(
+                route("channel.show", channel.id),
+                { message_id: message.id },
+                {
+                    preserveState: true,
+                    preserveScroll: true,
+                    onFinish: () => {
+                        dispatch(setMessageId(message.id));
+                    },
+                }
+            );
     }
     return (
         <li>

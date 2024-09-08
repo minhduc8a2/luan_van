@@ -66,8 +66,7 @@ export function formatDDMMYYY(dateObj) {
     return `${day}/${month}/${year}`;
 }
 export function groupMessagesByDate(messages) {
-    console.log(messages);
-    return messages.reduce((grouped, message) => {
+    const groupedMessages = messages.reduce((grouped, message) => {
         // Convert the timestamp to a Date object
         const dateObj = new Date(message.created_at);
 
@@ -88,9 +87,15 @@ export function groupMessagesByDate(messages) {
 
         return grouped;
     }, {});
+    Object.keys(groupedMessages).forEach((key) => {
+        groupedMessages[key].sort((a, b) =>
+            compareDateTime(a.created_at, b.created_at)
+        );
+    });
+    return groupedMessages;
 }
 
-export function compareDateTime(dateString1, dateString2, desc=false) {
+export function compareDateTime(dateString1, dateString2, desc = false) {
     const date1 = new Date(dateString1);
     const date2 = new Date(dateString2);
     if (desc) return date2.getTime() - date1.getTime();

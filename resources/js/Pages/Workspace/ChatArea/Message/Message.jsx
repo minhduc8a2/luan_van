@@ -57,26 +57,7 @@ export default function Message({
     useEffect(() => {
         setReactions([...message.reactions]);
     }, [message]);
-    useEffect(() => {
-        if (messageId) {
-            const targetMessage = document.getElementById(
-                `message-${messageId}`
-            );
-
-            if (targetMessage) {
-                targetMessage.classList.add("bg-link/15");
-               
-                setTimeout(() => {
-                    targetMessage.classList.remove("bg-link/15");
-                }, 1000);
-                targetMessage.scrollIntoView({
-                    behavior: "smooth",
-                    block: "center",
-                });
-                dispatch(setMessageId(null));
-            }
-        }
-    }, [messageId]);
+   
     useEffect(() => {
         if (
             newMessageReactionReceive &&
@@ -200,8 +181,8 @@ export default function Message({
                         </div>
                         <span className="text-xs leading-tight text-white/75 font-extralight">
                             {threadStyle
-                                ? UTCToDateTime(message.updated_at)
-                                : UTCToTime(message.updated_at)}
+                                ? UTCToDateTime(message.created_at)
+                                : UTCToTime(message.created_at)}
                         </span>
                     </div>
                 ) : (

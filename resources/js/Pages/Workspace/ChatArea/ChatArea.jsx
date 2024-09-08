@@ -9,6 +9,7 @@ import TipTapEditor from "@/Components/TipTapEditor";
 import { router, usePage } from "@inertiajs/react";
 import { useEffect, useRef, useState } from "react";
 import { InView } from "react-intersection-observer";
+import { TfiReload } from "react-icons/tfi";
 import {
     compareDateTime,
     differenceInSeconds,
@@ -27,7 +28,8 @@ import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
 import Thread from "./Thread";
 import { getMentionsFromContent } from "@/helpers/tiptapHelper";
 import { getChannelName } from "@/helpers/channelHelper";
-import { setMessages } from "@/Store/messagesSlice";
+import { addMessage, setMessages } from "@/Store/messagesSlice";
+import { setMessageId } from "@/Store/mentionSlice";
 
 export default function ChatArea() {
     const {
@@ -37,6 +39,7 @@ export default function ChatArea() {
         channelUsers,
         messages: initMessages,
     } = usePage().props;
+
     const { message: threadMessage } = useSelector((state) => state.thread);
     const { messageId } = useSelector((state) => state.mention);
     const { messages } = useSelector((state) => state.messages);
@@ -44,14 +47,19 @@ export default function ChatArea() {
     const dispatch = useDispatch();
     const { channel: huddleChannel } = useSelector((state) => state.huddle);
     const [infiniteScroll, setInfiniteScroll] = useState(false);
+    const [scrollDown, setScrollDown] = useState(false);
     const messageContainerRef = useRef(null);
     const [nextPageUrl, setNextPageUrl] = useState(initMessages.next_page_url);
+    const [previousPageUrl, setPreviousPageUrl] = useState(
+        initMessages.prev_page_url
+    );
 
     const [loadingMessages, setLoadingMessages] = useState(false);
     const [newMessageReactionReceive, setNewMessageReactionReceive] =
         useState(null);
     const channelConnectionRef = useRef(null);
     const prevScrollHeightRef = useRef(0);
+
     function onSubmit(content, fileObjects, JSONContent) {
         if (
             content == "<p></p>" &&
@@ -59,11 +67,15 @@ export default function ChatArea() {
             mentionsList.length == 0
         )
             return;
-        router.post(route("message.store", { channel: channel.id }), {
-            content,
-            fileObjects,
-            mentionsList: getMentionsFromContent(JSONContent),
-        });
+        router.post(
+            route("message.store", { channel: channel.id }),
+            {
+                content,
+                fileObjects,
+                mentionsList: getMentionsFromContent(JSONContent),
+            },
+            { preserveState: true }
+        );
     }
 
     let preValue = null;
@@ -86,11 +98,16 @@ export default function ChatArea() {
     }, [messages]);
 
     useEffect(() => {
-        if (messageId != null) dispatch(setMessages(initMessages?.data));
-    }, [messageId, initMessages?.data]);
+        if (messageId != null) {
+            dispatch(setMessages([...initMessages?.data]));
+            setNextPageUrl(initMessages?.next_page_url);
+            setPreviousPageUrl(initMessages?.prev_page_url);
+        }
+    }, [messageId, initMessages]);
     useEffect(() => {
-        dispatch(setMessages(initMessages?.data));
+        dispatch(setMessages([...initMessages?.data]));
         setNextPageUrl(initMessages?.next_page_url);
+        setPreviousPageUrl(initMessages?.prev_page_url);
     }, [channel.id]);
 
     useEffect(() => {
@@ -104,7 +121,7 @@ export default function ChatArea() {
                 console.log("leaving", user);
             })
             .listen("MessageEvent", (e) => {
-                dispatch(setMessages([...messages, e.message]));
+                dispatch(addMessage(e.message));
                 // console.log(e);
             })
             .listenForWhisper("messageReaction", (e) => {
@@ -122,19 +139,44 @@ export default function ChatArea() {
     useEffect(() => {
         if (messageContainerRef.current)
             if (!infiniteScroll) {
-                if (!messageId)
-                    messageContainerRef.current.scrollTop =
-                        messageContainerRef.current.scrollHeight;
+                messageContainerRef.current.scrollTop =
+                    messageContainerRef.current.scrollHeight;
             } else {
                 setInfiniteScroll(false);
-                const newScrollHeight =
-                    messageContainerRef.current.scrollHeight;
-                messageContainerRef.current.scrollTop =
-                    newScrollHeight -
-                    prevScrollHeightRef.current +
-                    messageContainerRef.current.scrollTop;
+                if (scrollDown) {
+                    messageContainerRef.current.scrollTop =
+                        prevScrollHeightRef.current;
+                } else {
+                    const newScrollHeight =
+                        messageContainerRef.current.scrollHeight;
+                    messageContainerRef.current.scrollTop =
+                        newScrollHeight -
+                        prevScrollHeightRef.current +
+                        messageContainerRef.current.scrollTop;
+                }
+                setScrollDown(false);
             }
     }, [messages]);
+    useEffect(() => {
+        if (messageId) {
+            const targetMessage = document.getElementById(
+                `message-${messageId}`
+            );
+
+            if (targetMessage) {
+                targetMessage.classList.add("bg-link/15");
+
+                setTimeout(() => {
+                    targetMessage.classList.remove("bg-link/15");
+                }, 1000);
+                targetMessage.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center",
+                });
+                dispatch(setMessageId(null));
+            }
+        }
+    }, [messageId]);
 
     function handleHuddleButtonClicked() {
         if (huddleChannel && huddleChannel.id != channel.id) {
@@ -294,8 +336,8 @@ export default function ChatArea() {
                                             if (
                                                 preValue.user.id != user.id ||
                                                 differenceInSeconds(
-                                                    preValue.message.updated_at,
-                                                    message.updated_at
+                                                    preValue.message.created_at,
+                                                    message.created_at
                                                 ) > 10
                                             ) {
                                                 hasChanged = true;
@@ -327,6 +369,75 @@ export default function ChatArea() {
                             </div>
                         );
                     })}
+                    <InView
+                        onChange={(inView, entry) => {
+                            if (inView && previousPageUrl) {
+                                setInfiniteScroll(true);
+                                setScrollDown(true);
+                                setLoadingMessages(true);
+                                prevScrollHeightRef.current =
+                                    messageContainerRef.current.scrollTop;
+                                axios.get(previousPageUrl).then((response) => {
+                                    if (response.status == 200) {
+                                        setLoadingMessages(false);
+
+                                        setPreviousPageUrl(
+                                            response.data.messages.prev_page_url
+                                        );
+                                        dispatch(
+                                            setMessages([
+                                                ...response.data.messages.data,
+                                                ...messages,
+                                            ])
+                                        );
+                                    }
+                                });
+                            }
+                        }}
+                    ></InView>
+                    <div className="flex h-12  justify-center items-center">
+                        {!loadingMessages && previousPageUrl != null && (
+                            <button
+                                className="flex items-center gap-x-2 hover:text-white text-white/75"
+                                onClick={() => {
+                                    if (previousPageUrl) {
+                                        setInfiniteScroll(true);
+                                        setScrollDown(true);
+                                        setLoadingMessages(true);
+                                        prevScrollHeightRef.current =
+                                            messageContainerRef.current.scrollTop;
+                                        axios
+                                            .get(previousPageUrl)
+                                            .then((response) => {
+                                                if (response.status == 200) {
+                                                    setLoadingMessages(false);
+
+                                                    setPreviousPageUrl(
+                                                        response.data.messages
+                                                            .prev_page_url
+                                                    );
+                                                    dispatch(
+                                                        setMessages([
+                                                            ...response.data
+                                                                .messages.data,
+                                                            ...messages,
+                                                        ])
+                                                    );
+                                                }
+                                            });
+                                    }
+                                }}
+                            >
+                                <TfiReload /> Load more
+                            </button>
+                        )}
+                        <div className="w-12 relative">
+                            {loadingMessages && (
+                                <OverlayLoadingSpinner spinerStyle="border-link" />
+                            )}
+                        </div>
+                        {loadingMessages && "Loading messages ..."}
+                    </div>
                 </div>
                 <div className="m-6 border border-white/15 pt-4 px-2 rounded-lg">
                     <TipTapEditor onSubmit={onSubmit} />

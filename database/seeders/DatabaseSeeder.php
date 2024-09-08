@@ -41,15 +41,19 @@ class DatabaseSeeder extends Seeder
 
 
         $user = User::find(1);
+
         $user->ownWorkspaces()->createMany([
             ['name' => 'Main'],
             ['name' => 'Duc Company'],
         ]);
         $user->workspaces()->attach(1);
+
         $user->workspaces()->attach(2);
+
         $user->ownWorkspaces->map(function ($wsp, $key) {
             $workspace = Workspace::find($wsp->id);
             $user = User::find(1);
+
             $workspace->channels()->createMany([
                 [
                     'name' => 'all-' . $workspace->name,
@@ -59,7 +63,7 @@ class DatabaseSeeder extends Seeder
                 ],
                 [
                     'name' => 'work',
-                    'description' => Channel::createChannelDescription('','work'),
+                    'description' => Channel::createChannelDescription('', 'work'),
                     'type' => 'PUBLIC',
                     'user_id' => 1
                 ],
