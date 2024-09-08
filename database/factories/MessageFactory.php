@@ -20,7 +20,7 @@ class MessageFactory extends Factory
     public function definition(): array
     {
         return [
-            "content" => Helper::contentToJSONContent(fake()->sentence()),
+            "content" => Helper::contentToHTML(fake()->sentence()),
             "user_id" => 1,
             "messagable_id" => 1,
             "messagable_type" => Channel::class,

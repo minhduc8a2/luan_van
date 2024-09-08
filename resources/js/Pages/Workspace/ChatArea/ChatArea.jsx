@@ -25,8 +25,9 @@ import { EditDescriptionForm } from "./EditDescriptionForm";
 import axios from "axios";
 import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
 import Thread from "./Thread";
-import { getMentionsFromContent,} from "@/helpers/tiptapHelper";
+import { getMentionsFromContent } from "@/helpers/tiptapHelper";
 import { getChannelName } from "@/helpers/channelHelper";
+import { setMessages } from "@/Store/messagesSlice";
 
 export default function ChatArea() {
     const {
@@ -37,12 +38,15 @@ export default function ChatArea() {
         messages: initMessages,
     } = usePage().props;
     const { message: threadMessage } = useSelector((state) => state.thread);
+    const { messageId } = useSelector((state) => state.mention);
+    const { messages } = useSelector((state) => state.messages);
+
     const dispatch = useDispatch();
     const { channel: huddleChannel } = useSelector((state) => state.huddle);
     const [infiniteScroll, setInfiniteScroll] = useState(false);
     const messageContainerRef = useRef(null);
     const [nextPageUrl, setNextPageUrl] = useState(initMessages.next_page_url);
-    const [messages, setMessages] = useState(initMessages?.data);
+
     const [loadingMessages, setLoadingMessages] = useState(false);
     const [newMessageReactionReceive, setNewMessageReactionReceive] =
         useState(null);
@@ -80,8 +84,12 @@ export default function ChatArea() {
                 };
             });
     }, [messages]);
+
     useEffect(() => {
-        setMessages(initMessages?.data);
+        if (messageId != null) dispatch(setMessages(initMessages?.data));
+    }, [messageId, initMessages?.data]);
+    useEffect(() => {
+        dispatch(setMessages(initMessages?.data));
         setNextPageUrl(initMessages?.next_page_url);
     }, [channel.id]);
 
@@ -96,7 +104,7 @@ export default function ChatArea() {
                 console.log("leaving", user);
             })
             .listen("MessageEvent", (e) => {
-                setMessages((pre) => [...pre, e.message]);
+                dispatch(setMessages([...messages, e.message]));
                 // console.log(e);
             })
             .listenForWhisper("messageReaction", (e) => {
@@ -114,8 +122,9 @@ export default function ChatArea() {
     useEffect(() => {
         if (messageContainerRef.current)
             if (!infiniteScroll) {
-                messageContainerRef.current.scrollTop =
-                    messageContainerRef.current.scrollHeight;
+                if (!messageId)
+                    messageContainerRef.current.scrollTop =
+                        messageContainerRef.current.scrollHeight;
             } else {
                 setInfiniteScroll(false);
                 const newScrollHeight =
@@ -256,10 +265,12 @@ export default function ChatArea() {
                                         setNextPageUrl(
                                             response.data.messages.next_page_url
                                         );
-                                        setMessages((pre) => [
-                                            ...response.data.messages.data,
-                                            ...pre,
-                                        ]);
+                                        dispatch(
+                                            setMessages([
+                                                ...response.data.messages.data,
+                                                ...messages,
+                                            ])
+                                        );
                                     }
                                 });
                             }

@@ -20,8 +20,9 @@ import { groupReactions } from "@/helpers/reactionHelper";
 import { useEffect } from "react";
 import Reactions from "./Reactions";
 import { FaAngleRight } from "react-icons/fa6";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setThreadMessage } from "@/Store/threadSlice";
+import { setMessageId } from "@/Store/mentionSlice";
 
 export default function Message({
     message,
@@ -35,6 +36,7 @@ export default function Message({
 }) {
     const { auth, channel, channelUsers } = usePage().props;
     const dispatch = useDispatch();
+    const { messageId } = useSelector((state) => state.mention);
     const attachments = message.attachments;
     const [reactions, setReactions] = useState([...message.reactions]);
     const imageAttachments = [];
@@ -55,6 +57,26 @@ export default function Message({
     useEffect(() => {
         setReactions([...message.reactions]);
     }, [message]);
+    useEffect(() => {
+        if (messageId) {
+            const targetMessage = document.getElementById(
+                `message-${messageId}`
+            );
+
+            if (targetMessage) {
+                targetMessage.classList.add("bg-link/15");
+               
+                setTimeout(() => {
+                    targetMessage.classList.remove("bg-link/15");
+                }, 1000);
+                targetMessage.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center",
+                });
+                dispatch(setMessageId(null));
+            }
+        }
+    }, [messageId]);
     useEffect(() => {
         if (
             newMessageReactionReceive &&
@@ -151,10 +173,10 @@ export default function Message({
     }
     return (
         <div
-            className={`message-container pl-8 pr-4 pb-2 relative break-all group hover:bg-white/10 ${
+            className={`message-container transition-all pl-8 pr-4 pb-2 relative break-all group hover:bg-white/10 ${
                 hasChanged || index == 0 ? "pt-4" : "mt-0"
             }`}
-            id={message.id}
+            id={`message-${message.id}`}
         >
             <MessageToolbar
                 message={message}

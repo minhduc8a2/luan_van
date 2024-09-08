@@ -12,7 +12,18 @@ class Helper
         $localPart = $parts[0];
         return  $localPart;
     }
-
+    public static function contentToHTML(string $content)
+    {
+        $editor = new Editor([
+            'extensions' => [
+                new \Tiptap\Extensions\StarterKit,
+                new CustomMention,
+            ]
+        ]);
+        $content = $editor->sanitize($content);
+        $editor->setContent($content);
+        return  $editor->getHTML();
+    }
     public static function sanitizeContent($content)
     {
         $editor = new Editor([

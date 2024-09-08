@@ -5,6 +5,8 @@ import OnlineStatusReducer from "./onlineStatusSlice";
 import panelReducer from "./panelSlice";
 import activityReducer from "./activitySlice";
 import threadReducer from "./threadSlice";
+import mentionReducer from "./mentionSlice";
+import messagesReducer from "./messagesSlice";
 export const makeStore = () => {
     return configureStore({
         reducer: {
@@ -14,6 +16,8 @@ export const makeStore = () => {
             panel: panelReducer,
             activity: activityReducer,
             thread: threadReducer,
+            mention: mentionReducer,
+           messages:messagesReducer,
         },
     });
 };

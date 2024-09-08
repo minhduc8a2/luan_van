@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Inertia\Inertia;
 use App\Models\Channel;
+use App\Models\Message;
 use App\Models\Workspace;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Builder;
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
 class ChannelController extends Controller
 {
     /**
- * Display a listing of the resource.
+     * Display a listing of the resource.
      */
     public function index()
     {
@@ -41,9 +42,22 @@ class ChannelController extends Controller
 
     public function show(Request $request,  Channel $channel)
     {
+        $perPage = 10;
 
         if ($request->user()->cannot('view', $channel)) {
             return  abort(403);
+        }
+
+        $messageId = $request->query('message_id');
+        $pageNumber = null;
+        if ($messageId) {
+            $message = Message::find($messageId);
+            $messagePosition = $channel->messages()
+                ->latest() // Order by latest first
+                ->where('created_at', '>=', $message->created_at) // Messages that are newer or equal to the mentioned one
+                ->count();
+            $pageNumber = ceil($messagePosition / $perPage);
+           
         }
 
         if ($request->expectsJson()) {
@@ -53,7 +67,7 @@ class ChannelController extends Controller
                 'thread' => function ($query) {
                     $query->withCount('messages');
                 }
-            ])->latest()->simplePaginate(10)];
+            ])->latest()->simplePaginate($perPage, ['*'], 'page', $pageNumber)];
         }
 
         $workspace = $channel->workspace;
@@ -89,7 +103,7 @@ class ChannelController extends Controller
                 'thread' => function ($query) {
                     $query->withCount('messages');
                 }
-            ])->latest()->simplePaginate(10),
+            ])->latest()->simplePaginate($perPage, ['*'], 'page', $pageNumber),
             'channelUsers' => $channel->users,
             'notifications' => $notifications
         ]);

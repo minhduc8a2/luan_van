@@ -66,6 +66,7 @@ export function formatDDMMYYY(dateObj) {
     return `${day}/${month}/${year}`;
 }
 export function groupMessagesByDate(messages) {
+    console.log(messages);
     return messages.reduce((grouped, message) => {
         // Convert the timestamp to a Date object
         const dateObj = new Date(message.created_at);

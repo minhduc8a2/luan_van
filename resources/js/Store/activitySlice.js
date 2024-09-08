@@ -24,6 +24,9 @@ export const activitySlice = createSlice({
             );
             if (index >= 0) {
                 state.notifications[index].view_at = new Date().toUTCString();
+                state.notifications[index].read_at=state.notifications[index].read_at
+                    ? state.notifications[index].read_at
+                    : new Date().toUTCString();
             }
         },
     },

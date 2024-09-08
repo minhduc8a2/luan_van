@@ -78,7 +78,7 @@ export default function HuddleNotification({
         }
     }
     return (
-        <li key={notification.id}>
+        <li >
             <button
                 className={`p-4 pl-8  hover:bg-white/15 border-t border-white/15 ${
                     read_at != null ? "" : "bg-primary-lighter/15"

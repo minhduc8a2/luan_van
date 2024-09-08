@@ -7,11 +7,17 @@ import { VscMention } from "react-icons/vsc";
 import { useDispatch, useSelector } from "react-redux";
 import { isMentionNotificationBroadcast } from "@/helpers/notificationTypeHelper";
 import { getChannelName } from "@/helpers/channelHelper";
+import { setMessageId } from "@/Store/mentionSlice";
+import { setMessages } from "@/Store/messagesSlice";
 export default function MentionNotification({
     notification,
     handleNotificationClick,
 }) {
-    const { auth, users: workspaceUsers } = usePage().props;
+    const {
+        auth,
+        users: workspaceUsers,
+        messages: initMessages,
+    } = usePage().props;
 
     const { fromUser, toUser, channel, workspace, message } =
         isMentionNotificationBroadcast(notification.type)
@@ -20,10 +26,24 @@ export default function MentionNotification({
     const read_at = notification.read_at;
     const created_at = notification.created_at;
     const view_at = notification.view_at;
-
-    function handleNotificationClickedPart() {}
+    const dispatch = useDispatch();
+    function handleNotificationClickedPart() {
+        router.get(
+            route("channel.show", channel.id),
+            { message_id: message.id },
+            {
+                preserveState: true,
+                preserveScroll: true,
+                onFinish: () => {
+                  
+                    dispatch(setMessageId(message.id));
+                   
+                },
+            }
+        );
+    }
     return (
-        <li key={notification.id}>
+        <li>
             <button
                 className={`p-4 pl-8 w-full hover:bg-white/15 border-t border-white/15 ${
                     read_at != null ? "" : "bg-primary-lighter/15"
