@@ -31,9 +31,19 @@ class ChannelController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, Workspace $workspace)
     {
-        //
+
+        if ($request->user()->cannot('create', [Channel::class, $workspace])) abort(403);
+        $validated = $request->validate(["name" => "required|string|max:255", "type" => "required|in:PUBLIC,PRIVATE"]);
+        try {
+            $channel = $request->user()->ownChannels()->create(['name' => $validated['name'], 'type' => $validated['type'], 'workspace_id' => $workspace->id]);
+            $request->user()->channels()->attach($channel->id);
+            return redirect(route('channel.show', $channel->id));
+        } catch (\Throwable $th) {
+            
+            return back()->withErrors(['server' => "Something went wrong, please try later!"]);
+        }
     }
 
     /**
@@ -57,7 +67,6 @@ class ChannelController extends Controller
                 ->where('created_at', '>=', $message->created_at) // Messages that are newer or equal to the mentioned one
                 ->count();
             $pageNumber = ceil($messagePosition / $perPage);
-           
         }
 
         if ($request->expectsJson()) {

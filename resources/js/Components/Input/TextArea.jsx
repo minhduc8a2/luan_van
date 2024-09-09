@@ -3,6 +3,7 @@ import { forwardRef, useEffect, useRef } from "react";
 export default forwardRef(function TextInput(
     {
         type = "text",
+        error = null,
         className = "",
         id = "",
         label = "",
@@ -37,6 +38,7 @@ export default forwardRef(function TextInput(
                 }
                 ref={input}
             />
+            {error && <div className="text-xs text-red-500">{error}</div>}
         </div>
     );
 });

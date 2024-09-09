@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\User;
 use App\Models\Channel;
+use App\Models\Workspace;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Auth\Access\Response;
 
@@ -32,9 +33,9 @@ class ChannelPolicy
     /**
      * Determine whether the user can create models.
      */
-    public function create(User $user): bool
+    public function create(User $user, Workspace $workspace): bool
     {
-        //
+        return $user->isWorkspaceMember($workspace);
     }
 
     /**

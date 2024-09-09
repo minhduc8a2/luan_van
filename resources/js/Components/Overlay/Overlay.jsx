@@ -46,7 +46,7 @@ export default function Overlay({
                     leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                 >
                     <DialogPanel
-                        className={`mb-6  rounded-lg overflow-hidden shadow-xl transform transition-all `}
+                        className={`mb-6  rounded-lg  shadow-xl transform transition-all `}
                     >
                         {children}
                     </DialogPanel>

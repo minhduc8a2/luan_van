@@ -2,7 +2,6 @@ import React from "react";
 import OverlayPanel from "@/Components/Overlay/OverlayPanel";
 import Button from "@/Components/Button";
 export default function Form1({
-    
     success = false,
     children,
     buttonName,
@@ -14,7 +13,6 @@ export default function Form1({
 }) {
     return (
         <OverlayPanel
-          
             buttonNode={activateButtonNode}
             submit={submit}
             success={success}
@@ -39,6 +37,7 @@ export default function Form1({
                                     <Button
                                         className="text-white/65"
                                         onClick={(e) => {
+                                            console.log("close form");
                                             e.preventDefault();
                                             close();
                                         }}
@@ -48,6 +47,7 @@ export default function Form1({
                                     <Button
                                         className="text-white/65"
                                         loading={submitting}
+                                        onClick={submit}
                                     >
                                         {buttonName}
                                     </Button>

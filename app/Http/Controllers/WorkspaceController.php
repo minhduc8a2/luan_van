@@ -65,7 +65,8 @@ class WorkspaceController extends Controller
         $workspace->assignUserToPublicChannels($user);
         $workspace->createAndAssignSelfChannelsForUser($user);
 
-        return redirect(route('workspace.show', $workspace->id));
+        $firstPublicChannel = $workspace->channels->where('type', '=', 'PUBLIC')->first();
+        return redirect()->route('channel.show', $firstPublicChannel->id);
     }
 
     /**

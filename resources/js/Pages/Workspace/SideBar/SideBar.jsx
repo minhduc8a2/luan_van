@@ -9,9 +9,8 @@ import { LuPlus } from "react-icons/lu";
 import Dropdown from "@/Components/Dropdown";
 import WorkspaceAvatar from "@/Components/WorkspaceAvatar";
 import WorkspaceListItem from "@/Components/WorkspaceListItem";
-import { IoIosAdd } from "react-icons/io";
-import Form1 from "@/Components/Form1";
-import TextArea from "@/Components/Input/TextArea";
+
+import { AddWorkspace } from "./AddWorkspace";
 import { useRef, useEffect } from "react";
 import { FaBell } from "react-icons/fa6";
 import { useDispatch, useSelector } from "react-redux";
@@ -22,11 +21,9 @@ export default function SideBar({}) {
     const { auth, url, workspace, workspaces } = usePage().props;
     const { type: panelType } = useSelector((state) => state.panel);
     const { notifications } = useSelector((state) => state.activity);
-    const newNotificationsLength = useMemo(()=>{
-        return notifications.filter(
-            (no) => !no.read_at
-        ).length;
-    },[notifications])
+    const newNotificationsLength = useMemo(() => {
+        return notifications.filter((no) => !no.read_at).length;
+    }, [notifications]);
     const dispatch = useDispatch();
     const boxRef = useRef(null);
     const itemStyle = "flex flex-col items-center gap-y-2 group";
@@ -109,7 +106,7 @@ export default function SideBar({}) {
                         </div>
                     )}
                     <div className="text-xs font-semibold">Activity</div>
-                    {newNotificationsLength>0 && (
+                    {newNotificationsLength > 0 && (
                         <div className="bg-red-500 rounded-lg text-white w-4 h-4 text-xs absolute -top-2 -right-1">
                             {newNotificationsLength}
                         </div>
@@ -133,51 +130,5 @@ export default function SideBar({}) {
                 />
             </div>
         </div>
-    );
-}
-import { useState } from "react";
-import { useForm } from "@inertiajs/react";
-
-function AddWorkspace() {
-    const { data, setData, post, processing, errors, reset } = useForm({
-        name: "",
-        channel: "",
-    });
-    const [success, setSuccess] = useState(false);
-    function submit(e) {
-        e.preventDefault();
-        post(route("workspace.store"), {
-            onSuccess: () => {
-                reset();
-                setSuccess(true);
-            },
-        });
-    }
-    return (
-        <Form1
-            success={success}
-            submit={submit}
-            buttonName="Create"
-            activateButtonNode={
-                <div className="flex gap-x-2 items-center p-4 hover:bg-white/10 w-full">
-                    <IoIosAdd className="text-xl" />
-                    Add workspace
-                </div>
-            }
-            title="Add Workspace"
-        >
-            <TextArea
-                placeholder=""
-                label="Workspace name:"
-                value={data.name}
-                onChange={(e) => setData("name", e.target.value)}
-            />
-            <TextArea
-                placeholder=""
-                label="What project are you working on?"
-                value={data.channel}
-                onChange={(e) => setData("channel", e.target.value)}
-            />
-        </Form1>
     );
 }

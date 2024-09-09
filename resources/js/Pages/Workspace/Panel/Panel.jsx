@@ -10,6 +10,7 @@ import { InvitationForm } from "./InvitationForm";
 import { DirectChannel } from "./DirectChannel";
 import { useSelector } from "react-redux";
 import Activity from "./Activity/Activity";
+import { CreateChannelForm } from "./createChannelForm";
 
 export default function Panel({}) {
     const {
@@ -100,12 +101,7 @@ export default function Panel({}) {
                             else return "";
                         })}
                     </ul>
-                    <div className="grid-item mt-2 px-4">
-                        <div className="flex items-center ">
-                            <LuPlus className="text-sm" />
-                        </div>
-                        <div className="">Add channels</div>
-                    </div>
+                    <CreateChannelForm />
                 </div>
                 <div className="mt-6">
                     <div className="grid-item px-4">
