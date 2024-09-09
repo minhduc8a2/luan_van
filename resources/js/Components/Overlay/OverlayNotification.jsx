@@ -9,9 +9,10 @@ export default function OverlayNotification({
     sameButtonRow,
     buttonNode,
     submitButtonNode,
+    success,
 }) {
     return (
-        <OverlayPanel buttonNode={buttonNode}>
+        <OverlayPanel buttonNode={buttonNode} success={success}>
             {({ close }) => (
                 <div className="  rounded-lg bg-background">
                     <div className="w-[500px]  m-4 ">

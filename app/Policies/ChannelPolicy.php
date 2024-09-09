@@ -55,6 +55,11 @@ class ChannelPolicy
 
         return $channel->user_id == $user->id;
     }
+    public function changeType(User $user, Channel $channel): bool
+    {
+        if ($channel->type == "DIRECT") return false;
+        return $channel->user_id == $user->id;
+    }
 
     /**
      * Determine whether the user can delete the model.

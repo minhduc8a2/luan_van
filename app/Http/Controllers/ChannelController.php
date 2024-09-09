@@ -167,6 +167,21 @@ class ChannelController extends Controller
             return back()->withErrors(["server" => "Something went wrong! Please try later"]);
         }
     }
+
+    public function changeType(Request $request, Channel $channel)
+    {
+        if ($request->user()->cannot('changeType', $channel)) {
+            return  abort(403);
+        }
+        $validated = $request->validate(['type' => "required|in:PUBLIC,PRIVATE"]);
+        try {
+            $channel->type = $validated['type'];
+            $channel->save();
+            return back();
+        } catch (\Throwable $th) {
+            return back()->withErrors(["server" => "Something went wrong! Please try later"]);
+        }
+    }
     /**
      * Remove the specified resource from storage.
      */

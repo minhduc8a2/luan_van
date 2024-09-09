@@ -3,16 +3,12 @@ import React from "react";
 import { FaAngleDown } from "react-icons/fa";
 import { useState } from "react";
 
-import ChangeChannelNameForm from "./ChangeChannelNameForm";
-import { EditDescriptionForm } from "./EditDescriptionForm";
-import Button from "@/Components/Button";
 import { usePage } from "@inertiajs/react";
-import { SettingsButton } from "./SettingsButton";
-import { UTCToDateTime } from "@/helpers/dateTimeHelper";
-import About from "./About";
-import Settings from "./Settings";
+
+import About from "./About/About";
+import Settings from "./Settings/Settings";
 export default function ChannelSettings({ channelName }) {
-    const { channel , workspace} = usePage().props;
+    const { channel, workspace } = usePage().props;
 
     const [tabIndex, setTabIndex] = useState(0);
     return (
@@ -59,8 +55,12 @@ export default function ChannelSettings({ channelName }) {
                     {tabIndex == 0 && (
                         <About channel={channel} channelName={channelName} />
                     )}
-                     {tabIndex == 2 && (
-                        <Settings channel={channel} channelName={channelName} workspace={workspace}/>
+                    {tabIndex == 2 && (
+                        <Settings
+                            channel={channel}
+                            channelName={channelName}
+                            workspace={workspace}
+                        />
                     )}
                 </div>
             </div>
