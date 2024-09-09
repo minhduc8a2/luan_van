@@ -2,6 +2,7 @@ import React from "react";
 import OverlayPanel from "@/Components/Overlay/OverlayPanel";
 import Button from "@/Components/Button";
 export default function Form1({
+    errors={},
     success = false,
     children,
     buttonName,
@@ -12,11 +13,7 @@ export default function Form1({
     submitting = false,
 }) {
     return (
-        <OverlayPanel
-            buttonNode={activateButtonNode}
-            submit={submit}
-            success={success}
-        >
+        <OverlayPanel buttonNode={activateButtonNode} success={success}>
             {({ close }) => (
                 <form action="" onSubmit={submit}>
                     <div className="w-[500px] max-w-screen-sm m-4 ">
@@ -25,6 +22,15 @@ export default function Form1({
                         </h2>
                         <div className="mt-8">
                             {children}
+                            {errors &&
+                                Object.values(errors).map((error, index) => (
+                                    <div
+                                        className="my-4 text-red-500 text-sm"
+                                        key={index}
+                                    >
+                                        {error}
+                                    </div>
+                                ))}
                             <div
                                 className={`mt-4 flex  ${
                                     sameButtonRow

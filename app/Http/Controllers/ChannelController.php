@@ -41,7 +41,7 @@ class ChannelController extends Controller
             $request->user()->channels()->attach($channel->id);
             return redirect(route('channel.show', $channel->id));
         } catch (\Throwable $th) {
-            
+
             return back()->withErrors(['server' => "Something went wrong, please try later!"]);
         }
     }
@@ -62,11 +62,14 @@ class ChannelController extends Controller
         $pageNumber = null;
         if ($messageId) {
             $message = Message::find($messageId);
-            $messagePosition = $channel->messages()
-                ->latest() // Order by latest first
-                ->where('created_at', '>=', $message->created_at) // Messages that are newer or equal to the mentioned one
-                ->count();
-            $pageNumber = ceil($messagePosition / $perPage);
+            if ($message) {
+
+                $messagePosition = $channel->messages()
+                    ->latest() // Order by latest first
+                    ->where('created_at', '>=', $message->created_at) // Messages that are newer or equal to the mentioned one
+                    ->count();
+                $pageNumber = ceil($messagePosition / $perPage);
+            }
         }
 
         if ($request->expectsJson()) {
@@ -102,7 +105,7 @@ class ChannelController extends Controller
             'workspace' => $workspace,
             'channels' => $channels,
             'users' => $users,
-            'channel' => $channel,
+            'channel' => $channel->load('user'),
             'workspaces' => $workspaces,
             "directChannels" => $directChannels->load("users"),
             'selfChannel' => $selfChannel,
@@ -136,16 +139,32 @@ class ChannelController extends Controller
 
     public function editDescription(Request $request, Channel $channel)
     {
-        if ($request->user()->cannot('update', $channel)) {
+        if ($request->user()->cannot('updateDescription', $channel)) {
             return  abort(403);
         }
-        $validated = $request->validate(['description' => "string"]);
+
+        $validated = $request->validate(['description' => "string|nullable"]);
+
         try {
-            $channel->description = $validated['description'];
+            $channel->description = $validated['description'] ?? "";
             $channel->save();
-            return back()->with('data', ['statusCode' => 201]);
+            return back();
         } catch (\Throwable $th) {
-            return back()->with('data', ['statusCode' => 500]);
+            return back()->withErrors(["server" => "Something went wrong! Please try later"]);
+        }
+    }
+    public function editName(Request $request, Channel $channel)
+    {
+        if ($request->user()->cannot('updateName', $channel)) {
+            return  abort(403);
+        }
+        $validated = $request->validate(['name' => "required|string"]);
+        try {
+            $channel->name = $validated['name'];
+            $channel->save();
+            return back();
+        } catch (\Throwable $th) {
+            return back()->withErrors(["server" => "Something went wrong! Please try later"]);
         }
     }
     /**

@@ -51,6 +51,7 @@ Route::middleware('auth')->group(function () {
     Route::post("workspaces/{workspace}/channels", [ChannelController::class, 'store'])->name('channel.store');
     Route::get("/channels/{channel}", [ChannelController::class, 'show'])->name('channel.show');
     Route::post("/channels/{channel}/edit_description", [ChannelController::class, 'editDescription'])->name("channel.edit_description");
+    Route::post("/channels/{channel}/edit_name", [ChannelController::class, 'editName'])->name("channel.edit_name");
     Route::post("/channels/{channel}/messages", [MessageController::class, 'store'])->name('message.store');
     Route::post("/channels/{channel}/messages/{message}", [MessageController::class, 'storeThreadMessage'])->name('thread_message.store');
     Route::get("/channels/{channel}/messages/{message}/thread_messages", [ThreadController::class, 'getMessages'])->name("thread.messages");

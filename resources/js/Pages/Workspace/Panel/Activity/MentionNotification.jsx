@@ -56,7 +56,7 @@ export default function MentionNotification({
                 { message_id: message.id },
                 {
                     preserveState: true,
-                    preserveScroll: true,
+                  
                     onFinish: () => {
                         dispatch(setMessageId(message.id));
                     },

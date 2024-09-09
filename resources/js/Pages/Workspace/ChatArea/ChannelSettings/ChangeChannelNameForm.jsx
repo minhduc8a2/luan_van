@@ -1,0 +1,48 @@
+import React from "react";
+import Form1 from "@/Components/Form1";
+
+import { useForm, usePage } from "@inertiajs/react";
+import { useState } from "react";
+import TextInput from "@/Components/Input/TextInput";
+import { SettingsButton } from "./SettingsButton";
+export default function ChangeChannelNameForm({ channelName }) {
+    const { channel } = usePage().props;
+    const { data, setData, post, processing, errors, reset } = useForm({
+        name: channelName,
+    });
+    const [success, setSuccess] = useState(false);
+    function onSubmit(e) {
+        e.preventDefault();
+        post(route("channel.edit_name", channel.id), {
+            preserveState: true,
+            onSuccess: () => {
+                setSuccess(true);
+            },
+            onFinish: () => {
+                console.log("errors");
+                reset();
+            },
+        });
+    }
+    return (
+        <Form1
+            errors={errors}
+            success={success}
+            submit={onSubmit}
+            submitting={processing}
+            title="Rename this channel"
+            buttonName="Save changes"
+            activateButtonNode={
+                <SettingsButton onClick={() => setSuccess(false)} title="Channel name" description={`# ${channelName}`} className="rounded-tl-lg rounded-tr-lg"/>
+               
+            }
+        >
+            <TextInput
+                row={1}
+                value={data.name}
+                onChange={(e) => setData("name", e.target.value)}
+            />
+           
+        </Form1>
+    );
+}

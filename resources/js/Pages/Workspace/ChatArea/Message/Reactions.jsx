@@ -11,7 +11,7 @@ export default function Reactions({
     removeMessageReaction,
 }) {
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-
+    if (groupedReactions.length == 0) return "";
     return (
         <div className="flex gap-2 mt-4 items-center flex-wrap">
             {groupedReactions.map((reaction) => (
@@ -30,10 +30,8 @@ export default function Reactions({
                     <button
                         onClick={() => {
                             if (reaction.hasReacted) {
-                               
                                 removeMessageReaction(reaction.emoji_id);
-                            }
-                            else reactToMessage(reaction.emoji_id)
+                            } else reactToMessage(reaction.emoji_id);
                         }}
                         className={`${
                             reaction.hasReacted

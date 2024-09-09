@@ -1,11 +1,11 @@
 import { useForm } from "@inertiajs/react";
 
 import TextArea from "@/Components/Input/TextArea";
-import { FaLink } from "react-icons/fa6";
 import Form1 from "@/Components/Form1";
 import { router, usePage } from "@inertiajs/react";
-import OverlayNotification from "@/Components/Overlay/OverlayNotification";
+
 import { useState, useEffect } from "react";
+import { SettingsButton } from "./SettingsButton";
 export function EditDescriptionForm() {
     const { channel } = usePage().props;
     const [success, setSuccess] = useState(false);
@@ -43,14 +43,12 @@ export function EditDescriptionForm() {
                 buttonName={channel.description ? "Update" : "Add"}
                 submitting={processing}
                 activateButtonNode={
-                    <div
-                        className=" text-link"
-                        onClick={() => {
-                            setSuccess(false);
-                        }}
-                    >
-                        {channel.description ? "Edit" : "Add"} description
-                    </div>
+                    <SettingsButton
+                        onClick={() => setSuccess(false)}
+                        title=" Description"
+                        description={channel.description}
+                        className="border-t-0"
+                    />
                 }
                 title={`${channel.description ? "Edit" : "Add"} Description`}
             >

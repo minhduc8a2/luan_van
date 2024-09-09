@@ -23,6 +23,7 @@ export default {
                 link: "#1d9bd1",
                 "primary-light": "#431248",
                 "primary-lighter": "#7d3986",
+                danger:"#b41541"
             },
         },
     },

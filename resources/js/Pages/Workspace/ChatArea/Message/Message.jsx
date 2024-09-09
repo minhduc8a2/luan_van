@@ -154,7 +154,7 @@ export default function Message({
     }
     return (
         <div
-            className={`message-container transition-all pl-8 pr-4 pb-2 relative break-all group hover:bg-white/10 ${
+            className={`message-container transition-all pl-8 pt-1 pr-4 pb-2 relative break-all group hover:bg-white/10 ${
                 hasChanged || index == 0 ? "pt-4" : "mt-0"
             }`}
             id={`message-${message.id}`}
@@ -173,7 +173,7 @@ export default function Message({
             ) : (
                 <div></div>
             )}
-            <div className="mx-3">
+            <div className="mx-3 ">
                 {hasChanged || index == 0 ? (
                     <div className="flex gap-x-2 items-end">
                         <div className="text-base font-bold leading-tight">

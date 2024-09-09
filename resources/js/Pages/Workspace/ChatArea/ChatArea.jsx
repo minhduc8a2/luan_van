@@ -30,6 +30,7 @@ import { getMentionsFromContent } from "@/helpers/tiptapHelper";
 import { getChannelName } from "@/helpers/channelHelper";
 import { addMessage, setMessages } from "@/Store/messagesSlice";
 import { setMessageId } from "@/Store/mentionSlice";
+import ChannelSettings from "./ChannelSettings/ChannelSettings";
 
 export default function ChatArea() {
     const {
@@ -173,10 +174,12 @@ export default function ChatArea() {
                     behavior: "smooth",
                     block: "center",
                 });
-                dispatch(setMessageId(null));
+                setTimeout(() => {
+                    dispatch(setMessageId(null));
+                }, 100);
             }
         }
-    }, [messageId]);
+    }, [messageId, messages]);
 
     function handleHuddleButtonClicked() {
         if (huddleChannel && huddleChannel.id != channel.id) {
@@ -216,10 +219,7 @@ export default function ChatArea() {
             <div className="bg-background  chat-area-container flex-1 ">
                 <div className="p-4 border-b border-b-white/10 z-10">
                     <div className="flex justify-between font-bold text-lg opacity-75">
-                        <div className="flex items-center gap-x-2">
-                            <div className=""># {channelName}</div>
-                            <FaAngleDown className="text-sm" />
-                        </div>
+                      <ChannelSettings channelName={channelName}/>
                         <div className="flex items-center gap-x-4 ">
                             <div className="flex items-center p-1 border  border-white/15 rounded-lg px-2">
                                 <ul className="flex">
@@ -286,14 +286,6 @@ export default function ChatArea() {
                             </div>
                         </div>
                     </div>
-                    {loadingMessages && (
-                        <div className="flex justify-center items-center">
-                            <div className="h-12 w-12 relative">
-                                <OverlayLoadingSpinner spinerStyle="border-link" />
-                            </div>
-                            Loading messages ...
-                        </div>
-                    )}
                     <InView
                         onChange={(inView, entry) => {
                             if (inView && nextPageUrl) {
@@ -371,7 +363,7 @@ export default function ChatArea() {
                     })}
                     <InView
                         onChange={(inView, entry) => {
-                            if (inView && previousPageUrl) {
+                            if (inView && previousPageUrl && !messageId) {
                                 setInfiniteScroll(true);
                                 setScrollDown(true);
                                 setLoadingMessages(true);
@@ -395,7 +387,7 @@ export default function ChatArea() {
                             }
                         }}
                     ></InView>
-                    <div className="flex h-12  justify-center items-center">
+                    <div className="flex  justify-center items-center">
                         {!loadingMessages && previousPageUrl != null && (
                             <button
                                 className="flex items-center gap-x-2 hover:text-white text-white/75"
@@ -431,12 +423,6 @@ export default function ChatArea() {
                                 <TfiReload /> Load more
                             </button>
                         )}
-                        <div className="w-12 relative">
-                            {loadingMessages && (
-                                <OverlayLoadingSpinner spinerStyle="border-link" />
-                            )}
-                        </div>
-                        {loadingMessages && "Loading messages ..."}
                     </div>
                 </div>
                 <div className="m-6 border border-white/15 pt-4 px-2 rounded-lg">

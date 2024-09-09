@@ -41,13 +41,19 @@ class ChannelPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Channel $channel): bool
+    public function updateDescription(User $user, Channel $channel): bool
     {
         $exists = DB::table('channel_user')
             ->where('user_id', '=', $user->id)
             ->where('channel_id', '=', $channel->id)
             ->count() > 0;
         return $exists;
+    }
+
+    public function updateName(User $user, Channel $channel): bool
+    {
+
+        return $channel->user_id == $user->id;
     }
 
     /**

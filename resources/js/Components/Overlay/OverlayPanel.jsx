@@ -4,7 +4,7 @@ import Overlay from "./Overlay";
 export default function OverlayPanel({
     children,
     buttonNode,
-
+    className="",
     success = false,
 }) {
     const [openOverlay, setOpenOverlay] = useState(false);
@@ -32,7 +32,7 @@ export default function OverlayPanel({
                     console.log("close");
                 }}
             >
-                <div className=" text-white  p-4 rounded-lg bg-background">
+                <div className={" text-white p-4  rounded-lg bg-background "+className}>
                     {typeof children === "function"
                         ? children({ close })
                         : children}
