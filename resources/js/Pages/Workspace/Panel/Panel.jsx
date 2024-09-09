@@ -89,7 +89,7 @@ export default function Panel({}) {
                                                     : "hover:bg-white/10"
                                             }`}
                                         >
-                                            <div className="flex items-center ">
+                                            <div className="flex items-center h-full justify-center">
                                                 <LuLock className="text-sm " />
                                             </div>
                                             <div className="font-semibold flex items-center leading-7">

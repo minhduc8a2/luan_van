@@ -48,7 +48,7 @@ export function EditDescriptionForm() {
             <Form1
                 success={flash.data?.statusCode != null}
                 submit={onSubmit}
-                buttonName="Update"
+                buttonName={channel.description ? "Update" : "Add"}
                 submitting={processing}
                 activateButtonNode={
                     <div
@@ -58,10 +58,10 @@ export function EditDescriptionForm() {
                             setShowError(true);
                         }}
                     >
-                        Edit description
+                        {channel.description ? "Edit" : "Add"} description
                     </div>
                 }
-                title={`Edit Description`}
+                title={`${channel.description ? "Edit" : "Add"} Description`}
             >
                 {" "}
                 <TextArea
