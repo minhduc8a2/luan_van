@@ -31,6 +31,7 @@ import {
     streamHasVideoTracks,
     streamHasAudioTracks,
     removeVideoTracks,
+    removeAudioTracks,
 } from "@/helpers/mediaHelper";
 import SquareImage from "@/Components/SquareImage";
 import StreamVideo from "@/Components/StreamVideo";
@@ -79,9 +80,22 @@ export default function Huddle() {
                 .then((stream) => {
                     const audioTrack = stream.getAudioTracks()[0];
                     currentStreamRef.current.addTrack(audioTrack);
-                    peersRef.current.forEach((value, key) => {
-                        value.addTrack(audioTrack, currentStreamRef.current);
+                    shouldRerender();
+                    //add stream to user video elements
+                    peersRef.current.forEach((peer, key) => {
+                        const oldTracks =
+                            currentStreamRef.current.getAudioTracks();
+                        if (oldTracks.length > 0) {
+                            peer.replaceTrack(
+                                oldTracks[0],
+                                audioTrack,
+                                currentStreamRef.current
+                            );
+                        } else
+                            peer.addTrack(audioTrack, currentStreamRef.current);
                     });
+                    removeAudioTracks(currentStreamRef.current);
+                    currentStreamRef.current.addTrack(audioTrack);
                 })
                 .catch((error) => {
                     setEnableAudio(false);
@@ -307,7 +321,6 @@ export default function Huddle() {
         };
     }, [channel?.id]);
     if (!channel) return "";
-   
 
     return (
         <div
@@ -316,7 +329,7 @@ export default function Huddle() {
         >
             <div className="flex justify-between p-4 items-center">
                 <div className="text-sm">
-                    {getChannelName(channel,auth.user, workspaceUsers)}
+                    {getChannelName(channel, auth.user, workspaceUsers)}
                 </div>
                 <MdOutlineZoomOutMap />
             </div>
@@ -485,6 +498,7 @@ export default function Huddle() {
                                     key={au.deviceId}
                                     onClick={() => {
                                         currentAudioRef.current = au;
+                                        addTrackToStream("audio");
                                     }}
                                 >
                                     {au.label}

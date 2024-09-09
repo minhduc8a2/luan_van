@@ -145,3 +145,11 @@ export function removeVideoTracks(stream) {
         track.stop();
     });
 }
+export function removeAudioTracks(stream) {
+    if (!stream) return;
+    const audioTracks = stream.getAudioTracks();
+    audioTracks.forEach((track) => {
+        stream.removeTrack(track);
+        track.stop();
+    });
+}
