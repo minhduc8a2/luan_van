@@ -5,6 +5,7 @@ import { FaRegTrashCan } from "react-icons/fa6";
 
 import ChangeToPrivateConfirm from "./ChangeToPrivateConfirm";
 export default function Settings({ channel, channelName, workspace }) {
+    if (channel.is_main_channel) return "";
     return (
         <>
             <ChangeToPrivateConfirm

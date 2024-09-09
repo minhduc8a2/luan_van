@@ -1,6 +1,6 @@
 import OverlayPanel from "@/Components/Overlay/OverlayPanel";
 import React from "react";
-import { FaAngleDown } from "react-icons/fa";
+import { FaAngleDown, FaLock } from "react-icons/fa";
 import { useState } from "react";
 
 import { usePage } from "@inertiajs/react";
@@ -9,13 +9,20 @@ import About from "./About/About";
 import Settings from "./Settings/Settings";
 export default function ChannelSettings({ channelName }) {
     const { channel, workspace } = usePage().props;
-
     const [tabIndex, setTabIndex] = useState(0);
     return (
         <OverlayPanel
             buttonNode={
                 <div className="flex items-center gap-x-2">
-                    <div className=""># {channelName}</div>
+                    <div className="flex items-baseline gap-x-1">
+                        {channel.type == "PUBLIC" ? (
+                            <span className="text-xl">#</span>
+                        ) : (
+                            <FaLock className="text-sm inline" />
+                        )}{" "}
+                        {channelName}
+                    </div>
+
                     <FaAngleDown className="text-sm" />
                 </div>
             }
@@ -23,7 +30,14 @@ export default function ChannelSettings({ channelName }) {
         >
             <div className="w-[500px] pt-4 px-4 m-4 text-white/85">
                 <h2 className="text-2xl my-4 font-bold text-white/85">
-                    # {channelName}
+                    <div className="flex items-baseline gap-x-2">
+                        {channel.type == "PUBLIC" ? (
+                            "#"
+                        ) : (
+                            <FaLock className="text-lg inline" />
+                        )}{" "}
+                        {channelName}
+                    </div>
                 </h2>
                 <div className="flex gap-x-4">
                     <button

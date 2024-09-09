@@ -53,7 +53,9 @@ class WorkspaceController extends Controller
                 'name' => "all-" . $workspace->name,
                 'description' => Channel::createChannelDescription('all', ''),
                 'type' => 'PUBLIC',
-                'user_id' => $user->id
+                'user_id' => $user->id,
+                'is_main_channel' => true
+
             ],
             [
                 'name' => "social",

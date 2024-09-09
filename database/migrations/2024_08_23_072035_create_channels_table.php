@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('description')->default("");
             $table->enum('type', Channel::$type);
+            $table->boolean('is_main_channel')->default(false);
             $table->foreignId('workspace_id')->constrained()->cascadeOnDelete();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->timestamps();

@@ -61,6 +61,15 @@ class ChannelPolicy
         return $channel->user_id == $user->id;
     }
 
+    public function leave(User $user, Channel $channel): bool
+    {
+        $exists = DB::table('channel_user')
+            ->where('user_id', '=', $user->id)
+            ->where('channel_id', '=', $channel->id)
+            ->count() > 0;
+        return $exists;
+    }
+
     /**
      * Determine whether the user can delete the model.
      */

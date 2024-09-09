@@ -5,6 +5,7 @@ import { useForm, usePage } from "@inertiajs/react";
 import { useState } from "react";
 import TextInput from "@/Components/Input/TextInput";
 import { SettingsButton } from "./SettingsButton";
+import { FaLock } from "react-icons/fa";
 export default function ChangeChannelNameForm({ channelName }) {
     const { channel } = usePage().props;
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -33,8 +34,21 @@ export default function ChangeChannelNameForm({ channelName }) {
             title="Rename this channel"
             buttonName="Save changes"
             activateButtonNode={
-                <SettingsButton onClick={() => setSuccess(false)} title="Channel name" description={`# ${channelName}`} className="rounded-tl-lg rounded-tr-lg"/>
-               
+                <SettingsButton
+                    onClick={() => setSuccess(false)}
+                    title="Channel name"
+                    description={
+                        <div className="flex items-baseline gap-x-1">
+                            {channel.type == "PUBLIC" ? (
+                                <span className="text-lg">#</span>
+                            ) : (
+                                <FaLock className="text-sm inline" />
+                            )}{" "}
+                            {channelName}
+                        </div>
+                    }
+                    className="rounded-tl-lg rounded-tr-lg"
+                />
             }
         >
             <TextInput
@@ -42,7 +56,6 @@ export default function ChangeChannelNameForm({ channelName }) {
                 value={data.name}
                 onChange={(e) => setData("name", e.target.value)}
             />
-           
         </Form1>
     );
 }

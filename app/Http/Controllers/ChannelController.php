@@ -85,7 +85,7 @@ class ChannelController extends Controller
         $workspace = $channel->workspace;
 
 
-        $channels = $workspace->channels()->where(function (Builder $query) {
+        $channels = $request->user()->channels()->where('workspace_id', '=', $workspace->id)->where(function (Builder $query) {
             return $query->where("type", "=", "PUBLIC")
                 ->orWhere("type", "=", "PRIVATE");
         })
@@ -178,6 +178,23 @@ class ChannelController extends Controller
             $channel->type = $validated['type'];
             $channel->save();
             return back();
+        } catch (\Throwable $th) {
+            return back()->withErrors(["server" => "Something went wrong! Please try later"]);
+        }
+    }
+
+    public function leave(Request $request, Channel $channel)
+    {
+        if ($request->user()->cannot('leave', $channel)) {
+            return  abort(403);
+        }
+
+        try {
+            if ($channel->is_main_channel) {
+                return back()->withErrors(["user_error" => "Cannot leave this channel!"]);
+            }
+            $request->user()->channels()->detach($channel->id);
+            return redirect(route('workspace.show', $channel->workspace->id));
         } catch (\Throwable $th) {
             return back()->withErrors(["server" => "Something went wrong! Please try later"]);
         }

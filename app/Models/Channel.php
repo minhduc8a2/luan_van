@@ -19,7 +19,8 @@ class Channel extends Model
         'description',
         'type',
         'workspace_id',
-        'user_id'
+        'user_id',
+        'is_main_channel'
     ];
     public static function createChannelDescription($type, $channelName)
     {
