@@ -65,7 +65,7 @@ class User extends Authenticatable
 
     public function workspaces(): BelongsToMany
     {
-        return $this->belongsToMany(Workspace::class);
+        return $this->belongsToMany(Workspace::class)->withPivot('role_id');
     }
 
     public function ownChannels(): HasMany
@@ -75,7 +75,7 @@ class User extends Authenticatable
 
     public function channels(): BelongsToMany
     {
-        return $this->belongsToMany(Channel::class);
+        return $this->belongsToMany(Channel::class)->withPivot('role_id');
     }
 
     public function messages(): HasMany
@@ -100,5 +100,26 @@ class User extends Authenticatable
             ->where('channel_id', '=',  $channel->id)
             ->count() > 0;
         return $exists;
+    }
+
+    public function workspacePermissionCheck(Workspace $workspace, string $permissionType): bool
+    {
+
+        $roleId = $this->workspaces()
+            ->where('workspace_id', '=', $workspace->id)
+            ->first()
+            ->pivot
+            ->role_id;
+        return $workspace->permissions()->where('permission_type', '=', $permissionType)->where('role_id', '=', $roleId)->count() > 0;
+    }
+    public function channelPermissionCheck(Channel $channel, string $permissionType): bool
+    {
+
+        $roleId = $this->channels()
+            ->where('channel_id', '=', $channel->id)
+            ->first()
+            ->pivot
+            ->role_id;
+        return $channel->permissions()->where('permission_type', '=', $permissionType)->where('role_id', '=', $roleId)->count() > 0;
     }
 }

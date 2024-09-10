@@ -16,7 +16,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        $this->call(RoleSeeder::class);
         User::factory()->create([
             'name' => 'Lê Minh Đức',
             'email' => 'minhduc8a2.1@gmail.com',
@@ -42,44 +42,15 @@ class DatabaseSeeder extends Seeder
 
         $user = User::find(1);
 
-        $user->ownWorkspaces()->createMany([
-            ['name' => 'Main'],
-            ['name' => 'Duc Company'],
-        ]);
-        $user->workspaces()->attach(1);
 
-        $user->workspaces()->attach(2);
 
-        $user->ownWorkspaces->map(function ($wsp, $key) {
-            $workspace = Workspace::find($wsp->id);
-            $user = User::find(1);
+        $workspace = $user->ownWorkspaces()->create(['name' => 'project']);
+        $workspace->assignAdminRoleAndAdminPermissions($user);
+        $workspace->createWorkspaceMemberPermissions();
+        $workspace->createInitChannels($user, 'project');
+        $workspace->createAndAssignSelfChannelForUser($user);
 
-            $workspace->channels()->createMany([
-                [
-                    'name' => 'all-' . $workspace->name,
-                    'description' => Channel::createChannelDescription('all', ''),
-                    'type' => 'PUBLIC',
-                    'user_id' => 1,
-                    'is_main_channel' => true
-                ],
-                [
-                    'name' => 'work',
-                    'description' => Channel::createChannelDescription('', 'work'),
-                    'type' => 'PUBLIC',
-                    'user_id' => 1
-                ],
-                [
-                    'name' => 'social',
-                    'description' => Channel::createChannelDescription('social', ''),
-                    'type' => 'PUBLIC',
-                    'user_id' => 1
-                ],
 
-            ]);
-
-            $workspace->assignUserToPublicChannels($user);
-            $workspace->createAndAssignSelfChannelsForUser($user);
-        });
         $this->call(MessageSeeder::class);
     }
 }

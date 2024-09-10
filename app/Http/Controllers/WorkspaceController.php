@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Channel;
+use App\Models\Role;
 use Inertia\Inertia;
+use App\Models\Channel;
 use App\Models\Workspace;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Builder;
@@ -40,35 +41,26 @@ class WorkspaceController extends Controller
         $validated = $request->validate(['name' => 'required|max:255|string', 'channel' => 'required|max:255|string']);
 
         $user = $request->user();
-        $workspace = $user->ownWorkspaces()->create(['name' => $validated['name']]);
-        $user->workspaces()->attach($workspace->id);
-        $workspace->channels()->createMany([
-            [
-                'name' => $validated['channel'],
-                'description' => Channel::createChannelDescription('', $validated['channel']),
-                'type' => 'PUBLIC',
-                'user_id' => $user->id
-            ],
-            [
-                'name' => "all-" . $workspace->name,
-                'description' => Channel::createChannelDescription('all', ''),
-                'type' => 'PUBLIC',
-                'user_id' => $user->id,
-                'is_main_channel' => true
+        try {
+            /**
+             * @var Workspace $workspace
+             */
 
-            ],
-            [
-                'name' => "social",
-                'description' => Channel::createChannelDescription('social', ''),
-                'type' => 'PUBLIC',
-                'user_id' => $user->id
-            ]
-        ]);
-        $workspace->assignUserToPublicChannels($user);
-        $workspace->createAndAssignSelfChannelsForUser($user);
 
-        $firstPublicChannel = $workspace->channels->where('type', '=', 'PUBLIC')->first();
-        return redirect()->route('channel.show', $firstPublicChannel->id);
+            $workspace = $user->ownWorkspaces()->create(['name' => $validated['name']]);
+            $workspace->assignAdminRoleAndAdminPermissions($user);
+            $workspace->createWorkspaceMemberPermissions();
+            $workspace->createInitChannels($user, $validated['channel']);
+
+            $workspace->createAndAssignSelfChannelForUser($user);
+
+            $mainChannel = $workspace->channels->where('is_main_channel', '=', true)->first();
+            return redirect()->route('channel.show', $mainChannel->id);
+        } catch (\Throwable $th) {
+            return back()->withErrors(['server' => 'Something went wrong! Please try later!']);
+        }
+        //create workspace
+
     }
 
     /**
@@ -76,8 +68,8 @@ class WorkspaceController extends Controller
      */
     public function show(Request $request, Workspace $workspace)
     {
-        $firstPublicChannel = $workspace->channels->where('type', '=', 'PUBLIC')->first();
-        return redirect()->route('channel.show', $firstPublicChannel->id);
+        $mainChannel = $workspace->channels->where('is_main_channel', '=', true)->first();
+        return redirect()->route('channel.show', $mainChannel->id);
     }
 
 

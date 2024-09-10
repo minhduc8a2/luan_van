@@ -44,10 +44,114 @@ class Channel extends Model
     }
     public function users(): BelongsToMany
     {
-        return $this->belongsToMany(User::class);
+        return $this->belongsToMany(User::class)->withPivot('role_id');
     }
     public function messages(): MorphMany
     {
         return $this->morphMany(Message::class, 'messagable');
+    }
+    public function permissions(): MorphMany
+    {
+        return $this->morphMany(Permission::class, 'permissionable');
+    }
+
+    public function assignManagerRoleAndManagerPermissions(User $user)
+    {
+        $managerRole = Role::getRoleByName('MANAGER');
+
+        //assign admin role for user
+        $user->channels()->attach($this->id, ['role_id' => $managerRole->id]);
+        if ($this->permissions()->where('role_id', '=', $managerRole->id)->count() > 0) return;
+        $this->permissions()->create(
+            [
+                'role_id' => $managerRole->id,
+                'permissionable_id' => $this->id,
+                'permissionable_type' => Channel::class,
+                'permission_type' => 'CHANNEL_ALL'
+            ]
+        );
+    }
+    public function initChannelPermissions()
+    {
+        $this->createChannelGuestPermissions();
+        $this->createChannelManagerPermissions();
+        $this->createChannelMemberPermissions();
+    }
+
+    public function createChannelManagerPermissions()
+    {
+        $managerRole = Role::getRoleByName('MANAGER');
+
+        if ($this->permissions()->where('role_id', '=', $managerRole->id)->count() > 0) return;
+
+        $this->permissions()->create(
+            [
+                'role_id' => $managerRole->id,
+                'permissionable_id' => $this->id,
+                'permissionable_type' => Channel::class,
+                'permission_type' => 'CHANNEL_ALL'
+            ]
+        );
+    }
+    public function createChannelMemberPermissions()
+    {
+        $memberRole = Role::getRoleByName('MEMBER');
+
+        if ($this->permissions()->where('role_id', '=', $memberRole->id)->count() > 0) return;
+
+        $this->permissions()->createMany([
+            [
+                'role_id' => $memberRole->id,
+                'permissionable_id' => $this->id,
+                'permissionable_type' => Workspace::class,
+                'permission_type' => 'CHANNEL_VIEW'
+            ],
+            [
+                'role_id' => $memberRole->id,
+                'permissionable_id' => $this->id,
+                'permissionable_type' => Workspace::class,
+                'permission_type' => 'CHANNEL_CHAT'
+            ],
+            [
+                'role_id' => $memberRole->id,
+                'permissionable_id' => $this->id,
+                'permissionable_type' => Workspace::class,
+                'permission_type' => 'CHANNEL_HUDDLE'
+            ],
+            [
+                'role_id' => $memberRole->id,
+                'permissionable_id' => $this->id,
+                'permissionable_type' => Workspace::class,
+                'permission_type' => 'CHANNEL_INVITATION'
+            ],
+            [
+                'role_id' => $memberRole->id,
+                'permissionable_id' => $this->id,
+                'permissionable_type' => Workspace::class,
+                'permission_type' => 'CHANNEL_EDIT_DESCRIPTION'
+            ],
+        ]);
+    }
+    public function createChannelGuestPermissions()
+    {
+        $guestRole = Role::getRoleByName('GUEST');
+
+        if ($this->permissions()->where('role_id', '=', $guestRole->id)->count() > 0) return;
+
+        $this->permissions()->createMany([
+            [
+                'role_id' => $guestRole->id,
+                'permissionable_id' => $this->id,
+                'permissionable_type' => Workspace::class,
+                'permission_type' => 'CHANNEL_CHAT'
+            ],
+            [
+                'role_id' => $guestRole->id,
+                'permissionable_id' => $this->id,
+                'permissionable_type' => Workspace::class,
+                'permission_type' => 'CHANNEL_HUDDLE'
+            ],
+
+        ]);
     }
 }

@@ -10,33 +10,26 @@ use Illuminate\Auth\Access\Response;
 
 class ChannelPolicy
 {
+
     /**
      * Determine whether the user can view any models.
      */
-    public function viewAny(User $user): bool
-    {
-        //
-    }
+    public function viewAny(User $user): bool {}
 
     /**
      * Determine whether the user can view the model.
      */
     public function view(User $user, Channel $channel): bool
     {
-        $exists = DB::table('channel_user')
-            ->where('user_id', '=', $user->id)
-            ->where('channel_id', '=', $channel->id)
-            ->count() > 0;
-        return $exists;
+
+        return $user->channelPermissionCheck($channel, "CHANNEL_ALL")
+            || $user->channelPermissionCheck($channel, "CHANNEL_VIEW");
     }
 
     /**
      * Determine whether the user can create models.
      */
-    public function create(User $user, Workspace $workspace): bool
-    {
-        return $user->isWorkspaceMember($workspace);
-    }
+    public function create(User $user, Workspace $workspace): bool {}
 
     /**
      * Determine whether the user can update the model.
