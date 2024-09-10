@@ -6,6 +6,7 @@ import Button from "@/Components/Button";
 import { SettingsButton } from "./SettingsButton";
 import { UTCToDateTime } from "@/helpers/dateTimeHelper";
 import LeaveChannel from "./LeaveChannel";
+import Managers from "./Managers";
 export default function About({ channel, channelName }) {
     return (
         <>
@@ -16,10 +17,15 @@ export default function About({ channel, channelName }) {
                 description={`${channel.user.name} on ${UTCToDateTime(
                     channel.created_at
                 )}`}
-                className={`border-t-0 ${channel.is_main_channel?" rounded-bl-lg rounded-br-lg ":""}`}
+                className={`border-t-0 ${
+                    channel.is_main_channel
+                        ? " rounded-bl-lg rounded-br-lg "
+                        : ""
+                }`}
                 hasEdit={false}
             />
-            <LeaveChannel channel={channel}/>
+            <Managers />
+            <LeaveChannel channel={channel} />
         </>
     );
 }

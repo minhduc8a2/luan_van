@@ -1,7 +1,7 @@
-import React from "react";
+import React, { memo } from "react";
 
-export default function Avatar({
-    src="/images/default_avatar.png",
+const Avatar = memo(function ({
+    src = "/images/default_avatar.png",
     className = "",
     isOnline,
     onlineClassName = "",
@@ -34,4 +34,5 @@ export default function Avatar({
             )}
         </div>
     );
-}
+});
+export default Avatar;

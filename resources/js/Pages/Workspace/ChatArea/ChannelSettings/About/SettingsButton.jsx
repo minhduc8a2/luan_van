@@ -17,7 +17,7 @@ export function SettingsButton({
                 <div className="font-bold text-sm ">{title}</div>
                 <div className="">{description}</div>
             </div>
-            <div className="text-sm text-link">{hasEdit ? "Edit" : ""}</div>
+            <div className="text-sm text-link hover:underline">{hasEdit ? "Edit" : ""}</div>
         </div>
     );
 }

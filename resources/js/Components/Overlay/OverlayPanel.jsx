@@ -32,7 +32,7 @@ export default function OverlayPanel({
                     console.log("close");
                 }}
             >
-                <div className={" text-white p-4  rounded-lg bg-background "+className}>
+                <div className={" text-white  rounded-lg bg-background "+className}>
                     {typeof children === "function"
                         ? children({ close })
                         : children}

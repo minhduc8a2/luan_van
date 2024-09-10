@@ -1,7 +1,7 @@
-import React from "react";
+import React, { memo } from "react";
 import Avatar from "./Avatar";
 import { usePage } from "@inertiajs/react";
-export default function AvatarAndName({ user, ...props }) {
+const AvatarAndName = memo(function ({ user, ...props }) {
     const { auth } = usePage().props;
     return (
         <div className="flex items-center justify-start gap-x-2  ">
@@ -18,4 +18,5 @@ export default function AvatarAndName({ user, ...props }) {
             </div>
         </div>
     );
-}
+});
+export default AvatarAndName;
