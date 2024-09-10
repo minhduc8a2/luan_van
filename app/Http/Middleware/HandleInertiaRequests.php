@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Message;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -33,11 +34,9 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'auth' => [
                 'user' => $request->user(),
-                
-                'workspaces' => $request->user()?->workspaces,
 
             ],
-            'publicAppUrl'=> env('PUBLIC_APP_URL',''),
+            'publicAppUrl' => env('PUBLIC_APP_URL', ''),
             'flash' => [
                 'message' => fn() => $request->session()->get('message'),
                 'invitation_link' => fn() => $request->session()->get('invitation_link'),

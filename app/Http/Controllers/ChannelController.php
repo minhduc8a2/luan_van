@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Role;
 use Inertia\Inertia;
 use App\Models\Channel;
 use App\Models\Message;
 use App\Models\Workspace;
+use App\Helpers\BaseRoles;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -106,6 +108,7 @@ class ChannelController extends Controller
             'channels' => $channels,
             'users' => $users,
             'channel' => $channel->load('user'),
+            'managers' => $channel->users()->wherePivot('role_id', '=', Role::getRoleByName(BaseRoles::MANAGER->name)->id)->get(),
             'workspaces' => $workspaces,
             "directChannels" => $directChannels->load("users"),
             'selfChannel' => $selfChannel,

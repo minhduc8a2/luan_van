@@ -19,7 +19,7 @@ class InvitationController extends Controller implements HasMiddleware
             'auth',
         ];
     }
-    public function index(Request $request, $code)
+    public function index(Request $request, string $code)
     {
 
         $invitation = Invitation::where('code', '=', $code)->first();
@@ -29,10 +29,13 @@ class InvitationController extends Controller implements HasMiddleware
         $isExpired = Carbon::now()->greaterThan($expirationTime);
 
         if ($isExpired) {
-            return abort(403);
+            abort(403, 'Expired link');;
         }
         //add user to workspace
         $user = $request->user();
+        /**
+         * @var Workspace $workspace
+         */
         $workspace = Workspace::find($invitation->workspace_id);
         $workspace->addUserToWorkspace($user);
         //

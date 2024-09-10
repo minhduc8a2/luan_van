@@ -10,7 +10,6 @@ import { makeStore } from "@/Store/store";
 import { Provider } from "react-redux";
 import { setActivity } from "@/Store/activitySlice";
 export default function Index({notifications}) {
-    console.log(notifications);
     const storeRef = useRef();
     if (!storeRef.current) {
         // Create the store instance the first time this renders

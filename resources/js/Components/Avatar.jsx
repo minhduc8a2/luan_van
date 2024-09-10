@@ -1,7 +1,7 @@
 import React from "react";
 
 export default function Avatar({
-    src,
+    src="/images/default_avatar.png",
     className = "",
     isOnline,
     onlineClassName = "",

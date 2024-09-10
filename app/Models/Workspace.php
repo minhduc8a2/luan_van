@@ -52,35 +52,35 @@ class Workspace extends Model
          */
         $selfChannel->assignManagerRoleAndManagerPermissions($user);
     }
-    public  function assignUserToPublicChannels(User $user, Role $role)
+    public  function assignUserToMainChannel(User $user, Role $role)
     {
-        $channel = $this->channels()->where("type", '=', ChannelTypes::PUBLIC->name)->where("is_main_channel", '=', true)->first();
+        $channel = $this->channels()->where("is_main_channel", '=', true)->first();
 
-        if (!$user->isChannelMember($channel->id)) {
+        if (!$user->isChannelMember($channel)) {
             $user->channels()->attach($channel->id, ['role_id' => $role->id]);
         }
     }
 
-    public function addUserToWorkspace($user)
+    public function addUserToWorkspace(User $user)
     {
         if ($user->isWorkspaceMember($this)) return;
-
+        $roleId = Role::getRoleByName(BaseRoles::MEMBER->name)->id;
         $otherUsers = $this->users->pluck('name', 'id');
-        $user->workspaces()->attach($this->id);
-        $this->assignUserToPublicChannels($user, Role::getRoleByName(BaseRoles::MEMBER->name));
+        $user->workspaces()->attach($this->id, ['role_id' => $roleId]);
+        $this->assignUserToMainChannel($user, Role::getRoleByName(BaseRoles::MEMBER->name));
 
         //create private channels
         foreach ($otherUsers as $id => $name) {
             $newChannel = $this->channels()->create(['user_id' => $user->id, 'name' => $user->id . "_" . $id, "type" => ChannelTypes::DIRECT->name]);
-            $user->channels()->attach($newChannel->id);
+            $user->channels()->attach($newChannel->id, ['role_id' => $roleId]);
             $otherUser = User::find($id);
             if ($otherUser) {
-                $otherUser->channels()->attach($newChannel->id);
+                $otherUser->channels()->attach($newChannel->id, ['role_id' => $roleId]);
             }
         }
         //create self channel
-        $newChannel = $this->channels()->create(['user_id' => $user->id, 'name' => $user->name, "description" => "This is your space. Draft messages, list your to-dos, or keep links and files handy. You can also talk to yourself here, but please bear in mind you’ll have to supply both sides of the conversation.", "type" => "SELF"]);
-        $user->channels()->attach($newChannel->id);
+        $newChannel = $this->channels()->create(['user_id' => $user->id, 'name' => $user->name, "description" => "This is your space. Draft messages, list your to-dos, or keep links and files handy. You can also talk to yourself here, but please bear in mind you’ll have to supply both sides of the conversation.", "type" => ChannelTypes::SELF->name]);
+        $user->channels()->attach($newChannel->id, ['role_id' => $roleId]);
     }
     public   function isWorkspaceMemberByEmail(string $email): bool
     {
