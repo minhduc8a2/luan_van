@@ -125,6 +125,12 @@ export default function ChatArea() {
                 dispatch(addMessage(e.message));
                 // console.log(e);
             })
+            .listen("SettingsEvent", (e) => {
+                
+                if(e.type=="addManagers" || e.type=="removeManager"){
+                    router.reload({ only: ["managers"] });
+                }
+            })
             .listenForWhisper("messageReaction", (e) => {
                 setNewMessageReactionReceive(e);
             })
@@ -219,7 +225,7 @@ export default function ChatArea() {
             <div className="bg-background  chat-area-container flex-1 ">
                 <div className="p-4 border-b border-b-white/10 z-10">
                     <div className="flex justify-between font-bold text-lg opacity-75">
-                      <ChannelSettings channelName={channelName}/>
+                        <ChannelSettings channelName={channelName} />
                         <div className="flex items-center gap-x-4 ">
                             <div className="flex items-center p-1 border  border-white/15 rounded-lg px-2">
                                 <ul className="flex">

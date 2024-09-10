@@ -28,8 +28,7 @@ class ChannelPolicy
                 || $user->channelPermissionCheck($channel->workspace->mainChannel(), PermissionTypes::CHANNEL_VIEW->name)
                 || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name);
         }
-        return $user->workspacePermissionCheck($channel->workspace, PermissionTypes::WORKSPACE_ALL->name)
-            || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name)
+        return $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name)
             || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_VIEW->name);
     }
 
@@ -61,8 +60,7 @@ class ChannelPolicy
     }
     public function changeType(User $user, Channel $channel): bool
     {
-        return $user->workspacePermissionCheck($channel->workspace, PermissionTypes::WORKSPACE_ALL->name)
-            || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name);
+        return $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name);
     }
 
     public function leave(User $user, Channel $channel): bool
@@ -71,7 +69,14 @@ class ChannelPolicy
             || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name)
             || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_VIEW->name);
     }
-
+    public function addManagers(User $user, Channel $channel): bool
+    {
+        return $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name);
+    }
+    public function removeManager(User $user, Channel $channel): bool
+    {
+        return $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name);
+    }
     /**
      * Determine whether the user can delete the model.
      */

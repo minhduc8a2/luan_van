@@ -1,5 +1,5 @@
 import OverlayPanel from "@/Components/Overlay/OverlayPanel";
-import { usePage } from "@inertiajs/react";
+import { router, useForm, usePage } from "@inertiajs/react";
 import React from "react";
 import { SettingsButton } from "./SettingsButton";
 import { FaLock } from "react-icons/fa";
@@ -8,40 +8,64 @@ import { IoPersonAddOutline } from "react-icons/io5";
 import AvatarAndName from "@/Components/AvatarAndName";
 import { useState } from "react";
 import AddManagers from "./AddManagers";
+import ErrorsList from "@/Components/ErrorsList";
 export default function Managers() {
     const { managers, channel } = usePage().props;
     const [searchValue, setSearchValue] = useState("");
+    const [errors, setErrors] = useState(null);
+    function removeManager(user) {
+        router.post(
+            route("channel.remove_manager", channel.id),
+            {
+                user,
+            },
+            {
+                preserveState: true,
+                onSuccess: () => {
+                    router.reload({ only: ["managers"] });
+                },
+                onError: (errors) => {
+                    setErrors(errors);
+                },
+            }
+        );
+    }
     return (
         <OverlayPanel
             buttonNode={
                 <SettingsButton
+                    onClick={() => setErrors(null)}
                     title="Manage by"
                     description={
                         <div>
                             {managers.map((user, index) => {
                                 if (index == managers.length - 1)
                                     return (
-                                        <span className="text-link" key={user.id}>
+                                        <span
+                                            className="text-link"
+                                            key={"name_" + user.id}
+                                        >
                                             {user.name}
                                         </span>
                                     );
                                 else if (index == managers.length - 2)
                                     return (
-                                        <>
-                                            <span className="text-link" key={user.id}>
+                                        <span key={"name_" + user.id}>
+                                            <span className="text-link">
                                                 {user.name}
                                             </span>{" "}
                                             and{" "}
-                                        </>
-                                    );
-                                return (
-                                    <>
-                                        <span className="text-link" key={user.id}>
-                                            {user.name}
                                         </span>
-                                        ,{" "}
-                                    </>
-                                );
+                                    );
+                                else
+                                    return (
+                                        <span key={"name_" + user.id}>
+                                            <span className="text-link">
+                                                {user.name}
+                                            </span>
+                                            ,{" "}
+                                        </span>
+                                    );
                             })}
                         </div>
                     }
@@ -73,6 +97,9 @@ export default function Managers() {
                             }}
                         />
                     </div>
+                    <div className="mx-6">
+                        <ErrorsList errors={errors} />
+                    </div>
                     <OverlayPanel
                         buttonNode={
                             <button className="flex gap-x-4 p-4 px-6 items-center mt-6 hover:bg-white/15 w-full">
@@ -83,7 +110,9 @@ export default function Managers() {
                             </button>
                         }
                     >
-                        {({ close }) => <AddManagers close={close} />}
+                        {({ close }) => (
+                            <AddManagers close={close} setErrors={setErrors} />
+                        )}
                     </OverlayPanel>
 
                     <ul className="overflow-hidden h-[30vh]">
@@ -96,13 +125,16 @@ export default function Managers() {
                             .map((user) => (
                                 <div
                                     className="px-6 py-4 flex justify-between items-center group hover:bg-white/15"
-                                    key={user.id}
+                                    key={"manager_" + user.id}
                                 >
                                     <AvatarAndName
                                         className="h-10 w-10"
                                         user={user}
                                     />
-                                    <button className="text-link text-sm hover:underline hidden group-hover:block">
+                                    <button
+                                        className="text-link text-sm hover:underline hidden group-hover:block"
+                                        onClick={() => removeManager(user)}
+                                    >
                                         Remove
                                     </button>
                                 </div>

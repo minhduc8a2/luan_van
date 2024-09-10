@@ -78,10 +78,19 @@ export default function AutocompleInput({
                                         setInputValue("");
                                     }}
                                 >
-                                    <AvatarAndName
-                                        user={user}
-                                        className="h-6 w-6"
-                                    />
+                                    <div className=" flex gap-x-4 items-center justify-between">
+                                        <AvatarAndName
+                                            user={user}
+                                            className="h-6 w-6"
+                                        />
+                                        {managers.some(
+                                            (u) => u.id == user.id
+                                        ) && (
+                                            <div className="text-xs text-white/50">
+                                                Already channel manager
+                                            </div>
+                                        )}
+                                    </div>
                                 </button>
                             </li>
                         ))}

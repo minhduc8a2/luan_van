@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\SettingsEvent;
 use App\Models\Role;
+use App\Models\User;
 use Inertia\Inertia;
 use App\Models\Channel;
 use App\Models\Message;
@@ -10,7 +12,7 @@ use App\Models\Workspace;
 use App\Helpers\BaseRoles;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Builder;
-
+use Illuminate\Support\Facades\Broadcast;
 
 class ChannelController extends Controller
 {
@@ -108,7 +110,7 @@ class ChannelController extends Controller
             'channels' => $channels,
             'users' => $users,
             'channel' => $channel->load('user'),
-            'managers' => $channel->users()->wherePivot('role_id', '=', Role::getRoleByName(BaseRoles::MANAGER->name)->id)->get(),
+            'managers' => fn() => $channel->users()->wherePivot('role_id', '=', Role::getRoleByName(BaseRoles::MANAGER->name)->id)->get(),
             'workspaces' => $workspaces,
             "directChannels" => $directChannels->load("users"),
             'selfChannel' => $selfChannel,
@@ -200,6 +202,49 @@ class ChannelController extends Controller
             return redirect(route('workspace.show', $channel->workspace->id));
         } catch (\Throwable $th) {
             return back()->withErrors(["server" => "Something went wrong! Please try later"]);
+        }
+    }
+
+    public function addManagers(Request $request, Channel $channel)
+    {
+
+        if ($request->user()->cannot('addManagers', $channel)) abort(403);
+
+        try {
+            //code...
+            $validated = $request->validate(["users" => "required|array"]);
+            $users = $validated['users'];
+            foreach ($users as $u) {
+                $user = User::find($u['id']);
+                $user->channels()->updateExistingPivot($channel->id, [
+                    'role_id' => Role::getRoleByName(BaseRoles::MANAGER->name)->id,
+                ]);
+            }
+            broadcast(new SettingsEvent($channel, "addManagers"))->toOthers();
+            return back();
+        } catch (\Throwable $th) {
+
+            return back()->withErrors(['server' => "Something went wrong! Please try later."]);
+        }
+    }
+    public function removeManager(Request $request, Channel $channel)
+    {
+
+
+        if ($request->user()->cannot('removeManager', $channel)) abort(403);
+        try {
+            //code...
+            $validated = $request->validate(["user" => "required"]);
+            $user = $validated['user'];
+            $user = User::find($user['id']);
+            $user->channels()->updateExistingPivot($channel->id, [
+                'role_id' => Role::getRoleByName(BaseRoles::MEMBER->name)->id,
+            ]);
+            broadcast(new SettingsEvent($channel, "removeManager"))->toOthers();
+            return back();
+        } catch (\Throwable $th) {
+
+            return back()->withErrors(['server' => "Something went wrong! Please try later."]);
         }
     }
     /**

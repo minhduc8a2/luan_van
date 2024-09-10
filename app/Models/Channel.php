@@ -87,14 +87,15 @@ class Channel extends Model
 
         if ($this->permissions()->where('role_id', '=', $managerRole->id)->count() > 0) return;
 
-        $this->permissions()->create(
+        $this->permissions()->createMany([
             [
                 'role_id' => $managerRole->id,
                 'permissionable_id' => $this->id,
                 'permissionable_type' => Channel::class,
                 'permission_type' => PermissionTypes::CHANNEL_ALL->name
-            ]
-        );
+            ],
+           
+        ]);
     }
     public function createChannelMemberPermissions()
     {
@@ -133,12 +134,7 @@ class Channel extends Model
                 'permissionable_type' => Workspace::class,
                 'permission_type' => PermissionTypes::CHANNEL_EDIT_DESCRIPTION->name
             ],
-            [
-                'role_id' => $memberRole->id,
-                'permissionable_id' => $this->id,
-                'permissionable_type' => Workspace::class,
-                'permission_type' => PermissionTypes::CHANNEL_EDIT_NAME->name
-            ],
+           
         ]);
     }
     public function createChannelGuestPermissions()

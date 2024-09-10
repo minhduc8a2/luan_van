@@ -1,23 +1,41 @@
-import { router, usePage } from "@inertiajs/react";
+import { router, useForm, usePage } from "@inertiajs/react";
 import React from "react";
 import AvatarAndName from "@/Components/AvatarAndName";
 import AutocompleInput from "./AutocompleInput";
 import Button from "@/Components/Button";
 import { useState } from "react";
 import { FaLock } from "react-icons/fa";
-export default function AddManagers({ close }) {
-    const { channelUsers, auth, channel, data } = usePage().props;
+import ErrorsList from "@/Components/ErrorsList";
+export default function AddManagers({ close, setErrors }) {
+    const { channelUsers, auth, channel } = usePage().props;
     const [choosenUsers, setChoosenUsers] = useState({});
+
+    const [processing, setProcessing] = useState(false);
+
     function submit() {
+        setProcessing(true);
         router.post(
-            route("huddle.invitation", channel.id),
-            { users: [...Object.values(choosenUsers)] },
+            route("channel.add_managers", channel.id),
+            {
+                users: [...Object.values(choosenUsers)],
+            },
             {
                 preserveState: true,
+                onSuccess: () => {
+                    router.reload({
+                        only: ["managers"],
+                    });
+                },
+                onError: (errors) => {
+                    setErrors(errors);
+                },
+                onFinish: () => {
+                    setProcessing(false);
+                    close();
+                },
             }
         );
     }
-
     return (
         <div className="min-w-96 p-4 text-white/85 max-w-lg">
             <div className="text-2xl flex items-baseline gap-x-2 p-2 pb-0 font-bold text-white/85">
@@ -45,7 +63,9 @@ export default function AddManagers({ close }) {
 
             <div className="flex justify-end gap-x-4 mt-8">
                 <Button onClick={close}>Cancel</Button>
-                <Button onClick={submit}>Add</Button>
+                <Button loading={processing} onClick={submit}>
+                    Add
+                </Button>
             </div>
         </div>
     );
