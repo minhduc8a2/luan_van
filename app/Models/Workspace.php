@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Helpers\BaseRoles;
+use App\Helpers\ChannelTypes;
+use App\Helpers\PermissionTypes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class Workspace extends Model
 {
     use HasFactory;
-    public const PERMISSION_TYPES = ['WORKSPACE_ALL', 'CREATE_CHANNEL', 'WORKSPACE_INVITATION', 'SEARCH_CHANNEL'];
+
     protected $fillable = [
         'name',
         'user_id'
@@ -37,9 +40,13 @@ class Workspace extends Model
         return $this->morphMany(Permission::class, 'permissionable');
     }
 
+    public function mainChannel()
+    {
+        return $this->channels()->where('is_main_channel', '=', true)->first();
+    }
     public function createAndAssignSelfChannelForUser(User $user)
     {
-        $selfChannel = $this->channels()->create(['name' => $user->name, 'type' => 'SELF', 'user_id' => $user->id]);
+        $selfChannel = $this->channels()->create(['name' => $user->name, 'type' => ChannelTypes::SELF->name, 'user_id' => $user->id]);
         /**
          * @var Channel $selfChannel
          */
@@ -47,7 +54,7 @@ class Workspace extends Model
     }
     public  function assignUserToPublicChannels(User $user, Role $role)
     {
-        $channel = $this->channels()->where("type", '=', "PUBLIC")->where("is_main_channel", '=', true)->first();
+        $channel = $this->channels()->where("type", '=', ChannelTypes::PUBLIC->name)->where("is_main_channel", '=', true)->first();
 
         if (!$user->isChannelMember($channel->id)) {
             $user->channels()->attach($channel->id, ['role_id' => $role->id]);
@@ -60,11 +67,11 @@ class Workspace extends Model
 
         $otherUsers = $this->users->pluck('name', 'id');
         $user->workspaces()->attach($this->id);
-        $this->assignUserToPublicChannels($user, Role::getRoleByName("MEMBER"));
+        $this->assignUserToPublicChannels($user, Role::getRoleByName(BaseRoles::MEMBER->name));
 
         //create private channels
         foreach ($otherUsers as $id => $name) {
-            $newChannel = $this->channels()->create(['user_id' => $user->id, 'name' => $user->id . "_" . $id, "type" => "DIRECT"]);
+            $newChannel = $this->channels()->create(['user_id' => $user->id, 'name' => $user->id . "_" . $id, "type" => ChannelTypes::DIRECT->name]);
             $user->channels()->attach($newChannel->id);
             $otherUser = User::find($id);
             if ($otherUser) {
@@ -84,7 +91,7 @@ class Workspace extends Model
 
     public function createWorkspaceMemberPermissions()
     {
-        $memberRole = Role::getRoleByName('MEMBER');
+        $memberRole = Role::getRoleByName(BaseRoles::MEMBER->name);
 
         if ($this->permissions()->where('role_id', '=', $memberRole->id)->count() > 0) return;
 
@@ -93,26 +100,26 @@ class Workspace extends Model
                 'role_id' => $memberRole->id,
                 'permissionable_id' => $this->id,
                 'permissionable_type' => Workspace::class,
-                'permission_type' => 'CREATE_CHANNEL'
+                'permission_type' => PermissionTypes::CREATE_CHANNEL->name
             ],
             [
                 'role_id' => $memberRole->id,
                 'permissionable_id' => $this->id,
                 'permissionable_type' => Workspace::class,
-                'permission_type' => 'WORKSPACE_INVITATION'
+                'permission_type' => PermissionTypes::WORKSPACE_INVITATION->name
             ],
             [
                 'role_id' => $memberRole->id,
                 'permissionable_id' => $this->id,
                 'permissionable_type' => Workspace::class,
-                'permission_type' => 'SEARCH_CHANNEL'
+                'permission_type' => PermissionTypes::SEARCH_CHANNEL->name
             ],
         ]);
     }
 
     public function assignAdminRoleAndAdminPermissions(User $user)
     {
-        $adminRole = Role::getRoleByName('ADMIN');
+        $adminRole = Role::getRoleByName(BaseRoles::ADMIN->name);
 
         //assign admin role for user
         $user->workspaces()->attach($this->id, ['role_id' => $adminRole->id]);
@@ -122,7 +129,7 @@ class Workspace extends Model
                 'role_id' => $adminRole->id,
                 'permissionable_id' => $this->id,
                 'permissionable_type' => Workspace::class,
-                'permission_type' => 'WORKSPACE_ALL'
+                'permission_type' => PermissionTypes::WORKSPACE_ALL->name
             ]
         );
     }
@@ -132,23 +139,24 @@ class Workspace extends Model
 
         $channels =   $this->channels()->createMany([
             [
-                'name' => $channelName,
-                'description' => Channel::createChannelDescription('', $channelName),
-                'type' => 'PUBLIC',
-                'user_id' => $user->id
-            ],
-            [
                 'name' => "all-" . $this->name,
                 'description' => Channel::createChannelDescription('all', ''),
-                'type' => 'PUBLIC',
+                'type' => ChannelTypes::PUBLIC->name,
                 'user_id' => $user->id,
                 'is_main_channel' => true
 
             ],
             [
+                'name' => $channelName,
+                'description' => Channel::createChannelDescription('', $channelName),
+                'type' => ChannelTypes::PUBLIC->name,
+                'user_id' => $user->id
+            ],
+
+            [
                 'name' => "social",
                 'description' => Channel::createChannelDescription('social', ''),
-                'type' => 'PUBLIC',
+                'type' => ChannelTypes::PUBLIC->name,
                 'user_id' => $user->id
             ]
         ]);

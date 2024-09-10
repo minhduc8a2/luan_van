@@ -1,5 +1,6 @@
 <?php
 
+use App\Helpers\ChannelTypes;
 use App\Models\Channel;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
@@ -16,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('description')->default("");
-            $table->enum('type', Channel::$type);
+            $table->enum('type',array_map(fn($case) => $case->name, ChannelTypes::cases()));
             $table->boolean('is_main_channel')->default(false);
             $table->foreignId('workspace_id')->constrained()->cascadeOnDelete();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();

@@ -2,6 +2,8 @@
 
 namespace App\Policies;
 
+use App\Helpers\ChannelTypes;
+use App\Helpers\PermissionTypes;
 use App\Models\User;
 use App\Models\Channel;
 use App\Models\Workspace;
@@ -21,46 +23,53 @@ class ChannelPolicy
      */
     public function view(User $user, Channel $channel): bool
     {
-
-        return $user->channelPermissionCheck($channel, "CHANNEL_ALL")
-            || $user->channelPermissionCheck($channel, "CHANNEL_VIEW");
+        if ($channel->type == ChannelTypes::PUBLIC->name) {
+            return $user->workspacePermissionCheck($channel->workspace, PermissionTypes::WORKSPACE_ALL->name)
+                || $user->channelPermissionCheck($channel->workspace->mainChannel(), PermissionTypes::CHANNEL_VIEW->name)
+                || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name);
+        }
+        return $user->workspacePermissionCheck($channel->workspace, PermissionTypes::WORKSPACE_ALL->name)
+            || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name)
+            || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_VIEW->name);
     }
 
     /**
      * Determine whether the user can create models.
      */
-    public function create(User $user, Workspace $workspace): bool {}
+    public function create(User $user, Workspace $workspace): bool
+    {
+        return $user->workspacePermissionCheck($workspace, PermissionTypes::WORKSPACE_ALL->name)
+            || $user->workspacePermissionCheck($workspace, PermissionTypes::CREATE_CHANNEL->name);
+    }
 
     /**
      * Determine whether the user can update the model.
      */
     public function updateDescription(User $user, Channel $channel): bool
     {
-        $exists = DB::table('channel_user')
-            ->where('user_id', '=', $user->id)
-            ->where('channel_id', '=', $channel->id)
-            ->count() > 0;
-        return $exists;
+        return $user->workspacePermissionCheck($channel->workspace, PermissionTypes::WORKSPACE_ALL->name)
+            || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name)
+            || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_EDIT_DESCRIPTION->name);
     }
 
     public function updateName(User $user, Channel $channel): bool
     {
 
-        return $channel->user_id == $user->id;
+        return $user->workspacePermissionCheck($channel->workspace, PermissionTypes::WORKSPACE_ALL->name)
+            || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name)
+            || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_EDIT_NAME->name);
     }
     public function changeType(User $user, Channel $channel): bool
     {
-        if ($channel->type == "DIRECT") return false;
-        return $channel->user_id == $user->id;
+        return $user->workspacePermissionCheck($channel->workspace, PermissionTypes::WORKSPACE_ALL->name)
+            || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name);
     }
 
     public function leave(User $user, Channel $channel): bool
     {
-        $exists = DB::table('channel_user')
-            ->where('user_id', '=', $user->id)
-            ->where('channel_id', '=', $channel->id)
-            ->count() > 0;
-        return $exists;
+        return $user->workspacePermissionCheck($channel->workspace, PermissionTypes::WORKSPACE_ALL->name)
+            || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name)
+            || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_VIEW->name);
     }
 
     /**
@@ -68,7 +77,8 @@ class ChannelPolicy
      */
     public function delete(User $user, Channel $channel): bool
     {
-        //
+        return $user->workspacePermissionCheck($channel->workspace, PermissionTypes::WORKSPACE_ALL->name)
+            || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name);
     }
 
     /**

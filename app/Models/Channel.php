@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Helpers\BaseRoles;
+use App\Helpers\PermissionTypes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,9 +11,10 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
+
 class Channel extends Model
 {
-    static $type = ['PUBLIC', 'PRIVATE', 'DIRECT', 'SELF'];
+
 
     use HasFactory;
     protected $fillable = [
@@ -57,7 +60,7 @@ class Channel extends Model
 
     public function assignManagerRoleAndManagerPermissions(User $user)
     {
-        $managerRole = Role::getRoleByName('MANAGER');
+        $managerRole = Role::getRoleByName(BaseRoles::MANAGER->name);
 
         //assign admin role for user
         $user->channels()->attach($this->id, ['role_id' => $managerRole->id]);
@@ -67,7 +70,7 @@ class Channel extends Model
                 'role_id' => $managerRole->id,
                 'permissionable_id' => $this->id,
                 'permissionable_type' => Channel::class,
-                'permission_type' => 'CHANNEL_ALL'
+                'permission_type' => PermissionTypes::CHANNEL_ALL->name
             ]
         );
     }
@@ -80,7 +83,7 @@ class Channel extends Model
 
     public function createChannelManagerPermissions()
     {
-        $managerRole = Role::getRoleByName('MANAGER');
+        $managerRole = Role::getRoleByName(BaseRoles::MANAGER->name);
 
         if ($this->permissions()->where('role_id', '=', $managerRole->id)->count() > 0) return;
 
@@ -89,13 +92,13 @@ class Channel extends Model
                 'role_id' => $managerRole->id,
                 'permissionable_id' => $this->id,
                 'permissionable_type' => Channel::class,
-                'permission_type' => 'CHANNEL_ALL'
+                'permission_type' => PermissionTypes::CHANNEL_ALL->name
             ]
         );
     }
     public function createChannelMemberPermissions()
     {
-        $memberRole = Role::getRoleByName('MEMBER');
+        $memberRole = Role::getRoleByName(BaseRoles::MEMBER->name);
 
         if ($this->permissions()->where('role_id', '=', $memberRole->id)->count() > 0) return;
 
@@ -104,37 +107,43 @@ class Channel extends Model
                 'role_id' => $memberRole->id,
                 'permissionable_id' => $this->id,
                 'permissionable_type' => Workspace::class,
-                'permission_type' => 'CHANNEL_VIEW'
+                'permission_type' => PermissionTypes::CHANNEL_VIEW->name
             ],
             [
                 'role_id' => $memberRole->id,
                 'permissionable_id' => $this->id,
                 'permissionable_type' => Workspace::class,
-                'permission_type' => 'CHANNEL_CHAT'
+                'permission_type' => PermissionTypes::CHANNEL_CHAT->name
             ],
             [
                 'role_id' => $memberRole->id,
                 'permissionable_id' => $this->id,
                 'permissionable_type' => Workspace::class,
-                'permission_type' => 'CHANNEL_HUDDLE'
+                'permission_type' => PermissionTypes::CHANNEL_HUDDLE->name
             ],
             [
                 'role_id' => $memberRole->id,
                 'permissionable_id' => $this->id,
                 'permissionable_type' => Workspace::class,
-                'permission_type' => 'CHANNEL_INVITATION'
+                'permission_type' => PermissionTypes::CHANNEL_INVITATION->name
             ],
             [
                 'role_id' => $memberRole->id,
                 'permissionable_id' => $this->id,
                 'permissionable_type' => Workspace::class,
-                'permission_type' => 'CHANNEL_EDIT_DESCRIPTION'
+                'permission_type' => PermissionTypes::CHANNEL_EDIT_DESCRIPTION->name
+            ],
+            [
+                'role_id' => $memberRole->id,
+                'permissionable_id' => $this->id,
+                'permissionable_type' => Workspace::class,
+                'permission_type' => PermissionTypes::CHANNEL_EDIT_NAME->name
             ],
         ]);
     }
     public function createChannelGuestPermissions()
     {
-        $guestRole = Role::getRoleByName('GUEST');
+        $guestRole = Role::getRoleByName(BaseRoles::GUEST->name);
 
         if ($this->permissions()->where('role_id', '=', $guestRole->id)->count() > 0) return;
 
@@ -143,13 +152,19 @@ class Channel extends Model
                 'role_id' => $guestRole->id,
                 'permissionable_id' => $this->id,
                 'permissionable_type' => Workspace::class,
-                'permission_type' => 'CHANNEL_CHAT'
+                'permission_type' => PermissionTypes::CHANNEL_VIEW->name
             ],
             [
                 'role_id' => $guestRole->id,
                 'permissionable_id' => $this->id,
                 'permissionable_type' => Workspace::class,
-                'permission_type' => 'CHANNEL_HUDDLE'
+                'permission_type' => PermissionTypes::CHANNEL_CHAT->name
+            ],
+            [
+                'role_id' => $guestRole->id,
+                'permissionable_id' => $this->id,
+                'permissionable_type' => Workspace::class,
+                'permission_type' => PermissionTypes::CHANNEL_HUDDLE->name
             ],
 
         ]);

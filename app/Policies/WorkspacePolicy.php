@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Helpers\PermissionTypes;
 use App\Models\User;
 use App\Models\Workspace;
 use Illuminate\Support\Facades\DB;
@@ -12,17 +13,14 @@ class WorkspacePolicy
     /**
      * Determine whether the user can view any models.
      */
-    public function viewAny(User $user): bool
-    {
-        //
-    }
+    public function viewAny(User $user): bool {}
 
     /**
      * Determine whether the user can view the model.
      */
     public function view(User $user, Workspace $workspace): bool
     {
-        return $user->isWorkspaceMember($workspace);
+        return $user->channelPermissionCheck($workspace->mainChannel(), PermissionTypes::CHANNEL_VIEW->name);
     }
 
     /**
@@ -38,7 +36,7 @@ class WorkspacePolicy
      */
     public function update(User $user, Workspace $workspace): bool
     {
-        //
+        return $user->workspacePermissionCheck($workspace, PermissionTypes::WORKSPACE_ALL->name);
     }
 
     /**
@@ -46,7 +44,7 @@ class WorkspacePolicy
      */
     public function delete(User $user, Workspace $workspace): bool
     {
-        //
+        return $user->workspacePermissionCheck($workspace, PermissionTypes::WORKSPACE_ALL->name);
     }
 
     /**
