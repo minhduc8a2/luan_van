@@ -21,9 +21,7 @@ export default function Managers() {
             },
             {
                 preserveState: true,
-                onSuccess: () => {
-                    router.reload({ only: ["managers"] });
-                },
+                only: ["managers"],
                 onError: (errors) => {
                     setErrors(errors);
                 },
@@ -34,10 +32,17 @@ export default function Managers() {
         <OverlayPanel
             buttonNode={
                 <SettingsButton
+                    className={`border-t-0 ${
+                        channel.is_main_channel
+                            ? "rounded-bl-lg rounded-br-lg"
+                            : ""
+                    }`}
                     onClick={() => setErrors(null)}
                     title="Manage by"
                     description={
                         <div>
+                            {managers.length == 0 &&
+                                "Ask admins to add channel managers"}
                             {managers.map((user, index) => {
                                 if (index == managers.length - 1)
                                     return (

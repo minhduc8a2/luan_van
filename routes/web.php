@@ -34,7 +34,7 @@ Route::get('/', function (Request $request) {
     return Inertia::render('Welcome', [
         "workspaces" => $request->user()->workspaces
     ]);
-})->middleware('auth');
+})->middleware('auth')->name('home');
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
@@ -56,6 +56,7 @@ Route::middleware('auth')->group(function () {
     Route::post("/channels/{channel}/leave", [ChannelController::class, 'leave'])->name("channel.leave");
     Route::post("/channels/{channel}/add_managers", [ChannelController::class, 'addManagers'])->name("channel.add_managers");
     Route::post("/channels/{channel}/remove_manager", [ChannelController::class, 'removeManager'])->name("channel.remove_manager");
+    Route::post("/channels/{channel}/last_read", [ChannelController::class, 'lastRead'])->name("channel.last_read");
     Route::post("/channels/{channel}/messages", [MessageController::class, 'store'])->name('message.store');
     Route::post("/channels/{channel}/messages/{message}", [MessageController::class, 'storeThreadMessage'])->name('thread_message.store');
     Route::get("/channels/{channel}/messages/{message}/thread_messages", [ThreadController::class, 'getMessages'])->name("thread.messages");

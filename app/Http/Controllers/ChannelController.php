@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\SettingsEvent;
 use App\Models\Role;
 use App\Models\User;
 use Inertia\Inertia;
@@ -11,6 +10,11 @@ use App\Models\Message;
 use App\Models\Workspace;
 use App\Helpers\BaseRoles;
 use Illuminate\Http\Request;
+use App\Events\SettingsEvent;
+use App\Helpers\ChannelTypes;
+use App\Events\WorkspaceEvent;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Broadcast;
 
@@ -37,13 +41,28 @@ class ChannelController extends Controller
      */
     public function store(Request $request, Workspace $workspace)
     {
+        // return back()->withErrors(['server' => "Something went wrong, please try later!"]);
 
         if ($request->user()->cannot('create', [Channel::class, $workspace])) abort(403);
         $validated = $request->validate(["name" => "required|string|max:255", "type" => "required|in:PUBLIC,PRIVATE"]);
         try {
+
+
+            //check channel exists
+
+            $channelExists = $workspace->channels()->where('name', '=', $validated['name'])->exists();
+            if ($channelExists) {
+                return back()->withErrors(['client' => "Channel exists! Please choose a different name!"]);
+            }
+            //
+            /**
+             * @var Channel $channel
+             */
             $channel = $request->user()->ownChannels()->create(['name' => $validated['name'], 'type' => $validated['type'], 'workspace_id' => $workspace->id]);
-            $request->user()->channels()->attach($channel->id);
-            return redirect(route('channel.show', $channel->id));
+            $channel->assignManagerRoleAndManagerPermissions($request->user());
+            $channel->initChannelPermissions();
+            broadcast(new WorkspaceEvent($workspace, "storeChannel", $request->user()->id))->toOthers();
+            return back();
         } catch (\Throwable $th) {
 
             return back()->withErrors(['server' => "Something went wrong, please try later!"]);
@@ -85,16 +104,43 @@ class ChannelController extends Controller
                 }
             ])->latest()->simplePaginate($perPage, ['*'], 'page', $pageNumber)];
         }
-
-        $workspace = $channel->workspace;
-
-
-        $channels = $request->user()->channels()->where('workspace_id', '=', $workspace->id)->where(function (Builder $query) {
-            return $query->where("type", "=", "PUBLIC")
-                ->orWhere("type", "=", "PRIVATE");
-        })
-            ->get();
         $user = $request->user();
+        $workspace = $channel->workspace;
+        $availableChannels = $workspace->channels()->where("type", "=", ChannelTypes::PUBLIC->name)->get();
+
+        $channels =  DB::table('channels')
+            ->join('channel_user', 'channels.id', '=', 'channel_user.channel_id')
+            ->leftJoin('messages', function ($join) {
+                $join->on('messages.messagable_id', '=', 'channel_user.channel_id')
+                    ->where('messages.messagable_type', '=', 'App\\Models\\Channel');
+            })
+            ->select(
+                'channels.id',
+                'channels.name',
+                'channels.description',
+                'channels.type',
+                'channels.workspace_id',
+                'channels.user_id',
+                'channels.is_main_channel',
+                DB::raw('COUNT(CASE WHEN messages.created_at > channel_user.last_read_at OR channel_user.last_read_at IS NULL THEN 1 END) as unread_messages_count')
+            )
+            ->where('channel_user.user_id', $user->id)
+            ->where('channels.workspace_id', $workspace->id)
+            ->where(function ($query) {
+                $query->where('channels.type', 'PUBLIC')
+                    ->orWhere('channels.type', 'PRIVATE');
+            })
+            ->groupBy(
+                'channels.id',
+                'channels.name',
+                'channels.description',
+                'channels.type',
+                'channels.workspace_id',
+                'channels.user_id',
+                'channels.is_main_channel'
+            )
+            ->get();
+
         $directChannels = $workspace->channels()->where("type", "=", "DIRECT")->whereHas('users', function ($query) use ($user) {
             $query->where('user_id', $user->id);
         })->get();
@@ -107,6 +153,7 @@ class ChannelController extends Controller
 
         return Inertia::render("Workspace/Index", [
             'workspace' => $workspace,
+            'availableChannels' => $availableChannels,
             'channels' => $channels,
             'users' => $users,
             'channel' => $channel->load('user'),
@@ -153,6 +200,8 @@ class ChannelController extends Controller
         try {
             $channel->description = $validated['description'] ?? "";
             $channel->save();
+            broadcast(new SettingsEvent($channel, "editDescription"))->toOthers();
+
             return back();
         } catch (\Throwable $th) {
             return back()->withErrors(["server" => "Something went wrong! Please try later"]);
@@ -167,6 +216,7 @@ class ChannelController extends Controller
         try {
             $channel->name = $validated['name'];
             $channel->save();
+            broadcast(new SettingsEvent($channel, "editName"))->toOthers();
             return back();
         } catch (\Throwable $th) {
             return back()->withErrors(["server" => "Something went wrong! Please try later"]);
@@ -182,6 +232,7 @@ class ChannelController extends Controller
         try {
             $channel->type = $validated['type'];
             $channel->save();
+            broadcast(new SettingsEvent($channel, "changeType"))->toOthers();
             return back();
         } catch (\Throwable $th) {
             return back()->withErrors(["server" => "Something went wrong! Please try later"]);
@@ -241,6 +292,21 @@ class ChannelController extends Controller
                 'role_id' => Role::getRoleByName(BaseRoles::MEMBER->name)->id,
             ]);
             broadcast(new SettingsEvent($channel, "removeManager"))->toOthers();
+            return back();
+        } catch (\Throwable $th) {
+
+            return back()->withErrors(['server' => "Something went wrong! Please try later."]);
+        }
+    }
+    public function lastRead(Request $request, Channel $channel)
+    {
+
+
+        if ($request->user()->cannot('view', $channel)) abort(403);
+        try {
+            $request->user()->channels()->updateExistingPivot($channel->id, [
+                'last_read_at' => Carbon::now(),
+            ]);
             return back();
         } catch (\Throwable $th) {
 

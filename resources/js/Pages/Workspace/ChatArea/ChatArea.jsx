@@ -109,6 +109,22 @@ export default function ChatArea() {
         dispatch(setMessages([...initMessages?.data]));
         setNextPageUrl(initMessages?.next_page_url);
         setPreviousPageUrl(initMessages?.prev_page_url);
+        router.post(
+            route("channel.last_read", channel.id),
+            {},
+            { preserveScroll: true, preserveState: true, only: ["channels"] }
+        );
+        return () => {
+            router.post(
+                route("channel.last_read", channel.id),
+                {},
+                {
+                    preserveScroll: true,
+                    preserveState: true,
+                    only: ["channels"],
+                }
+            );
+        };
     }, [channel.id]);
 
     useEffect(() => {
@@ -126,8 +142,7 @@ export default function ChatArea() {
                 // console.log(e);
             })
             .listen("SettingsEvent", (e) => {
-                
-                if(e.type=="addManagers" || e.type=="removeManager"){
+                if (e.type == "addManagers" || e.type == "removeManager") {
                     router.reload({ only: ["managers"] });
                 }
             })

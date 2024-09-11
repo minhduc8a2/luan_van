@@ -26,7 +26,7 @@ class MessagePolicy
         $exists = DB::table('channel_user')
             ->where('user_id', '=', $user->id)
             ->where('channel_id', '=', $channel->id)
-            ->count() > 0;
+            ->exists();
         return $exists;
     }
 
@@ -38,7 +38,7 @@ class MessagePolicy
         $exists = DB::table('channel_user')
             ->where('user_id', '=', $user->id)
             ->where('channel_id', '=', $channel->id)
-            ->count() > 0;
+            ->exists();
         return $exists;
     }
 

@@ -3,7 +3,10 @@ import Avatar from "@/Components/Avatar";
 import { router } from "@inertiajs/react";
 import { useSelector } from "react-redux";
 export function DirectChannel({ channel, user, isOnline = false }) {
-    const { auth } = usePage().props;
+    const {
+        auth,
+        channel: currentChannel,
+    } = usePage().props;
     const onlineStatusMap = useSelector((state) => state.onlineStatus);
     function changeChannel() {
         router.get(
@@ -18,7 +21,11 @@ export function DirectChannel({ channel, user, isOnline = false }) {
         <li>
             <button
                 onClick={changeChannel}
-                className="flex mt-2 items-center justify-start gap-x-2 px-4 "
+                className={`flex mt-2 items-center justify-start gap-x-2 px-4 py-1 rounded-lg w-full ${
+                    channel.id == currentChannel.id
+                        ? "bg-primary-lighter"
+                        : "hover:bg-white/10"
+                }`}
             >
                 <div className="">
                     <Avatar

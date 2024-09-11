@@ -27,6 +27,7 @@ export default function ChangeChannelNameForm({ channelName }) {
     }
     return (
         <Form1
+            className="p-4"
             errors={errors}
             success={success}
             submit={onSubmit}

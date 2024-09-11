@@ -2,6 +2,7 @@
 
 namespace App\Events;
 
+use App\Models\User;
 use App\Models\Workspace;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Queue\SerializesModels;
@@ -19,7 +20,7 @@ class WorkspaceEvent implements ShouldBroadcastNow
     /**
      * Create a new event instance.
      */
-    public function __construct(public Workspace $workspace)
+    public function __construct(public Workspace $workspace, public string $type = "", public string $fromUserId = "")
     {
         //
     }
@@ -34,5 +35,10 @@ class WorkspaceEvent implements ShouldBroadcastNow
         return [
             new PresenceChannel('workspaces.' . $this->workspace->id),
         ];
+    }
+
+    public function broadcastWith(): array
+    {
+        return ['type' => $this->type, 'fromUserId' => $this->fromUserId];
     }
 }

@@ -65,7 +65,7 @@ class User extends Authenticatable
 
     public function workspaces(): BelongsToMany
     {
-        return $this->belongsToMany(Workspace::class)->withPivot('role_id');
+        return $this->belongsToMany(Workspace::class)->withPivot('role_id')->withTimestamps();
     }
 
     public function ownChannels(): HasMany
@@ -75,7 +75,7 @@ class User extends Authenticatable
 
     public function channels(): BelongsToMany
     {
-        return $this->belongsToMany(Channel::class)->withPivot('role_id');
+        return $this->belongsToMany(Channel::class)->withPivot('role_id','last_read_at')->withTimestamps();
     }
 
     public function messages(): HasMany
@@ -88,7 +88,7 @@ class User extends Authenticatable
         $exists = DB::table('user_workspace')
             ->where('user_id', '=', $this->id)
             ->where('workspace_id', '=', $workspace->id)
-            ->count() > 0;
+            ->exists();
         return $exists;
     }
 
@@ -98,19 +98,24 @@ class User extends Authenticatable
         $exists = DB::table('channel_user')
             ->where('user_id', '=', $this->id)
             ->where('channel_id', '=',  $channel->id)
-            ->count() > 0;
+            ->exists();
         return $exists;
     }
 
     public function workspacePermissionCheck(Workspace $workspace, string $permissionType): bool
     {
 
-        $roleId = $this->workspaces()
-            ->where('workspace_id', '=', $workspace->id)
-            ->first()
-            ->pivot
-            ->role_id;
-        return $workspace->permissions()->where('permission_type', '=', $permissionType)->where('role_id', '=', $roleId)->count() > 0;
+        try {
+
+            $roleId = $this->workspaces()
+                ->where('workspace_id', '=', $workspace->id)
+                ->first()
+                ?->pivot
+                ?->role_id;
+            return $workspace->permissions()->where('permission_type', '=', $permissionType)->where('role_id', '=', $roleId)->exists();
+        } catch (\Throwable $th) {
+            return false;
+        }
     }
     public function channelPermissionCheck(Channel $channel, string $permissionType): bool
     {
@@ -120,6 +125,6 @@ class User extends Authenticatable
             ->first()
             ->pivot
             ->role_id;
-        return $channel->permissions()->where('permission_type', '=', $permissionType)->where('role_id', '=', $roleId)->count() > 0;
+        return $channel->permissions()->where('permission_type', '=', $permissionType)->where('role_id', '=', $roleId)->exists();
     }
 }

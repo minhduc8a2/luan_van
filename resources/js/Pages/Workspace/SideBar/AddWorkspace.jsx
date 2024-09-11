@@ -20,6 +20,7 @@ export function AddWorkspace() {
             submit={submit}
             submitting={processing}
             buttonName="Create"
+            className="p-4"
             activateButtonNode={
                 <div className="flex gap-x-2 items-center p-4 hover:bg-white/10 w-full">
                     <IoIosAdd className="text-xl" />

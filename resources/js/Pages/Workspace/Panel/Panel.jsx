@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useMemo } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { HiOutlinePencilAlt } from "react-icons/hi";
 import { BiMessageRoundedDetail } from "react-icons/bi";
@@ -11,6 +11,7 @@ import { DirectChannel } from "./DirectChannel";
 import { useSelector } from "react-redux";
 import Activity from "./Activity/Activity";
 import { CreateChannelForm } from "./createChannelForm";
+import { compareDateTime } from "@/helpers/dateTimeHelper";
 
 export default function Panel({}) {
     const {
@@ -23,6 +24,7 @@ export default function Panel({}) {
         selfChannel,
     } = usePage().props;
     const { type } = useSelector((state) => state.panel);
+    const { messages } = useSelector((state) => state.messages);
     function changeChannel(channel) {
         router.get(
             route("channel.show", channel.id),
@@ -31,7 +33,7 @@ export default function Panel({}) {
         );
     }
     if (type == "activity") return <Activity />;
-
+   
     return (
         <div className="bg-secondary h-full rounded-l-lg rounded-s-lg ">
             <div className="flex justify-between items-center p-4">
@@ -63,15 +65,20 @@ export default function Panel({}) {
                                             onClick={() =>
                                                 changeChannel(channel)
                                             }
-                                            className={`grid-item mt-2 w-full px-4 block  rounded-lg ${
+                                            className={`flex items-center mt-2 w-full px-4 justify-between rounded-lg ${
                                                 channel.id == currentChannel.id
                                                     ? "bg-primary-lighter"
                                                     : "hover:bg-white/10"
                                             }`}
                                         >
-                                            <div className="text-lg">#</div>
-                                            <div className="flex items-center">
-                                                {channel.name}
+                                            <div className="grid-item">
+                                                <div className="text-lg">#</div>
+                                                <div className="flex items-center">
+                                                    {channel.name}
+                                                </div>
+                                            </div>
+                                            <div className="">
+                                                {channel.newMessagesCount?channel.newMessagesCount:""}
                                             </div>
                                         </button>
                                     </li>

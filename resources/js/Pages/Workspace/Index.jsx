@@ -9,12 +9,13 @@ import Event from "./Event";
 import { makeStore } from "@/Store/store";
 import { Provider } from "react-redux";
 import { setActivity } from "@/Store/activitySlice";
-export default function Index({notifications}) {
+export default function Index({ notifications, workspace, channel, channels,users }) {
+    console.log(workspace, channel, channels,users);
     const storeRef = useRef();
     if (!storeRef.current) {
         // Create the store instance the first time this renders
         storeRef.current = makeStore();
-        storeRef.current.dispatch(setActivity(notifications))
+        storeRef.current.dispatch(setActivity(notifications));
     }
     return (
         <Provider store={storeRef.current}>

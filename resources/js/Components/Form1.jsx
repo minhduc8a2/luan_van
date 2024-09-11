@@ -11,12 +11,13 @@ export default function Form1({
     sameButtonRow,
     submit,
     submitting = false,
+    className=""
 }) {
     return (
         <OverlayPanel buttonNode={activateButtonNode} success={success}>
             {({ close }) => (
                 <form action="" onSubmit={submit}>
-                    <div className="w-[500px] max-w-screen-sm m-4 ">
+                    <div className={"w-[500px] max-w-screen-sm m-4 "+className}>
                         <h2 className="text-2xl my-4 font-bold text-white/85">
                             {title}
                         </h2>

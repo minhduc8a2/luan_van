@@ -1,7 +1,7 @@
 import { router, usePage } from "@inertiajs/react";
 import React, { useRef } from "react";
 import { useEffect } from "react";
-import { setManyOnline, setOnlineStatus } from "@/Store/onlineStatusSlice";
+import { setManyOnline, setOnlineStatus } from "@/Store/OnlineStatusSlice";
 import { useDispatch } from "react-redux";
 import { addActivity } from "@/Store/activitySlice";
 export default function Event() {
@@ -11,7 +11,6 @@ export default function Event() {
     useEffect(() => {
         Echo.private("App.Models.User." + auth.user.id).notification(
             (notification) => {
-                
                 dispatch(addActivity(notification));
             }
         );
@@ -24,6 +23,11 @@ export default function Event() {
         connectionRef.current
             .here((users) => {
                 dispatch(setManyOnline(users));
+            })
+            .listen("WorkspaceEvent", (e) => {
+                if (e.type === "storeChannel" && e.fromUserId != auth.user.id) {
+                    router.reload({ only: ["availableChannels"], preserveState: true });
+                }
             })
             .error((error) => {
                 console.error(error);

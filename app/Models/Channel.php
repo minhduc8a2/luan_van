@@ -47,7 +47,7 @@ class Channel extends Model
     }
     public function users(): BelongsToMany
     {
-        return $this->belongsToMany(User::class)->withPivot('role_id');
+        return $this->belongsToMany(User::class)->withPivot('role_id','last_read_at')->withTimestamps();
     }
     public function messages(): MorphMany
     {
@@ -64,7 +64,7 @@ class Channel extends Model
 
         //assign admin role for user
         $user->channels()->attach($this->id, ['role_id' => $managerRole->id]);
-        if ($this->permissions()->where('role_id', '=', $managerRole->id)->count() > 0) return;
+        if ($this->permissions()->where('role_id', '=', $managerRole->id)->exists()) return;
         $this->permissions()->create(
             [
                 'role_id' => $managerRole->id,
@@ -85,7 +85,7 @@ class Channel extends Model
     {
         $managerRole = Role::getRoleByName(BaseRoles::MANAGER->name);
 
-        if ($this->permissions()->where('role_id', '=', $managerRole->id)->count() > 0) return;
+        if ($this->permissions()->where('role_id', '=', $managerRole->id)->exists()) return;
 
         $this->permissions()->createMany([
             [
@@ -101,7 +101,7 @@ class Channel extends Model
     {
         $memberRole = Role::getRoleByName(BaseRoles::MEMBER->name);
 
-        if ($this->permissions()->where('role_id', '=', $memberRole->id)->count() > 0) return;
+        if ($this->permissions()->where('role_id', '=', $memberRole->id)->exists()) return;
 
         $this->permissions()->createMany([
             [
@@ -141,7 +141,7 @@ class Channel extends Model
     {
         $guestRole = Role::getRoleByName(BaseRoles::GUEST->name);
 
-        if ($this->permissions()->where('role_id', '=', $guestRole->id)->count() > 0) return;
+        if ($this->permissions()->where('role_id', '=', $guestRole->id)->exists()) return;
 
         $this->permissions()->createMany([
             [

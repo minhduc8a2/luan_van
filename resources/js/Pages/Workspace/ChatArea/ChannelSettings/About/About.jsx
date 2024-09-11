@@ -19,7 +19,7 @@ export default function About({ channel, channelName }) {
                 )}`}
                 className={`border-t-0 ${
                     channel.is_main_channel
-                        ? " rounded-bl-lg rounded-br-lg "
+                        ? "  "
                         : ""
                 }`}
                 hasEdit={false}

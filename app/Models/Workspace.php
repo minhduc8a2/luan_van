@@ -27,7 +27,7 @@ class Workspace extends Model
 
     public function users(): BelongsToMany
     {
-        return $this->belongsToMany(User::class)->withPivot('role_id');
+        return $this->belongsToMany(User::class)->withPivot('role_id')->withTimestamps();
     }
 
     public function channels(): HasMany
@@ -46,7 +46,7 @@ class Workspace extends Model
     }
     public function createAndAssignSelfChannelForUser(User $user)
     {
-        $selfChannel = $this->channels()->create(['name' => $user->name, 'type' => ChannelTypes::SELF->name, 'user_id' => $user->id]);
+        $selfChannel = $this->channels()->create(['name' => $user->name, 'type' => ChannelTypes::SELF->name, 'user_id' => $user->id, 'description' => "This is your space. Draft messages, list your to-dos, or keep links and files handy. You can also talk to yourself here, but please bear in mind you’ll have to supply both sides of the conversation."]);
         /**
          * @var Channel $selfChannel
          */
@@ -71,7 +71,11 @@ class Workspace extends Model
 
         //create private channels
         foreach ($otherUsers as $id => $name) {
+            /**
+             * @var Channel $newChannel
+             */
             $newChannel = $this->channels()->create(['user_id' => $user->id, 'name' => $user->id . "_" . $id, "type" => ChannelTypes::DIRECT->name]);
+            $newChannel->initChannelPermissions();
             $user->channels()->attach($newChannel->id, ['role_id' => $roleId]);
             $otherUser = User::find($id);
             if ($otherUser) {
@@ -80,7 +84,7 @@ class Workspace extends Model
         }
         //create self channel
         $newChannel = $this->channels()->create(['user_id' => $user->id, 'name' => $user->name, "description" => "This is your space. Draft messages, list your to-dos, or keep links and files handy. You can also talk to yourself here, but please bear in mind you’ll have to supply both sides of the conversation.", "type" => ChannelTypes::SELF->name]);
-        $user->channels()->attach($newChannel->id, ['role_id' => $roleId]);
+        $newChannel->assignManagerRoleAndManagerPermissions($user);
     }
     public   function isWorkspaceMemberByEmail(string $email): bool
     {
@@ -93,7 +97,7 @@ class Workspace extends Model
     {
         $memberRole = Role::getRoleByName(BaseRoles::MEMBER->name);
 
-        if ($this->permissions()->where('role_id', '=', $memberRole->id)->count() > 0) return;
+        if ($this->permissions()->where('role_id', '=', $memberRole->id)->exists()) return;
 
         $this->permissions()->createMany([
             [

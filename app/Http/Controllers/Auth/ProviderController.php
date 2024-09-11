@@ -44,9 +44,8 @@ class ProviderController extends Controller
 
             Auth::login($user);
 
-            return redirect('/dashboard');
+            return redirect('/');
         } catch (\Throwable $th) {
-            dd($th);
             return redirect('/login')->withErrors(['fail' => "Failed to login with {$provider}"]);
         }
 

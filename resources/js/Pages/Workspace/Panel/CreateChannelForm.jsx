@@ -14,16 +14,17 @@ export function CreateChannelForm() {
             label: "Private — only specific people \n Can only be viewed or joined by invitation",
         },
     ];
-    const { data, setData, post, processing, reset, errors } = useForm({
-        name: "",
-        type: "PUBLIC",
-    });
+    const { data, setData, post, processing, reset, errors, clearErrors } =
+        useForm({
+            name: "",
+            type: "PUBLIC",
+        });
     const [success, setSuccess] = useState(false);
     function submit(e) {
         e.preventDefault();
-        console.log("submit");
         post(route("channel.store", workspace.id), {
-            preserveState: false,
+            preserveState: true,
+            only: ["channels"],
             onSuccess: () => {
                 setSuccess(true);
                 reset();
@@ -32,12 +33,20 @@ export function CreateChannelForm() {
     }
     return (
         <Form1
+            className="p-4"
+            errors={errors}
             success={success}
             submit={submit}
             submitting={processing}
             buttonName="Create"
             activateButtonNode={
-                <div className="grid-item mt-2 px-4">
+                <div
+                    className="grid-item mt-2 px-4"
+                    onClick={() => {
+                        clearErrors();
+                        setSuccess(false);
+                    }}
+                >
                     <div className="flex items-center ">
                         <LuPlus className="text-sm" />
                     </div>
@@ -58,9 +67,6 @@ export function CreateChannelForm() {
                 list={channelTypes}
                 onChange={(item) => setData("type", item.type)}
             />
-            {errors.server && (
-                <div className="text-red-500 text-sm my-2">{errors.server}</div>
-            )}
         </Form1>
     );
 }

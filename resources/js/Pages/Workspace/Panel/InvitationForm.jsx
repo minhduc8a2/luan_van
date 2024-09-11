@@ -81,6 +81,7 @@ export function InvitationForm({ workspace }) {
                 </OverlayNotification>
             )}
             <Form1
+                className="p-4"
                 success={flash.invitation_sent}
                 submit={onSubmit}
                 buttonName="Send"

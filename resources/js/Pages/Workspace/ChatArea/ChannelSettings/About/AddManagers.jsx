@@ -21,11 +21,7 @@ export default function AddManagers({ close, setErrors }) {
             },
             {
                 preserveState: true,
-                onSuccess: () => {
-                    router.reload({
-                        only: ["managers"],
-                    });
-                },
+                only: ["managers"],
                 onError: (errors) => {
                     setErrors(errors);
                 },
