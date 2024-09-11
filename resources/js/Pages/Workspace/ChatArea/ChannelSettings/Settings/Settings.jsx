@@ -7,7 +7,7 @@ import ChangeToPrivateConfirm from "./ChangeToPrivateConfirm";
 export default function Settings({ channel, channelName, workspace }) {
     if (channel.is_main_channel) return "";
     return (
-        <>
+        <div className="p-6">
             <ChangeToPrivateConfirm
                 channel={channel}
                 channelName={channelName}
@@ -23,6 +23,6 @@ export default function Settings({ channel, channelName, workspace }) {
                     <FaRegTrashCan className="" /> Delete this channel
                 </div>
             </Button>
-        </>
+        </div>
     );
 }

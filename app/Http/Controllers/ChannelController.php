@@ -267,11 +267,31 @@ class ChannelController extends Controller
                 return back()->withErrors(["user_error" => "Cannot remove user from this channel!"]);
             }
 
-            $validated = $request->validate(['user_id' => ['required|integer']]);
-            $user = User::find($validated['user_id']);
+            $validated = $request->validate(['user' => ['required']]);
+            $user = User::find($validated['user']['id']);
             $user->channels()->detach($channel->id);
             return back();
         } catch (\Throwable $th) {
+            return back()->withErrors(["server" => "Something went wrong! Please try later"]);
+        }
+    }
+    public function addUsersToChannel(Request $request, Channel $channel)
+    {
+        if ($request->user()->cannot('addUsersToChannel', $channel)) {
+            return  abort(403);
+        }
+
+        try {
+            $validated = $request->validate(["users" => "required|array"]);
+            $users = $validated['users'];
+            foreach ($users as $u) {
+                $user = User::find($u['id']);
+                if ($user->channels()->where('channels.id', '=', $channel->id)->exists()) continue;
+                $user->channels()->attach($channel->id, ['role_id' => Role::getRoleIdByName(BaseRoles::MEMBER->name)]);
+            }
+            return back();
+        } catch (\Throwable $th) {
+            dd($th);
             return back()->withErrors(["server" => "Something went wrong! Please try later"]);
         }
     }
@@ -288,7 +308,7 @@ class ChannelController extends Controller
             foreach ($users as $u) {
                 $user = User::find($u['id']);
                 $user->channels()->updateExistingPivot($channel->id, [
-                    'role_id' => Role::getRoleByName(BaseRoles::MANAGER->name)->id,
+                    'role_id' => Role::getRoleIdByName(BaseRoles::MANAGER->name),
                 ]);
             }
             broadcast(new SettingsEvent($channel, "addManagers"))->toOthers();
@@ -309,7 +329,7 @@ class ChannelController extends Controller
             $user = $validated['user'];
             $user = User::find($user['id']);
             $user->channels()->updateExistingPivot($channel->id, [
-                'role_id' => Role::getRoleByName(BaseRoles::MEMBER->name)->id,
+                'role_id' => Role::getRoleIdByName(BaseRoles::MEMBER->name),
             ]);
             broadcast(new SettingsEvent($channel, "removeManager"))->toOthers();
             return back();

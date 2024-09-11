@@ -7,8 +7,7 @@ use App\Helpers\PermissionTypes;
 use App\Models\User;
 use App\Models\Channel;
 use App\Models\Workspace;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Auth\Access\Response;
+
 
 class ChannelPolicy
 {
@@ -84,7 +83,12 @@ class ChannelPolicy
 
     public function leave(User $user, Channel $channel): bool
     {
-        return $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_VIEW->name);
+        if ($channel->type == ChannelTypes::PUBLIC->name) {
+            if ($user->workspacePermissionCheck($channel->workspace, PermissionTypes::WORKSPACE_ALL->name) && $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_VIEW->name))
+                return true;
+        }
+        return $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name)
+            || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_VIEW->name);
     }
     public function addManagers(User $user, Channel $channel): bool
     {
@@ -107,6 +111,29 @@ class ChannelPolicy
                 return true;
         }
         return $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name);
+    }
+    public function removeUserFromChannel(User $user, Channel $channel): bool
+    {
+        if ($channel->type == ChannelTypes::PUBLIC->name) {
+            if ($user->workspacePermissionCheck($channel->workspace, PermissionTypes::WORKSPACE_ALL->name))
+                return true;
+        } else {
+            if ($user->workspacePermissionCheck($channel->workspace, PermissionTypes::WORKSPACE_ALL->name) && $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_VIEW->name))
+                return true;
+        }
+        return $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name);
+    }
+    public function addUsersToChannel(User $user, Channel $channel): bool
+    {
+        if ($channel->type == ChannelTypes::PUBLIC->name) {
+            if ($user->workspacePermissionCheck($channel->workspace, PermissionTypes::WORKSPACE_ALL->name))
+                return true;
+        } else {
+            if ($user->workspacePermissionCheck($channel->workspace, PermissionTypes::WORKSPACE_ALL->name) && $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_VIEW->name))
+                return true;
+        }
+        return $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name)
+            || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_INVITATION->name);
     }
     /**
      * Determine whether the user can delete the model.

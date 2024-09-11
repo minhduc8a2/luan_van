@@ -15,6 +15,13 @@ class Role extends Model
 
     public static function getRoleByName(string $name)
     {
-        return Role::where('name', '=', $name)->first();
+
+        return Role::firstWhere('name', '=', $name);
+    }
+    public static function getRoleIdByName(string $name)
+    {
+        $role =  Role::firstWhere('name', '=', $name);
+        if ($role) return $role->id;
+        return null;
     }
 }

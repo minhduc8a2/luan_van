@@ -58,6 +58,7 @@ Route::middleware('auth')->group(function () {
     Route::post("/channels/{channel}/remove_manager", [ChannelController::class, 'removeManager'])->name("channel.remove_manager");
     Route::post("/channels/{channel}/last_read", [ChannelController::class, 'lastRead'])->name("channel.last_read");
     Route::post("/channels/{channel}/remove_user_from_channel", [ChannelController::class, 'removeUserFromChannel'])->name("channel.remove_user_from_channel");
+    Route::post("/channels/{channel}/add_users_to_channel", [ChannelController::class, 'addUsersToChannel'])->name("channel.add_users_to_channel");
     Route::post("/channels/{channel}/messages", [MessageController::class, 'store'])->name('message.store');
     Route::post("/channels/{channel}/messages/{message}", [MessageController::class, 'storeThreadMessage'])->name('thread_message.store');
     Route::get("/channels/{channel}/messages/{message}/thread_messages", [ThreadController::class, 'getMessages'])->name("thread.messages");

@@ -6,17 +6,26 @@ import React, { useMemo } from "react";
 
 import AvatarAndName from "@/Components/AvatarAndName";
 import { useState } from "react";
-import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
+import {
+    Popover,
+    PopoverButton,
+    PopoverPanel,
+    CloseButton,
+} from "@headlessui/react";
 
-export default function Member({ user }) {
-    const { managers } = usePage().props;
+export default function Member({
+    user,
+    makeChannelManager,
+    removeFromChannel,
+    removeChannelManager,
+}) {
+    const { managers, channel } = usePage().props;
     const [showOptions, setShowOptions] = useState(false);
     const onlineStatusMap = useSelector((state) => state.onlineStatus);
     const isManager = useMemo(() => {
         return managers.some((m) => m.id == user.id);
-    }, [user.id]);
+    }, [user, managers]);
 
-    
     return (
         <div
             className={`px-6 py-4 flex justify-between relative items-center group hover:bg-white/15 ${
@@ -55,17 +64,30 @@ export default function Member({ user }) {
                                 className="flex flex-col bg-background border border-white/25 py-2 rounded-lg text-white/85"
                             >
                                 {isManager ? (
-                                    <button className="p-2 px-4 text-start hover:bg-white/15">
+                                    <CloseButton
+                                        className="p-2 px-4 text-start hover:bg-white/15"
+                                        onClick={() =>
+                                            removeChannelManager(user)
+                                        }
+                                    >
                                         Remove from Channel Manager
-                                    </button>
+                                    </CloseButton>
                                 ) : (
-                                    <button className="p-2 px-4 text-start hover:bg-white/15">
+                                    <CloseButton
+                                        className="p-2 px-4 text-start hover:bg-white/15"
+                                        onClick={() => makeChannelManager(user)}
+                                    >
                                         Make Channel Manager
-                                    </button>
+                                    </CloseButton>
                                 )}
-                                <button className="p-2 px-4 text-start hover:bg-danger">
-                                    Remove from Channel
-                                </button>
+                                {!channel.is_main_channel && (
+                                    <CloseButton
+                                        className="p-2 px-4 text-start hover:bg-danger"
+                                        onClick={() => removeFromChannel(user)}
+                                    >
+                                        Remove from Channel
+                                    </CloseButton>
+                                )}
                             </PopoverPanel>
                         </>
                     );

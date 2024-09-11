@@ -1,5 +1,5 @@
 import OverlayPanel from "@/Components/Overlay/OverlayPanel";
-import { usePage } from "@inertiajs/react";
+import { router, usePage } from "@inertiajs/react";
 
 import TextInput from "@/Components/Input/TextInput";
 import { IoPersonAddOutline } from "react-icons/io5";
@@ -11,6 +11,52 @@ export default function Members() {
     const [errors, setErrors] = useState(null);
     const { managers, channel, channelUsers } = usePage().props;
     const [searchValue, setSearchValue] = useState("");
+    function removeChannelManager(user) {
+        router.post(
+            route("channel.remove_manager", channel.id),
+            {
+                user,
+            },
+            {
+                preserveState: true,
+                only: ["managers"],
+                onError: (errors) => {
+                    setErrors(errors);
+                },
+            }
+        );
+    }
+    function makeChannelManager(user) {
+        router.post(
+            route("channel.add_managers", channel.id),
+            {
+                users: [user],
+            },
+            {
+                preserveState: true,
+                only: ["managers"],
+                onError: (errors) => {
+                    setErrors(errors);
+                },
+            }
+        );
+    }
+    function removeFromChannel(user) {
+        router.post(
+            route("channel.remove_user_from_channel", channel.id),
+            {
+                user,
+            },
+            {
+                preserveState: true,
+                only: ["channelUsers"],
+                onError: (errors) => {
+                    setErrors(errors);
+                },
+            }
+        );
+    }
+   
     return (
         <div className="">
             <div className="my-4 mx-6">
@@ -36,7 +82,7 @@ export default function Members() {
                 }
             >
                 {({ close }) => (
-                    <AddPeople close={close} setErrors={setErrors} />
+                    <AddPeople close={close} setErrors={setErrors}  />
                 )}
             </OverlayPanel>
 
@@ -48,7 +94,14 @@ export default function Members() {
                             .includes(searchValue.toLowerCase())
                     )
                     .map((user) => (
-                        <Member key={"manager_" + user.id} user={user} />
+                        <Member
+                            key={"manager_" + user.id}
+                            user={user}
+                            makeChannelManager={makeChannelManager}
+                            removeFromChannel={removeFromChannel}
+                            removeChannelManager={removeChannelManager}
+                            
+                        />
                     ))}
             </ul>
         </div>

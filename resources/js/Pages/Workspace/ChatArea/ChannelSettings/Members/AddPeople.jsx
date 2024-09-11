@@ -15,13 +15,13 @@ export default function AddPeople({ close, setErrors }) {
     function submit() {
         setProcessing(true);
         router.post(
-            route("channel.add_managers", channel.id),
+            route("channel.add_users_to_channel", channel.id),
             {
                 users: [...Object.values(choosenUsers)],
             },
             {
                 preserveState: true,
-                only: ["managers"],
+                only: ["channelUsers"],
                 onError: (errors) => {
                     setErrors(errors);
                 },
