@@ -7,6 +7,7 @@ import { usePage } from "@inertiajs/react";
 
 import About from "./About/About";
 import Settings from "./Settings/Settings";
+import Members from "./Members/Members";
 export default function ChannelSettings({ channelName }) {
     const { channel, workspace } = usePage().props;
     const [tabIndex, setTabIndex] = useState(0);
@@ -28,8 +29,8 @@ export default function ChannelSettings({ channelName }) {
             }
             className="p-0"
         >
-            <div className="w-[500px] pt-4 px-4 m-4 text-white/85">
-                <h2 className="text-2xl my-4 font-bold text-white/85">
+            <div className="w-[548px]  text-white/85">
+                <h2 className="text-2xl p-6 font-bold text-white/85">
                     <div className="flex items-baseline gap-x-2">
                         {channel.type == "PUBLIC" ? (
                             "#"
@@ -39,7 +40,7 @@ export default function ChannelSettings({ channelName }) {
                         {channelName}
                     </div>
                 </h2>
-                <div className="flex gap-x-4">
+                <div className="flex px-6 gap-x-4">
                     <button
                         onClick={() => setTabIndex(0)}
                         className={`${
@@ -65,10 +66,12 @@ export default function ChannelSettings({ channelName }) {
                         Settings
                     </button>
                 </div>
-                <div className="pt-4 flex flex-col pb-8 h-[65vh] overflow-y-auto scrollbar">
+                <div className="pt-4  flex flex-col pb-8 h-[65vh] overflow-y-auto scrollbar">
                     {tabIndex == 0 && (
-                        <About channel={channel} channelName={channelName} />
+                       <div className="px-6"><About channel={channel} channelName={channelName} /></div> 
                     )}
+
+                    {tabIndex == 1 && <Members />}
                     {tabIndex == 2 && (
                         <Settings
                             channel={channel}

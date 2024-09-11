@@ -256,6 +256,26 @@ class ChannelController extends Controller
         }
     }
 
+    public function removeUserFromChannel(Request $request, Channel $channel)
+    {
+        if ($request->user()->cannot('removeUserFromChannel', $channel)) {
+            return  abort(403);
+        }
+
+        try {
+            if ($channel->is_main_channel) {
+                return back()->withErrors(["user_error" => "Cannot remove user from this channel!"]);
+            }
+
+            $validated = $request->validate(['user_id' => ['required|integer']]);
+            $user = User::find($validated['user_id']);
+            $user->channels()->detach($channel->id);
+            return back();
+        } catch (\Throwable $th) {
+            return back()->withErrors(["server" => "Something went wrong! Please try later"]);
+        }
+    }
+
     public function addManagers(Request $request, Channel $channel)
     {
 

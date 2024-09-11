@@ -9,8 +9,11 @@ import AvatarAndName from "@/Components/AvatarAndName";
 import { useState } from "react";
 import AddManagers from "./AddManagers";
 import ErrorsList from "@/Components/ErrorsList";
+import { useSelector } from "react-redux";
 export default function Managers() {
     const { managers, channel } = usePage().props;
+    const onlineStatusMap = useSelector((state) => state.onlineStatus);
+
     const [searchValue, setSearchValue] = useState("");
     const [errors, setErrors] = useState(null);
     function removeManager(user) {
@@ -135,6 +138,7 @@ export default function Managers() {
                                     <AvatarAndName
                                         className="h-10 w-10"
                                         user={user}
+                                        isOnline={onlineStatusMap[user.id]}
                                     />
                                     <button
                                         className="text-link text-sm hover:underline hidden group-hover:block"

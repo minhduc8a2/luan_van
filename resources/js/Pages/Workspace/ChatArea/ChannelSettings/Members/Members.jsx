@@ -1,0 +1,56 @@
+import OverlayPanel from "@/Components/Overlay/OverlayPanel";
+import { usePage } from "@inertiajs/react";
+
+import TextInput from "@/Components/Input/TextInput";
+import { IoPersonAddOutline } from "react-icons/io5";
+import { useState } from "react";
+import ErrorsList from "@/Components/ErrorsList";
+import AddPeople from "./AddPeople";
+import Member from "./Member";
+export default function Members() {
+    const [errors, setErrors] = useState(null);
+    const { managers, channel, channelUsers } = usePage().props;
+    const [searchValue, setSearchValue] = useState("");
+    return (
+        <div className="">
+            <div className="my-4 mx-6">
+                <TextInput
+                    placeholder="Find members"
+                    value={searchValue}
+                    onChange={(e) => {
+                        setSearchValue(e.target.value);
+                    }}
+                />
+            </div>
+            <div className="mx-6">
+                <ErrorsList errors={errors} />
+            </div>
+            <OverlayPanel
+                buttonNode={
+                    <button className="flex gap-x-4 p-4 px-6 items-center mt-6 hover:bg-white/15 w-full">
+                        <div className=" rounded p-2 bg-link/15">
+                            <IoPersonAddOutline className="text-link text-xl" />
+                        </div>
+                        Add People
+                    </button>
+                }
+            >
+                {({ close }) => (
+                    <AddPeople close={close} setErrors={setErrors} />
+                )}
+            </OverlayPanel>
+
+            <ul className="overflow-hidden h-[30vh]">
+                {channelUsers
+                    .filter((user) =>
+                        user.name
+                            .toLowerCase()
+                            .includes(searchValue.toLowerCase())
+                    )
+                    .map((user) => (
+                        <Member key={"manager_" + user.id} user={user} />
+                    ))}
+            </ul>
+        </div>
+    );
+}

@@ -10,11 +10,10 @@ export default function AutocompleInput({
     choosenUsers,
     setChoosenUsers,
 }) {
-    const { managers } = usePage().props;
-    const [showSuggested, setShowSuggested] = useState(false);
-    const [inputValue, setInputValue] = useState("");
+    const { channelUsers } = usePage().props;
     const onlineStatusMap = useSelector((state) => state.onlineStatus);
 
+    const [inputValue, setInputValue] = useState("");
     return (
         <div className="border border-white/15 rounded-xl p-2 relative">
             <div className="flex gap-x-2">
@@ -47,7 +46,7 @@ export default function AutocompleInput({
             </div>
             <input
                 type="text"
-                placeholder="Search members"
+                placeholder="Search by name"
                 className="bg-transparent border-none focus:border-none focus:ring-0 w-full "
                 value={inputValue}
                 onChange={(e) => {
@@ -73,7 +72,7 @@ export default function AutocompleInput({
                                     className="w-full"
                                     onClick={() => {
                                         if (
-                                            managers.some(
+                                            channelUsers.some(
                                                 (u) => u.id == user.id
                                             )
                                         )
@@ -91,11 +90,11 @@ export default function AutocompleInput({
                                             className="h-6 w-6"
                                             isOnline={onlineStatusMap[user.id]}
                                         />
-                                        {managers.some(
+                                        {channelUsers.some(
                                             (u) => u.id == user.id
                                         ) && (
                                             <div className="text-xs text-white/50">
-                                                Already channel manager
+                                                Already channel member
                                             </div>
                                         )}
                                     </div>
