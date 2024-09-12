@@ -372,7 +372,8 @@ export default function ChatArea() {
                                         );
                                         if(!user) user = {
                                             id: message.user_id,
-                                            name: message.user_name
+                                            name: message.user_name,
+                                            notMember:true,
                                         }
                                         // if (!user) return "";
                                         hasChanged = false;

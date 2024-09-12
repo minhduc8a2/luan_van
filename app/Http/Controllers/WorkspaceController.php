@@ -7,6 +7,7 @@ use Inertia\Inertia;
 use App\Models\Channel;
 use App\Models\Workspace;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Builder;
 
 
@@ -42,6 +43,8 @@ class WorkspaceController extends Controller
 
         $user = $request->user();
         try {
+            DB::beginTransaction(); 
+
             /**
              * @var Workspace $workspace
              */
@@ -56,7 +59,11 @@ class WorkspaceController extends Controller
 
             $mainChannel = $workspace->channels->where('is_main_channel', '=', true)->first();
             return redirect()->route('channel.show', $mainChannel->id);
+            DB::commit(); 
+
         } catch (\Throwable $th) {
+            DB::rollBack(); 
+
             return back()->withErrors(['server' => 'Something went wrong! Please try later!']);
         }
         //create workspace

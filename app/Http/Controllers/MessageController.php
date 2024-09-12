@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Thread;
+use App\Helpers\Helper;
 use App\Models\Channel;
 use App\Models\Message;
 use App\Models\Workspace;
@@ -12,9 +13,9 @@ use App\Models\Attachment;
 use App\Events\MessageEvent;
 use Illuminate\Http\Request;
 use App\Events\ThreadMessageEvent;
-use App\Helpers\Helper;
-use App\Notifications\MentionNotification;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use App\Notifications\MentionNotification;
 
 
 class MessageController extends Controller
@@ -49,57 +50,62 @@ class MessageController extends Controller
     public function store(Request $request,  Channel $channel)
     {
         if ($request->user()->cannot('create', [Message::class, $channel])) return abort(403);
-        $content = $request->content;
+        $content = $request->validate(['content' => 'string|nullable']);
+        if (!$content) $content = "";
         // dd($request->fileObjects);
-        if (isset($content)) {
-            try {
-                $content = Helper::sanitizeContent($content);
-                $message = Message::create([
-                    'content' => $content,
-                    'messagable_id' => $channel->id,
-                    'messagable_type' => Channel::class,
-                    'user_id' => $request->user()->id
-                ]);
-                $fileObjects = [];
-                foreach ($request->fileObjects as $i => $fileObject) {
-                    $newPath = str_replace("temporary", "public", $fileObject['path']);
-                    Storage::move($fileObject['path'], $newPath);
-                    $fileObject['path'] = $newPath;
-                    array_push($fileObjects, $fileObject);
-                }
+        try {
+            DB::beginTransaction();
 
-                $message->attachments()->saveMany($this->createAttachments($fileObjects));
-
-
-                if (isset($message)) {
-                    //handle mentions list
-                    $mentionsList = $request->mentionsList;
-
-                    foreach ($mentionsList as $u) {
-                        $mentionedUser = User::find($u['id']);
-                        $mentionedUser->notify(new MentionNotification($channel, $channel->workspace, $request->user(), $mentionedUser, $message));
-                    }
-                    //notify others about new message
-                    broadcast(new MessageEvent($channel, $message->load([
-                        'attachments',
-                        'reactions',
-                        'thread' => function ($query) {
-                            $query->withCount('messages');
-                        }
-                    ])));
-                }
-            } catch (\Throwable $th) {
-                return back()->withErrors(['server' => "Something went wrong, please try later!"]);
+            $content = Helper::sanitizeContent($content);
+            $message = Message::create([
+                'content' => $content,
+                'messagable_id' => $channel->id,
+                'messagable_type' => Channel::class,
+                'user_id' => $request->user()->id
+            ]);
+            $fileObjects = [];
+            foreach ($request->fileObjects as $i => $fileObject) {
+                $newPath = str_replace("temporary", "public", $fileObject['path']);
+                Storage::move($fileObject['path'], $newPath);
+                $fileObject['path'] = $newPath;
+                array_push($fileObjects, $fileObject);
             }
+
+            $message->attachments()->saveMany($this->createAttachments($fileObjects));
+
+
+            if (isset($message)) {
+                //handle mentions list
+                $mentionsList = $request->mentionsList;
+
+                foreach ($mentionsList as $u) {
+                    $mentionedUser = User::find($u['id']);
+                    $mentionedUser->notify(new MentionNotification($channel, $channel->workspace, $request->user(), $mentionedUser, $message));
+                }
+                //notify others about new message
+                broadcast(new MessageEvent($channel, $message->load([
+                    'attachments',
+                    'reactions',
+                    'thread' => function ($query) {
+                        $query->withCount('messages');
+                    }
+                ])));
+            }
+            DB::commit();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+
+            return back()->withErrors(['server' => "Something went wrong, please try later!"]);
         }
     }
 
     public function storeThreadMessage(Request $request, Channel $channel, Message $message)
     {
         if ($request->user()->cannot('create', [Message::class, $channel])) return abort(403);
-        $content = $request->content;
-        if (isset($content)) {
-
+        try {
+            $content = $request->validate(['content' => 'string|nullable']);
+            if (!$content) $content = "";
+            DB::beginTransaction();
             $content = Helper::sanitizeContent($content);
             //check thread is created already
             $thread = $message->thread;
@@ -134,6 +140,9 @@ class MessageController extends Controller
 
                 broadcast(new ThreadMessageEvent($message, $newMessage->load(['attachments', 'reactions'])))->toOthers();
             }
+            DB::commit();
+        } catch (\Throwable $th) {
+            DB::rollBack();
         }
     }
 

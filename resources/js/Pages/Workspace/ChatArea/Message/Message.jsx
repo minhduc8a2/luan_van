@@ -175,15 +175,17 @@ export default function Message({
             )}
             <div className="mx-3 ">
                 {hasChanged || index == 0 ? (
-                    <div className="flex gap-x-2 items-end">
-                        <div className="text-base font-bold leading-tight">
+                    <div className="flex gap-x-2 items-baseline">
+                        <div className={`text-base font-bold leading-tight ${user.notMember?"line-through":""}`}>
                             {user.name}
                         </div>
+                        {user.notMember&&<span className="text-xs leading-tight text-white/75 font-extralight">(Removed User)</span>}
                         <span className="text-xs leading-tight text-white/75 font-extralight">
                             {threadStyle
                                 ? UTCToDateTime(message.created_at)
                                 : UTCToTime(message.created_at)}
                         </span>
+                       
                     </div>
                 ) : (
                     ""
