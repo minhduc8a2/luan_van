@@ -55,7 +55,7 @@ export default function Members() {
             },
             {
                 preserveState: true,
-                only: ["channelUsers","permissions"],
+                only: ["channelUsers","permissions", "messages"],
                 onError: (errors) => {
                     setErrors(errors);
                 },

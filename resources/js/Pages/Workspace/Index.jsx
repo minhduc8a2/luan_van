@@ -10,8 +10,7 @@ import { makeStore } from "@/Store/store";
 import { Provider } from "react-redux";
 import { setActivity } from "@/Store/activitySlice";
 import { initMessageCountForChannel } from "@/Store/newMessageCountsMapSlice";
-export default function Index({ notifications, channels }) {
-    console.log(channels);
+export default function Index({ notifications, channels, directChannels }) {
     const storeRef = useRef();
     if (!storeRef.current) {
         // Create the store instance the first time this renders
@@ -19,6 +18,9 @@ export default function Index({ notifications, channels }) {
         storeRef.current.dispatch(setActivity(notifications));
 
         channels.forEach((channel) => {
+            storeRef.current.dispatch(initMessageCountForChannel(channel));
+        });
+        directChannels.forEach((channel) => {
             storeRef.current.dispatch(initMessageCountForChannel(channel));
         });
     }

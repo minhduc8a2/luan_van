@@ -42,7 +42,7 @@ class Workspace extends Model
 
     public function mainChannel()
     {
-        return $this->channels()->where('is_main_channel', '=', true)->first();
+        return $this->channels()->where('is_main_channel', true)->first();
     }
     public function createAndAssignSelfChannelForUser(User $user)
     {

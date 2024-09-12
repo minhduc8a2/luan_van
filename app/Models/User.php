@@ -119,6 +119,7 @@ class User extends Authenticatable
                 ->role_id;
             return $channel->permissions()->where('permission_type', '=', $permissionType)->where('role_id', '=', $roleId)->exists();
         } catch (\Throwable $th) {
+            // dd($th);
             return false;
         }
     }

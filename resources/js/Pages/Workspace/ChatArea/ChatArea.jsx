@@ -93,11 +93,11 @@ export default function ChatArea() {
     let hasChanged = false;
 
     useEffect(() => {
-        if (messageId != null) {
+        
             dispatch(setMessages([...initMessages?.data]));
             setNextPageUrl(initMessages?.next_page_url);
             setPreviousPageUrl(initMessages?.prev_page_url);
-        }
+        
     }, [messageId, initMessages]);
     useEffect(() => {
         dispatch(setMessages([...initMessages?.data]));

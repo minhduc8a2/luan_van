@@ -146,9 +146,37 @@ class ChannelController extends Controller
             )
             ->get();
 
-        $directChannels = $workspace->channels()->where("type", "=", "DIRECT")->whereHas('users', function ($query) use ($user) {
-            $query->where('user_id', $user->id);
-        })->get();
+        $directChannels = Channel::with(['users']) // Eager load users
+            ->leftJoin('channel_user', 'channels.id', '=', 'channel_user.channel_id')
+            ->leftJoin('messages', function ($join) {
+                $join->on('messages.messagable_id', '=', 'channel_user.channel_id')
+                    ->where('messages.messagable_type', '=', 'App\\Models\\Channel');
+            })
+            ->select(
+                'channels.id',
+                'channels.name',
+                'channels.description',
+                'channels.type',
+                'channels.workspace_id',
+                'channels.user_id',
+                'channels.is_main_channel',
+                DB::raw('COUNT(CASE WHEN messages.created_at > channel_user.last_read_at OR channel_user.last_read_at IS NULL THEN 1 END) as unread_messages_count')
+            )
+            ->where('channel_user.user_id', $user->id)
+            ->where('channels.workspace_id', $workspace->id)
+            ->where(function ($query) {
+                $query->where('channels.type', 'DIRECT');
+            })
+            ->groupBy(
+                'channels.id',
+                'channels.name',
+                'channels.description',
+                'channels.type',
+                'channels.workspace_id',
+                'channels.user_id',
+                'channels.is_main_channel'
+            )
+            ->get();
         $selfChannel = $workspace->channels()->where("type", "=", "SELF")->where("user_id", "=", $request->user()->id)->first();
 
         $workspaces = $request->user()->workspaces;
@@ -179,7 +207,7 @@ class ChannelController extends Controller
             'channel' => $channel->load('user'),
             'managers' => fn() => $channel->users()->wherePivot('role_id', '=', Role::getRoleByName(BaseRoles::MANAGER->name)->id)->get(),
             'workspaces' => $workspaces,
-            "directChannels" => $directChannels->load("users"),
+            "directChannels" => $directChannels,
             'selfChannel' => $selfChannel,
             'messages' => $channel->messages()->with([
                 'attachments',

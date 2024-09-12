@@ -97,17 +97,26 @@ export default function Panel({}) {
                                             onClick={() =>
                                                 changeChannel(channel)
                                             }
-                                            className={`grid-item mt-2 px-4 w-full rounded-lg ${
+                                            className={`flex items-center justify-between mt-2 px-4 w-full rounded-lg ${
                                                 channel.id == currentChannel.id
                                                     ? "bg-primary-lighter"
                                                     : "hover:bg-white/10"
                                             }`}
                                         >
-                                            <div className="flex items-center h-full justify-center">
-                                                <LuLock className="text-sm " />
+                                            <div className="grid-item">
+                                                <div className="flex items-center h-full justify-center">
+                                                    <LuLock className="text-sm " />
+                                                </div>
+                                                <div className="font-semibold flex items-center leading-7">
+                                                    {channel.name}
+                                                </div>
                                             </div>
-                                            <div className="font-semibold flex items-center leading-7">
-                                                {channel.name}
+                                            <div className="text-sm text-white">
+                                                {newMessageCountsMap[channel.id]
+                                                    ? newMessageCountsMap[
+                                                          channel.id
+                                                      ]
+                                                    : ""}
                                             </div>
                                         </button>
                                     </li>

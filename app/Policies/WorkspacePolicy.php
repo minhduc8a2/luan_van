@@ -2,9 +2,10 @@
 
 namespace App\Policies;
 
-use App\Helpers\PermissionTypes;
 use App\Models\User;
 use App\Models\Workspace;
+use App\Helpers\ChannelTypes;
+use App\Helpers\PermissionTypes;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Auth\Access\Response;
 
@@ -20,7 +21,10 @@ class WorkspacePolicy
      */
     public function view(User $user, Workspace $workspace): bool
     {
-        return $user->channelPermissionCheck($workspace->mainChannel(), PermissionTypes::CHANNEL_VIEW->name);
+        $channel = $workspace->mainChannel();
+        return $user->workspacePermissionCheck($channel->workspace, PermissionTypes::WORKSPACE_ALL->name)
+            || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name)
+            || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_VIEW->name);
     }
 
     /**

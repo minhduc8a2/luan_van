@@ -7,7 +7,8 @@ import { addActivity } from "@/Store/activitySlice";
 import { isChannelsNotificationBroadcast } from "@/helpers/notificationTypeHelper";
 import { addMessageCountForChannel } from "@/Store/newMessageCountsMapSlice";
 export default function Event() {
-    const { workspace, channel, auth, channels } = usePage().props;
+    const { workspace, channel, auth, channels, directChannels } =
+        usePage().props;
     const dispatch = useDispatch();
     const connectionRef = useRef(null);
     useEffect(() => {
@@ -20,6 +21,8 @@ export default function Event() {
                         case "removedFromChannel":
                             router.reload({
                                 only: [
+                                    "channel",
+                                    "messages",
                                     "channelUsers",
                                     "channels",
                                     "availableChannels",
@@ -96,12 +99,25 @@ export default function Event() {
                 }
             );
         });
+        directChannels.forEach((cn) => {
+            Echo.private(`private_channels.${cn.id}`).listen(
+                "MessageEvent",
+                (e) => {
+                    if (e.message?.user_id != auth.user.id)
+                        if (cn.id != channel.id)
+                            dispatch(addMessageCountForChannel(cn));
+                }
+            );
+        });
         return () => {
             channels.forEach((cn) => {
                 Echo.leave(`private_channels.${cn.id}`);
             });
+            directChannels.forEach((cn) => {
+                Echo.leave(`private_channels.${cn.id}`);
+            });
         };
-    }, [channels, channel]);
+    }, [channels, channel, directChannels]);
 
     return <></>;
 }
