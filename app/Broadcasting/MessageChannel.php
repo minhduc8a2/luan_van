@@ -23,10 +23,8 @@ class MessageChannel
      */
     public function join(User $user, Channel $channel): array|bool
     {
-        if ($user->isChannelMember($channel))
+        if ($user->can('view', [Channel::class, $channel]))
             return ['id' => $user->id, 'name' => $user->name, 'avatar_url' => $user->avatar_url];
         return false;
     }
-
-    
 }

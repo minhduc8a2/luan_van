@@ -24,6 +24,9 @@ export default function Panel({}) {
         selfChannel,
     } = usePage().props;
     const { type } = useSelector((state) => state.panel);
+    const newMessageCountsMap = useSelector(
+        (state) => state.newMessageCountsMap
+    );
     // const { messages } = useSelector((state) => state.messages);
     function changeChannel(channel) {
         router.get(
@@ -33,7 +36,7 @@ export default function Panel({}) {
         );
     }
     if (type == "activity") return <Activity />;
-   
+
     return (
         <div className="bg-secondary h-full rounded-l-lg rounded-s-lg ">
             <div className="flex justify-between items-center p-4">
@@ -77,8 +80,12 @@ export default function Panel({}) {
                                                     {channel.name}
                                                 </div>
                                             </div>
-                                            <div className="">
-                                                {channel.newMessagesCount?channel.newMessagesCount:""}
+                                            <div className="text-sm text-white">
+                                                {newMessageCountsMap[channel.id]
+                                                    ? newMessageCountsMap[
+                                                          channel.id
+                                                      ]
+                                                    : ""}
                                             </div>
                                         </button>
                                     </li>

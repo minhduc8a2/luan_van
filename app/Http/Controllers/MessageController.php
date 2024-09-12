@@ -50,8 +50,8 @@ class MessageController extends Controller
     public function store(Request $request,  Channel $channel)
     {
         if ($request->user()->cannot('create', [Message::class, $channel])) return abort(403);
-        $content = $request->validate(['content' => 'string|nullable']);
-        if (!$content) $content = "";
+        $validated = $request->validate(['content' => 'string', 'fileObjects' => 'array']);
+        $content = $validated['content'];
         // dd($request->fileObjects);
         try {
             DB::beginTransaction();
@@ -64,7 +64,7 @@ class MessageController extends Controller
                 'user_id' => $request->user()->id
             ]);
             $fileObjects = [];
-            foreach ($request->fileObjects as $i => $fileObject) {
+            foreach ($validated['fileObjects'] as $i => $fileObject) {
                 $newPath = str_replace("temporary", "public", $fileObject['path']);
                 Storage::move($fileObject['path'], $newPath);
                 $fileObject['path'] = $newPath;
@@ -92,9 +92,10 @@ class MessageController extends Controller
                 ])));
             }
             DB::commit();
+            back();
         } catch (\Throwable $th) {
             DB::rollBack();
-
+            // dd($th);
             return back()->withErrors(['server' => "Something went wrong, please try later!"]);
         }
     }
@@ -103,8 +104,8 @@ class MessageController extends Controller
     {
         if ($request->user()->cannot('create', [Message::class, $channel])) return abort(403);
         try {
-            $content = $request->validate(['content' => 'string|nullable']);
-            if (!$content) $content = "";
+            $validated = $request->validate(['content' => 'string', 'fileObjects' => 'array']);
+            $content = $validated['content'];
             DB::beginTransaction();
             $content = Helper::sanitizeContent($content);
             //check thread is created already
@@ -119,7 +120,7 @@ class MessageController extends Controller
                 'user_id' => $request->user()->id
             ]);
             $fileObjects = [];
-            foreach ($request->fileObjects as $i => $fileObject) {
+            foreach ($validated['fileObjects'] as $i => $fileObject) {
                 $newPath = str_replace("temporary", "public", $fileObject['path']);
                 Storage::move($fileObject['path'], $newPath);
                 $fileObject['path'] = $newPath;
@@ -141,8 +142,10 @@ class MessageController extends Controller
                 broadcast(new ThreadMessageEvent($message, $newMessage->load(['attachments', 'reactions'])))->toOthers();
             }
             DB::commit();
+            return back();
         } catch (\Throwable $th) {
             DB::rollBack();
+            return back()->withErrors(['server'=>'Something went wrong! Please try later.']);
         }
     }
 

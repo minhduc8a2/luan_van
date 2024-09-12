@@ -173,6 +173,7 @@ export default function TipTapEditor({
     onSubmit,
     onFilePicked,
     message = null,
+    focus = 1,
 }) {
     const { auth, channel, channelUsers } = usePage().props;
     const inputId = useId();
@@ -206,6 +207,7 @@ export default function TipTapEditor({
             editor.getJSON()
         );
         editor.commands.clearContent();
+
         resetState();
         return true;
     }
@@ -396,8 +398,14 @@ export default function TipTapEditor({
             //     console.log(editor.getJSON());
             // },
         },
-        message ? [channel.id, message.id, channelUsers] : [channel.id,channelUsers]
+        message
+            ? [channel.id, message.id, channelUsers]
+            : [channel.id, channelUsers]
     );
+
+    useEffect(() => {
+        if (editor) editor.commands.focus();
+    }, [focus, editor]);
 
     return (
         <div className="w-full">

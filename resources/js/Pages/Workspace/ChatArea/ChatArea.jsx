@@ -31,6 +31,7 @@ import { getChannelName } from "@/helpers/channelHelper";
 import { addMessage, setMessages } from "@/Store/messagesSlice";
 import { setMessageId } from "@/Store/mentionSlice";
 import ChannelSettings from "./ChannelSettings/ChannelSettings";
+import { resetMessageCountForChannel } from "@/Store/newMessageCountsMapSlice";
 
 export default function ChatArea() {
     const {
@@ -44,7 +45,7 @@ export default function ChatArea() {
     const { message: threadMessage } = useSelector((state) => state.thread);
     const { messageId } = useSelector((state) => state.mention);
     const { messages } = useSelector((state) => state.messages);
-
+    const [focus, setFocus] = useState(1);
     const dispatch = useDispatch();
     const { channel: huddleChannel } = useSelector((state) => state.huddle);
     const [infiniteScroll, setInfiniteScroll] = useState(false);
@@ -76,9 +77,13 @@ export default function ChatArea() {
                 mentionsList: getMentionsFromContent(JSONContent),
             },
             {
+                only: [],
                 preserveState: true,
                 headers: {
                     "X-Socket-Id": Echo.socketId(),
+                },
+                onFinish: () => {
+                    setFocus((pre) => pre + 1);
                 },
             }
         );
@@ -98,6 +103,7 @@ export default function ChatArea() {
         dispatch(setMessages([...initMessages?.data]));
         setNextPageUrl(initMessages?.next_page_url);
         setPreviousPageUrl(initMessages?.prev_page_url);
+        dispatch(resetMessageCountForChannel(channel));
         router.post(
             route("channel.last_read", channel.id),
             {},
@@ -134,12 +140,12 @@ export default function ChatArea() {
         channelConnectionRef.current = Echo.join(`channels.${channel.id}`);
         channelConnectionRef.current
             .here((users) => {})
-            .joining((user) => {
-                console.log("join", user, channel.name);
-            })
-            .leaving((user) => {
-                console.log("leaving", user);
-            })
+            // .joining((user) => {
+            //     console.log("join", user, channel.name);
+            // })
+            // .leaving((user) => {
+            //     console.log("leaving", user);
+            // })
             .listen("MessageEvent", (e) => {
                 dispatch(addMessage(e.message));
                 // console.log(e);
@@ -370,11 +376,12 @@ export default function ChatArea() {
                                         let user = channelUsers.find(
                                             (mem) => mem.id === message.user_id
                                         );
-                                        if(!user) user = {
-                                            id: message.user_id,
-                                            name: message.user_name,
-                                            notMember:true,
-                                        }
+                                        if (!user)
+                                            user = {
+                                                id: message.user_id,
+                                                name: message.user_name,
+                                                notMember: true,
+                                            };
                                         // if (!user) return "";
                                         hasChanged = false;
                                         if (preValue) {

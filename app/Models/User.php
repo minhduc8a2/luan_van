@@ -75,7 +75,7 @@ class User extends Authenticatable
 
     public function channels(): BelongsToMany
     {
-        return $this->belongsToMany(Channel::class)->withPivot('role_id','last_read_at')->withTimestamps();
+        return $this->belongsToMany(Channel::class)->withPivot('role_id', 'last_read_at')->withTimestamps();
     }
 
     public function messages(): HasMany
@@ -92,16 +92,7 @@ class User extends Authenticatable
         return $exists;
     }
 
-    public  function isChannelMember($channel): bool
-    {
-
-        $exists = DB::table('channel_user')
-            ->where('user_id', '=', $this->id)
-            ->where('channel_id', '=',  $channel->id)
-            ->exists();
-        return $exists;
-    }
-
+   
     public function workspacePermissionCheck(Workspace $workspace, string $permissionType): bool
     {
 
@@ -120,11 +111,15 @@ class User extends Authenticatable
     public function channelPermissionCheck(Channel $channel, string $permissionType): bool
     {
 
-        $roleId = $this->channels()
-            ->where('channel_id', '=', $channel->id)
-            ->first()
-            ->pivot
-            ->role_id;
-        return $channel->permissions()->where('permission_type', '=', $permissionType)->where('role_id', '=', $roleId)->exists();
+        try {
+            $roleId = $this->channels()
+                ->where('channel_id', '=', $channel->id)
+                ->first()
+                ->pivot
+                ->role_id;
+            return $channel->permissions()->where('permission_type', '=', $permissionType)->where('role_id', '=', $roleId)->exists();
+        } catch (\Throwable $th) {
+            return false;
+        }
     }
 }

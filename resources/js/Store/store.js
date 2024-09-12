@@ -1,12 +1,13 @@
 import { configureStore } from "@reduxjs/toolkit";
 import huddleReducer from "@/Store/huddleSlice";
 import sideBarReducer from "@/Store/sideBarSlice";
-import OnlineStatusReducer from "./onlineStatusSlice";
+import OnlineStatusReducer from "./OnlineStatusSlice";
 import panelReducer from "./panelSlice";
 import activityReducer from "./activitySlice";
 import threadReducer from "./threadSlice";
 import mentionReducer from "./mentionSlice";
 import messagesReducer from "./messagesSlice";
+import newMessageCountsMapReducer from "./newMessageCountsMapSlice";
 export const makeStore = () => {
     return configureStore({
         reducer: {
@@ -17,7 +18,8 @@ export const makeStore = () => {
             activity: activityReducer,
             thread: threadReducer,
             mention: mentionReducer,
-           messages:messagesReducer,
+            messages: messagesReducer,
+            newMessageCountsMap: newMessageCountsMapReducer,
         },
     });
 };

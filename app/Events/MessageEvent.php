@@ -34,6 +34,7 @@ class MessageEvent implements ShouldBroadcastNow
         return [
 
             new PresenceChannel('channels.' . $this->channel->id),
+            new PrivateChannel('private_channels.' . $this->channel->id),
         ];
     }
     public function broadcastWith(): array
