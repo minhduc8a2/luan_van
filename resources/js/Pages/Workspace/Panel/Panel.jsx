@@ -24,7 +24,7 @@ export default function Panel({}) {
         selfChannel,
     } = usePage().props;
     const { type } = useSelector((state) => state.panel);
-    const { messages } = useSelector((state) => state.messages);
+    // const { messages } = useSelector((state) => state.messages);
     function changeChannel(channel) {
         router.get(
             route("channel.show", channel.id),

@@ -5,6 +5,7 @@ namespace App\Policies;
 use App\Models\User;
 use App\Models\Channel;
 use App\Models\Message;
+use App\Helpers\PermissionTypes;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Auth\Access\Response;
 
@@ -35,11 +36,8 @@ class MessagePolicy
      */
     public function create(User $user, Channel $channel): bool
     {
-        $exists = DB::table('channel_user')
-            ->where('user_id', '=', $user->id)
-            ->where('channel_id', '=', $channel->id)
-            ->exists();
-        return $exists;
+        return $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name)
+            || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_CHAT->name);
     }
 
     /**

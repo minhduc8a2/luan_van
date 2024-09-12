@@ -24,9 +24,12 @@ export default function Managers() {
             },
             {
                 preserveState: true,
-                only: ["managers"],
+                only: ["managers","permissions"],
                 onError: (errors) => {
                     setErrors(errors);
+                },
+                headers: {
+                    "X-Socket-Id": Echo.socketId(),
                 },
             }
         );

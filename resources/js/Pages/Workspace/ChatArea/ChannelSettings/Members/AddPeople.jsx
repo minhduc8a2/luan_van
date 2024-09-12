@@ -29,6 +29,9 @@ export default function AddPeople({ close, setErrors }) {
                     setProcessing(false);
                     close();
                 },
+                headers: {
+                    "X-Socket-Id": Echo.socketId(),
+                },
             }
         );
     }

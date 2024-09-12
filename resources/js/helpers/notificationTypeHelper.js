@@ -25,3 +25,18 @@ export function isMentionNotification(givenType) {
 export function isMentionNotificationBroadcast(givenType) {
     return givenType == "App\\Notifications\\MentionNotification";
 }
+
+//added to new channel ------------------------------------
+export function isChannelsNotification(givenType) {
+    const channelsNotificationType = [
+        "App\\Notifications\\ChannelsNotification",
+        "CHANNELS_NOTIFICATION",
+    ];
+    return (
+        channelsNotificationType.findIndex((i) => i == givenType) >= 0
+    );
+}
+
+export function isChannelsNotificationBroadcast(givenType) {
+    return givenType == "App\\Notifications\\ChannelsNotification";
+}

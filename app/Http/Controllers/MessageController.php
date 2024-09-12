@@ -85,7 +85,7 @@ class MessageController extends Controller
                     'thread' => function ($query) {
                         $query->withCount('messages');
                     }
-                ])))->toOthers();
+                ])));
             }
         }
     }

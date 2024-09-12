@@ -75,28 +75,17 @@ export default function ChatArea() {
                 fileObjects,
                 mentionsList: getMentionsFromContent(JSONContent),
             },
-            { preserveState: true }
+            {
+                preserveState: true,
+                headers: {
+                    "X-Socket-Id": Echo.socketId(),
+                },
+            }
         );
     }
 
     let preValue = null;
     let hasChanged = false;
-
-    const groupedMessages = useMemo(() => {
-        const gMessages = groupMessagesByDate(messages);
-        const currentDate = formatDDMMYYY(new Date());
-        return Object.keys(gMessages)
-            .sort((a, b) => {
-                return compareDateTime(a, b);
-            })
-            .map((key) => {
-                const formatedDate = formatDDMMYYY(new Date(key));
-                return {
-                    date: formatedDate == currentDate ? "Today" : formatedDate,
-                    mgs: gMessages[key],
-                };
-            });
-    }, [messages]);
 
     useEffect(() => {
         if (messageId != null) {
@@ -126,7 +115,21 @@ export default function ChatArea() {
             );
         };
     }, [channel.id]);
-
+    const groupedMessages = useMemo(() => {
+        const gMessages = groupMessagesByDate(messages);
+        const currentDate = formatDDMMYYY(new Date());
+        return Object.keys(gMessages)
+            .sort((a, b) => {
+                return compareDateTime(a, b);
+            })
+            .map((key) => {
+                const formatedDate = formatDDMMYYY(new Date(key));
+                return {
+                    date: formatedDate == currentDate ? "Today" : formatedDate,
+                    mgs: gMessages[key],
+                };
+            });
+    }, [messages]);
     useEffect(() => {
         channelConnectionRef.current = Echo.join(`channels.${channel.id}`);
         channelConnectionRef.current
@@ -142,8 +145,31 @@ export default function ChatArea() {
                 // console.log(e);
             })
             .listen("SettingsEvent", (e) => {
-                if (e.type == "addManagers" || e.type == "removeManager") {
-                    router.reload({ only: ["managers"] });
+                switch (e.type) {
+                    case "addManagers":
+                    case "removeManager":
+                        router.reload({ only: ["managers", "permissions"] });
+                        break;
+                    case "editDescription":
+                    case "editName":
+                    case "changeType":
+                        router.reload({ only: ["channel", "permissions"] });
+                        break;
+                    case "leave":
+                    case "removeUserFromChannel":
+                    case "addUsersToChannel":
+                        console.log("addUserFromChannel");
+                        router.reload({
+                            only: [
+                                "channelUsers",
+                                "channels",
+                                "availableChannels",
+                                "permissions",
+                            ],
+                        });
+                        break;
+                    default:
+                        break;
                 }
             })
             .listenForWhisper("messageReaction", (e) => {
@@ -341,9 +367,10 @@ export default function ChatArea() {
 
                                 <ul className="">
                                     {mgs.map((message, index) => {
-                                        const user = channelUsers.filter(
+                                        const user = channelUsers.find(
                                             (mem) => mem.id === message.user_id
-                                        )[0];
+                                        );
+                                        if (!user) return "";
                                         hasChanged = false;
                                         if (preValue) {
                                             if (

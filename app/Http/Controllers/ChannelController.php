@@ -13,6 +13,8 @@ use Illuminate\Http\Request;
 use App\Events\SettingsEvent;
 use App\Helpers\ChannelTypes;
 use App\Events\WorkspaceEvent;
+use App\Helpers\PermissionTypes;
+use App\Notifications\ChannelsNotification;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Builder;
@@ -78,7 +80,7 @@ class ChannelController extends Controller
         $perPage = 10;
 
         if ($request->user()->cannot('view', $channel)) {
-            return  abort(403);
+            return  redirect(route('workspace.show', $channel->workspace->id));
         }
 
         $messageId = $request->query('message_id');
@@ -150,9 +152,24 @@ class ChannelController extends Controller
         $users = $workspace->users;
         $notifications = $user->notifications;
 
+        $permissions = [
+            'view' => $user->can('view', [Channel::class, $channel]),
+            'chat' => $user->can('create', [Message::class, $channel]),
+            'createChannel' => $user->can('create', [Channel::class, $workspace]),
+            'updateDescription' => $user->can('updateDescription', [Channel::class, $channel]),
+            'updateName' => $user->can('updateName', [Channel::class, $channel]),
+            'changeType' => $user->can('changeType', [Channel::class, $channel]),
+            'leave' => $user->can('leave', [Channel::class, $channel]),
+            'addManagers' => $user->can('addManagers', [Channel::class, $channel]),
+            'removeManager' => $user->can('removeManager', [Channel::class, $channel]),
+            'removeUserFromChannel' => $user->can('removeUserFromChannel', [Channel::class, $channel]),
+            'addUsersToChannel' => $user->can('addUsersToChannel', [Channel::class, $channel]),
+            'deleteChannel' => $user->can('delete', [Channel::class, $channel]),
+        ];
 
         return Inertia::render("Workspace/Index", [
             'workspace' => $workspace,
+            'permissions' => $permissions,
             'availableChannels' => $availableChannels,
             'channels' => $channels,
             'users' => $users,
@@ -250,6 +267,7 @@ class ChannelController extends Controller
                 return back()->withErrors(["user_error" => "Cannot leave this channel!"]);
             }
             $request->user()->channels()->detach($channel->id);
+            broadcast(new SettingsEvent($channel, "leave"))->toOthers();
             return redirect(route('workspace.show', $channel->workspace->id));
         } catch (\Throwable $th) {
             return back()->withErrors(["server" => "Something went wrong! Please try later"]);
@@ -270,6 +288,9 @@ class ChannelController extends Controller
             $validated = $request->validate(['user' => ['required']]);
             $user = User::find($validated['user']['id']);
             $user->channels()->detach($channel->id);
+            broadcast(new SettingsEvent($channel, "removeUserFromChannel"))->toOthers();
+            $user->notify(new ChannelsNotification($request->user(), $user, $channel, "removedFromChannel"));
+
             return back();
         } catch (\Throwable $th) {
             return back()->withErrors(["server" => "Something went wrong! Please try later"]);
@@ -289,9 +310,11 @@ class ChannelController extends Controller
                 if ($user->channels()->where('channels.id', '=', $channel->id)->exists()) continue;
                 $user->channels()->attach($channel->id, ['role_id' => Role::getRoleIdByName(BaseRoles::MEMBER->name)]);
             }
+            broadcast(new SettingsEvent($channel, "addUsersToChannel"))->toOthers();
+            $user->notify(new ChannelsNotification($request->user(), $user, $channel, "addedToNewChannel"));
             return back();
         } catch (\Throwable $th) {
-            dd($th);
+            // dd($th);
             return back()->withErrors(["server" => "Something went wrong! Please try later"]);
         }
     }

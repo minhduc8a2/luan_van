@@ -16,17 +16,12 @@ export function EditDescriptionForm() {
         e.preventDefault();
         post(route("channel.edit_description", channel.id), {
             preserveState: true,
+            headers: {
+                "X-Socket-Id": Echo.socketId(),
+            },
+            only: ["channel"],
             onSuccess: () => {
                 setSuccess(true);
-                router.get(
-                    route("channel.show", channel.id),
-                    {},
-                    {
-                        preserveState: true,
-                        preserveScroll: true,
-                        only: ["channel"],
-                    }
-                );
             },
         });
     }

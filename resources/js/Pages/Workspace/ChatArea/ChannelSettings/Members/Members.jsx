@@ -19,9 +19,12 @@ export default function Members() {
             },
             {
                 preserveState: true,
-                only: ["managers"],
+                only: ["managers","permissions"],
                 onError: (errors) => {
                     setErrors(errors);
+                },
+                headers: {
+                    "X-Socket-Id": Echo.socketId(),
                 },
             }
         );
@@ -38,6 +41,9 @@ export default function Members() {
                 onError: (errors) => {
                     setErrors(errors);
                 },
+                headers: {
+                    "X-Socket-Id": Echo.socketId(),
+                },
             }
         );
     }
@@ -49,9 +55,12 @@ export default function Members() {
             },
             {
                 preserveState: true,
-                only: ["channelUsers"],
+                only: ["channelUsers","permissions"],
                 onError: (errors) => {
                     setErrors(errors);
+                },
+                headers: {
+                    "X-Socket-Id": Echo.socketId(),
                 },
             }
         );

@@ -23,9 +23,11 @@ class ChannelPolicy
     public function view(User $user, Channel $channel): bool
     {
         if ($channel->type == ChannelTypes::PUBLIC->name) {
-            return $user->workspacePermissionCheck($channel->workspace, PermissionTypes::WORKSPACE_ALL->name)
+            if (
+                $user->workspacePermissionCheck($channel->workspace, PermissionTypes::WORKSPACE_ALL->name)
                 || $user->channelPermissionCheck($channel->workspace->mainChannel(), PermissionTypes::CHANNEL_VIEW->name)
-                || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name);
+            )
+                return true;
         }
         return $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name)
             || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_VIEW->name);

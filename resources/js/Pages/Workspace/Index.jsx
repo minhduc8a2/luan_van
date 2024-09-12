@@ -9,8 +9,8 @@ import Event from "./Event";
 import { makeStore } from "@/Store/store";
 import { Provider } from "react-redux";
 import { setActivity } from "@/Store/activitySlice";
-export default function Index({ notifications, workspace, channel, channels,users }) {
-    console.log(workspace, channel, channels,users);
+export default function Index({ notifications }) {
+    
     const storeRef = useRef();
     if (!storeRef.current) {
         // Create the store instance the first time this renders

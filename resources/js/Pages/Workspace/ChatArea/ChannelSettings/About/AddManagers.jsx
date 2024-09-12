@@ -29,6 +29,9 @@ export default function AddManagers({ close, setErrors }) {
                     setProcessing(false);
                     close();
                 },
+                headers: {
+                    "X-Socket-Id": Echo.socketId(),
+                },
             }
         );
     }

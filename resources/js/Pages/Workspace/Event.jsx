@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { setManyOnline, setOnlineStatus } from "@/Store/OnlineStatusSlice";
 import { useDispatch } from "react-redux";
 import { addActivity } from "@/Store/activitySlice";
+import { isChannelsNotificationBroadcast } from "@/helpers/notificationTypeHelper";
 export default function Event() {
     const { workspace, channel, auth } = usePage().props;
     const dispatch = useDispatch();
@@ -12,6 +13,24 @@ export default function Event() {
         Echo.private("App.Models.User." + auth.user.id).notification(
             (notification) => {
                 dispatch(addActivity(notification));
+                if (isChannelsNotificationBroadcast(notification.type)) {
+                    switch (notification.changesType) {
+                        case "addedToNewChannel":
+                        case "removedFromChannel":
+                            router.reload({
+                                only: [
+                                    "channelUsers",
+                                    "channels",
+                                    "availableChannels",
+                                    "permissions",
+                                ],
+                            });
+                            break;
+
+                        default:
+                            break;
+                    }
+                }
             }
         );
         return () => {
@@ -25,8 +44,11 @@ export default function Event() {
                 dispatch(setManyOnline(users));
             })
             .listen("WorkspaceEvent", (e) => {
-                if (e.type === "storeChannel" && e.fromUserId != auth.user.id) {
-                    router.reload({ only: ["availableChannels"], preserveState: true });
+                if (e.type === "storeChannel") {
+                    router.reload({
+                        only: ["availableChannels"],
+                        preserveState: true,
+                    });
                 }
             })
             .error((error) => {

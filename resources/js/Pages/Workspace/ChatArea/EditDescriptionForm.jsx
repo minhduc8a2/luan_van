@@ -16,6 +16,9 @@ export function EditDescriptionForm() {
         e.preventDefault();
         post(route("channel.edit_description", channel.id), {
             preserveState: true,
+            headers: {
+                "X-Socket-Id": Echo.socketId(),
+            },
             onSuccess: () => {
                 setSuccess(true);
                 router.get(

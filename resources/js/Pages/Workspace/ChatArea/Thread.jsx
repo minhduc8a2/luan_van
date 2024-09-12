@@ -90,6 +90,9 @@ export default function Thread() {
             {
                 preserveState: true,
                 preserveScroll: true,
+                headers: {
+                    "X-Socket-Id": Echo.socketId(),
+                },
             }
         );
     }

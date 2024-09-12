@@ -29,6 +29,9 @@ export function CreateChannelForm() {
                 setSuccess(true);
                 reset();
             },
+            headers: {
+                "X-Socket-Id": Echo.socketId(),
+            },
         });
     }
     return (

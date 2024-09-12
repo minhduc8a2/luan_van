@@ -23,6 +23,9 @@ export default function ChangeToPrivateConfirm({ channelName }) {
             onSuccess: () => {
                 setSuccess(true);
             },
+            headers: {
+                "X-Socket-Id": Echo.socketId(),
+            },
         });
     }
     return (

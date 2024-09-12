@@ -18,6 +18,9 @@ export default function LeaveChannel({ channel }) {
             onSuccess: () => {
                 setSuccess(true);
             },
+            headers: {
+                "X-Socket-Id": Echo.socketId(),
+            },
         });
     }
     if (channel.is_main_channel) return "";

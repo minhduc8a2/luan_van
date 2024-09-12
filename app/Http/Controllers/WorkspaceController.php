@@ -68,6 +68,7 @@ class WorkspaceController extends Controller
      */
     public function show(Request $request, Workspace $workspace)
     {
+        if ($request->user()->cannot('view', [Workspace::class,$workspace])) abort(403);
         $mainChannel = $workspace->channels->where('is_main_channel', '=', true)->first();
         return redirect()->route('channel.show', $mainChannel->id);
     }

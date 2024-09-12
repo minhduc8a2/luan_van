@@ -16,12 +16,16 @@ export default function ChangeChannelNameForm({ channelName }) {
         e.preventDefault();
         post(route("channel.edit_name", channel.id), {
             preserveState: true,
+            only: ["channel"],
             onSuccess: () => {
                 setSuccess(true);
             },
             onFinish: () => {
                 console.log("errors");
                 reset();
+            },
+            headers: {
+                "X-Socket-Id": Echo.socketId(),
             },
         });
     }
