@@ -66,7 +66,7 @@ export const MentionList = forwardRef((props, ref) => {
                     </button>
                 ))
             ) : (
-                <div className="item">No result</div>
+                <div className="item px-4">No result</div>
             )}
         </div>
     );

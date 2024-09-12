@@ -396,7 +396,7 @@ export default function TipTapEditor({
             //     console.log(editor.getJSON());
             // },
         },
-        message ? [channel.id, message.id] : [channel.id]
+        message ? [channel.id, message.id, channelUsers] : [channel.id,channelUsers]
     );
 
     return (
