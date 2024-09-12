@@ -13,10 +13,11 @@ return new class extends Migration
     {
         Schema::create('messages', function (Blueprint $table) {
             $table->id();
-            $table->string('content',12000);
-            $table->unsignedBigInteger('messagable_id'); 
-            $table->string('messagable_type');   
+            $table->string('content', 12000);
+            $table->unsignedBigInteger('messagable_id');
+            $table->string('messagable_type');
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->string('user_name')->nullable();
             $table->timestamps();
         });
     }

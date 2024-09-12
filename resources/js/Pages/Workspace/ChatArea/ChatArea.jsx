@@ -367,10 +367,14 @@ export default function ChatArea() {
 
                                 <ul className="">
                                     {mgs.map((message, index) => {
-                                        const user = channelUsers.find(
+                                        let user = channelUsers.find(
                                             (mem) => mem.id === message.user_id
                                         );
-                                        if (!user) return "";
+                                        if(!user) user = {
+                                            id: message.user_id,
+                                            name: message.user_name
+                                        }
+                                        // if (!user) return "";
                                         hasChanged = false;
                                         if (preValue) {
                                             if (

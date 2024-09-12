@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Helpers\Helper;
+use App\Events\MessageEvent;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -38,5 +40,23 @@ class Message extends Model
         return $this->hasMany(Reaction::class);
     }
 
-    
+    public static function createStringMessageAndBroadcast(Channel $channel, User $user, string $content)
+    {
+        
+        $content = Helper::sanitizeContent($content);
+        $message = Message::create([
+            'content' => $content,
+            'messagable_id' => $channel->id,
+            'messagable_type' => Channel::class,
+            'user_id' => $user->id
+        ]);
+        broadcast(new MessageEvent($channel, $message->load([
+            'attachments',
+            'reactions',
+            'thread' => function ($query) {
+                $query->withCount('messages');
+            }
+        ])));
+        return $message;
+    }
 }

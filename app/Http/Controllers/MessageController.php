@@ -52,40 +52,44 @@ class MessageController extends Controller
         $content = $request->content;
         // dd($request->fileObjects);
         if (isset($content)) {
-            $content = Helper::sanitizeContent($content);
-            $message = Message::create([
-                'content' => $content,
-                'messagable_id' => $channel->id,
-                'messagable_type' => Channel::class,
-                'user_id' => $request->user()->id
-            ]);
-            $fileObjects = [];
-            foreach ($request->fileObjects as $i => $fileObject) {
-                $newPath = str_replace("temporary", "public", $fileObject['path']);
-                Storage::move($fileObject['path'], $newPath);
-                $fileObject['path'] = $newPath;
-                array_push($fileObjects, $fileObject);
-            }
-
-            $message->attachments()->saveMany($this->createAttachments($fileObjects));
-
-
-            if (isset($message)) {
-                //handle mentions list
-                $mentionsList = $request->mentionsList;
-
-                foreach ($mentionsList as $u) {
-                    $mentionedUser = User::find($u['id']);
-                    $mentionedUser->notify(new MentionNotification($channel, $channel->workspace, $request->user(), $mentionedUser, $message));
+            try {
+                $content = Helper::sanitizeContent($content);
+                $message = Message::create([
+                    'content' => $content,
+                    'messagable_id' => $channel->id,
+                    'messagable_type' => Channel::class,
+                    'user_id' => $request->user()->id
+                ]);
+                $fileObjects = [];
+                foreach ($request->fileObjects as $i => $fileObject) {
+                    $newPath = str_replace("temporary", "public", $fileObject['path']);
+                    Storage::move($fileObject['path'], $newPath);
+                    $fileObject['path'] = $newPath;
+                    array_push($fileObjects, $fileObject);
                 }
-                //notify others about new message
-                broadcast(new MessageEvent($channel, $message->load([
-                    'attachments',
-                    'reactions',
-                    'thread' => function ($query) {
-                        $query->withCount('messages');
+
+                $message->attachments()->saveMany($this->createAttachments($fileObjects));
+
+
+                if (isset($message)) {
+                    //handle mentions list
+                    $mentionsList = $request->mentionsList;
+
+                    foreach ($mentionsList as $u) {
+                        $mentionedUser = User::find($u['id']);
+                        $mentionedUser->notify(new MentionNotification($channel, $channel->workspace, $request->user(), $mentionedUser, $message));
                     }
-                ])));
+                    //notify others about new message
+                    broadcast(new MessageEvent($channel, $message->load([
+                        'attachments',
+                        'reactions',
+                        'thread' => function ($query) {
+                            $query->withCount('messages');
+                        }
+                    ])));
+                }
+            } catch (\Throwable $th) {
+                return back()->withErrors(['server' => "Something went wrong, please try later!"]);
             }
         }
     }

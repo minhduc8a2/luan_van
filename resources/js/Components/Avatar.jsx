@@ -7,7 +7,7 @@ const Avatar = memo(function ({
     onlineClassName = "",
     offlineClassName = "",
     noStatus = false,
-    roundedClassName = "rounded-lg",
+    roundedClassName = "rounded-lg ",
 }) {
     return (
         <div className={"relative  " + className}>

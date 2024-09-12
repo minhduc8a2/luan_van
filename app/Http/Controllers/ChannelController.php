@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Role;
 use App\Models\User;
 use Inertia\Inertia;
+use App\Models\Thread;
 use App\Models\Channel;
 use App\Models\Message;
 use App\Models\Workspace;
@@ -13,12 +14,12 @@ use Illuminate\Http\Request;
 use App\Events\SettingsEvent;
 use App\Helpers\ChannelTypes;
 use App\Events\WorkspaceEvent;
-use App\Helpers\PermissionTypes;
-use App\Notifications\ChannelsNotification;
 use Illuminate\Support\Carbon;
+use App\Helpers\PermissionTypes;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Broadcast;
+use App\Notifications\ChannelsNotification;
 
 class ChannelController extends Controller
 {
@@ -288,11 +289,26 @@ class ChannelController extends Controller
             $validated = $request->validate(['user' => ['required']]);
             $user = User::find($validated['user']['id']);
             $user->channels()->detach($channel->id);
+
+            //archive messages
+            $messages = Message::where('messagable_id', $channel->id)
+                ->where('messagable_type', Channel::class)
+                ->where('user_id', $user->id)
+                ->get();
+            foreach ($messages as $message) {
+                $message->user_name = $user->name;
+                $message->save();
+                $message->thread->messages()->update(['user_name' => $user->name]);
+            }
+
+
+            //notify
             broadcast(new SettingsEvent($channel, "removeUserFromChannel"))->toOthers();
             $user->notify(new ChannelsNotification($request->user(), $user, $channel, "removedFromChannel"));
-
+            Message::createStringMessageAndBroadcast($channel, $request->user(), $request->user()->name . " has removed " . $user->name . " from channel");
             return back();
         } catch (\Throwable $th) {
+            dd($th);
             return back()->withErrors(["server" => "Something went wrong! Please try later"]);
         }
     }
@@ -309,12 +325,13 @@ class ChannelController extends Controller
                 $user = User::find($u['id']);
                 if ($user->channels()->where('channels.id', '=', $channel->id)->exists()) continue;
                 $user->channels()->attach($channel->id, ['role_id' => Role::getRoleIdByName(BaseRoles::MEMBER->name)]);
+                $user->notify(new ChannelsNotification($request->user(), $user, $channel, "addedToNewChannel"));
+                Message::createStringMessageAndBroadcast($channel, $request->user(), $request->user()->name . " has added " . $user->name . " to channel");
             }
             broadcast(new SettingsEvent($channel, "addUsersToChannel"))->toOthers();
-            $user->notify(new ChannelsNotification($request->user(), $user, $channel, "addedToNewChannel"));
             return back();
         } catch (\Throwable $th) {
-            // dd($th);
+            dd($th);
             return back()->withErrors(["server" => "Something went wrong! Please try later"]);
         }
     }
