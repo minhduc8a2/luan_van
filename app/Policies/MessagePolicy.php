@@ -34,10 +34,15 @@ class MessagePolicy
     /**
      * Determine whether the user can create models.
      */
-    public function create(User $user, Channel $channel): bool
+    public function create(User $user, Channel $channel, $type = 'channel'): bool
     {
-        return $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name)
-            || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_CHAT->name);
+        if ($type == 'channel')
+            return $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name)
+                || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_CHAT->name);
+        if ($type == 'thread') {
+            return $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name)
+                || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_THREAD->name);
+        }
     }
 
     /**

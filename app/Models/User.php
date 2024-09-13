@@ -83,6 +83,11 @@ class User extends Authenticatable
         return $this->hasMany(Message::class);
     }
 
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(Attachment::class);
+    }
+
     public  function isWorkspaceMember(Workspace $workspace): bool
     {
         $exists = DB::table('user_workspace')
@@ -92,7 +97,16 @@ class User extends Authenticatable
         return $exists;
     }
 
-   
+    public  function isChannelMember(Channel $channel): bool
+    {
+        $exists = DB::table('channel_user')
+            ->where('user_id', '=', $this->id)
+            ->where('channel_id', '=', $channel->id)
+            ->exists();
+        return $exists;
+    }
+
+
     public function workspacePermissionCheck(Workspace $workspace, string $permissionType): bool
     {
 

@@ -14,6 +14,7 @@ class Thread extends Model
     protected $fillable = [
         "message_id"
     ];
+   
     public function messages(): MorphMany
     {
         return $this->morphMany(Message::class, 'messagable');

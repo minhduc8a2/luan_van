@@ -25,6 +25,8 @@ class Channel extends Model
         'user_id',
         'is_main_channel'
     ];
+
+   
     public static function createChannelDescription($type, $channelName)
     {
         switch ($type) {
@@ -47,7 +49,7 @@ class Channel extends Model
     }
     public function users(): BelongsToMany
     {
-        return $this->belongsToMany(User::class)->withPivot('role_id','last_read_at')->withTimestamps();
+        return $this->belongsToMany(User::class)->withPivot('role_id', 'last_read_at')->withTimestamps();
     }
     public function messages(): MorphMany
     {
@@ -94,7 +96,7 @@ class Channel extends Model
                 'permissionable_type' => Channel::class,
                 'permission_type' => PermissionTypes::CHANNEL_ALL->name
             ],
-           
+
         ]);
     }
     public function createChannelMemberPermissions()
@@ -120,6 +122,12 @@ class Channel extends Model
                 'role_id' => $memberRole->id,
                 'permissionable_id' => $this->id,
                 'permissionable_type' => Workspace::class,
+                'permission_type' => PermissionTypes::CHANNEL_THREAD->name
+            ],
+            [
+                'role_id' => $memberRole->id,
+                'permissionable_id' => $this->id,
+                'permissionable_type' => Workspace::class,
                 'permission_type' => PermissionTypes::CHANNEL_HUDDLE->name
             ],
             [
@@ -134,7 +142,7 @@ class Channel extends Model
                 'permissionable_type' => Workspace::class,
                 'permission_type' => PermissionTypes::CHANNEL_EDIT_DESCRIPTION->name
             ],
-           
+
         ]);
     }
     public function createChannelGuestPermissions()

@@ -15,7 +15,8 @@ class Attachment extends Model
         'url',
         'name',
         'message_id',
-        'path'
+        'path',
+        'user_id'
     ];
     protected $hidden = [
         'path'
@@ -23,5 +24,9 @@ class Attachment extends Model
     public function message(): BelongsTo
     {
         return $this->belongsTo(Message::class);
+    }
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 }

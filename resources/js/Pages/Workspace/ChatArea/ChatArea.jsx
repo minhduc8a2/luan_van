@@ -28,7 +28,12 @@ import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
 import Thread from "./Thread";
 import { getMentionsFromContent } from "@/helpers/tiptapHelper";
 import { getChannelName } from "@/helpers/channelHelper";
-import { addMessage, setMessages } from "@/Store/messagesSlice";
+import {
+    addMessage,
+    addThreadMessagesCount,
+    addThreadToMessages,
+    setMessages,
+} from "@/Store/messagesSlice";
 import { setMessageId } from "@/Store/mentionSlice";
 import ChannelSettings from "./ChannelSettings/ChannelSettings";
 import { resetMessageCountForChannel } from "@/Store/newMessageCountsMapSlice";
@@ -40,6 +45,7 @@ export default function ChatArea() {
         channel,
         channelUsers,
         messages: initMessages,
+        permissions,
     } = usePage().props;
 
     const { message: threadMessage } = useSelector((state) => state.thread);
@@ -93,11 +99,9 @@ export default function ChatArea() {
     let hasChanged = false;
 
     useEffect(() => {
-        
-            dispatch(setMessages([...initMessages?.data]));
-            setNextPageUrl(initMessages?.next_page_url);
-            setPreviousPageUrl(initMessages?.prev_page_url);
-        
+        dispatch(setMessages([...initMessages?.data]));
+        setNextPageUrl(initMessages?.next_page_url);
+        setPreviousPageUrl(initMessages?.prev_page_url);
     }, [messageId, initMessages]);
     useEffect(() => {
         dispatch(setMessages([...initMessages?.data]));
@@ -148,6 +152,13 @@ export default function ChatArea() {
             // })
             .listen("MessageEvent", (e) => {
                 dispatch(addMessage(e.message));
+                // console.log(e);
+            })
+
+            .listen("ThreadMessageEvent", (e) => {
+                console.log(e);
+                if (e.thread) dispatch(addThreadToMessages(e.thread));
+                else dispatch(addThreadMessagesCount(e.masterMessageId));
                 // console.log(e);
             })
             .listen("SettingsEvent", (e) => {
@@ -403,7 +414,7 @@ export default function ChatArea() {
                                                 user={user}
                                                 hasChanged={hasChanged}
                                                 index={index}
-                                                channelConnectionRef={
+                                                messagableConnectionRef={
                                                     channelConnectionRef
                                                 }
                                                 newMessageReactionReceive={
@@ -486,7 +497,13 @@ export default function ChatArea() {
                     </div>
                 </div>
                 <div className="m-6 border border-white/15 pt-4 px-2 rounded-lg">
-                    <TipTapEditor onSubmit={onSubmit} />
+                    {permissions.chat && <TipTapEditor onSubmit={onSubmit} />}
+                    {!permissions.chat && (
+                        <h5 className="mb-4 ml-4">
+                            You're not allowed to post in channel. Contact
+                            Admins or Channel managers for more information!
+                        </h5>
+                    )}
                 </div>
             </div>
             {threadMessage && <Thread />}

@@ -8,6 +8,7 @@ import { useEffect, useState, useRef } from "react";
 import TipTapEditor from "@/Components/TipTapEditor";
 import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
 import { compareDateTime, differenceInSeconds } from "@/helpers/dateTimeHelper";
+import { getMentionsFromContent } from "@/helpers/tiptapHelper";
 export default function Thread() {
     const dispatch = useDispatch();
     const { channel } = usePage().props;
@@ -19,20 +20,27 @@ export default function Thread() {
     const user = channelUsers.filter((mem) => mem.id === message.user_id)[0];
     const [loadingMessages, setLoadingMessages] = useState(false);
     const [infiniteScroll, setInfiniteScroll] = useState(false);
+    const [newMessageReactionReceive, setNewMessageReactionReceive] =
+        useState(null);
+    const threadConnectionRef = useRef(null);
     let preValue = null;
     let hasChanged = false;
     useEffect(() => {
-        Echo.join(`threads.${message.id}`)
+        threadConnectionRef.current = Echo.join(`threads.${message.id}`);
+        threadConnectionRef.current
             .here((users) => {})
             .joining((user) => {
-                console.log("join thread", user);
+                // console.log("join thread", user);
             })
             .leaving((user) => {
-                console.log("leaving thread", user);
+                // console.log("leaving thread", user);
             })
             .listen("ThreadMessageEvent", (e) => {
                 setMessages((pre) => [...pre, e.message]);
                 console.log(e);
+            })
+            .listenForWhisper("messageReaction", (e) => {
+                setNewMessageReactionReceive(e);
             })
             .error((error) => {
                 console.error(error);
@@ -76,8 +84,9 @@ export default function Thread() {
         temp.sort((a, b) => compareDateTime(a.created_at, b.created_at));
         return temp;
     }, [messages]);
-    function onSubmit(content, fileObjects) {
+    function onSubmit(content, fileObjects, JSONContent) {
         if (content == "<p></p>" && fileObjects.length == 0) return;
+
         router.post(
             route("thread_message.store", {
                 channel: channel.id,
@@ -86,6 +95,7 @@ export default function Thread() {
             {
                 content,
                 fileObjects,
+                mentionsList: getMentionsFromContent(JSONContent),
             },
             {
                 preserveState: true,
@@ -97,7 +107,7 @@ export default function Thread() {
         );
     }
     return (
-        <div className="w-[35%] bg-background flex flex-col">
+        <div className="w-[35%] bg-background flex flex-col border-l border-white/15">
             <div className="p-4 z-10">
                 <div className="flex justify-between font-bold text-lg opacity-75 items-center">
                     <div className="">Thread</div>
@@ -120,7 +130,7 @@ export default function Thread() {
                 />
             </div>
 
-            <div className="flex items-center gap-x-4 my-4">
+            <div className="flex items-center gap-x-4 pl-4 my-4">
                 <h3 className="text-sm text-white/75">
                     {messages.length}{" "}
                     {messages.length > 1 ? "replies" : "reply"}
@@ -139,7 +149,7 @@ export default function Thread() {
                 className="overflow-y-auto max-w-full flex-1 scrollbar"
                 ref={messageContainerRef}
             >
-                <ul className="">
+                <ul className="mt-8">
                     {sortedMessages.map((message, index) => {
                         const user = channelUsers.filter(
                             (mem) => mem.id === message.user_id
@@ -165,16 +175,20 @@ export default function Thread() {
                                 hasChanged={hasChanged}
                                 index={index}
                                 threadStyle={true}
+                                messagableConnectionRef={threadConnectionRef}
+                                newMessageReactionReceive={
+                                    newMessageReactionReceive
+                                }
+                                resetNewMessageReactionReceive={() =>
+                                    setNewMessageReactionReceive(null)
+                                }
                             />
                         );
                     })}
                 </ul>
             </div>
             <div className="m-6 border border-white/15 pt-4 px-2 rounded-lg">
-                <TipTapEditor
-                    onSubmit={(a, b) => onSubmit(a, b)}
-                    message={message}
-                />
+                <TipTapEditor onSubmit={onSubmit} message={message} />
             </div>
         </div>
     );

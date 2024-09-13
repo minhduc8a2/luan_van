@@ -3,6 +3,7 @@
 namespace App\Broadcasting;
 
 use App\Models\User;
+use App\Models\Thread;
 use App\Models\Channel;
 use App\Models\Message;
 
@@ -23,7 +24,7 @@ class ThreadChannel
     {
         try {
             $channel = $message->messagable;
-            if ($user->isChannelMember($channel))
+            if ($user->can('view', [Thread::class, $channel]))
                 return ['id' => $user->id, 'name' => $user->name, 'avatar_url' => $user->avatar_url];
         } catch (\Throwable $th) {
         }

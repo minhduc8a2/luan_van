@@ -9,7 +9,7 @@ import AddPeople from "./AddPeople";
 import Member from "./Member";
 export default function Members() {
     const [errors, setErrors] = useState(null);
-    const { managers, channel, channelUsers } = usePage().props;
+    const { managers, channel, channelUsers, permissions } = usePage().props;
     const [searchValue, setSearchValue] = useState("");
     function removeChannelManager(user) {
         router.post(
@@ -19,7 +19,7 @@ export default function Members() {
             },
             {
                 preserveState: true,
-                only: ["managers","permissions"],
+                only: ["managers", "permissions"],
                 onError: (errors) => {
                     setErrors(errors);
                 },
@@ -55,7 +55,7 @@ export default function Members() {
             },
             {
                 preserveState: true,
-                only: ["channelUsers","permissions", "messages"],
+                only: ["channelUsers", "permissions", "messages"],
                 onError: (errors) => {
                     setErrors(errors);
                 },
@@ -65,7 +65,7 @@ export default function Members() {
             }
         );
     }
-   
+
     return (
         <div className="">
             <div className="my-4 mx-6">
@@ -80,20 +80,22 @@ export default function Members() {
             <div className="mx-6">
                 <ErrorsList errors={errors} />
             </div>
-            <OverlayPanel
-                buttonNode={
-                    <button className="flex gap-x-4 p-4 px-6 items-center mt-6 hover:bg-white/15 w-full">
-                        <div className=" rounded p-2 bg-link/15">
-                            <IoPersonAddOutline className="text-link text-xl" />
-                        </div>
-                        Add People
-                    </button>
-                }
-            >
-                {({ close }) => (
-                    <AddPeople close={close} setErrors={setErrors}  />
-                )}
-            </OverlayPanel>
+            {permissions.addUsersToChannel && (
+                <OverlayPanel
+                    buttonNode={
+                        <button className="flex gap-x-4 p-4 px-6 items-center mt-6 hover:bg-white/15 w-full">
+                            <div className=" rounded p-2 bg-link/15">
+                                <IoPersonAddOutline className="text-link text-xl" />
+                            </div>
+                            Add People
+                        </button>
+                    }
+                >
+                    {({ close }) => (
+                        <AddPeople close={close} setErrors={setErrors} />
+                    )}
+                </OverlayPanel>
+            )}
 
             <ul className="overflow-hidden h-[30vh]">
                 {channelUsers
@@ -109,7 +111,6 @@ export default function Members() {
                             makeChannelManager={makeChannelManager}
                             removeFromChannel={removeFromChannel}
                             removeChannelManager={removeChannelManager}
-                            
                         />
                     ))}
             </ul>

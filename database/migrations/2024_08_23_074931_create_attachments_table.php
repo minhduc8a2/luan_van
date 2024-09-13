@@ -18,7 +18,8 @@ return new class extends Migration
             $table->string('url', 2083);
             $table->string('path')->nullable();
             $table->string('name');
-            $table-> foreignId('message_id')->constrained()->cascadeOnDelete();
+            $table->unsignedBigInteger('message_id')->nullable();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }

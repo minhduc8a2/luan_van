@@ -10,12 +10,13 @@ export default function OverlayNotification({
     buttonNode,
     submitButtonNode,
     success,
+    className=""
 }) {
     return (
         <OverlayPanel buttonNode={buttonNode} success={success}>
             {({ close }) => (
                 <div className="  rounded-lg bg-background">
-                    <div className="w-[500px]  m-4 ">
+                    <div className={`w-[500px] ${className}  m-4 `}>
                         <h2 className="text-2xl my-4 font-bold text-white/85">
                             {title}
                         </h2>

@@ -40,9 +40,12 @@ class Message extends Model
         return $this->hasMany(Reaction::class);
     }
 
+    public function threadMessages(): HasManyThrough
+    {
+        return $this->hasManyThrough(Thread::class, Message::class);
+    }
     public static function createStringMessageAndBroadcast(Channel $channel, User $user, string $content)
     {
-        
         $content = Helper::sanitizeContent($content);
         $message = Message::create([
             'content' => $content,

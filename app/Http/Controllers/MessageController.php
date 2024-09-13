@@ -11,6 +11,7 @@ use App\Models\Message;
 use App\Models\Workspace;
 use App\Models\Attachment;
 use App\Events\MessageEvent;
+use App\Events\ThreadCreatedEvent;
 use Illuminate\Http\Request;
 use App\Events\ThreadMessageEvent;
 use Illuminate\Support\Facades\DB;
@@ -39,11 +40,11 @@ class MessageController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    function createAttachments($fileObjects)
+    function createAttachments($fileObjects, $user)
     {
         $attachments = [];
         foreach ($fileObjects as $fileObject) {
-            array_push($attachments, new Attachment(['name' => $fileObject['name'], 'path' => $fileObject['path'], 'type' => $fileObject['type'], 'url' => Storage::url($fileObject['path'])]));
+            array_push($attachments, ['name' => $fileObject['name'], 'path' => $fileObject['path'], 'type' => $fileObject['type'], 'url' => Storage::url($fileObject['path']), 'user_id' => $user->id]);
         }
         return $attachments;
     }
@@ -70,8 +71,9 @@ class MessageController extends Controller
                 $fileObject['path'] = $newPath;
                 array_push($fileObjects, $fileObject);
             }
-
-            $message->attachments()->saveMany($this->createAttachments($fileObjects));
+            $attachments = $this->createAttachments($fileObjects, $request->user());
+          
+            $message->attachments()->createMany($attachments);
 
 
             if (isset($message)) {
@@ -102,7 +104,7 @@ class MessageController extends Controller
 
     public function storeThreadMessage(Request $request, Channel $channel, Message $message)
     {
-        if ($request->user()->cannot('create', [Message::class, $channel])) return abort(403);
+        if ($request->user()->cannot('create', [Message::class, $channel, 'thread'])) return abort(403);
         try {
             $validated = $request->validate(['content' => 'string', 'fileObjects' => 'array']);
             $content = $validated['content'];
@@ -110,8 +112,10 @@ class MessageController extends Controller
             $content = Helper::sanitizeContent($content);
             //check thread is created already
             $thread = $message->thread;
+            $isNewThread = false;
             if (!$thread) {
                 $thread = $message->thread()->create([]);
+                $isNewThread = true;
             }
             $newMessage = Message::create([
                 'content' =>  $content,
@@ -127,7 +131,10 @@ class MessageController extends Controller
                 array_push($fileObjects, $fileObject);
             }
 
-            $newMessage->attachments()->saveMany($this->createAttachments($fileObjects));
+            $attachments = $this->createAttachments($fileObjects, $request->user());
+            
+           $newMessage->attachments()->createMany($attachments);
+
             if (isset($newMessage)) {
 
                 //handle mentions list
@@ -139,13 +146,14 @@ class MessageController extends Controller
                 }
                 //notify others about new message
 
-                broadcast(new ThreadMessageEvent($message, $newMessage->load(['attachments', 'reactions'])))->toOthers();
+                broadcast(new ThreadMessageEvent($message, $newMessage->load(['attachments', 'reactions']), $isNewThread ? $thread : null));
             }
             DB::commit();
             return back();
         } catch (\Throwable $th) {
             DB::rollBack();
-            return back()->withErrors(['server'=>'Something went wrong! Please try later.']);
+            dd($th);
+            return back()->withErrors(['server' => 'Something went wrong! Please try later.']);
         }
     }
 

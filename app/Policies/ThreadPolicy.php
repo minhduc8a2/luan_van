@@ -4,6 +4,8 @@ namespace App\Policies;
 
 use App\Models\User;
 use App\Models\Channel;
+use App\Helpers\ChannelTypes;
+use App\Helpers\PermissionTypes;
 use Illuminate\Support\Facades\DB;
 
 class ThreadPolicy
@@ -13,10 +15,14 @@ class ThreadPolicy
      */
     public function view(User $user, Channel $channel): bool
     {
-        $exists = DB::table('channel_user')
-            ->where('user_id', '=', $user->id)
-            ->where('channel_id', '=', $channel->id)
-            ->exists();
-        return $exists;
+        if ($channel->type == ChannelTypes::PUBLIC->name) {
+            if (
+                $user->workspacePermissionCheck($channel->workspace, PermissionTypes::WORKSPACE_ALL->name)
+                || $user->channelPermissionCheck($channel->workspace->mainChannel(), PermissionTypes::CHANNEL_VIEW->name)
+            )
+                return true;
+        }
+        return $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name)
+            || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_VIEW->name);
     }
 }

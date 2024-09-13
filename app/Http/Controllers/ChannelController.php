@@ -475,8 +475,29 @@ class ChannelController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Channel $channel)
+    public function destroy(Request $request, Channel $channel)
     {
-        //
+        if ($request->user()->cannot('delete', $channel)) abort(403);
+        try {
+            DB::beginTransaction();
+
+            $messages = $channel->messages()->with('thread')->get();
+            $messages->each(function ($message) {
+                if ($message->thread) { 
+                    $message->thread->messages()->delete(); 
+                    // $message->thread->delete();  cascadeOnDelete
+                }
+            });
+            $channel->messages()->delete();
+            $channel->permissions()->delete();
+            $channel->delete();
+            DB::commit();
+
+            return back();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+
+            return back()->withErrors(['server' => "Something went wrong! Please try later."]);
+        }
     }
 }

@@ -30,7 +30,7 @@ export default function Message({
     hasChanged,
     index,
     threadStyle = false,
-    channelConnectionRef,
+    messagableConnectionRef,
     newMessageReactionReceive,
     resetNewMessageReactionReceive,
 }) {
@@ -57,7 +57,7 @@ export default function Message({
     useEffect(() => {
         setReactions([...message.reactions]);
     }, [message]);
-   
+
     useEffect(() => {
         if (
             newMessageReactionReceive &&
@@ -107,7 +107,7 @@ export default function Message({
                         ...pre,
                         { emoji_id: emojiId, user_id: auth.user.id },
                     ]);
-                    channelConnectionRef.current.whisper("messageReaction", {
+                    messagableConnectionRef.current.whisper("messageReaction", {
                         method: "STORE",
                         emoji_id: emojiId,
                         user_id: auth.user.id,
@@ -139,7 +139,7 @@ export default function Message({
                                 )
                         )
                     );
-                    channelConnectionRef.current.whisper("messageReaction", {
+                    messagableConnectionRef.current.whisper("messageReaction", {
                         method: "DELETE",
                         emoji_id: emojiId,
                         user_id: auth.user.id,
@@ -176,16 +176,23 @@ export default function Message({
             <div className="mx-3 ">
                 {hasChanged || index == 0 ? (
                     <div className="flex gap-x-2 items-baseline">
-                        <div className={`text-base font-bold leading-tight ${user.notMember?"line-through":""}`}>
+                        <div
+                            className={`text-base font-bold leading-tight ${
+                                user.notMember ? "line-through" : ""
+                            }`}
+                        >
                             {user.name}
                         </div>
-                        {user.notMember&&<span className="text-xs leading-tight text-white/75 font-extralight">(Removed User)</span>}
+                        {user.notMember && (
+                            <span className="text-xs leading-tight text-white/75 font-extralight">
+                                (Removed User)
+                            </span>
+                        )}
                         <span className="text-xs leading-tight text-white/75 font-extralight">
                             {threadStyle
                                 ? UTCToDateTime(message.created_at)
                                 : UTCToTime(message.created_at)}
                         </span>
-                       
                     </div>
                 ) : (
                     ""
