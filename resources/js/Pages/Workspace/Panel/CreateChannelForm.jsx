@@ -5,8 +5,9 @@ import Form1 from "@/Components/Form1";
 import TextArea from "@/Components/Input/TextArea";
 import SelectInput from "@/Components/Input/SelectInput";
 import { LuPlus } from "react-icons/lu";
+
 export function CreateChannelForm() {
-    const { workspace } = usePage().props;
+    const { workspace, permissions } = usePage().props;
     const channelTypes = [
         { type: "PUBLIC", label: "Public - Anyone in " + workspace.name },
         {
@@ -36,6 +37,7 @@ export function CreateChannelForm() {
     }
     return (
         <Form1
+            disabled={!permissions.createChannel}
             className="p-4"
             errors={errors}
             success={success}
@@ -58,18 +60,32 @@ export function CreateChannelForm() {
             }
             title="Add channel"
         >
-            <TextArea
-                error={errors.name}
-                placeholder=""
-                label="Channel name:"
-                value={data.name}
-                onChange={(e) => setData("name", e.target.value)}
-            />
-            <SelectInput
-                label="Channel type"
-                list={channelTypes}
-                onChange={(item) => setData("type", item.type)}
-            />
+            {!permissions.createChannel && (
+                <h3 className="text-lg">
+                    ⚠️You are not allowed to create channels, contact admins for
+                    more information.
+                </h3>
+            )}
+            <div
+                className={`mt-4 ${
+                    !permissions.createChannel ? "opacity-50" : ""
+                }`}
+            >
+                <TextArea
+                    
+                    placeholder=""
+                    label="Channel name:"
+                    value={data.name}
+                    onChange={(e) => setData("name", e.target.value)}
+                    disabled={!permissions.createChannel}
+                />
+                <SelectInput
+                    label="Channel type"
+                    list={channelTypes}
+                    onChange={(item) => setData("type", item.type)}
+                    disabled={!permissions.createChannel}
+                />
+            </div>
         </Form1>
     );
 }

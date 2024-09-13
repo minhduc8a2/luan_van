@@ -7,7 +7,7 @@ import TextInput from "@/Components/Input/TextInput";
 import { SettingsButton } from "./SettingsButton";
 import { FaLock } from "react-icons/fa";
 export default function ChangeChannelNameForm({ channelName }) {
-    const { channel } = usePage().props;
+    const { channel, permissions } = usePage().props;
     const { data, setData, post, processing, errors, reset } = useForm({
         name: channelName,
     });
@@ -31,6 +31,7 @@ export default function ChangeChannelNameForm({ channelName }) {
     }
     return (
         <Form1
+            disabled={!permissions.updateName || channel.type=="DIRECT"}
             className="p-4"
             errors={errors}
             success={success}
@@ -40,6 +41,7 @@ export default function ChangeChannelNameForm({ channelName }) {
             buttonName="Save changes"
             activateButtonNode={
                 <SettingsButton
+                    disabled={!permissions.updateName || channel.type=="DIRECT"}
                     onClick={() => setSuccess(false)}
                     title="Channel name"
                     description={
@@ -56,7 +58,14 @@ export default function ChangeChannelNameForm({ channelName }) {
                 />
             }
         >
+            {!permissions.updateName && (
+                <h3 className="text-lg my-4">
+                    ⚠️You are not allowed to rename channel, contact admins or
+                    channel managers for more information.
+                </h3>
+            )}
             <TextInput
+                disabled={!permissions.updateName}
                 row={1}
                 value={data.name}
                 onChange={(e) => setData("name", e.target.value)}

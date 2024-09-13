@@ -11,7 +11,7 @@ import AddManagers from "./AddManagers";
 import ErrorsList from "@/Components/ErrorsList";
 import { useSelector } from "react-redux";
 export default function Managers() {
-    const { managers, channel } = usePage().props;
+    const { managers, channel, permissions } = usePage().props;
     const onlineStatusMap = useSelector((state) => state.onlineStatus);
 
     const [searchValue, setSearchValue] = useState("");
@@ -24,7 +24,7 @@ export default function Managers() {
             },
             {
                 preserveState: true,
-                only: ["managers","permissions"],
+                only: ["managers", "permissions"],
                 onError: (errors) => {
                     setErrors(errors);
                 },
@@ -38,6 +38,7 @@ export default function Managers() {
         <OverlayPanel
             buttonNode={
                 <SettingsButton
+                    disabled={!permissions.addManagers}
                     className={`border-t-0 ${
                         channel.is_main_channel
                             ? "rounded-bl-lg rounded-br-lg"
@@ -111,20 +112,25 @@ export default function Managers() {
                     <div className="mx-6">
                         <ErrorsList errors={errors} />
                     </div>
-                    <OverlayPanel
-                        buttonNode={
-                            <button className="flex gap-x-4 p-4 px-6 items-center mt-6 hover:bg-white/15 w-full">
-                                <div className=" rounded p-2 bg-link/15">
-                                    <IoPersonAddOutline className="text-link text-xl" />
-                                </div>
-                                Add Channel Managers
-                            </button>
-                        }
-                    >
-                        {({ close }) => (
-                            <AddManagers close={close} setErrors={setErrors} />
-                        )}
-                    </OverlayPanel>
+                    {permissions.addManagers && (
+                        <OverlayPanel
+                            buttonNode={
+                                <button className="flex gap-x-4 p-4 px-6 items-center mt-6 hover:bg-white/15 w-full">
+                                    <div className=" rounded p-2 bg-link/15">
+                                        <IoPersonAddOutline className="text-link text-xl" />
+                                    </div>
+                                    Add Channel Managers
+                                </button>
+                            }
+                        >
+                            {({ close }) => (
+                                <AddManagers
+                                    close={close}
+                                    setErrors={setErrors}
+                                />
+                            )}
+                        </OverlayPanel>
+                    )}
 
                     <ul className="overflow-hidden h-[30vh]">
                         {managers
@@ -143,12 +149,12 @@ export default function Managers() {
                                         user={user}
                                         isOnline={onlineStatusMap[user.id]}
                                     />
-                                    <button
+                                    {permissions.addManagers && <button
                                         className="text-link text-sm hover:underline hidden group-hover:block"
                                         onClick={() => removeManager(user)}
                                     >
                                         Remove
-                                    </button>
+                                    </button>}
                                 </div>
                             ))}
                     </ul>

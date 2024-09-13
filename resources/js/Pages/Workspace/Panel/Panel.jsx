@@ -1,17 +1,16 @@
-import React, { useContext, useMemo } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { HiOutlinePencilAlt } from "react-icons/hi";
 import { BiMessageRoundedDetail } from "react-icons/bi";
 import { FaCaretDown } from "react-icons/fa";
 import { LuLock } from "react-icons/lu";
-import { LuPlus } from "react-icons/lu";
-import { Link, router, usePage } from "@inertiajs/react";
+
+import { router, usePage } from "@inertiajs/react";
 import { InvitationForm } from "./InvitationForm";
 import { DirectChannel } from "./DirectChannel";
 import { useSelector } from "react-redux";
 import Activity from "./Activity/Activity";
 import { CreateChannelForm } from "./createChannelForm";
-import { compareDateTime } from "@/helpers/dateTimeHelper";
+
 
 export default function Panel({}) {
     const {
@@ -22,6 +21,7 @@ export default function Panel({}) {
         users,
         directChannels = [],
         selfChannel,
+        permissions
     } = usePage().props;
     const { type } = useSelector((state) => state.panel);
     const newMessageCountsMap = useSelector(

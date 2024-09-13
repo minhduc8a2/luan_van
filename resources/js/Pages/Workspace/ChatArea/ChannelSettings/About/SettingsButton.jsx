@@ -1,23 +1,31 @@
 export function SettingsButton({
-    onClick,
+    onClick=()=>{},
     title,
     description,
     hasEdit = true,
     className = "",
+    disabled = false,
 }) {
     return (
         <div
             className={
-                "flex hover:bg-white/10 transition-all justify-between items-start p-4 border border-white/15  " +
+                `${
+                    disabled ? "cursor-default hover:bg-transparent" : ""
+                } flex hover:bg-white/10 transition-all justify-between items-start p-4 border border-white/15  ` +
                 className
             }
-            onClick={onClick}
+            onClick={() => {
+                if (disabled) return;
+                onClick();
+            }}
         >
             <div className="">
                 <div className="font-bold text-sm ">{title}</div>
-                <div className="">{description}</div>
+                <div className="mt-1">{description}</div>
             </div>
-            <div className="text-sm text-link hover:underline">{hasEdit ? "Edit" : ""}</div>
+            <div className="text-sm text-link hover:underline">
+                {hasEdit && !disabled ? "Edit" : ""}
+            </div>
         </div>
     );
 }

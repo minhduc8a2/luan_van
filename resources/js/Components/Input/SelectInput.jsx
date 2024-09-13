@@ -5,6 +5,7 @@ export default function SelectInput({
     label,
     list,
     className = "",
+    disabled = false,
 }) {
     const [isOpen, setIsOpen] = useState(false);
     const [selected, setSelected] = useState(list[0]);
@@ -37,7 +38,10 @@ export default function SelectInput({
             <label className="block mb-2 ">{label}</label>
             <div
                 className={`border border-white/25 bg-transparent block w-full p-2.5 rounded-lg text-sm text-white/85  ${className}`}
-                onClick={() => setIsOpen(!isOpen)}
+                onClick={() => {
+                    if (disabled) return;
+                    setIsOpen(!isOpen);
+                }}
             >
                 {selected.label}
             </div>

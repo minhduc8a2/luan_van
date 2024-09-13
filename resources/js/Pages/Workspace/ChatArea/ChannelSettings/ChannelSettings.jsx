@@ -49,29 +49,38 @@ export default function ChannelSettings({ channelName }) {
                     >
                         About
                     </button>
-                    <button
-                        onClick={() => setTabIndex(1)}
-                        className={`${
-                            tabIndex == 1 ? " " : "border-b-transparent"
-                        } border-b-2`}
-                    >
-                        Members
-                    </button>
-                    <button
-                        onClick={() => setTabIndex(2)}
-                        className={`${
-                            tabIndex == 2 ? " " : "border-b-transparent"
-                        } border-b-2`}
-                    >
-                        Settings
-                    </button>
+                    {channel.type != "DIRECT" && channel.type != "SELF" && (
+                        <button
+                            onClick={() => setTabIndex(1)}
+                            className={`${
+                                tabIndex == 1 ? " " : "border-b-transparent"
+                            } border-b-2`}
+                        >
+                            Members
+                        </button>
+                    )}
+                    {channel.type != "DIRECT" && channel.type != "SELF" && (
+                        <button
+                            onClick={() => setTabIndex(2)}
+                            className={`${
+                                tabIndex == 2 ? " " : "border-b-transparent"
+                            } border-b-2`}
+                        >
+                            Settings
+                        </button>
+                    )}
                 </div>
                 <div className="pt-4  flex flex-col pb-8 h-[65vh] overflow-y-auto scrollbar">
                     {tabIndex == 0 && (
-                       <div className="px-6"><About channel={channel} channelName={channelName} /></div> 
+                        <div className="px-6">
+                            <About
+                                channel={channel}
+                                channelName={channelName}
+                            />
+                        </div>
                     )}
 
-                    {tabIndex == 1 && <Members />}
+                    {tabIndex == 1 && channel.type != "DIRECT"&&channel.type != "SELF" && <Members />}
                     {tabIndex == 2 && (
                         <Settings
                             channel={channel}

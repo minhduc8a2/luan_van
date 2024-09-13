@@ -7,7 +7,7 @@ import { router, usePage } from "@inertiajs/react";
 import { useState, useEffect } from "react";
 import { SettingsButton } from "./SettingsButton";
 export function EditDescriptionForm() {
-    const { channel } = usePage().props;
+    const { channel, permissions } = usePage().props;
     const [success, setSuccess] = useState(false);
     const { data, setData, post, processing, errors } = useForm({
         description: channel.description,
@@ -32,6 +32,7 @@ export function EditDescriptionForm() {
     return (
         <div>
             <Form1
+                disabled={!permissions.updateDescription}
                 className="p-4"
                 errors={errors}
                 success={success}
@@ -48,8 +49,14 @@ export function EditDescriptionForm() {
                 }
                 title={`${channel.description ? "Edit" : "Add"} Description`}
             >
-                {" "}
+                {!permissions.updateDescription && (
+                    <h3 className="text-lg my-4">
+                        ⚠️You are not allowed to edit channel description, contact admins or channel managers
+                        for more information.
+                    </h3>
+                )}
                 <TextArea
+                    disabled={!permissions.updateDescription}
                     rows="2"
                     value={data.description}
                     onChange={(e) => setData("description", e.target.value)}

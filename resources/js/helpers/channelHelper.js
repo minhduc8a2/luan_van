@@ -1,17 +1,22 @@
-export function getChannelName(channel,currentUser, workspaceUsers) {
+export function getChannelName(channel, currentUser) {
     let isDirectChannel = channel.type == "DIRECT";
 
     if (isDirectChannel) {
         try {
-            const userId = channel.name
-                .split("_")
-                .find((id) => id != currentUser.id);
-
-            const user = workspaceUsers.find((user) => user.id == userId);
+            const user = channel.users.find(
+                (user) => user.id != currentUser.id
+            );
             return user.name;
         } catch (error) {
             console.error(error);
         }
     }
     return channel.name;
+}
+
+export function getDirectChannelUser(channel, currentUser) {
+    const user = channel.users.find(
+        (user) => user.id != currentUser.id
+    );
+    return user;
 }

@@ -6,6 +6,7 @@ export default function OverlayPanel({
     buttonNode,
     className="",
     success = false,
+    disabled = false
 }) {
     const [openOverlay, setOpenOverlay] = useState(false);
     useEffect(() => {
@@ -18,8 +19,9 @@ export default function OverlayPanel({
         <div className="">
             <div
                 onClick={() => {
+                    if(disabled) return;
                     setOpenOverlay(true);
-                    console.log("open");
+                   
                 }}
                 className="w-full cursor-pointer"
             >

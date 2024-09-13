@@ -2,7 +2,7 @@ import React from "react";
 import OverlayPanel from "@/Components/Overlay/OverlayPanel";
 import Button from "@/Components/Button";
 export default function Form1({
-    errors={},
+    errors = {},
     success = false,
     children,
     buttonName,
@@ -11,13 +11,16 @@ export default function Form1({
     sameButtonRow,
     submit,
     submitting = false,
-    className=""
+    className = "",
+    disabled = false,
 }) {
     return (
-        <OverlayPanel buttonNode={activateButtonNode} success={success}>
+        <OverlayPanel buttonNode={activateButtonNode} success={success} disabled={disabled}>
             {({ close }) => (
                 <form action="" onSubmit={submit}>
-                    <div className={"w-[500px] max-w-screen-sm m-4 "+className}>
+                    <div
+                        className={"w-[500px] max-w-screen-sm m-4 " + className}
+                    >
                         <h2 className="text-2xl my-4 font-bold text-white/85">
                             {title}
                         </h2>
@@ -52,9 +55,14 @@ export default function Form1({
                                         Close
                                     </Button>
                                     <Button
-                                        className="text-white/65"
+                                        className={`text-white/65 ${
+                                            disabled ? "opacity-50" : ""
+                                        }`}
                                         loading={submitting}
-                                        onClick={submit}
+                                        onClick={(e) => {
+                                            if (disabled) return;
+                                            submit(e);
+                                        }}
                                     >
                                         {buttonName}
                                     </Button>
