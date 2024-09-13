@@ -15,7 +15,7 @@ export default function DeleteChannel() {
     function submit(e) {
         if (!confirm) return;
         setProcessing(true);
-        router.post(
+        router.delete(
             route("channel.delete", channel.id),
             {},
             {
@@ -23,7 +23,9 @@ export default function DeleteChannel() {
                 preserveScroll: true,
                 onError: (errors) => setErrors(errors),
                 onSuccess: () => {
+                   
                     setSuccess(true);
+                    
                 },
                 onFinish: () => {
                     setProcessing(false);

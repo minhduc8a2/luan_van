@@ -37,6 +37,7 @@ import {
 import { setMessageId } from "@/Store/mentionSlice";
 import ChannelSettings from "./ChannelSettings/ChannelSettings";
 import { resetMessageCountForChannel } from "@/Store/newMessageCountsMapSlice";
+import { setThreadMessage } from "@/Store/threadSlice";
 
 export default function ChatArea() {
     const {
@@ -98,6 +99,13 @@ export default function ChatArea() {
     let preValue = null;
     let hasChanged = false;
 
+    //close thread panel
+    useEffect(() => {
+        return () => {
+            dispatch(setThreadMessage(null));
+        };
+    }, [channel.id]);
+    //
     useEffect(() => {
         dispatch(setMessages([...initMessages?.data]));
         setNextPageUrl(initMessages?.next_page_url);

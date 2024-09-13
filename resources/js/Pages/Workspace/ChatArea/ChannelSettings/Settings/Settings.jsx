@@ -24,7 +24,7 @@ export default function Settings({ channel, channelName, workspace }) {
                 </div>
             </Button>
             {permissions.deleteChannel && (
-                <DeleteChannel />
+                <DeleteChannel  />
             )}
         </div>
     );

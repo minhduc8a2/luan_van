@@ -480,7 +480,7 @@ class ChannelController extends Controller
         if ($request->user()->cannot('delete', $channel)) abort(403);
         try {
             DB::beginTransaction();
-
+            $workspace = $channel->workspace;
             $messages = $channel->messages()->with('thread')->get();
             $messages->each(function ($message) {
                 if ($message->thread) { 
@@ -492,8 +492,7 @@ class ChannelController extends Controller
             $channel->permissions()->delete();
             $channel->delete();
             DB::commit();
-
-            return back();
+            return redirect(route('workspace.show',$workspace->id));
         } catch (\Throwable $th) {
             DB::rollBack();
 
