@@ -73,7 +73,7 @@ class ChannelPolicy
     }
     public function changeType(User $user, Channel $channel): bool
     {
-        if($channel->is_main_channel) return false;
+        if ($channel->is_main_channel) return false;
         if ($channel->type == ChannelTypes::PUBLIC->name) {
             if ($user->workspacePermissionCheck($channel->workspace, PermissionTypes::WORKSPACE_ALL->name))
                 return true;
@@ -137,6 +137,18 @@ class ChannelPolicy
         }
         return $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name)
             || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_INVITATION->name);
+    }
+
+    public function updatePermissions(User $user, Channel $channel): bool
+    {
+        if ($channel->type == ChannelTypes::PUBLIC->name) {
+            if ($user->workspacePermissionCheck($channel->workspace, PermissionTypes::WORKSPACE_ALL->name))
+                return true;
+        } else {
+            if ($user->workspacePermissionCheck($channel->workspace, PermissionTypes::WORKSPACE_ALL->name) && $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_VIEW->name))
+                return true;
+        }
+        return $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name);
     }
     /**
      * Determine whether the user can delete the model.

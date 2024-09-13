@@ -117,3 +117,19 @@
 .tiptap .mention {
     @apply bg-link/15 text-link p-1 rounded;
 }
+
+
+*{
+    @apply text-white/75;
+}
+
+input[type="radio"]{
+    @apply bg-white/15 h-[0.85rem] w-[0.85rem];
+}
+
+input[type="checkbox"]{
+    @apply bg-white/15 h-[0.85rem] w-[0.85rem] rounded;
+}
+hr{
+    @apply border-white/15; 
+}

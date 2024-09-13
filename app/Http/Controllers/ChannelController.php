@@ -472,6 +472,45 @@ class ChannelController extends Controller
             return back()->withErrors(['server' => "Something went wrong! Please try later."]);
         }
     }
+
+    public function updatePermissions(Request $request, Channel $channel)
+    {
+
+
+        if ($request->user()->cannot('updatePermissions', $channel)) abort(403);
+        try {
+            DB::beginTransaction();
+
+            $validated = $request->validate([
+                'channelPostPermission' => 'required|string',
+                'channelAddMemberPermission' => 'required|string',
+                'allowHuddle' => 'required|boolean',
+                'allowThread' => 'required|boolean',
+            ]);
+
+            //who can post
+            $whoCanPost = $validated['channelPostPermission'];
+            switch ($whoCanPost) {
+                case 'everyone':
+                    break;
+                case 'everyone_except_guests':
+                    $channel->permissions()->where('role_id',Role::getRoleIdByName(BaseRoles::GUEST->name))->where('permission_type',PermissionTypes::CHANNEL_CHAT)->delete();
+                    break;
+
+                default:
+                    # code...
+                    break;
+            }
+
+            DB::commit();
+
+            return back();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+
+            return back()->withErrors(['server' => "Something went wrong! Please try later."]);
+        }
+    }
     /**
      * Remove the specified resource from storage.
      */
@@ -483,8 +522,8 @@ class ChannelController extends Controller
             $workspace = $channel->workspace;
             $messages = $channel->messages()->with('thread')->get();
             $messages->each(function ($message) {
-                if ($message->thread) { 
-                    $message->thread->messages()->delete(); 
+                if ($message->thread) {
+                    $message->thread->messages()->delete();
                     // $message->thread->delete();  cascadeOnDelete
                 }
             });
@@ -492,7 +531,7 @@ class ChannelController extends Controller
             $channel->permissions()->delete();
             $channel->delete();
             DB::commit();
-            return redirect(route('workspace.show',$workspace->id));
+            return redirect(route('workspace.show', $workspace->id));
         } catch (\Throwable $th) {
             DB::rollBack();
 

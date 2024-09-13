@@ -31,12 +31,13 @@ export default function ChangeToPrivateConfirm({ channelName }) {
     return (
         <OverlayNotification
             success={success}
+            className="p-3"
             title={`Change to a ${
                 channel.type == "PUBLIC" ? "private" : "public"
             } channel?`}
             buttonNode={
                 <Button
-                    className=" bg-transparent w-full rounded-tl-lg rounded-tr-lg rounded-bl-none rounded-br-none border  border-white/15 py-4"
+                    className=" bg-transparent w-full rounded-none    py-4"
                     onClick={() => setSuccess(false)}
                 >
                     <div className="flex items-center gap-x-2">
@@ -53,7 +54,7 @@ export default function ChangeToPrivateConfirm({ channelName }) {
             }
             submitButtonNode={
                 <Button className="!bg-danger relative" onClick={onSubmit}>
-                    {processing ? <OverlayLoadingSpinner /> : ""}\
+                    {processing ? <OverlayLoadingSpinner /> : ""}
                     <span className={processing ? "invisible" : ""}>
                         Change to{" "}
                         {channel.type == "PUBLIC" ? "Private" : "Public"}
