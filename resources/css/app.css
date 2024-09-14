@@ -119,17 +119,17 @@
 }
 
 
-*{
+body {
     @apply text-white/75;
 }
 
-input[type="radio"]{
+input[type="radio"] {
     @apply bg-white/15 h-[0.85rem] w-[0.85rem];
 }
 
-input[type="checkbox"]{
+input[type="checkbox"] {
     @apply bg-white/15 h-[0.85rem] w-[0.85rem] rounded;
 }
-hr{
-    @apply border-white/15; 
+hr {
+    @apply border-white/15;
 }

@@ -37,7 +37,7 @@ export default function ChangeToPrivateConfirm({ channelName }) {
             } channel?`}
             buttonNode={
                 <Button
-                    className=" bg-transparent w-full rounded-none    py-4"
+                    className=" bg-transparent w-full !rounded-none    py-4"
                     onClick={() => setSuccess(false)}
                 >
                     <div className="flex items-center gap-x-2">

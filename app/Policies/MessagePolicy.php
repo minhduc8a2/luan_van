@@ -24,25 +24,18 @@ class MessagePolicy
      */
     public function view(User $user, Channel $channel): bool
     {
-        $exists = DB::table('channel_user')
-            ->where('user_id', '=', $user->id)
-            ->where('channel_id', '=', $channel->id)
-            ->exists();
-        return $exists;
+       
     }
 
     /**
      * Determine whether the user can create models.
      */
-    public function create(User $user, Channel $channel, $type = 'channel'): bool
+    public function create(User $user, Channel $channel): bool
     {
-        if ($type == 'channel')
-            return $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name)
-                || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_CHAT->name);
-        if ($type == 'thread') {
-            return $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name)
-                || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_THREAD->name);
-        }
+        if($channel->is_archived) return false;
+
+        return $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name)
+            || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_CHAT->name);
     }
 
     /**

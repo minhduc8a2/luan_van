@@ -38,6 +38,7 @@ import { setMessageId } from "@/Store/mentionSlice";
 import ChannelSettings from "./ChannelSettings/ChannelSettings";
 import { resetMessageCountForChannel } from "@/Store/newMessageCountsMapSlice";
 import { setThreadMessage } from "@/Store/threadSlice";
+import OverlayNotification from "@/Components/Overlay/OverlayNotification";
 
 export default function ChatArea() {
     const {
@@ -193,6 +194,11 @@ export default function ChatArea() {
                             ],
                         });
                         break;
+                    case "updateChannelPermissions":
+                        router.reload({
+                            only: ["permissions", "channelPermissions"],
+                        });
+                        break;
                     default:
                         break;
                 }
@@ -273,7 +279,7 @@ export default function ChatArea() {
     }
 
     const channelName = useMemo(
-        () => getChannelName(channel, auth.user, users),
+        () => getChannelName(channel, channelUsers, auth.user),
         [channel]
     );
     const welcomeMessage = useMemo(() => {
@@ -292,49 +298,82 @@ export default function ChatArea() {
                 <div className="p-4 border-b border-b-white/10 z-10">
                     <div className="flex justify-between font-bold text-lg opacity-75">
                         <ChannelSettings channelName={channelName} />
-                        <div className="flex items-center gap-x-4 ">
-                            <div className="flex items-center p-1 border  border-white/15 rounded-lg px-2">
-                                <ul className="flex">
-                                    {channelUsers.map((user) => (
-                                        <li
-                                            key={user.id}
-                                            className="-ml-2 first:ml-0  "
-                                        >
-                                            <Avatar
-                                                src={user.avatar_url}
-                                                noStatus={true}
-                                                className="w-6 h-6 border-2  border-background"
-                                                roundedClassName="rounded-lg"
-                                            />
-                                        </li>
-                                    ))}
-                                </ul>
+                        <div className="">
+                            {!channel.is_archived && (
+                                <div className="flex items-center gap-x-4 ">
+                                    <div className="flex items-center p-1 border  border-white/15 rounded-lg px-2">
+                                        <ul className="flex">
+                                            {channelUsers.map((user) => (
+                                                <li
+                                                    key={user.id}
+                                                    className="-ml-2 first:ml-0  "
+                                                >
+                                                    <Avatar
+                                                        src={user.avatar_url}
+                                                        noStatus={true}
+                                                        className="w-6 h-6 border-2  border-background"
+                                                        roundedClassName="rounded-lg"
+                                                    />
+                                                </li>
+                                            ))}
+                                        </ul>
 
-                                <div className="text-xs ml-2">
-                                    {channelUsers.length}
-                                </div>
-                            </div>
-                            <div
-                                className={`flex items-center p-1 border border-white/15 rounded-lg px-2 gap-x-3 font-normal  ${
-                                    huddleChannel ? "bg-green-700 " : ""
-                                }`}
-                            >
-                                <button
-                                    className={`flex items-center gap-x-1 `}
-                                    onClick={handleHuddleButtonClicked}
-                                >
-                                    <FiHeadphones className="text-xl" />
-                                    <div className={`text-sm `}>Huddle</div>
-                                </button>
-                                {/* <div className="flex items-center gap-x-1">
+                                        <div className="text-xs ml-2">
+                                            {channelUsers.length}
+                                        </div>
+                                    </div>
+                                    <div
+                                        className={`flex items-center p-1 border border-white/15 rounded-lg px-2 gap-x-3 font-normal  ${
+                                            huddleChannel ? "bg-green-700 " : ""
+                                        }`}
+                                    >
+                                        {permissions.huddle ? (
+                                            <button
+                                                className={`flex items-center gap-x-1 `}
+                                                onClick={
+                                                    handleHuddleButtonClicked
+                                                }
+                                            >
+                                                <FiHeadphones className="text-xl" />
+                                                <div className={`text-sm `}>
+                                                    Huddle
+                                                </div>
+                                            </button>
+                                        ) : (
+                                            <OverlayNotification
+                                                buttonNode={
+                                                    <button
+                                                        className={`flex items-center gap-x-1 `}
+                                                    >
+                                                        <FiHeadphones className="text-xl" />
+                                                        <div
+                                                            className={`text-sm `}
+                                                        >
+                                                            Huddle
+                                                        </div>
+                                                    </button>
+                                                }
+                                                className="p-3"
+                                            >
+                                                <h5 className="mb-4  ">
+                                                    You're not allowed to huddle
+                                                    in channel. Contact Admins
+                                                    or Channel managers for more
+                                                    information!
+                                                </h5>
+                                            </OverlayNotification>
+                                        )}
+                                        {/* <div className="flex items-center gap-x-1">
                               <span className="text-sm opacity-25 ">|</span>
                               <FaAngleDown className="text-xs" />
                           </div> */}
-                            </div>
+                                    </div>
 
-                            <div className="p-1 border border-white/15 rounded-lg ">
-                                <CgFileDocument className="text-xl" />
-                            </div>
+                                    <div className="p-1 border border-white/15 rounded-lg ">
+                                        <CgFileDocument className="text-xl" />
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                     <div className="flex items-center gap-x-2 opacity-75 mt-4">
@@ -507,7 +546,7 @@ export default function ChatArea() {
                 <div className="m-6 border border-white/15 pt-4 px-2 rounded-lg">
                     {permissions.chat && <TipTapEditor onSubmit={onSubmit} />}
                     {!permissions.chat && (
-                        <h5 className="mb-4 ml-4">
+                        <h5 className="mb-4 text-center ml-4">
                             You're not allowed to post in channel. Contact
                             Admins or Channel managers for more information!
                         </h5>

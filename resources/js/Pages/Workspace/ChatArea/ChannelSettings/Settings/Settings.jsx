@@ -14,24 +14,31 @@ export default function Settings({ channel, channelName, workspace }) {
     return (
         <div className="p-6 ">
             <div className="border border-white/15 rounded-lg overflow-hidden">
-                <ChannelPermissions />
-                <hr />
+                {permissions.updatePermissions && <ChannelPermissions />}
+
                 {permissions.changeType && (
-                    <ChangeToPrivateConfirm
-                        channel={channel}
-                        channelName={channelName}
-                        workspace={workspace}
-                    />
+                    <>
+                        {permissions.updatePermissions && <hr />}
+                        <ChangeToPrivateConfirm
+                            channel={channel}
+                            channelName={channelName}
+                            workspace={workspace}
+                        />
+                    </>
                 )}
                 <hr />
-                <Button className="!text-danger !hover:text-danger bg-transparent w-full py-4 !rounded-none">
-                    <div className="flex items-center gap-x-2">
+                <Button className=" !hover:text-danger bg-transparent w-full py-4 !rounded-none">
+                    <div className="flex items-center gap-x-2 text-danger">
                         <FiArchive className="" /> Archive channel for everyone
                     </div>
                 </Button>
-                <hr />
-               
-                {permissions.deleteChannel && <DeleteChannel />}
+
+                {permissions.deleteChannel && (
+                    <>
+                        <hr />
+                        <DeleteChannel />
+                    </>
+                )}
             </div>
         </div>
     );

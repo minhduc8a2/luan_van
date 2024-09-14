@@ -111,9 +111,9 @@ class ChannelController extends Controller
         }
         $user = $request->user();
         $workspace = $channel->workspace;
-        $availableChannels = $workspace->channels()->where("type", "=", ChannelTypes::PUBLIC->name)->get();
+        $availableChannels = fn() => $workspace->channels()->where("type", "=", ChannelTypes::PUBLIC->name)->get();
 
-        $channels =  DB::table('channels')
+        $channels = fn() => DB::table('channels')
             ->join('channel_user', 'channels.id', '=', 'channel_user.channel_id')
             ->leftJoin('messages', function ($join) {
                 $join->on('messages.messagable_id', '=', 'channel_user.channel_id')
@@ -146,8 +146,8 @@ class ChannelController extends Controller
             )
             ->get();
 
-        $directChannels = Channel::with(['users']) // Eager load users
-            ->leftJoin('channel_user', 'channels.id', '=', 'channel_user.channel_id')
+        $directChannels = fn() => Channel:: // Eager load users
+            leftJoin('channel_user', 'channels.id', '=', 'channel_user.channel_id')
             ->leftJoin('messages', function ($join) {
                 $join->on('messages.messagable_id', '=', 'channel_user.channel_id')
                     ->where('messages.messagable_type', '=', 'App\\Models\\Channel');
@@ -177,18 +177,20 @@ class ChannelController extends Controller
                 'channels.is_main_channel'
             )
             ->get();
-        $selfChannel = $workspace->channels()->where("type", "=", "SELF")->where("user_id", "=", $request->user()->id)->first();
+        $selfChannel = fn() => $workspace->channels()->where("type", "=", "SELF")->where("user_id", "=", $request->user()->id)->first();
 
-        $workspaces = $request->user()->workspaces;
-        $users = $workspace->users;
-        $notifications = $user->notifications;
+        $workspaces = fn() => $request->user()->workspaces;
+        $users = fn() => $workspace->users;
+        $notifications = fn() => $user->notifications;
 
-        $permissions = [
+        $permissions = fn() => [
             'view' => $user->can('view', [Channel::class, $channel]),
             'chat' => $user->can('create', [Message::class, $channel]),
+            'thread' => $user->can('create', [Thread::class, $channel]),
             'createChannel' => $user->can('create', [Channel::class, $workspace]),
             'updateDescription' => $user->can('updateDescription', [Channel::class, $channel]),
             'updateName' => $user->can('updateName', [Channel::class, $channel]),
+            'updatePermissions' => $user->can('updatePermissions', [Channel::class, $channel]),
             'changeType' => $user->can('changeType', [Channel::class, $channel]),
             'leave' => $user->can('leave', [Channel::class, $channel]),
             'addManagers' => $user->can('addManagers', [Channel::class, $channel]),
@@ -196,9 +198,18 @@ class ChannelController extends Controller
             'removeUserFromChannel' => $user->can('removeUserFromChannel', [Channel::class, $channel]),
             'addUsersToChannel' => $user->can('addUsersToChannel', [Channel::class, $channel]),
             'deleteChannel' => $user->can('delete', [Channel::class, $channel]),
+            'huddle' => $channel->allowHuddlePermission(),
+
         ];
 
+        $channelPermissions = fn() => [
+            'channelPostPermission' => $channel->chatPermission(),
+            'addChannelMembersPermission' => $channel->addChannelMembersPermission(),
+            'allowHuddle' => $channel->allowHuddlePermission(),
+            'allowThread' => $channel->allowThreadPermission(),
+        ];
         return Inertia::render("Workspace/Index", [
+            'channelPermissions' => $channelPermissions,
             'workspace' => $workspace,
             'permissions' => $permissions,
             'availableChannels' => $availableChannels,
@@ -209,14 +220,14 @@ class ChannelController extends Controller
             'workspaces' => $workspaces,
             "directChannels" => $directChannels,
             'selfChannel' => $selfChannel,
-            'messages' => $channel->messages()->with([
+            'messages' => fn() => $channel->messages()->with([
                 'attachments',
                 'reactions',
                 'thread' => function ($query) {
                     $query->withCount('messages');
                 }
             ])->latest()->simplePaginate($perPage, ['*'], 'page', $pageNumber),
-            'channelUsers' => $channel->users,
+            'channelUsers' => fn() => $channel->users,
             'notifications' => $notifications
         ]);
     }
@@ -483,7 +494,7 @@ class ChannelController extends Controller
 
             $validated = $request->validate([
                 'channelPostPermission' => 'required|string',
-                'channelAddMemberPermission' => 'required|string',
+                'addChannelMembersPermission' => 'required|string',
                 'allowHuddle' => 'required|boolean',
                 'allowThread' => 'required|boolean',
             ]);
@@ -492,22 +503,54 @@ class ChannelController extends Controller
             $whoCanPost = $validated['channelPostPermission'];
             switch ($whoCanPost) {
                 case 'everyone':
+                    $channel->createChannelGuestPermissions(PermissionTypes::CHANNEL_CHAT->name);
+                    $channel->createChannelMemberPermissions(PermissionTypes::CHANNEL_CHAT->name);
                     break;
                 case 'everyone_except_guests':
-                    $channel->permissions()->where('role_id',Role::getRoleIdByName(BaseRoles::GUEST->name))->where('permission_type',PermissionTypes::CHANNEL_CHAT)->delete();
+                    $channel->createChannelMemberPermissions(PermissionTypes::CHANNEL_CHAT->name);
+                    $channel->deleteGuestPermission(PermissionTypes::CHANNEL_CHAT->name);
                     break;
-
-                default:
-                    # code...
+                case 'channel_managers_only':
+                    $channel->deleteGuestPermission(PermissionTypes::CHANNEL_CHAT->name);
+                    $channel->deleteMemberPermission(PermissionTypes::CHANNEL_CHAT->name);
                     break;
             }
+            //who can add members
+            $whoCanAddMembers = $validated['addChannelMembersPermission'];
+            switch ($whoCanAddMembers) {
+                case 'everyone_except_guests':
+                    $channel->createChannelMemberPermissions(PermissionTypes::CHANNEL_INVITATION->name);
+                    break;
+                case 'channel_managers_only':
+                    $channel->deleteMemberPermission(PermissionTypes::CHANNEL_INVITATION->name);
+
+                    break;
+            }
+            //allow huddle
+            $allowHuddle = $validated['allowHuddle'];
+            if ($allowHuddle) {
+                $channel->createChannelGuestPermissions(PermissionTypes::CHANNEL_HUDDLE->name);
+                $channel->createChannelMemberPermissions(PermissionTypes::CHANNEL_HUDDLE->name);
+            } else {
+                $channel->deleteGuestPermission(PermissionTypes::CHANNEL_HUDDLE->name);
+                $channel->deleteMemberPermission(PermissionTypes::CHANNEL_HUDDLE->name);
+            }
+
+            //allow thread
+            $allowThread = $validated['allowThread'];
+            if ($allowThread) {
+                $channel->createChannelGuestPermissions(PermissionTypes::CHANNEL_THREAD->name);
+                $channel->createChannelMemberPermissions(PermissionTypes::CHANNEL_THREAD->name);
+            } else {
+                $channel->deleteGuestPermission(PermissionTypes::CHANNEL_THREAD->name);
+                $channel->deleteMemberPermission(PermissionTypes::CHANNEL_THREAD->name);
+            }
+            broadcast(new SettingsEvent($channel, "updateChannelPermissions"))->toOthers();
 
             DB::commit();
-
             return back();
         } catch (\Throwable $th) {
             DB::rollBack();
-
             return back()->withErrors(['server' => "Something went wrong! Please try later."]);
         }
     }

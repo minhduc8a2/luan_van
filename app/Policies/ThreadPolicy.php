@@ -25,4 +25,11 @@ class ThreadPolicy
         return $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name)
             || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_VIEW->name);
     }
+
+    public function create(User $user, Channel $channel): bool
+    {
+        if($channel->is_archived) return false;
+        return $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name)
+            || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_THREAD->name);
+    }
 }

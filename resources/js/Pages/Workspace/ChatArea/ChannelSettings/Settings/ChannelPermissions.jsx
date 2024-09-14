@@ -2,11 +2,12 @@ import Button from "@/Components/Button";
 import OverlayNotification from "@/Components/Overlay/OverlayNotification";
 import React from "react";
 import { SettingsButton } from "../About/SettingsButton";
-
+import { useState } from "react";
 import { useForm, usePage } from "@inertiajs/react";
 
 export default function ChannelPermissions() {
-    const { channel } = usePage().props;
+    const { channel, channelPermissions } = usePage().props;
+    const [success, setSuccess] = useState(false);
     const whoes = [
         {
             value: "everyone",
@@ -22,30 +23,45 @@ export default function ChannelPermissions() {
         },
     ];
     const { data, setData, post, processing, errors } = useForm({
-        channelPostPermission: "everyone",
-        channelAddMemberPermission: "everyone_except_guests",
-        allowHuddle: true,
-        allowThread: true,
+        channelPostPermission: channelPermissions.channelPostPermission,
+        addChannelMembersPermission:
+            channelPermissions.addChannelMembersPermission,
+        allowHuddle: channelPermissions.allowHuddle,
+        allowThread: channelPermissions.allowThread,
     });
 
     function submit(e) {
         e.preventDefault();
         post(route("channel.update_permissions", channel.id), {
             preserveState: true,
-            only: ["permissions"],
+            only: ["permissions", "channelPermissions"],
+            onSuccess: () => {
+                setSuccess(true);
+            },
+            headers: {
+                "X-Socket-Id": Echo.socketId(),
+            },
         });
     }
     return (
         <OverlayNotification
+            success={success}
             buttonNode={
                 <SettingsButton
+                    onClick={() => {
+                        setSuccess(false);
+                    }}
                     className="border-none"
                     title="Channel permissions"
                     description={<div>Everyone can post</div>}
                 />
             }
             title={<div className="font-semibold ">Channel permissions</div>}
-            submitButtonNode={<Button onClick={submit}>Save changes</Button>}
+            submitButtonNode={
+                <Button onClick={submit} loading={processing}>
+                    Save changes
+                </Button>
+            }
             className="p-3 pb-6"
         >
             <div className=" pb-4">
@@ -56,7 +72,10 @@ export default function ChannelPermissions() {
                     <ul className="flex flex-col gap-y-2 mt-4">
                         {whoes.map((who) => {
                             return (
-                                <li className="flex gap-x-3 items-center" key={who.value + "who_can_post"}>
+                                <li
+                                    className="flex gap-x-3 items-center"
+                                    key={who.value + "who_can_post"}
+                                >
                                     <input
                                         type="radio"
                                         name="who_can_post"
@@ -91,7 +110,10 @@ export default function ChannelPermissions() {
                         {whoes.map((who, index) => {
                             if (index == 0) return "";
                             return (
-                                <li className="flex gap-x-3 items-center" key={who.value + "who_can_add_members"}>
+                                <li
+                                    className="flex gap-x-3 items-center"
+                                    key={who.value + "who_can_add_members"}
+                                >
                                     <input
                                         type="radio"
                                         name="who_can_add_member"
@@ -99,11 +121,11 @@ export default function ChannelPermissions() {
                                         value={who.value}
                                         checked={
                                             who.value ==
-                                            data.channelAddMemberPermission
+                                            data.addChannelMembersPermission
                                         }
                                         onChange={(e) => {
                                             setData(
-                                                "channelAddMemberPermission",
+                                                "addChannelMembersPermission",
                                                 e.target.value
                                             );
                                         }}
@@ -130,11 +152,8 @@ export default function ChannelPermissions() {
                                 type="radio"
                                 name="allow_huddles"
                                 id="allow_huddles"
-                                value="allow_huddles"
-                                checked={"allow_huddles" == data.allowHuddle}
-                                onChange={(e) =>
-                                    setData("allowHuddle", e.target.value)
-                                }
+                                checked={data.allowHuddle}
+                                onChange={(e) => setData("allowHuddle", true)}
                             />
                             <label htmlFor="allow_huddles">
                                 Yes, members can start and join huddles
@@ -144,14 +163,9 @@ export default function ChannelPermissions() {
                             <input
                                 type="radio"
                                 name="allow_huddles"
-                                value="not_allow_huddles"
                                 id="not_allow_huddles"
-                                checked={
-                                    "not_allow_huddles" == data.allowHuddle
-                                }
-                                onChange={(e) =>
-                                    setData("allowHuddle", e.target.value)
-                                }
+                                checked={!data.allowHuddle}
+                                onChange={(e) => setData("allowHuddle", false)}
                             />
                             <label htmlFor="not_allow_huddles">
                                 No, members can’t start or join huddles

@@ -10,10 +10,12 @@ import Managers from "./Managers";
 import { getDirectChannelUser } from "@/helpers/channelHelper";
 import { usePage } from "@inertiajs/react";
 import { MdOutlineEmail } from "react-icons/md";
-export default function About({ channel, channelName }) {
-    const { auth } = usePage().props;
+export default function About({ channelName }) {
+    const { auth, channel, channelUsers } = usePage().props;
     const directChannelUser = useMemo(
-        () => getDirectChannelUser(channel, auth),
+        () =>
+            channel.type == "DIRECT" &&
+            getDirectChannelUser(channel, channelUsers, auth.user),
         [channel, auth]
     );
     return (
@@ -35,9 +37,7 @@ export default function About({ channel, channelName }) {
                     hasEdit={false}
                 />
             )}
-            {channel.type != "DIRECT" && channel.type != "SELF" && (
-                <Managers />
-            )}
+            {channel.type != "DIRECT" && channel.type != "SELF" && <Managers />}
             {channel.type != "DIRECT" && channel.type != "SELF" && (
                 <LeaveChannel channel={channel} />
             )}
@@ -48,11 +48,15 @@ export default function About({ channel, channelName }) {
                     </h5>
                     <div className="flex mt-2 items-center gap-x-3">
                         <div className="">
-                            <MdOutlineEmail className="text-2xl"/>
+                            <MdOutlineEmail className="text-2xl" />
                         </div>
                         <div className="flex flex-col justify-between items-start">
-                            <div className="text-sm font-semibold text-white/85">Email Address</div>
-                            <div className="text-sm text-link">{directChannelUser.email}</div>
+                            <div className="text-sm font-semibold text-white/85">
+                                Email Address
+                            </div>
+                            <div className="text-sm text-link">
+                                {directChannelUser.email}
+                            </div>
                         </div>
                     </div>
                 </div>

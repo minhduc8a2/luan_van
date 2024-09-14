@@ -11,7 +11,7 @@ import { compareDateTime, differenceInSeconds } from "@/helpers/dateTimeHelper";
 import { getMentionsFromContent } from "@/helpers/tiptapHelper";
 export default function Thread() {
     const dispatch = useDispatch();
-    const { channel } = usePage().props;
+    const { channel, permissions } = usePage().props;
     const { message } = useSelector((state) => state.thread);
     const { channelUsers } = usePage().props;
     const [messages, setMessages] = useState([]);
@@ -188,7 +188,15 @@ export default function Thread() {
                 </ul>
             </div>
             <div className="m-6 border border-white/15 pt-4 px-2 rounded-lg">
-                <TipTapEditor onSubmit={onSubmit} message={message} />
+                {permissions.thread && (
+                    <TipTapEditor onSubmit={onSubmit} message={message} />
+                )}
+                {!permissions.thread && (
+                    <h5 className="mb-4 text-center ml-4">
+                        You're not allowed to post in thread. Contact Admins or
+                        Channel managers for more information!
+                    </h5>
+                )}
             </div>
         </div>
     );

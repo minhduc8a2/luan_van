@@ -40,7 +40,7 @@ import OverlayPanel from "@/Components/Overlay/OverlayPanel";
 import HuddleInvitation from "./HuddleInvitation";
 import { getChannelName } from "@/helpers/channelHelper";
 export default function Huddle() {
-    const { auth, users: workspaceUsers } = usePage().props;
+    const { auth, users: workspaceUsers , permissions} = usePage().props;
     const { channel, users } = useSelector((state) => state.huddle);
     const { width } = useSelector((state) => state.sideBar);
     const [refresh, setRefresh] = useState(0);

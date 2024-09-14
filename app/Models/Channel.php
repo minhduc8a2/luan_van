@@ -23,10 +23,11 @@ class Channel extends Model
         'type',
         'workspace_id',
         'user_id',
-        'is_main_channel'
+        'is_main_channel',
+        'is_archived'
     ];
 
-   
+
     public static function createChannelDescription($type, $channelName)
     {
         switch ($type) {
@@ -64,17 +65,9 @@ class Channel extends Model
     {
         $managerRole = Role::getRoleByName(BaseRoles::MANAGER->name);
 
-        //assign admin role for user
+        //assign manager role for user
         $user->channels()->attach($this->id, ['role_id' => $managerRole->id]);
-        if ($this->permissions()->where('role_id', '=', $managerRole->id)->exists()) return;
-        $this->permissions()->create(
-            [
-                'role_id' => $managerRole->id,
-                'permissionable_id' => $this->id,
-                'permissionable_type' => Channel::class,
-                'permission_type' => PermissionTypes::CHANNEL_ALL->name
-            ]
-        );
+        $this->createChannelManagerPermissions();
     }
     public function initChannelPermissions()
     {
@@ -83,94 +76,141 @@ class Channel extends Model
         $this->createChannelMemberPermissions();
     }
 
-    public function createChannelManagerPermissions()
+    public function createChannelManagerPermissions($permissionList = null)
     {
         $managerRole = Role::getRoleByName(BaseRoles::MANAGER->name);
+        if (isset($permissionList)) {
+            if (gettype($permissionList) == 'array') {
+                $channelManagerPermissionList = $permissionList;
+            } else {
+                $channelManagerPermissionList = [$permissionList];
+            }
+        } else
+            $channelManagerPermissionList = [
 
-        if ($this->permissions()->where('role_id', '=', $managerRole->id)->exists()) return;
+                PermissionTypes::CHANNEL_ALL->name,
 
-        $this->permissions()->createMany([
-            [
+            ];
+        foreach ($channelManagerPermissionList as $channelManagerPermission) {
+
+            $this->permissions()->firstOrCreate([
                 'role_id' => $managerRole->id,
                 'permissionable_id' => $this->id,
                 'permissionable_type' => Channel::class,
-                'permission_type' => PermissionTypes::CHANNEL_ALL->name
-            ],
-
-        ]);
+                'permission_type' => $channelManagerPermission
+            ]);
+        }
     }
-    public function createChannelMemberPermissions()
+    public function createChannelMemberPermissions($permissionList = null)
     {
         $memberRole = Role::getRoleByName(BaseRoles::MEMBER->name);
+        if (isset($permissionList)) {
+            if (gettype($permissionList) == 'array') {
+                $channelMemberPermissionList = $permissionList;
+            } else {
+                $channelMemberPermissionList = [$permissionList];
+            }
+        } else
+            $channelMemberPermissionList = [
 
-        if ($this->permissions()->where('role_id', '=', $memberRole->id)->exists()) return;
+                PermissionTypes::CHANNEL_VIEW->name,
 
-        $this->permissions()->createMany([
-            [
-                'role_id' => $memberRole->id,
-                'permissionable_id' => $this->id,
-                'permissionable_type' => Workspace::class,
-                'permission_type' => PermissionTypes::CHANNEL_VIEW->name
-            ],
-            [
-                'role_id' => $memberRole->id,
-                'permissionable_id' => $this->id,
-                'permissionable_type' => Workspace::class,
-                'permission_type' => PermissionTypes::CHANNEL_CHAT->name
-            ],
-            [
-                'role_id' => $memberRole->id,
-                'permissionable_id' => $this->id,
-                'permissionable_type' => Workspace::class,
-                'permission_type' => PermissionTypes::CHANNEL_THREAD->name
-            ],
-            [
-                'role_id' => $memberRole->id,
-                'permissionable_id' => $this->id,
-                'permissionable_type' => Workspace::class,
-                'permission_type' => PermissionTypes::CHANNEL_HUDDLE->name
-            ],
-            [
-                'role_id' => $memberRole->id,
-                'permissionable_id' => $this->id,
-                'permissionable_type' => Workspace::class,
-                'permission_type' => PermissionTypes::CHANNEL_INVITATION->name
-            ],
-            [
-                'role_id' => $memberRole->id,
-                'permissionable_id' => $this->id,
-                'permissionable_type' => Workspace::class,
-                'permission_type' => PermissionTypes::CHANNEL_EDIT_DESCRIPTION->name
-            ],
+                PermissionTypes::CHANNEL_CHAT->name,
 
-        ]);
+                PermissionTypes::CHANNEL_THREAD->name,
+
+                PermissionTypes::CHANNEL_HUDDLE->name,
+
+                PermissionTypes::CHANNEL_INVITATION->name,
+
+                PermissionTypes::CHANNEL_EDIT_DESCRIPTION->name
+
+
+            ];
+
+
+        foreach ($channelMemberPermissionList as $channelMemberPermission) {
+
+            $this->permissions()->firstOrCreate([
+                'role_id' => $memberRole->id,
+                'permissionable_id' => $this->id,
+                'permissionable_type' => Workspace::class,
+                'permission_type' => $channelMemberPermission
+            ]);
+        }
     }
-    public function createChannelGuestPermissions()
+    public function createChannelGuestPermissions($permissionList = null)
     {
         $guestRole = Role::getRoleByName(BaseRoles::GUEST->name);
+        if (isset($permissionList)) {
+            if (gettype($permissionList) == 'array') {
+                $guestPermissionList = $permissionList;
+            } else {
+                $guestPermissionList = [$permissionList];
+            }
+        } else
+            $guestPermissionList = [
 
-        if ($this->permissions()->where('role_id', '=', $guestRole->id)->exists()) return;
+                PermissionTypes::CHANNEL_VIEW->name,
 
-        $this->permissions()->createMany([
-            [
+                PermissionTypes::CHANNEL_CHAT->name,
+
+                PermissionTypes::CHANNEL_THREAD->name,
+
+                PermissionTypes::CHANNEL_HUDDLE->name,
+
+            ];
+        foreach ($guestPermissionList as $guestPermission) {
+
+            $this->permissions()->firstOrCreate([
                 'role_id' => $guestRole->id,
                 'permissionable_id' => $this->id,
                 'permissionable_type' => Workspace::class,
-                'permission_type' => PermissionTypes::CHANNEL_VIEW->name
-            ],
-            [
-                'role_id' => $guestRole->id,
-                'permissionable_id' => $this->id,
-                'permissionable_type' => Workspace::class,
-                'permission_type' => PermissionTypes::CHANNEL_CHAT->name
-            ],
-            [
-                'role_id' => $guestRole->id,
-                'permissionable_id' => $this->id,
-                'permissionable_type' => Workspace::class,
-                'permission_type' => PermissionTypes::CHANNEL_HUDDLE->name
-            ],
+                'permission_type' => $guestPermission
+            ]);
+        }
+    }
 
-        ]);
+    public function deleteMemberPermission($permission)
+    {
+        $this->permissions()->where('role_id', Role::getRoleIdByName(BaseRoles::MEMBER->name))->where('permission_type', $permission)->delete();
+    }
+    public function deleteGuestPermission($permission)
+    {
+        $this->permissions()->where('role_id', Role::getRoleIdByName(BaseRoles::GUEST->name))->where('permission_type', $permission)->delete();
+    }
+
+    public function memberPermissionExists($permissionName)
+    {
+        return $this->permissions()->where('role_id', Role::getRoleIdByName(BaseRoles::MEMBER->name))->where('permission_type', $permissionName)->exists();
+    }
+    public function guestPermissionExists($permissionName)
+    {
+        return $this->permissions()->where('role_id', Role::getRoleIdByName(BaseRoles::GUEST->name))->where('permission_type', $permissionName)->exists();
+    }
+    public function chatPermission()
+    {
+        $memberChatPermission = $this->memberPermissionExists(PermissionTypes::CHANNEL_CHAT->name);
+        $guestChatPermission = $this->guestPermissionExists(PermissionTypes::CHANNEL_CHAT->name);
+        if ($memberChatPermission && $guestChatPermission) return 'everyone';
+        else if ($memberChatPermission) return 'everyone_except_guests';
+        return 'channel_managers_only';
+    }
+
+    public function addChannelMembersPermission()
+    {
+        $memberAddChannelMembersPermission = $this->memberPermissionExists(PermissionTypes::CHANNEL_INVITATION->name);
+        if ($memberAddChannelMembersPermission) return 'everyone_except_guests';
+        return 'channel_managers_only';
+    }
+
+    public function allowHuddlePermission()
+    {
+        return $this->memberPermissionExists(PermissionTypes::CHANNEL_HUDDLE->name) && $this->guestPermissionExists(PermissionTypes::CHANNEL_HUDDLE->name);
+    }
+
+    public function allowThreadPermission()
+    {
+        return $this->memberPermissionExists(PermissionTypes::CHANNEL_THREAD->name) && $this->guestPermissionExists(PermissionTypes::CHANNEL_THREAD->name);
     }
 }

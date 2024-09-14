@@ -10,8 +10,13 @@ import { makeStore } from "@/Store/store";
 import { Provider } from "react-redux";
 import { setActivity } from "@/Store/activitySlice";
 import { initMessageCountForChannel } from "@/Store/newMessageCountsMapSlice";
-export default function Index({ notifications, channels, directChannels , permissions}) {
-    console.log(permissions);
+export default function Index({
+    notifications,
+    channels,
+    directChannels,
+    
+}) {
+    console.log(directChannels);
     const storeRef = useRef();
     if (!storeRef.current) {
         // Create the store instance the first time this renders

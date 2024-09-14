@@ -72,7 +72,7 @@ class MessageController extends Controller
                 array_push($fileObjects, $fileObject);
             }
             $attachments = $this->createAttachments($fileObjects, $request->user());
-          
+
             $message->attachments()->createMany($attachments);
 
 
@@ -104,7 +104,7 @@ class MessageController extends Controller
 
     public function storeThreadMessage(Request $request, Channel $channel, Message $message)
     {
-        if ($request->user()->cannot('create', [Message::class, $channel, 'thread'])) return abort(403);
+        if ($request->user()->cannot('create', [Thread::class, $channel])) return abort(403);
         try {
             $validated = $request->validate(['content' => 'string', 'fileObjects' => 'array']);
             $content = $validated['content'];
@@ -132,8 +132,8 @@ class MessageController extends Controller
             }
 
             $attachments = $this->createAttachments($fileObjects, $request->user());
-            
-           $newMessage->attachments()->createMany($attachments);
+
+            $newMessage->attachments()->createMany($attachments);
 
             if (isset($newMessage)) {
 

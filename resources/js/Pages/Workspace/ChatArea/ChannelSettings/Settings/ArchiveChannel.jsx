@@ -6,7 +6,7 @@ import { router, usePage } from "@inertiajs/react";
 import OverlayNotification from "@/Components/Overlay/OverlayNotification";
 import ErrorsList from "@/Components/ErrorsList";
 
-export default function DeleteChannel() {
+export default function ArchiveChannel() {
     const { channel } = usePage().props;
     const [confirm, setConfirm] = useState(false);
     const [errors, setErrors] = useState(null);
