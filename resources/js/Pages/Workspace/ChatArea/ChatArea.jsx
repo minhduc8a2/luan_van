@@ -49,6 +49,7 @@ export default function ChatArea() {
         channelUsers,
         messages: initMessages,
         permissions,
+        mainChannelId,
     } = usePage().props;
 
     const { message: threadMessage } = useSelector((state) => state.thread);
@@ -72,6 +73,7 @@ export default function ChatArea() {
     const prevScrollHeightRef = useRef(0);
 
     function onSubmit(content, fileObjects, JSONContent) {
+        let mentionsList = getMentionsFromContent(JSONContent);
         if (
             content == "<p></p>" &&
             fileObjects.length == 0 &&
@@ -83,7 +85,7 @@ export default function ChatArea() {
             {
                 content,
                 fileObjects,
-                mentionsList: getMentionsFromContent(JSONContent),
+                mentionsList,
             },
             {
                 only: [],
@@ -175,29 +177,64 @@ export default function ChatArea() {
                 switch (e.type) {
                     case "addManagers":
                     case "removeManager":
-                        router.reload({ only: ["managers", "permissions"] });
+                        router.reload({
+                            only: [
+                                "managers",
+                                "permissions",
+                                "channelPermissions",
+                            ],
+                        });
                         break;
                     case "editDescription":
                     case "editName":
                     case "changeType":
-                        router.reload({ only: ["channel", "permissions"] });
+                        router.reload({
+                            only: [
+                                "channel",
+                                "permissions",
+                                "channelPermissions",
+                            ],
+                        });
                         break;
                     case "leave":
                     case "removeUserFromChannel":
                     case "addUsersToChannel":
-                        console.log("addUserFromChannel");
                         router.reload({
                             only: [
                                 "channelUsers",
                                 "channels",
                                 "availableChannels",
                                 "permissions",
+                                "channelPermissions",
                             ],
                         });
                         break;
                     case "updateChannelPermissions":
                         router.reload({
                             only: ["permissions", "channelPermissions"],
+                        });
+                        break;
+                    case "deleteChannel":
+                        
+                        if (huddleChannel.id == channel.id) {
+                            dispatch(toggleHuddle());
+                        }
+                        // router.get(
+                        //     route("channel.show", mainChannelId),
+                        //     {},
+                        //     {
+                        //         preserveState: true,
+                        //     }
+                        // );
+                        break;
+                    case "archiveChannel":
+                        router.reload({
+                            only: [
+                                "channels",
+                                "availableChannels",
+                                "permissions",
+                                "channelPermissions",
+                            ],
                         });
                         break;
                     default:
@@ -215,7 +252,7 @@ export default function ChatArea() {
             channelConnectionRef.current = null;
             Echo.leave(`channels.${channel.id}`);
         };
-    }, [channel.id]);
+    }, [channel.id, huddleChannel]);
     useEffect(() => {
         if (messageContainerRef.current)
             if (!infiniteScroll) {
@@ -552,7 +589,7 @@ export default function ChatArea() {
                             Admins or Channel managers for more information!
                         </h5>
                     )}
-                    {channel.is_archived==true && (
+                    {channel.is_archived == true && (
                         <div className="mb-4 justify-center flex ml-4 items-baseline gap-x-1 text-white/75">
                             You are viewing{" "}
                             <div className="flex items-baseline gap-x-1">

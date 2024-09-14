@@ -68,23 +68,9 @@ export default function Event() {
             connectionRef.current
                 .joining((user) => {
                     dispatch(setOnlineStatus({ user, onlineStatus: true }));
-                    router.get(
-                        route("channel.show", channel.id),
-                        {},
-                        {
-                            preserveState: true,
-                            only: ["channelUsers", "directChannels", "users"],
-                        }
-                    );
                 })
                 .leaving((user) => {
                     dispatch(setOnlineStatus({ user, onlineStatus: false }));
-                    route("channel.show", channel.id),
-                        {},
-                        {
-                            preserveState: true,
-                            only: ["channelUsers", "directChannels", "users"],
-                        };
                 });
     }, [workspace.id, channel.id]);
 

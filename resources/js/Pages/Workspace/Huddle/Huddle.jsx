@@ -40,7 +40,7 @@ import OverlayPanel from "@/Components/Overlay/OverlayPanel";
 import HuddleInvitation from "./HuddleInvitation";
 import { getChannelName } from "@/helpers/channelHelper";
 export default function Huddle() {
-    const { auth, users: workspaceUsers , permissions} = usePage().props;
+    const { auth, users: workspaceUsers, permissions } = usePage().props;
     const { channel, users } = useSelector((state) => state.huddle);
     const { width } = useSelector((state) => state.sideBar);
     const [refresh, setRefresh] = useState(0);
@@ -195,15 +195,19 @@ export default function Huddle() {
         }
     }
     function leaveHuddle() {
-        if (channel) {
-            Echo.leave(`huddles.${channel.id}`);
-            removeTrackTFromStream("video");
-            removeTrackTFromStream("audio");
-            otherUserStreams.current.clear();
-            peersRef.current.clear();
-            joinObject.current = null;
-            setShowUserVideo(false);
-            setShowShareScreen(false);
+        try {
+            if (channel) {
+                Echo.leave(`huddles.${channel.id}`);
+                removeTrackTFromStream("video");
+                removeTrackTFromStream("audio");
+                otherUserStreams.current.clear();
+                peersRef.current.clear();
+                joinObject.current = null;
+                setShowUserVideo(false);
+                setShowShareScreen(false);
+            }
+        } catch (error) {
+            console.log(error);
         }
     }
     useEffect(() => {

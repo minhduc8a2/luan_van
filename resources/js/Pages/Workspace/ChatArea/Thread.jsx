@@ -85,8 +85,13 @@ export default function Thread() {
         return temp;
     }, [messages]);
     function onSubmit(content, fileObjects, JSONContent) {
-        if (content == "<p></p>" && fileObjects.length == 0) return;
-
+        let mentionsList = getMentionsFromContent(JSONContent);
+        if (
+            content == "<p></p>" &&
+            fileObjects.length == 0 &&
+            mentionsList.length == 0
+        )
+            return;
         router.post(
             route("thread_message.store", {
                 channel: channel.id,

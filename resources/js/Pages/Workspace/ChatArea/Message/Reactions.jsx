@@ -5,11 +5,13 @@ import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
 import EmojiPicker from "@emoji-mart/react";
 import data from "@emoji-mart/data";
 import { useState } from "react";
+import { usePage } from "@inertiajs/react";
 export default function Reactions({
     groupedReactions,
     reactToMessage,
     removeMessageReaction,
 }) {
+    const { permissions } = usePage().props;
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     if (groupedReactions.length == 0) return "";
     return (
@@ -29,15 +31,25 @@ export default function Reactions({
                 >
                     <button
                         onClick={() => {
-                            if (reaction.hasReacted) {
+                            if (
+                                reaction.hasReacted &&
+                                permissions.deleteReaction
+                            ) {
                                 removeMessageReaction(reaction.emoji_id);
-                            } else reactToMessage(reaction.emoji_id);
+                            } else if (
+                                !reaction.hasReacted &&
+                                permissions.createReaction
+                            ) {
+                                reactToMessage(reaction.emoji_id);
+                            }
                         }}
                         className={`${
                             reaction.hasReacted
                                 ? "bg-blue-500/25"
                                 : "bg-white/15"
-                        } rounded-full px-[6px] flex items-center gap-x-1 py-[2px]`}
+                        } rounded-full px-[6px] flex items-center gap-x-1 py-[2px] ${
+                            permissions.deleteReaction ? "" : "cursor-default"
+                        }`}
                     >
                         <div className="text-sm">{reaction.nativeEmoji}</div>
                         <div className="text-sm w-2 font-semibold">
@@ -46,7 +58,7 @@ export default function Reactions({
                     </button>
                 </Tooltip>
             ))}
-            {groupedReactions.length > 0 && (
+            {groupedReactions.length > 0 && permissions.createReaction && (
                 <div className="bg-white/15 rounded-full px-[8px] flex items-center gap-x-1 py-[4px]">
                     <Tooltip
                         content={

@@ -16,7 +16,7 @@ export default function Index({
     directChannels,
     
 }) {
-    console.log(directChannels);
+    
     const storeRef = useRef();
     if (!storeRef.current) {
         // Create the store instance the first time this renders

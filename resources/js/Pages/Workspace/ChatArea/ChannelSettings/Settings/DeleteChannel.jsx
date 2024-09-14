@@ -39,7 +39,7 @@ export default function DeleteChannel() {
     return (
         <OverlayNotification
             success={success}
-            className="w-[30vw] p-3"
+            className="min-w-[30vw] p-3"
             title={<div className=" ">Delete this channel?</div>}
             sameButtonRow={
                 <div
@@ -72,7 +72,7 @@ export default function DeleteChannel() {
             submitButtonNode={
                 <Button
                     loading={processing}
-                    className={confirm ? "bg-danger text-white" : ""}
+                    className={confirm ? " !bg-danger text-white" : ""}
                     disabled={!confirm}
                     onClick={submit}
                 >

@@ -40,7 +40,7 @@ class Workspace extends Model
         return $this->morphMany(Permission::class, 'permissionable');
     }
 
-    public function mainChannel()
+    public function mainChannel():Channel
     {
         return $this->channels()->where('is_main_channel', true)->first();
     }

@@ -4,25 +4,23 @@ namespace App\Policies;
 
 use App\Models\User;
 use App\Models\Channel;
-use Illuminate\Support\Facades\DB;
+use App\Helpers\ChannelTypes;
+use App\Helpers\PermissionTypes;
+
 
 class ReactionPolicy
 {
     public function create(User $user, Channel $channel): bool
     {
-        $exists = DB::table('channel_user')
-            ->where('user_id', '=', $user->id)
-            ->where('channel_id', '=', $channel->id)
-            ->exists();
-        return $exists;
+        if ($channel->is_archived) return false;
+        return $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name)
+            || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_VIEW->name);
     }
 
     public function delete(User $user, Channel $channel): bool
     {
-        $exists = DB::table('channel_user')
-            ->where('user_id', '=', $user->id)
-            ->where('channel_id', '=', $channel->id)
-            ->exists();
-        return $exists;
+        if ($channel->is_archived) return false;
+        return $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name)
+            || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_VIEW->name);
     }
 }

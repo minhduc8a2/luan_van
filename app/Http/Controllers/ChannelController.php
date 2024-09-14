@@ -16,6 +16,7 @@ use App\Helpers\ChannelTypes;
 use App\Events\WorkspaceEvent;
 use Illuminate\Support\Carbon;
 use App\Helpers\PermissionTypes;
+use App\Models\Reaction;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Broadcast;
@@ -110,6 +111,9 @@ class ChannelController extends Controller
             ])->latest()->simplePaginate($perPage, ['*'], 'page', $pageNumber)];
         }
         $user = $request->user();
+        /**
+         * @var Workspace $workspace
+         */
         $workspace = $channel->workspace;
         $availableChannels = fn() => $workspace->channels()->where("type", "=", ChannelTypes::PUBLIC->name)->get();
 
@@ -153,6 +157,8 @@ class ChannelController extends Controller
             'archive' => $user->can('archive', [Channel::class, $channel]),
             'chat' => $user->can('create', [Message::class, $channel]),
             'thread' => $user->can('create', [Thread::class, $channel]),
+            'createReaction' => $user->can('create', [Reaction::class, $channel]),
+            'deleteReaction' => $user->can('delete', [Reaction::class, $channel]),
             'createChannel' => $user->can('create', [Channel::class, $workspace]),
             'updateDescription' => $user->can('updateDescription', [Channel::class, $channel]),
             'updateName' => $user->can('updateName', [Channel::class, $channel]),
@@ -174,7 +180,10 @@ class ChannelController extends Controller
             'allowHuddle' => $channel->allowHuddlePermission(),
             'allowThread' => $channel->allowThreadPermission(),
         ];
+
+        $mainChannelId = fn() => $workspace->mainChannel()->id;
         return Inertia::render("Workspace/Index", [
+            'mainChannelId' => $mainChannelId,
             'channelPermissions' => $channelPermissions,
             'workspace' => $workspace,
             'permissions' => $permissions,
@@ -533,6 +542,8 @@ class ChannelController extends Controller
             $channel->is_archived = $validated['status'];
 
             $channel->save();
+            broadcast(new SettingsEvent($channel, "archiveChannel"))->toOthers();
+
             DB::commit();
             return back();
         } catch (\Throwable $th) {
@@ -560,6 +571,8 @@ class ChannelController extends Controller
             $channel->messages()->delete();
             $channel->permissions()->delete();
             $channel->delete();
+            broadcast(new SettingsEvent($channel, "deleteChannel"))->toOthers();
+
             DB::commit();
             return redirect(route('workspace.show', $workspace->id));
         } catch (\Throwable $th) {

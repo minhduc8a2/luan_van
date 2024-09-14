@@ -34,7 +34,7 @@ export default function Message({
     newMessageReactionReceive,
     resetNewMessageReactionReceive,
 }) {
-    const { auth, channel, channelUsers } = usePage().props;
+    const { auth, channel, channelUsers, permissions } = usePage().props;
     const dispatch = useDispatch();
     const { messageId } = useSelector((state) => state.mention);
     const attachments = message.attachments;
@@ -159,11 +159,13 @@ export default function Message({
             }`}
             id={`message-${message.id}`}
         >
-            <MessageToolbar
-                message={message}
-                threadStyle={threadStyle}
-                reactToMessage={reactToMessage}
-            />
+            {!channel.is_archived && (
+                <MessageToolbar
+                    message={message}
+                    threadStyle={threadStyle}
+                    reactToMessage={reactToMessage}
+                />
+            )}
             {hasChanged || index == 0 ? (
                 <Avatar
                     src={user.avatar_url}

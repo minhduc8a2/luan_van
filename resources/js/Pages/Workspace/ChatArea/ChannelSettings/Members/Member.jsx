@@ -19,7 +19,7 @@ export default function Member({
     removeFromChannel,
     removeChannelManager,
 }) {
-    const { managers, channel } = usePage().props;
+    const { managers, channel, permissions } = usePage().props;
     const [showOptions, setShowOptions] = useState(false);
     const onlineStatusMap = useSelector((state) => state.onlineStatus);
     const isManager = useMemo(() => {

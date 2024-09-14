@@ -51,6 +51,6 @@ class DatabaseSeeder extends Seeder
         $workspace->createAndAssignSelfChannelForUser($user);
 
 
-        $this->call(MessageSeeder::class);
+        // $this->call(MessageSeeder::class);
     }
 }
