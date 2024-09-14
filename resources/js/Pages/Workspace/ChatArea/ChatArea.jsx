@@ -552,7 +552,7 @@ export default function ChatArea() {
                             Admins or Channel managers for more information!
                         </h5>
                     )}
-                    {channel.is_archived && (
+                    {channel.is_archived==true && (
                         <div className="mb-4 justify-center flex ml-4 items-baseline gap-x-1 text-white/75">
                             You are viewing{" "}
                             <div className="flex items-baseline gap-x-1">

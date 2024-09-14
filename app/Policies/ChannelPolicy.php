@@ -141,6 +141,8 @@ class ChannelPolicy
 
     public function updatePermissions(User $user, Channel $channel): bool
     {
+        if ($channel->is_archived) return false;
+
         if ($channel->type == ChannelTypes::PUBLIC->name) {
             if ($user->workspacePermissionCheck($channel->workspace, PermissionTypes::WORKSPACE_ALL->name))
                 return true;

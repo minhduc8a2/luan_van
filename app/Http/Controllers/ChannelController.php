@@ -113,74 +113,35 @@ class ChannelController extends Controller
         $workspace = $channel->workspace;
         $availableChannels = fn() => $workspace->channels()->where("type", "=", ChannelTypes::PUBLIC->name)->get();
 
-        $channels = fn() => DB::table('channels')
-            ->join('channel_user', 'channels.id', '=', 'channel_user.channel_id')
-            ->leftJoin('messages', function ($join) {
-                $join->on('messages.messagable_id', '=', 'channel_user.channel_id')
-                    ->where('messages.messagable_type', '=', 'App\\Models\\Channel');
-            })
-            ->select(
-                'channels.id',
-                'channels.name',
-                'channels.description',
-                'channels.type',
-                'channels.workspace_id',
-                'channels.user_id',
-                'channels.is_main_channel',
-                'channels.is_archived',
-                DB::raw('COUNT(CASE WHEN messages.created_at > channel_user.last_read_at OR channel_user.last_read_at IS NULL THEN 1 END) as unread_messages_count')
-            )
-            ->where('channel_user.user_id', $user->id)
-            ->where('channels.workspace_id', $workspace->id)
-            ->where(function ($query) {
-                $query->where('channels.type', 'PUBLIC')
-                    ->orWhere('channels.type', 'PRIVATE');
-            })
-            ->groupBy(
-                'channels.id',
-                'channels.name',
-                'channels.description',
-                'channels.type',
-                'channels.workspace_id',
-                'channels.user_id',
-                'channels.is_main_channel',
-                'channels.is_archived'
-            )
-            ->get();
+        $channels = fn() => $user->channels()
+            ->whereIn("type", [ChannelTypes::PUBLIC->name, ChannelTypes::PRIVATE->name])
+            ->where('is_archived', false)
+            ->withCount([
+                'messages as unread_messages_count' => function (Builder $query) use ($user) {
+                    $query->where("created_at", ">", function ($query) use ($user) {
+                        $query->select('last_read_at')
+                            ->from('channel_user')
+                            ->whereColumn('channel_user.channel_id', 'channels.id')
+                            ->where('channel_user.user_id', $user->id)
+                            ->limit(1);
+                    })->orWhereNull('last_read_at');
+                }
+            ])->get();
 
-        $directChannels = fn() => Channel:: // Eager load users
-            leftJoin('channel_user', 'channels.id', '=', 'channel_user.channel_id')
-            ->leftJoin('messages', function ($join) {
-                $join->on('messages.messagable_id', '=', 'channel_user.channel_id')
-                    ->where('messages.messagable_type', '=', 'App\\Models\\Channel');
-            })
-            ->select(
-                'channels.id',
-                'channels.name',
-                'channels.description',
-                'channels.type',
-                'channels.workspace_id',
-                'channels.user_id',
-                'channels.is_main_channel',
-                'channels.is_archived',
-                DB::raw('COUNT(CASE WHEN messages.created_at > channel_user.last_read_at OR channel_user.last_read_at IS NULL THEN 1 END) as unread_messages_count')
-            )
-            ->where('channel_user.user_id', $user->id)
-            ->where('channels.workspace_id', $workspace->id)
-            ->where(function ($query) {
-                $query->where('channels.type', 'DIRECT');
-            })
-            ->groupBy(
-                'channels.id',
-                'channels.name',
-                'channels.description',
-                'channels.type',
-                'channels.workspace_id',
-                'channels.user_id',
-                'channels.is_main_channel',
-                'channels.is_archived'
-            )
-            ->get();
+        $directChannels = fn() => $user->channels()
+            ->where("type",  ChannelTypes::DIRECT->name)
+            ->where('is_archived', false)
+            ->withCount([
+                'messages as unread_messages_count' => function (Builder $query) use ($user) {
+                    $query->where("created_at", ">", function ($query) use ($user) {
+                        $query->select('last_read_at')
+                            ->from('channel_user')
+                            ->whereColumn('channel_user.channel_id', 'channels.id')
+                            ->where('channel_user.user_id', $user->id)
+                            ->limit(1);
+                    })->orWhereNull('last_read_at');
+                }
+            ])->get();
         $selfChannel = fn() => $workspace->channels()->where("type", "=", "SELF")->where("user_id", "=", $request->user()->id)->first();
 
         $workspaces = fn() => $request->user()->workspaces;
@@ -570,6 +531,7 @@ class ChannelController extends Controller
         try {
             DB::beginTransaction();
             $channel->is_archived = $validated['status'];
+
             $channel->save();
             DB::commit();
             return back();
