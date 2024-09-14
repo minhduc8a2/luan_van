@@ -5,27 +5,31 @@ import { useState } from "react";
 import { router, usePage } from "@inertiajs/react";
 import OverlayNotification from "@/Components/Overlay/OverlayNotification";
 import ErrorsList from "@/Components/ErrorsList";
-
+import { FiArchive } from "react-icons/fi";
+import { RiInboxUnarchiveLine } from "react-icons/ri";
+import Overlay from "@/Components/Overlay/Overlay";
+import OverlaySimpleNotification from "@/Components/Overlay/OverlaySimpleNotification";
 export default function ArchiveChannel() {
     const { channel } = usePage().props;
-    const [confirm, setConfirm] = useState(false);
+
     const [errors, setErrors] = useState(null);
     const [success, setSuccess] = useState(false);
     const [processing, setProcessing] = useState(false);
+
     function submit(e) {
         if (!confirm) return;
         setProcessing(true);
-        router.delete(
-            route("channel.delete", channel.id),
-            {},
+        router.post(
+            route("channel.archive", channel.id),
+            {
+                status: !channel.is_archived,
+            },
             {
                 preserveState: true,
                 preserveScroll: true,
                 onError: (errors) => setErrors(errors),
                 onSuccess: () => {
-                   
                     setSuccess(true);
-                    
                 },
                 onFinish: () => {
                     setProcessing(false);
@@ -36,47 +40,80 @@ export default function ArchiveChannel() {
             }
         );
     }
+    if (channel.is_archived) {
+        return (
+            <>
+                <OverlaySimpleNotification
+                    show={errors}
+                    onClose={() => setErrors(null)}
+                >
+                    <ErrorsList errors={errors} />
+                </OverlaySimpleNotification>
+                <Button
+                    className=" !hover:text-danger bg-transparent w-full py-4 !rounded-none"
+                    loading={processing}
+                    onClick={submit}
+                >
+                    {channel.is_archived ? (
+                        <div className="flex items-center gap-x-2">
+                            <RiInboxUnarchiveLine className="" /> Unarchive this
+                            channel
+                        </div>
+                    ) : (
+                        <div className="flex items-center gap-x-2 text-danger">
+                            <FiArchive className="" /> Archive channel for
+                            everyone
+                        </div>
+                    )}
+                </Button>
+            </>
+        );
+    }
     return (
         <OverlayNotification
             success={success}
-            className="w-[30vw] p-3"
-            title={<div className=" ">Delete this channel?</div>}
-            sameButtonRow={
-                <div
-                    className="flex gap-x-2 items-center"
-                    onClick={() => {
-                        setErrors(null);
-                        setSuccess(false);
-                    }}
-                >
-                    <input
-                        type="checkbox"
-                        name=""
-                        id="delete-channel-confirm"
-                        onChange={(e) => {
-                            setConfirm(e.target.checked);
-                        }}
-                    />
-                    <label htmlFor="delete-channel-confirm">
-                        Yes, permanently delete the channel
-                    </label>
+            className="min-w-[30vw] max-w-[50vw] p-3 pb-6"
+            title={
+                <div className=" ">
+                    {" "}
+                    {channel.is_archived
+                        ? "Unarchive this channel?"
+                        : "Archive this channel?"}
                 </div>
             }
             buttonNode={
-                <Button className=" !hover:text-danger bg-transparent w-full !rounded-none py-4 ">
-                    <div className="flex items-center gap-x-2 text-danger">
-                        <FaRegTrashCan className="" /> Delete this channel
-                    </div>
+                <Button
+                    className=" !hover:text-danger bg-transparent w-full py-4 !rounded-none"
+                    onClick={() => {
+                        setSuccess(false);
+                        setErrors(null);
+                    }}
+                >
+                    {channel.is_archived ? (
+                        <div className="flex items-center gap-x-2">
+                            <RiInboxUnarchiveLine className="" /> Unarchive this
+                            channel
+                        </div>
+                    ) : (
+                        <div className="flex items-center gap-x-2 text-danger">
+                            <FiArchive className="" /> Archive channel for
+                            everyone
+                        </div>
+                    )}
                 </Button>
             }
             submitButtonNode={
                 <Button
                     loading={processing}
-                    className={confirm ? "bg-danger text-white" : ""}
+                    className={
+                        channel.is_archived ? "" : "!bg-danger text-white"
+                    }
                     disabled={!confirm}
                     onClick={submit}
                 >
-                    Delete Channel
+                    {channel.is_archived
+                        ? "Unarchive Channel"
+                        : "Archive Channel"}
                 </Button>
             }
         >
@@ -84,25 +121,25 @@ export default function ArchiveChannel() {
                 {!errors && (
                     <>
                         <div className=" ">
-                            When you delete a channel, all messages from this
-                            channel will be removed from Slack immediately.{" "}
-                            <span className="font-bold">
-                                This can’t be undone.
-                            </span>
+                            When you archive a channel, it’s archived for
+                            everyone. That means…
                         </div>
-                        <div className="mt-4">Keep in mind that:</div>
+
                         <ul className="list-disc ml-4 ">
                             <li>
-                                Any files uploaded to this channel won’t be
-                                removed
+                                No one will be able to send messages to the
+                                channel
                             </li>
                             <li>
-                                You can archive a channel instead without
-                                removing its messages
+                                You’ll still be able to find the channel’s
+                                contents via search. And you can always
+                                unarchive the channel in the future, if you’d
+                                like.
                             </li>
                         </ul>
                     </>
                 )}
+
                 {errors && (
                     <div>
                         <ErrorsList errors={errors} />

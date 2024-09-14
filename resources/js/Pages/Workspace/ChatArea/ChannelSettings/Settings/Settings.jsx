@@ -8,6 +8,7 @@ import { router, usePage } from "@inertiajs/react";
 import OverlayNotification from "@/Components/Overlay/OverlayNotification";
 import DeleteChannel from "./DeleteChannel";
 import ChannelPermissions from "./ChannelPermissions";
+import ArchiveChannel from "./ArchiveChannel";
 export default function Settings({ channel, channelName, workspace }) {
     const { permissions } = usePage().props;
 
@@ -26,12 +27,13 @@ export default function Settings({ channel, channelName, workspace }) {
                         />
                     </>
                 )}
-                <hr />
-                <Button className=" !hover:text-danger bg-transparent w-full py-4 !rounded-none">
-                    <div className="flex items-center gap-x-2 text-danger">
-                        <FiArchive className="" /> Archive channel for everyone
-                    </div>
-                </Button>
+
+                {permissions.archive && (
+                    <>
+                        <hr />
+                        <ArchiveChannel />
+                    </>
+                )}
 
                 {permissions.deleteChannel && (
                     <>

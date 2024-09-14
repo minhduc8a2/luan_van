@@ -39,6 +39,7 @@ import ChannelSettings from "./ChannelSettings/ChannelSettings";
 import { resetMessageCountForChannel } from "@/Store/newMessageCountsMapSlice";
 import { setThreadMessage } from "@/Store/threadSlice";
 import OverlayNotification from "@/Components/Overlay/OverlayNotification";
+import { FaLock } from "react-icons/fa";
 
 export default function ChatArea() {
     const {
@@ -545,11 +546,25 @@ export default function ChatArea() {
                 </div>
                 <div className="m-6 border border-white/15 pt-4 px-2 rounded-lg">
                     {permissions.chat && <TipTapEditor onSubmit={onSubmit} />}
-                    {!permissions.chat && (
+                    {!permissions.chat && !channel.is_archived && (
                         <h5 className="mb-4 text-center ml-4">
                             You're not allowed to post in channel. Contact
                             Admins or Channel managers for more information!
                         </h5>
+                    )}
+                    {channel.is_archived && (
+                        <div className="mb-4 justify-center flex ml-4 items-baseline gap-x-1 text-white/75">
+                            You are viewing{" "}
+                            <div className="flex items-baseline gap-x-1">
+                                {channel.type == "PUBLIC" ? (
+                                    <span className="text-xl">#</span>
+                                ) : (
+                                    <FaLock className="text-sm inline" />
+                                )}{" "}
+                                {channelName}
+                            </div>
+                            , an archived channel
+                        </div>
                     )}
                 </div>
             </div>

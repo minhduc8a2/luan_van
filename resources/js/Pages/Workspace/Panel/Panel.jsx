@@ -10,7 +10,7 @@ import { DirectChannel } from "./DirectChannel";
 import { useSelector } from "react-redux";
 import Activity from "./Activity/Activity";
 import { CreateChannelForm } from "./createChannelForm";
-
+import { FiArchive } from "react-icons/fi";
 
 export default function Panel({}) {
     const {
@@ -21,7 +21,7 @@ export default function Panel({}) {
         users,
         directChannels = [],
         selfChannel,
-        permissions
+        permissions,
     } = usePage().props;
     const { type } = useSelector((state) => state.panel);
     const newMessageCountsMap = useSelector(
@@ -61,6 +61,7 @@ export default function Panel({}) {
                     </div>
                     <ul>
                         {channels.map((channel) => {
+                            console.log(channel);
                             if (channel.type === "PUBLIC")
                                 return (
                                     <li key={channel.id}>
@@ -74,12 +75,25 @@ export default function Panel({}) {
                                                     : "hover:bg-white/10"
                                             }`}
                                         >
-                                            <div className="grid-item">
-                                                <div className="text-lg">#</div>
-                                                <div className="flex items-center">
-                                                    {channel.name}
+                                            {channel.is_archived ? (
+                                                <div className="grid-item">
+                                                    <div className="flex items-center h-full justify-center">
+                                                        <FiArchive className="text-sm " />
+                                                    </div>
+                                                    <div className="font-semibold flex items-center leading-7">
+                                                        {channel.name}
+                                                    </div>
                                                 </div>
-                                            </div>
+                                            ) : (
+                                                <div className="grid-item">
+                                                    <div className="text-lg">
+                                                        #
+                                                    </div>
+                                                    <div className="flex items-center">
+                                                        {channel.name}
+                                                    </div>
+                                                </div>
+                                            )}
                                             <div className="text-sm text-white">
                                                 {newMessageCountsMap[channel.id]
                                                     ? newMessageCountsMap[
@@ -105,7 +119,11 @@ export default function Panel({}) {
                                         >
                                             <div className="grid-item">
                                                 <div className="flex items-center h-full justify-center">
-                                                    <LuLock className="text-sm " />
+                                                    {channel.is_archived ? (
+                                                        <FiArchive className="text-sm " />
+                                                    ) : (
+                                                        <LuLock className="text-sm " />
+                                                    )}
                                                 </div>
                                                 <div className="font-semibold flex items-center leading-7">
                                                     {channel.name}

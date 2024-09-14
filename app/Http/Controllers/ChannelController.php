@@ -127,6 +127,7 @@ class ChannelController extends Controller
                 'channels.workspace_id',
                 'channels.user_id',
                 'channels.is_main_channel',
+                'channels.is_archived',
                 DB::raw('COUNT(CASE WHEN messages.created_at > channel_user.last_read_at OR channel_user.last_read_at IS NULL THEN 1 END) as unread_messages_count')
             )
             ->where('channel_user.user_id', $user->id)
@@ -142,7 +143,8 @@ class ChannelController extends Controller
                 'channels.type',
                 'channels.workspace_id',
                 'channels.user_id',
-                'channels.is_main_channel'
+                'channels.is_main_channel',
+                'channels.is_archived'
             )
             ->get();
 
@@ -160,6 +162,7 @@ class ChannelController extends Controller
                 'channels.workspace_id',
                 'channels.user_id',
                 'channels.is_main_channel',
+                'channels.is_archived',
                 DB::raw('COUNT(CASE WHEN messages.created_at > channel_user.last_read_at OR channel_user.last_read_at IS NULL THEN 1 END) as unread_messages_count')
             )
             ->where('channel_user.user_id', $user->id)
@@ -174,7 +177,8 @@ class ChannelController extends Controller
                 'channels.type',
                 'channels.workspace_id',
                 'channels.user_id',
-                'channels.is_main_channel'
+                'channels.is_main_channel',
+                'channels.is_archived'
             )
             ->get();
         $selfChannel = fn() => $workspace->channels()->where("type", "=", "SELF")->where("user_id", "=", $request->user()->id)->first();
@@ -185,6 +189,7 @@ class ChannelController extends Controller
 
         $permissions = fn() => [
             'view' => $user->can('view', [Channel::class, $channel]),
+            'archive' => $user->can('archive', [Channel::class, $channel]),
             'chat' => $user->can('create', [Message::class, $channel]),
             'thread' => $user->can('create', [Thread::class, $channel]),
             'createChannel' => $user->can('create', [Channel::class, $workspace]),
@@ -551,6 +556,26 @@ class ChannelController extends Controller
             return back();
         } catch (\Throwable $th) {
             DB::rollBack();
+            return back()->withErrors(['server' => "Something went wrong! Please try later."]);
+        }
+    }
+
+
+    public function archive(Request $request, Channel $channel)
+    {
+        // return back()->withErrors(['server' => "Something went wrong! Please try later."]);
+
+        if ($request->user()->cannot('archive', $channel)) abort(403);
+        $validated = $request->validate(['status' => 'required|boolean']);
+        try {
+            DB::beginTransaction();
+            $channel->is_archived = $validated['status'];
+            $channel->save();
+            DB::commit();
+            return back();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            // dd($th);
             return back()->withErrors(['server' => "Something went wrong! Please try later."]);
         }
     }

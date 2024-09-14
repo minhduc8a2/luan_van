@@ -60,6 +60,7 @@ Route::middleware('auth')->group(function () {
     Route::post("/channels/{channel}/remove_user_from_channel", [ChannelController::class, 'removeUserFromChannel'])->name("channel.remove_user_from_channel");
     Route::post("/channels/{channel}/add_users_to_channel", [ChannelController::class, 'addUsersToChannel'])->name("channel.add_users_to_channel");
     Route::post("/channels/{channel}/update_permissions", [ChannelController::class, 'updatePermissions'])->name("channel.update_permissions");
+    Route::post("/channels/{channel}/archive", [ChannelController::class, 'archive'])->name("channel.archive");
     Route::delete("/channels/{channel}", [ChannelController::class, 'destroy'])->name("channel.delete");
     Route::post("/channels/{channel}/messages", [MessageController::class, 'store'])->name('message.store');
     Route::post("/channels/{channel}/messages/{message}", [MessageController::class, 'storeThreadMessage'])->name('thread_message.store');
