@@ -23,7 +23,9 @@ import { FaAngleRight } from "react-icons/fa6";
 import { useDispatch, useSelector } from "react-redux";
 import { setThreadMessage } from "@/Store/threadSlice";
 import { setMessageId } from "@/Store/mentionSlice";
-
+import TipTapEditor from "@/Components/TipTapEditor";
+import { editMessage as editMessageInStore } from "@/Store/messagesSlice";
+import { getMentionsFromContent } from "@/helpers/tiptapHelper";
 export default function Message({
     message,
     user,
@@ -51,6 +53,8 @@ export default function Message({
         else otherAttachments.push(attachment);
     });
     const [openOverlay, setOpenOverlay] = useState(false);
+    const [isHovered, setIsHovered] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
     const groupedReactions = useMemo(() => {
         return groupReactions(reactions, channelUsers, auth.user);
     }, [reactions]);
@@ -90,6 +94,27 @@ export default function Message({
         }
     }, [newMessageReactionReceive]);
 
+    function editMessage(content, _, JSONContent) {
+        let mentionsList = getMentionsFromContent(JSONContent);
+
+        if (content == "<p></p>" && mentionsList.length == 0) return;
+        dispatch(editMessageInStore({ message_id: message.id, content }));
+        setIsEditing(false);
+        router.post(
+            route("message.update", message.id),
+            {
+                content,
+                mentionsList,
+            },
+            {
+                only: [],
+                preserveState: true,
+                headers: {
+                    "X-Socket-Id": Echo.socketId(),
+                },
+            }
+        );
+    }
     function reactToMessage(emojiId) {
         router.post(
             route("reaction.store", {
@@ -155,8 +180,8 @@ export default function Message({
     return (
         <div
             className={`message-container transition-all pl-8 pt-1 pr-4 pb-2 relative break-all group hover:bg-white/10 ${
-                hasChanged || index == 0 ? "pt-4" : "mt-0"
-            }`}
+                isHovered ? "bg-white/10" : ""
+            } ${hasChanged || index == 0 ? "pt-4" : "mt-0"}`}
             id={`message-${message.id}`}
         >
             {!channel.is_archived && (
@@ -164,6 +189,8 @@ export default function Message({
                     message={message}
                     threadStyle={threadStyle}
                     reactToMessage={reactToMessage}
+                    setIsHovered={(pre) => setIsHovered(pre)}
+                    setIsEditing={(pre) => setIsEditing(pre)}
                 />
             )}
             {hasChanged || index == 0 ? (
@@ -200,12 +227,30 @@ export default function Message({
                     ""
                 )}
 
-                <div
-                    className="prose prose-invert "
-                    dangerouslySetInnerHTML={{
-                        __html: message.content,
-                    }}
-                ></div>
+                {isEditing ? (
+                    <div className="border rounded-lg border-white/15 p-2 mt-2">
+                        <TipTapEditor
+                            message={message}
+                            onSubmit={editMessage}
+                            isEditMessage={true}
+                            closeEditMessageEditor={() => setIsEditing(false)}
+                        />
+                    </div>
+                ) : (
+                    <>
+                        <div
+                            className="prose prose-invert "
+                            dangerouslySetInnerHTML={{
+                                __html: message.content,
+                            }}
+                        ></div>
+                        {message.is_edited == true && (
+                            <span className="text-xs text-white/50">
+                                (edited)
+                            </span>
+                        )}
+                    </>
+                )}
                 {imageAttachments.length != 0 && (
                     <div className="flex mt-4 gap-4 flex-wrap">
                         <PhotoProvider

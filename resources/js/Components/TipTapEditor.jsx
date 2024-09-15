@@ -168,12 +168,15 @@ import { ReactRenderer } from "@tiptap/react";
 import tippy from "tippy.js";
 import Mention from "@tiptap/extension-mention";
 import { MentionList } from "./MentionList.jsx";
+import Button from "./Button";
 
 export default function TipTapEditor({
     onSubmit,
     onFilePicked,
     message = null,
     focus = 1,
+    isEditMessage = false,
+    closeEditMessageEditor = () => {},
 }) {
     const { auth, channel, channelUsers } = usePage().props;
     const inputId = useId();
@@ -380,7 +383,7 @@ export default function TipTapEditor({
         // }),
     ];
 
-    const content = ``;
+    const content = message?.content ? message.content : ``;
     const editorProps = {
         attributes: {
             class: "prose prose-invert  text-white/85  focus:outline-none  ",
@@ -444,56 +447,80 @@ export default function TipTapEditor({
                     }
                 })}
             </div>
-            <div className="py-2 flex items-center justify-between">
-                <div className="flex items-center gap-x-4">
-                    <div className="">
-                        <label
-                            className="bg-white/10 rounded-full w-fit p-2 block"
-                            htmlFor={inputId}
-                        >
-                            {" "}
-                            <FaPlus className="text-sm opacity-75" />
-                        </label>
-                        <input
-                            ref={inputFileRef}
-                            type="file"
-                            name=""
-                            id={inputId}
-                            multiple
-                            onChange={handleFilePicked}
-                            hidden
-                        />
-                    </div>
-                    <VscMention className="text-2xl opacity-75" />
-                    <PiVideoCamera className="text-xl opacity-75" />
-                    <TiMicrophoneOutline className="text-xl opacity-75" />
+            {!isEditMessage && (
+                <>
+                    <div className="py-2 flex items-center justify-between">
+                        <div className="flex items-center gap-x-4">
+                            <div className="">
+                                <label
+                                    className="bg-white/10 rounded-full w-fit p-2 block"
+                                    htmlFor={inputId}
+                                >
+                                    {" "}
+                                    <FaPlus className="text-sm opacity-75" />
+                                </label>
+                                <input
+                                    ref={inputFileRef}
+                                    type="file"
+                                    name=""
+                                    id={inputId}
+                                    multiple
+                                    onChange={handleFilePicked}
+                                    hidden
+                                />
+                            </div>
+                            <VscMention className="text-2xl opacity-75" />
+                            <PiVideoCamera className="text-xl opacity-75" />
+                            <TiMicrophoneOutline className="text-xl opacity-75" />
 
-                    {uploadProgress > 0 && uploadProgress < 100 && (
-                        <div className="flex gap-x-2 items-center">
-                            |<div className="text-xs">Uploading</div>
-                            <div className="w-64">
-                                <div className="w-full bg-gray-200 rounded-full dark:bg-gray-700">
-                                    <div
-                                        className="bg-purple-500 text-xs font-medium text-blue-100 text-center p-0.5 leading-none rounded-full"
-                                        style={{ width: `${uploadProgress}%` }}
-                                    >
-                                        {" "}
+                            {uploadProgress > 0 && uploadProgress < 100 && (
+                                <div className="flex gap-x-2 items-center">
+                                    |<div className="text-xs">Uploading</div>
+                                    <div className="w-64">
+                                        <div className="w-full bg-gray-200 rounded-full dark:bg-gray-700">
+                                            <div
+                                                className="bg-purple-500 text-xs font-medium text-blue-100 text-center p-0.5 leading-none rounded-full"
+                                                style={{
+                                                    width: `${uploadProgress}%`,
+                                                }}
+                                            >
+                                                {" "}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="text-xs">
+                                        {uploadProgress}%
                                     </div>
                                 </div>
-                            </div>
-                            <div className="text-xs">{uploadProgress}%</div>
+                            )}
                         </div>
-                    )}
-                </div>
 
-                <div className="p-1 px-2 bg-green-800 rounded flex justify-center items-center gap-x-2">
-                    <button onClick={() => submit(editor)}>
-                        <IoMdSend className="text-base" />
-                    </button>
-                    <div className="opacity-75">|</div>
-                    <FaAngleDown className="text-sm" />
+                        <div className="p-1 px-2 bg-green-800 rounded flex justify-center items-center gap-x-2">
+                            <button onClick={() => submit(editor)}>
+                                <IoMdSend className="text-base" />
+                            </button>
+                            <div className="opacity-75">|</div>
+                            <FaAngleDown className="text-sm" />
+                        </div>
+                    </div>
+                </>
+            )}
+            {isEditMessage && (
+                <div className="py-2 flex items-center justify-end">
+                    <Button
+                        className="text-xs"
+                        onClick={closeEditMessageEditor}
+                    >
+                        Close
+                    </Button>
+                    <Button
+                        className="bg-green-900 ml-4 text-xs  !text-white"
+                        onClick={() => submit(editor)}
+                    >
+                        Save
+                    </Button>
                 </div>
-            </div>
+            )}
         </div>
     );
 }

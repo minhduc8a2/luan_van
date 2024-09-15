@@ -77,6 +77,17 @@ export default function Event() {
                             preserveState: true,
                         });
                     }
+                } else if (e.type == "newUserJoinWorkspace") {
+                    if (channel.id == mainChannelId) {
+                        router.reload({
+                            only: ["directChannels", "users", "channelUsers"],
+                            preserveState: true,
+                        });
+                    } else
+                        router.reload({
+                            only: ["directChannels", "users"],
+                            preserveState: true,
+                        });
                 }
             })
             .error((error) => {
@@ -105,7 +116,8 @@ export default function Event() {
                 (e) => {
                     if (e.message?.user_id != auth.user.id)
                         if (cn.id != channel.id)
-                            dispatch(addMessageCountForChannel(cn));
+                            if (e.type == "newMessageCreated")
+                                dispatch(addMessageCountForChannel(cn));
                 }
             );
         });
@@ -115,7 +127,8 @@ export default function Event() {
                 (e) => {
                     if (e.message?.user_id != auth.user.id)
                         if (cn.id != channel.id)
-                            dispatch(addMessageCountForChannel(cn));
+                            if (e.type == "newMessageCreated")
+                                dispatch(addMessageCountForChannel(cn));
                 }
             );
         });

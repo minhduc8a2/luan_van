@@ -50,9 +50,7 @@ Route::middleware('auth')->group(function () {
     Route::get("/workspaces/{workspace}", [WorkspaceController::class, 'show'])->name('workspace.show');
     Route::get("/workspaces/{workspace}/direct_channels", [WorkspaceController::class, 'getDirectChannels'])->name('workspace.direct_channels');
     Route::post("workspaces/{workspace}/channels", [ChannelController::class, 'store'])->name('channel.store');
-    Route::get("/channels/{channel}", [ChannelController::class, 'show'])->name('channel.show')->fallback(function (Channel $channel) {
-        return redirect(route('workspace.show', $channel->workspace->id));
-    });
+    Route::get("/channels/{channel}", [ChannelController::class, 'show'])->name('channel.show');
     Route::post("/channels/{channel}/edit_description", [ChannelController::class, 'editDescription'])->name("channel.edit_description");
     Route::post("/channels/{channel}/edit_name", [ChannelController::class, 'editName'])->name("channel.edit_name");
     Route::post("/channels/{channel}/change_type", [ChannelController::class, 'changeType'])->name("channel.change_type");
@@ -66,6 +64,7 @@ Route::middleware('auth')->group(function () {
     Route::post("/channels/{channel}/archive", [ChannelController::class, 'archive'])->name("channel.archive");
     Route::delete("/channels/{channel}", [ChannelController::class, 'destroy'])->name("channel.delete");
     Route::post("/channels/{channel}/messages", [MessageController::class, 'store'])->name('message.store');
+    Route::post("/messages/{message}", [MessageController::class, 'update'])->name('message.update');
     Route::post("/channels/{channel}/messages/{message}", [MessageController::class, 'storeThreadMessage'])->name('thread_message.store');
     Route::get("/channels/{channel}/messages/{message}/thread_messages", [ThreadController::class, 'getMessages'])->name("thread.messages");
     Route::post("/channels/{channel}/huddle_invitation", [HuddleController::class, 'invite'])->name("huddle.invitation");

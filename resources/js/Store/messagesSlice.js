@@ -21,6 +21,15 @@ export const messagesSlice = createSlice({
                 state.messages[messageIndex].thread.messages_count = 1;
             }
         },
+        editMessage(state, action) {
+            let messageIndex = state.messages.findIndex(
+                (message) => message.id == action.payload.message_id
+            );
+            if (messageIndex >= 0) {
+                state.messages[messageIndex].content = action.payload.content;
+                state.messages[messageIndex].is_edited = true;
+            }
+        },
         addThreadMessagesCount(state, action) {
             let messageIndex = state.messages.findIndex(
                 (message) => message.id == action.payload
@@ -38,6 +47,7 @@ export const {
     addMessage,
     addThreadToMessages,
     addThreadMessagesCount,
+    editMessage,
 } = messagesSlice.actions;
 
 export default messagesSlice.reducer;

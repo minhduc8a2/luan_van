@@ -18,6 +18,8 @@ return new class extends Migration
             $table->string('messagable_type');
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('user_name')->nullable();
+            $table->boolean('is_auto_generated')->default(false);
+            $table->boolean('is_edited')->default(false);
             $table->timestamps();
         });
     }

@@ -103,7 +103,7 @@ class ChannelController extends Controller
 
         if ($request->expectsJson()) {
             return [
-                'messages' => fn() => $channel->messages()->with([
+                'messages' => $channel->messages()->with([
                     'attachments',
                     'reactions',
                     'thread' => function ($query) {

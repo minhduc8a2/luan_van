@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 class Message extends Model
 {
     use HasFactory;
-    protected $fillable = ['content', 'user_id', 'messagable_id', 'messagable_type', 'created_at'];
+    protected $fillable = ['content', 'user_id', 'messagable_id', 'messagable_type', 'created_at', 'is_auto_generated'];
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -51,7 +51,8 @@ class Message extends Model
             'content' => $content,
             'messagable_id' => $channel->id,
             'messagable_type' => Channel::class,
-            'user_id' => $user->id
+            'user_id' => $user->id,
+            'is_auto_generated' => true,
         ]);
         broadcast(new MessageEvent($channel, $message->load([
             'attachments',

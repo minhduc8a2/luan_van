@@ -41,10 +41,14 @@ export function InvitationForm({ workspace }) {
             return;
         }
 
-        router.post(route("invitation.store", { workspace: workspace.id }), {
-            code: uuid,
-            workspace_id: workspace.id,
-        });
+        router.post(
+            route("invitation.store", workspace.id),
+            {
+                code: uuid,
+                workspace_id: workspace.id,
+            },
+            { preserveState: true, only: [], preserveScroll: true }
+        );
     }
     useEffect(() => {
         if (flash.invitation_link) {

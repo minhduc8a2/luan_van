@@ -19,7 +19,7 @@ class MessageEvent implements ShouldBroadcastNow
     /**
      * Create a new event instance.
      */
-    public function __construct(public Channel $channel, public Message $message)
+    public function __construct(public Channel $channel, public Message $message, public string $type="newMessageCreated")
     {
         //
     }
@@ -39,6 +39,6 @@ class MessageEvent implements ShouldBroadcastNow
     }
     public function broadcastWith(): array
     {
-        return ['message' => $this->message];
+        return ['message' => $this->message, 'type' => $this->type];
     }
 }

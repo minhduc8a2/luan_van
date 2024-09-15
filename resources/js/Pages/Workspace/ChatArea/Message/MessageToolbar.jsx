@@ -10,17 +10,22 @@ import data from "@emoji-mart/data";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { setThreadMessage } from "@/Store/threadSlice";
+import { IoMdMore } from "react-icons/io";
 export default function MessageToolbar({
     message,
     threadStyle = false,
     reactToMessage,
+    setIsHovered,
+    setIsEditing,
 }) {
     const dispatch = useDispatch();
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+    const [showMore, setShowMore] = useState(false);
+
     return (
         <div
             className={`absolute bg-background  -top-6 h-12 w-fit right-12 group-hover:flex items-center justify-between  border rounded-lg border-white/15 p-2 ${
-                showEmojiPicker ? "flex" : "hidden"
+                showEmojiPicker || showMore ? "flex" : "hidden"
             }`}
         >
             <Tooltip
@@ -102,16 +107,14 @@ export default function MessageToolbar({
                 <div className="rounded p-2 hover:bg-white/15">
                     <Popover className="relative flex items-center">
                         {({ open }) => {
-                            if (open !== showEmojiPicker) {
-                                setShowEmojiPicker(open);
-                            }
                             return (
                                 <>
                                     <PopoverButton>
                                         <LuSmilePlus
-                                            onClick={() =>
-                                                setShowEmojiPicker(true)
-                                            }
+                                            onClick={() => {
+                                                setIsHovered(true);
+                                                setShowEmojiPicker(true);
+                                            }}
                                         />
                                     </PopoverButton>
                                     <PopoverPanel
@@ -119,14 +122,108 @@ export default function MessageToolbar({
                                         className="flex flex-col"
                                     >
                                         {({ close }) => (
-                                            <EmojiPicker
-                                                data={data}
-                                                onEmojiSelect={(emoji) => {
-                                                    close();
-                                                    setShowEmojiPicker(false);
-                                                    reactToMessage(emoji.id);
-                                                }}
-                                            />
+                                            <div className="">
+                                                <div
+                                                    className="fixed top-0 bottom-0 right-0 left-0 bg-transparent overflow-hidden z-10"
+                                                    onClick={() => {
+                                                        close();
+                                                        setShowEmojiPicker(
+                                                            false
+                                                        );
+                                                        setIsHovered(false);
+                                                    }}
+                                                ></div>
+                                                <div className="z-20 relative">
+                                                    <EmojiPicker
+                                                        data={data}
+                                                        onEmojiSelect={(
+                                                            emoji
+                                                        ) => {
+                                                            close();
+                                                            setShowEmojiPicker(
+                                                                false
+                                                            );
+                                                            reactToMessage(
+                                                                emoji.id
+                                                            );
+                                                            setIsHovered(false);
+                                                        }}
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
+                                    </PopoverPanel>
+                                </>
+                            );
+                        }}
+                    </Popover>
+                </div>
+            </Tooltip>
+            {/* More */}
+            <Tooltip
+                content={
+                    <div className="whitespace-nowrap p-1 text-center text-sm ">
+                        More actions
+                    </div>
+                }
+            >
+                <div className="rounded p-2 hover:bg-white/15">
+                    <Popover className="relative flex items-center">
+                        {({ open }) => {
+                            if (open !== showMore) {
+                                setShowMore(open);
+                            }
+                            return (
+                                <>
+                                    <PopoverButton>
+                                        <IoMdMore
+                                            onClick={() => {
+                                                setShowMore(true);
+                                                setIsHovered(true);
+                                            }}
+                                        />
+                                    </PopoverButton>
+                                    <PopoverPanel
+                                        anchor="bottom end"
+                                        className="flex flex-col"
+                                    >
+                                        {({ close }) => (
+                                            <div className="">
+                                                <div className=" rounded-lg border border-white/15 mt-2  bg-foreground w-48 z-20 relative overflow-hidden text-sm">
+                                                    <button className="hover:bg-blue-500 hover:text-white px-4  py-2 w-full text-left">
+                                                        Pin to channel
+                                                    </button>
+                                                    <hr />
+                                                    {!message.is_auto_generated && (
+                                                        <button
+                                                            className="hover:bg-blue-500 hover:text-white px-4  py-2 w-full text-left"
+                                                            onClick={() => {
+                                                                setIsEditing(
+                                                                    true
+                                                                );
+                                                                setIsHovered(
+                                                                    false
+                                                                );
+                                                                close();
+                                                            }}
+                                                        >
+                                                            Edit message
+                                                        </button>
+                                                    )}
+                                                    <hr />
+                                                    <button className="hover:bg-danger hover:text-white px-4  py-2 w-full text-left text-danger-light">
+                                                        Delete message
+                                                    </button>
+                                                </div>
+                                                <div
+                                                    className="fixed top-0 bottom-0 right-0 left-0 bg-transparent overflow-hidden z-10"
+                                                    onClick={() => {
+                                                        close();
+
+                                                        setIsHovered(false);
+                                                    }}
+                                                ></div>
+                                            </div>
                                         )}
                                     </PopoverPanel>
                                 </>

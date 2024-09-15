@@ -32,6 +32,7 @@ import {
     addMessage,
     addThreadMessagesCount,
     addThreadToMessages,
+    editMessage,
     setMessages,
 } from "@/Store/messagesSlice";
 import { setMessageId } from "@/Store/mentionSlice";
@@ -163,7 +164,16 @@ export default function ChatArea() {
             //     console.log("leaving", user);
             // })
             .listen("MessageEvent", (e) => {
-                dispatch(addMessage(e.message));
+                if (e.type == "newMessageCreated")
+                    dispatch(addMessage(e.message));
+                else if (e.type == "messageEdited")
+                    dispatch(
+                        editMessage({
+                            message_id: e.message.id,
+                            content: e.message.content,
+                            
+                        })
+                    );
                 // console.log(e);
             })
 

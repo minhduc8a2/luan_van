@@ -7,7 +7,9 @@ use App\Models\Workspace;
 use App\Models\Invitation;
 use App\Mail\InvitationMail;
 use Illuminate\Http\Request;
+use App\Events\WorkspaceEvent;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Routing\Controllers\HasMiddleware;
 
@@ -22,24 +24,33 @@ class InvitationController extends Controller implements HasMiddleware
     public function index(Request $request, string $code)
     {
 
-        $invitation = Invitation::where('code', '=', $code)->first();
-        //check invitation link is exists and valid
-        $expirationTime = $invitation->created_at->addDays(30);
+        try {
+            DB::beginTransaction();
+            $invitation = Invitation::where('code', '=', $code)->first();
+            //check invitation link is exists and valid
+            $expirationTime = $invitation->created_at->addDays(30);
 
-        $isExpired = Carbon::now()->greaterThan($expirationTime);
+            $isExpired = Carbon::now()->greaterThan($expirationTime);
 
-        if ($isExpired) {
-            abort(403, 'Expired link');;
+            if ($isExpired) {
+                abort(403, 'Expired link');
+            }
+            //add user to workspace
+            $user = $request->user();
+            /**
+             * @var Workspace $workspace
+             */
+            $workspace = Workspace::find($invitation->workspace_id);
+            $workspace->addUserToWorkspace($user);
+
+            broadcast(new WorkspaceEvent(workspace: $workspace, type: "newUserJoinWorkspace", fromUserId: $request->user()->id), $user)->toOthers();
+            DB::commit();
+            //
+            return redirect(route('workspace.show', $workspace->id));
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return abort(403, 'Invalid link');
         }
-        //add user to workspace
-        $user = $request->user();
-        /**
-         * @var Workspace $workspace
-         */
-        $workspace = Workspace::find($invitation->workspace_id);
-        $workspace->addUserToWorkspace($user);
-        //
-        return redirect(route('workspace.show', $workspace->id));
     }
 
     public function store(Request $request, Workspace $workspace)
@@ -51,13 +62,16 @@ class InvitationController extends Controller implements HasMiddleware
             'workspace_id' => 'required|integer',
         ]);
         try {
+            DB::beginTransaction();
             Invitation::create([
                 'code' => $validated['code'],
                 'workspace_id' => $validated['workspace_id']
             ]);
             $invitationLink = env('PUBLIC_APP_URL') . '/invitations/' . $validated['code'];
+            DB::commit();
             return back()->with('invitation_link', $invitationLink);
         } catch (\Throwable $th) {
+            DB::rollBack();
             return abort(403);
         }
     }

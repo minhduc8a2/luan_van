@@ -22,17 +22,14 @@ class MessagePolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Channel $channel): bool
-    {
-       
-    }
+    public function view(User $user, Channel $channel): bool {}
 
     /**
      * Determine whether the user can create models.
      */
     public function create(User $user, Channel $channel): bool
     {
-        if($channel->is_archived) return false;
+        if ($channel->is_archived) return false;
 
         return $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name)
             || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_CHAT->name);
@@ -43,7 +40,16 @@ class MessagePolicy
      */
     public function update(User $user, Message $message): bool
     {
-        //
+        if ($message->messagable_type != Channel::class) return false;
+        try {
+            $channel = Channel::find($message->messagable_id);
+            if ($channel->is_archived) return false;
+            if ($message->is_auto_generated) return false;
+            return $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name)
+                || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_CHAT->name);
+        } catch (\Throwable $th) {
+            return false;
+        }
     }
 
     /**

@@ -178,7 +178,40 @@ class MessageController extends Controller
      */
     public function update(Request $request, Message $message)
     {
-        //
+        if ($request->user()->cannot('update', [Message::class, $message])) return abort(403);
+        $validated = $request->validate(['content' => 'string']);
+        $content = $validated['content'];
+
+        try {
+            DB::beginTransaction();
+            $channel = Channel::find($message->messagable_id);
+            $content = Helper::sanitizeContent($content);
+            $message->content = $content;
+            $message->is_edited = true;
+            $message->save();
+            //mentions
+            $mentionsList = $request->mentionsList;
+
+            foreach ($mentionsList as $u) {
+                $mentionedUser = User::find($u['id']);
+                $mentionedUser->notify(new MentionNotification($channel, $channel->workspace, $request->user(), $mentionedUser, $message));
+            }
+            //notify others about new message
+            broadcast(new MessageEvent($channel, $message->load([
+                'attachments',
+                'reactions',
+                'thread' => function ($query) {
+                    $query->withCount('messages');
+                }
+            ]), "messageEdited"));
+
+            DB::commit();
+            back();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            // dd($th);
+            return back()->withErrors(['server' => "Something went wrong, please try later!"]);
+        }
     }
 
     /**
