@@ -2,31 +2,48 @@ import Button from "@/Components/Button";
 import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
 
 import OverlayNotification from "@/Components/Overlay/OverlayNotification";
-import { useForm, usePage } from "@inertiajs/react";
-import React from "react";
+import { router, useForm, usePage } from "@inertiajs/react";
+import React, { useMemo } from "react";
 import { useState } from "react";
 import { FaLock } from "react-icons/fa";
 export default function ChangeToPrivateConfirm({ channelName }) {
     const { channel, workspace } = usePage().props;
-    const channelType =
-        channel.type == "PUBLIC"
+    const channelType = useMemo(() => {
+        return channel.type == "PUBLIC"
             ? "PRIVATE"
             : channel.type == "PRIVATE"
             ? "PUBLIC"
             : "";
-    const { post, processing, errors, reset } = useForm({ type: channelType });
+    }, [channel]);
+
     const [success, setSuccess] = useState(false);
+    const [errors, setErrors] = useState(null);
+    const [processing, setProcessing] = useState(false);
     function onSubmit(e) {
         e.preventDefault();
-        post(route("channel.change_type", channel.id), {
-            preserveState: true,
-            onSuccess: () => {
-                setSuccess(true);
+        setProcessing(true);
+
+        router.post(
+            route("channel.change_type", channel.id),
+            {
+                type: channelType,
             },
-            headers: {
-                "X-Socket-Id": Echo.socketId(),
-            },
-        });
+            {
+                preserveState: true,
+                onSuccess: () => {
+                    setSuccess(true);
+                },
+                onError: (err) => {
+                    setErrors(err);
+                },
+                onFinish: () => {
+                    setProcessing(false);
+                },
+                headers: {
+                    "X-Socket-Id": Echo.socketId(),
+                },
+            }
+        );
     }
     return (
         <OverlayNotification
@@ -38,7 +55,10 @@ export default function ChangeToPrivateConfirm({ channelName }) {
             buttonNode={
                 <Button
                     className=" bg-transparent w-full !rounded-none    py-4"
-                    onClick={() => setSuccess(false)}
+                    onClick={() => {
+                        setSuccess(false);
+                        setErrors(null);
+                    }}
                 >
                     <div className="flex items-center gap-x-2">
                         {channel.type != "PUBLIC" ? (

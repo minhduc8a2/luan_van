@@ -102,13 +102,15 @@ class ChannelController extends Controller
         }
 
         if ($request->expectsJson()) {
-            return ['messages' => $channel->messages()->with([
-                'attachments',
-                'reactions',
-                'thread' => function ($query) {
-                    $query->withCount('messages');
-                }
-            ])->latest()->simplePaginate($perPage, ['*'], 'page', $pageNumber)];
+            return [
+                'messages' => fn() => $channel->messages()->with([
+                    'attachments',
+                    'reactions',
+                    'thread' => function ($query) {
+                        $query->withCount('messages');
+                    }
+                ])->latest()->simplePaginate($perPage, ['*'], 'page', $pageNumber)
+            ];
         }
         $user = $request->user();
         /**
@@ -150,7 +152,7 @@ class ChannelController extends Controller
 
         $workspaces = fn() => $request->user()->workspaces;
         $users = fn() => $workspace->users;
-        $notifications = fn() => $user->notifications;
+        $newNotificationsCount = fn() => $user->notifications()->where("read_at", null)->count();
 
         $permissions = fn() => [
             'view' => $user->can('view', [Channel::class, $channel]),
@@ -203,7 +205,7 @@ class ChannelController extends Controller
                 }
             ])->latest()->simplePaginate($perPage, ['*'], 'page', $pageNumber),
             'channelUsers' => fn() => $channel->users,
-            'notifications' => $notifications
+            'newNoftificationsCount' => $newNotificationsCount
         ]);
     }
 

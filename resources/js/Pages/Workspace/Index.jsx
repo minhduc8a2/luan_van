@@ -8,21 +8,21 @@ import Huddle from "./Huddle/Huddle";
 import Event from "./Event";
 import { makeStore } from "@/Store/store";
 import { Provider } from "react-redux";
-import { setActivity } from "@/Store/activitySlice";
+import { setActivity, setNotificationsCount } from "@/Store/activitySlice";
 import { initMessageCountForChannel } from "@/Store/newMessageCountsMapSlice";
 export default function Index({
-    notifications,
+    newNoftificationsCount,
     channels,
     directChannels,
-    
 }) {
-    
     const storeRef = useRef();
     if (!storeRef.current) {
         // Create the store instance the first time this renders
         storeRef.current = makeStore();
-        storeRef.current.dispatch(setActivity(notifications));
 
+        storeRef.current.dispatch(
+            setNotificationsCount(newNoftificationsCount)
+        );
         channels.forEach((channel) => {
             storeRef.current.dispatch(initMessageCountForChannel(channel));
         });

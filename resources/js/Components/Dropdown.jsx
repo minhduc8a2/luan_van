@@ -26,7 +26,7 @@ const Trigger = ({ children }) => {
             <div
                 onClick={toggleOpen}
                 className="cursor-pointer"
-                onMouseOver={toggleOpen}
+                
             >
                 {children}
             </div>

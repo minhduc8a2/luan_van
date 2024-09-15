@@ -59,7 +59,7 @@ export default function Panel({}) {
                         </div>
                         <div className="">Channels</div>
                     </div>
-                    <ul>
+                    <ul className="max-h-[30vh] overflow-y-auto scrollbar">
                         {channels.map((channel) => {
                             console.log(channel);
                             if (channel.type === "PUBLIC")
@@ -151,7 +151,7 @@ export default function Panel({}) {
                         </div>
                         <div className="">Direct messages</div>
                     </div>
-                    <ul>
+                    <ul className="max-h-[30vh] overflow-y-auto scrollbar">
                         {directChannels.map((directCn) => {
                             const userIds = directCn.name.split("_");
                             const userId = userIds.find(

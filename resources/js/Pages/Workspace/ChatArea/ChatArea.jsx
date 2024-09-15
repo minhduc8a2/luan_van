@@ -191,6 +191,7 @@ export default function ChatArea() {
                         router.reload({
                             only: [
                                 "channel",
+                                "channels",
                                 "permissions",
                                 "channelPermissions",
                             ],
@@ -218,7 +219,7 @@ export default function ChatArea() {
                     case "archiveChannel":
                         router.reload({
                             only: [
-                                'channel',
+                                "channel",
                                 "channels",
                                 "availableChannels",
                                 "permissions",

@@ -124,6 +124,12 @@ export default function ChannelNotification({
                         </div>
                     </div>
                 );
+            case "changeType":
+                return (
+                    <div className="text-left">
+                        {`${fromUser.name} has changed channel privacy from ${data.oldType} to ${data.newType}`}
+                    </div>
+                );
             default:
                 break;
         }

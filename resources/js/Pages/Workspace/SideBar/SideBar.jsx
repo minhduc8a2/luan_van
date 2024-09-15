@@ -20,10 +20,8 @@ import { usePage } from "@inertiajs/react";
 export default function SideBar({}) {
     const { auth, url, workspace, workspaces } = usePage().props;
     const { type: panelType } = useSelector((state) => state.panel);
-    const { notifications } = useSelector((state) => state.activity);
-    const newNotificationsLength = useMemo(() => {
-        return notifications.filter((no) => !no.read_at).length;
-    }, [notifications]);
+    const {  new_count } = useSelector((state) => state.activity);
+  
     const dispatch = useDispatch();
     const boxRef = useRef(null);
     const itemStyle = "flex flex-col items-center gap-y-2 group";
@@ -106,9 +104,9 @@ export default function SideBar({}) {
                         </div>
                     )}
                     <div className="text-xs font-semibold">Activity</div>
-                    {newNotificationsLength > 0 && (
+                    {new_count > 0 && (
                         <div className="bg-red-500 rounded-lg text-white w-4 h-4 text-xs absolute -top-2 -right-1">
-                            {newNotificationsLength}
+                            {new_count}
                         </div>
                     )}
                 </button>

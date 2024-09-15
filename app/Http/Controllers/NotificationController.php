@@ -21,4 +21,8 @@ class NotificationController extends Controller
       $notification->read_at = $notification->read_at ?? Carbon::now();
       $notification->save();
    }
+
+   public function get(Request $request){
+      return $request->user()->notifications()->simplePaginate(8);
+   }
 }
