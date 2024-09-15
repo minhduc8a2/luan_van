@@ -22,12 +22,14 @@ export default function Event() {
     useEffect(() => {
         Echo.private("App.Models.User." + auth.user.id).notification(
             (notification) => {
+                console.log("new", notification);
                 dispatch(addActivity(notification));
                 if (isChannelsNotificationBroadcast(notification.type)) {
                     switch (notification.changesType) {
                         case "addedToNewChannel":
                         case "removedFromChannel":
                             router.reload({
+                                preserveState: true,
                                 only: [
                                     "channel",
                                     "messages",
@@ -69,13 +71,11 @@ export default function Event() {
                         router.visit(route("channel.show", mainChannelId), {
                             preserveState: true,
                         });
-                    }
-                    else{
-                       
+                    } else {
                         router.reload({
-                            only: ["availableChannels","channels"],
+                            only: ["availableChannels", "channels"],
                             preserveState: true,
-                        })
+                        });
                     }
                 }
             })

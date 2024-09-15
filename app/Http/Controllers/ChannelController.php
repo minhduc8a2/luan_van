@@ -272,18 +272,32 @@ class ChannelController extends Controller
             return  abort(403);
         }
         $validated = $request->validate(['type' => "required|in:PUBLIC,PRIVATE"]);
+        $user = $request->user();
         try {
             DB::beginTransaction();
-
+            $oldType = $channel->type;
             $channel->type = $validated['type'];
             $channel->save();
+            Message::createStringMessageAndBroadcast($channel, $request->user(), $request->user()->name . " has changed channel privacy from " . $oldType . " to " . $channel->type . ".");
             broadcast(new SettingsEvent($channel, "changeType"))->toOthers();
+            $channelUsers = $channel->users;
+            foreach ($channelUsers as $channelUser) {
+                $channelUser->notify(new ChannelsNotification(
+                    fromUser: $user,
+                    toUser: null,
+                    channel: $channel,
+                    workspace: $channel->workspace,
+                    changesType: 'changeType',
+                    data: ['oldType' => $oldType, 'newType' => $channel->type]
+                ));
+            }
+
             DB::commit();
 
             return back();
         } catch (\Throwable $th) {
             DB::rollBack();
-
+            dd($th);
             return back()->withErrors(["server" => "Something went wrong! Please try later"]);
         }
     }
@@ -345,7 +359,7 @@ class ChannelController extends Controller
 
             //notify
             broadcast(new SettingsEvent($channel, "removeUserFromChannel"))->toOthers();
-            $user->notify(new ChannelsNotification($request->user(), $user, $channel, "removedFromChannel"));
+            $user->notify(new ChannelsNotification($request->user(), $user, $channel, $channel->workspace, "removedFromChannel"));
             Message::createStringMessageAndBroadcast($channel, $request->user(), $request->user()->name . " has removed " . $user->name . " from channel");
 
             DB::commit();
@@ -371,7 +385,7 @@ class ChannelController extends Controller
                 $user = User::find($u['id']);
                 if ($user->channels()->where('channels.id', '=', $channel->id)->exists()) continue;
                 $user->channels()->attach($channel->id, ['role_id' => Role::getRoleIdByName(BaseRoles::MEMBER->name)]);
-                $user->notify(new ChannelsNotification($request->user(), $user, $channel, "addedToNewChannel"));
+                $user->notify(new ChannelsNotification($request->user(), $user, $channel, $channel->workspace, "addedToNewChannel"));
                 Message::createStringMessageAndBroadcast($channel, $request->user(), $request->user()->name . " has added " . $user->name . " to channel");
             }
             broadcast(new SettingsEvent($channel, "addUsersToChannel"))->toOthers();
@@ -402,6 +416,7 @@ class ChannelController extends Controller
                 $user->channels()->updateExistingPivot($channel->id, [
                     'role_id' => Role::getRoleIdByName(BaseRoles::MANAGER->name),
                 ]);
+                $user->notify(new ChannelsNotification($request->user(), null, $channel, $channel->workspace, "addedAsManager"));
             }
             broadcast(new SettingsEvent($channel, "addManagers"))->toOthers();
             DB::commit();
@@ -429,6 +444,14 @@ class ChannelController extends Controller
                 'role_id' => Role::getRoleIdByName(BaseRoles::MEMBER->name),
             ]);
             broadcast(new SettingsEvent($channel, "removeManager"))->toOthers();
+            $user->notify(new ChannelsNotification(
+                fromUser: $request->user(),
+                toUser: null,
+                channel: $channel,
+                workspace: $channel->workspace,
+                changesType: "removedManagerRole",
+
+            ));
             DB::commit();
 
             return back();
@@ -540,10 +563,20 @@ class ChannelController extends Controller
         try {
             DB::beginTransaction();
             $channel->is_archived = $validated['status'];
-
+            $user = $request->user();
             $channel->save();
             broadcast(new SettingsEvent($channel, "archiveChannel"))->toOthers();
+            $channelUsers = $channel->users;
+            foreach ($channelUsers as $channelUser) {
+                $channelUser->notify(new ChannelsNotification(
+                    fromUser: $user,
+                    toUser: null,
+                    channel: $channel,
+                    workspace: $channel->workspace,
+                    changesType: $validated['status'] ? 'archiveChannel' : "unarchiveChannel",
 
+                ));
+            }
             DB::commit();
             return back();
         } catch (\Throwable $th) {
@@ -560,6 +593,8 @@ class ChannelController extends Controller
         if ($request->user()->cannot('delete', $channel)) abort(403);
         try {
             DB::beginTransaction();
+            $user = $request->user;
+            $channelUsers = $channel->users;
             $channelId = $channel->id;
             $workspace = $channel->workspace;
             $messages = $channel->messages()->with('thread')->get();
@@ -572,8 +607,18 @@ class ChannelController extends Controller
             $channel->messages()->delete();
             $channel->permissions()->delete();
             $channel->delete();
-            broadcast(new WorkspaceEvent(workspace: $workspace, type: 'deleteChannel', data: $channelId))->toOthers();
 
+            foreach ($channelUsers as $channelUser) {
+                $channelUser->notify(new ChannelsNotification(
+                    fromUser: $user,
+                    toUser: null,
+                    channel: $channel,
+                    workspace: $channel->workspace,
+                    changesType: 'deleteChannel',
+
+                ));
+            }
+            broadcast(new WorkspaceEvent(workspace: $workspace, type: 'deleteChannel', data: $channelId))->toOthers();
             DB::commit();
             return redirect(route('channel.show', $workspace->mainChannel()->id));
         } catch (\Throwable $th) {

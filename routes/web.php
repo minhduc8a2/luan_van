@@ -2,6 +2,7 @@
 
 use App\Models\User;
 use Inertia\Inertia;
+use App\Models\Channel;
 use App\Models\Attachment;
 use App\Mail\InvitationMail;
 use Illuminate\Http\Request;
@@ -14,11 +15,11 @@ use App\Http\Controllers\ThreadController;
 use App\Http\Controllers\ChannelController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReactionController;
 use App\Http\Controllers\WorkspaceController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Auth\ProviderController;
-use App\Http\Controllers\ReactionController;
 
 
 Route::get('/auth/redirect', function () {
@@ -49,7 +50,9 @@ Route::middleware('auth')->group(function () {
     Route::get("/workspaces/{workspace}", [WorkspaceController::class, 'show'])->name('workspace.show');
     Route::get("/workspaces/{workspace}/direct_channels", [WorkspaceController::class, 'getDirectChannels'])->name('workspace.direct_channels');
     Route::post("workspaces/{workspace}/channels", [ChannelController::class, 'store'])->name('channel.store');
-    Route::get("/channels/{channel}", [ChannelController::class, 'show'])->name('channel.show');
+    Route::get("/channels/{channel}", [ChannelController::class, 'show'])->name('channel.show')->fallback(function (Channel $channel) {
+        return redirect(route('workspace.show', $channel->workspace->id));
+    });
     Route::post("/channels/{channel}/edit_description", [ChannelController::class, 'editDescription'])->name("channel.edit_description");
     Route::post("/channels/{channel}/edit_name", [ChannelController::class, 'editName'])->name("channel.edit_name");
     Route::post("/channels/{channel}/change_type", [ChannelController::class, 'changeType'])->name("channel.change_type");

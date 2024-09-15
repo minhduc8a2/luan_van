@@ -104,14 +104,14 @@ export default function HuddleNotification({
                 <div className="flex gap-x-2 justify-between">
                     <div className={`message-container  flex-1 `}>
                         <Avatar
-                            src={"/storage/bot.png"}
+                            src={fromUser.avatar_url}
                             className="w-8 h-8"
                             noStatus={true}
                         />
                         <div className="mx-2 ">
                             <div className="flex gap-x-2 items-center">
                                 <div className="text-sm font-bold">
-                                    Snackbot
+                                    {fromUser.name}
                                 </div>
                                 <div className="text-xs">
                                     {UTCToDateTime(created_at)}

@@ -3,6 +3,7 @@ import React from "react";
 import { FaToggleOff } from "react-icons/fa6";
 import { useEffect } from "react";
 import {
+    isChannelsNotification,
     isHuddleInvitationNotificationType,
     isMentionNotification,
 } from "@/helpers/notificationTypeHelper";
@@ -10,6 +11,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setAsRead, setAsView } from "@/Store/activitySlice";
 import HuddleNotification from "./HuddleNotification";
 import MentionNotification from "./MentionNotification";
+import ChannelNotification from "./ChannelNotification";
 export default function Activity() {
     const { notifications } = useSelector((state) => state.activity);
     const { type: panelType } = useSelector((state) => state.panel);
@@ -79,6 +81,16 @@ export default function Activity() {
                     } else if (isMentionNotification(notification.type)) {
                         return (
                             <MentionNotification
+                                notification={notification}
+                                key={notification.id}
+                                handleNotificationClick={
+                                    handleNotificationClick
+                                }
+                            />
+                        );
+                    } else if (isChannelsNotification(notification.type)) {
+                        return (
+                            <ChannelNotification
                                 notification={notification}
                                 key={notification.id}
                                 handleNotificationClick={
