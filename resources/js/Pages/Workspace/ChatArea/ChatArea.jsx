@@ -214,22 +214,11 @@ export default function ChatArea() {
                             only: ["permissions", "channelPermissions"],
                         });
                         break;
-                    case "deleteChannel":
-                        
-                        if (huddleChannel.id == channel.id) {
-                            dispatch(toggleHuddle());
-                        }
-                        // router.get(
-                        //     route("channel.show", mainChannelId),
-                        //     {},
-                        //     {
-                        //         preserveState: true,
-                        //     }
-                        // );
-                        break;
+
                     case "archiveChannel":
                         router.reload({
                             only: [
+                                'channel',
                                 "channels",
                                 "availableChannels",
                                 "permissions",

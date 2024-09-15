@@ -20,7 +20,7 @@ class WorkspaceEvent implements ShouldBroadcastNow
     /**
      * Create a new event instance.
      */
-    public function __construct(public Workspace $workspace, public string $type = "", public string $fromUserId = "")
+    public function __construct(public Workspace $workspace, public string $type = "", public $data = null, public string $fromUserId = "")
     {
         //
     }
@@ -39,6 +39,6 @@ class WorkspaceEvent implements ShouldBroadcastNow
 
     public function broadcastWith(): array
     {
-        return ['type' => $this->type, 'fromUserId' => $this->fromUserId];
+        return ['type' => $this->type, 'fromUserId' => $this->fromUserId, 'data' => $this->data];
     }
 }

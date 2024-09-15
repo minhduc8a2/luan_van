@@ -2,15 +2,23 @@ import { router, usePage } from "@inertiajs/react";
 import React, { useRef } from "react";
 import { useEffect } from "react";
 import { setManyOnline, setOnlineStatus } from "@/Store/OnlineStatusSlice";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addActivity } from "@/Store/activitySlice";
 import { isChannelsNotificationBroadcast } from "@/helpers/notificationTypeHelper";
 import { addMessageCountForChannel } from "@/Store/newMessageCountsMapSlice";
+import { toggleHuddle } from "@/Store/huddleSlice";
 export default function Event() {
-    const { workspace, channel, auth, channels, directChannels } =
-        usePage().props;
+    const {
+        workspace,
+        channel,
+        auth,
+        channels,
+        directChannels,
+        mainChannelId,
+    } = usePage().props;
     const dispatch = useDispatch();
     const connectionRef = useRef(null);
+    const { channel: huddleChannel } = useSelector((state) => state.huddle);
     useEffect(() => {
         Echo.private("App.Models.User." + auth.user.id).notification(
             (notification) => {
@@ -53,6 +61,22 @@ export default function Event() {
                         only: ["availableChannels"],
                         preserveState: true,
                     });
+                } else if (e.type == "deleteChannel") {
+                    if (huddleChannel.id == e.data) {
+                        dispatch(toggleHuddle());
+                    }
+                    if (channel.id == e.data) {
+                        router.visit(route("channel.show", mainChannelId), {
+                            preserveState: true,
+                        });
+                    }
+                    else{
+                       
+                        router.reload({
+                            only: ["availableChannels","channels"],
+                            preserveState: true,
+                        })
+                    }
                 }
             })
             .error((error) => {
@@ -62,7 +86,7 @@ export default function Event() {
             connectionRef.current = null;
             Echo.leave(`workspaces.${workspace.id}`);
         };
-    }, [workspace.id]);
+    }, [workspace.id, huddleChannel, channel]);
     useEffect(() => {
         if (connectionRef.current)
             connectionRef.current

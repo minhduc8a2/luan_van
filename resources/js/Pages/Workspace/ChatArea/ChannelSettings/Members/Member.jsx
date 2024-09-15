@@ -42,57 +42,68 @@ export default function Member({
                     Channel Manager
                 </div>
             )}
-            <Popover className="absolute right-4 top-1/2 -translate-y-1/2">
-                {({ open }) => {
-                    if (!open) setShowOptions(false);
-                    return (
-                        <>
-                            <PopoverButton
-                                className={` text-sm hover:underline ${
-                                    showOptions ? "block" : "hidden"
-                                } group-hover:block`}
-                            >
-                                <div
-                                    className=" p-1 bg-background border border-white/50 rounded-lg"
-                                    onClick={() => setShowOptions(true)}
+            {(permissions.removeManager ||
+                permissions.addManagers ||
+                permissions.removeUserFromChannel) && (
+                <Popover className="absolute right-4 top-1/2 -translate-y-1/2">
+                    {({ open }) => {
+                        if (!open) setShowOptions(false);
+                        return (
+                            <>
+                                <PopoverButton
+                                    className={` text-sm hover:underline ${
+                                        showOptions ? "block" : "hidden"
+                                    } group-hover:block`}
                                 >
-                                    <IoMdMore className="text-xl" />
-                                </div>
-                            </PopoverButton>
-                            <PopoverPanel
-                                anchor="bottom end"
-                                className="flex flex-col bg-background border border-white/25 py-2 rounded-lg text-white/85"
-                            >
-                                {isManager ? (
-                                    <CloseButton
-                                        className="p-2 px-4 text-start hover:bg-white/15"
-                                        onClick={() =>
-                                            removeChannelManager(user)
-                                        }
+                                    <div
+                                        className=" p-1 bg-background border border-white/50 rounded-lg"
+                                        onClick={() => setShowOptions(true)}
                                     >
-                                        Remove from Channel Manager
-                                    </CloseButton>
-                                ) : (
-                                    <CloseButton
-                                        className="p-2 px-4 text-start hover:bg-white/15"
-                                        onClick={() => makeChannelManager(user)}
-                                    >
-                                        Make Channel Manager
-                                    </CloseButton>
-                                )}
-                                {!channel.is_main_channel && (
-                                    <CloseButton
-                                        className="p-2 px-4 text-start hover:bg-danger"
-                                        onClick={() => removeFromChannel(user)}
-                                    >
-                                        Remove from Channel
-                                    </CloseButton>
-                                )}
-                            </PopoverPanel>
-                        </>
-                    );
-                }}
-            </Popover>
+                                        <IoMdMore className="text-xl" />
+                                    </div>
+                                </PopoverButton>
+                                <PopoverPanel
+                                    anchor="bottom end"
+                                    className="flex flex-col bg-background border border-white/25 py-2 rounded-lg text-white/85"
+                                >
+                                    {isManager
+                                        ? permissions.removeManager && (
+                                              <CloseButton
+                                                  className="p-2 px-4 text-start hover:bg-white/15"
+                                                  onClick={() =>
+                                                      removeChannelManager(user)
+                                                  }
+                                              >
+                                                  Remove from Channel Manager
+                                              </CloseButton>
+                                          )
+                                        : permissions.addManagers && (
+                                              <CloseButton
+                                                  className="p-2 px-4 text-start hover:bg-white/15"
+                                                  onClick={() =>
+                                                      makeChannelManager(user)
+                                                  }
+                                              >
+                                                  Make Channel Manager
+                                              </CloseButton>
+                                          )}
+                                    {!channel.is_main_channel &&
+                                        permissions.removeUserFromChannel && (
+                                            <CloseButton
+                                                className="p-2 px-4 text-start hover:bg-danger"
+                                                onClick={() =>
+                                                    removeFromChannel(user)
+                                                }
+                                            >
+                                                Remove from Channel
+                                            </CloseButton>
+                                        )}
+                                </PopoverPanel>
+                            </>
+                        );
+                    }}
+                </Popover>
+            )}
         </div>
     );
 }

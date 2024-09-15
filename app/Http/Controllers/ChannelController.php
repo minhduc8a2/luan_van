@@ -65,7 +65,7 @@ class ChannelController extends Controller
             $channel = $request->user()->ownChannels()->create(['name' => $validated['name'], 'type' => $validated['type'], 'workspace_id' => $workspace->id]);
             $channel->assignManagerRoleAndManagerPermissions($request->user());
             $channel->initChannelPermissions();
-            broadcast(new WorkspaceEvent($workspace, "storeChannel", $request->user()->id))->toOthers();
+            broadcast(new WorkspaceEvent(workspace: $workspace, type: "storeChannel", fromUserId: $request->user()->id))->toOthers();
 
             DB::commit();
             return back();
@@ -560,6 +560,7 @@ class ChannelController extends Controller
         if ($request->user()->cannot('delete', $channel)) abort(403);
         try {
             DB::beginTransaction();
+            $channelId = $channel->id;
             $workspace = $channel->workspace;
             $messages = $channel->messages()->with('thread')->get();
             $messages->each(function ($message) {
@@ -571,10 +572,10 @@ class ChannelController extends Controller
             $channel->messages()->delete();
             $channel->permissions()->delete();
             $channel->delete();
-            broadcast(new SettingsEvent($channel, "deleteChannel"))->toOthers();
+            broadcast(new WorkspaceEvent(workspace: $workspace, type: 'deleteChannel', data: $channelId))->toOthers();
 
             DB::commit();
-            return redirect(route('workspace.show', $workspace->id));
+            return redirect(route('channel.show', $workspace->mainChannel()->id));
         } catch (\Throwable $th) {
             DB::rollBack();
 

@@ -195,19 +195,17 @@ export default function Huddle() {
         }
     }
     function leaveHuddle() {
-        try {
-            if (channel) {
-                Echo.leave(`huddles.${channel.id}`);
+        if (channel) {
+            Echo.leave(`huddles.${channel.id}`);
+            try {
                 removeTrackTFromStream("video");
                 removeTrackTFromStream("audio");
-                otherUserStreams.current.clear();
-                peersRef.current.clear();
-                joinObject.current = null;
-                setShowUserVideo(false);
-                setShowShareScreen(false);
-            }
-        } catch (error) {
-            console.log(error);
+            } catch (error) {}
+            otherUserStreams.current.clear();
+            peersRef.current.clear();
+            joinObject.current = null;
+            setShowUserVideo(false);
+            setShowShareScreen(false);
         }
     }
     useEffect(() => {
