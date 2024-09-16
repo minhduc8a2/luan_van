@@ -8,7 +8,7 @@ import { FaPlus } from "react-icons/fa6";
 import TipTapEditor from "@/Components/TipTapEditor";
 import { router, usePage } from "@inertiajs/react";
 import { useEffect, useRef, useState } from "react";
-import { InView } from "react-intersection-observer";
+import { InView, useInView } from "react-intersection-observer";
 import { TfiReload } from "react-icons/tfi";
 import {
     compareDateTime,
@@ -44,34 +44,48 @@ import { FaLock } from "react-icons/fa";
 
 export default function ChatArea() {
     const {
-        users,
         auth,
         channel,
         channelUsers,
         messages: initMessages,
         permissions,
-        mainChannelId,
     } = usePage().props;
-
+    const {
+        ref: top_ref,
+        inView: top_inView,
+        entry: top_entry,
+    } = useInView({
+        /* Optional options */
+        threshold: 0,
+        initialInView: true,
+    });
+    const {
+        ref: bottom_ref,
+        inView: bottom_inView,
+        entry: bottom_entry,
+    } = useInView({
+        /* Optional options */
+        threshold: 0,
+        initialInView: true,
+    });
     const { message: threadMessage } = useSelector((state) => state.thread);
     const { messageId } = useSelector((state) => state.mention);
     const { messages } = useSelector((state) => state.messages);
     const [focus, setFocus] = useState(1);
     const dispatch = useDispatch();
     const { channel: huddleChannel } = useSelector((state) => state.huddle);
-    const [infiniteScroll, setInfiniteScroll] = useState(false);
-    const [scrollDown, setScrollDown] = useState(false);
-    const messageContainerRef = useRef(null);
-    const [nextPageUrl, setNextPageUrl] = useState(initMessages.next_page_url);
-    const [previousPageUrl, setPreviousPageUrl] = useState(
-        initMessages.prev_page_url
-    );
 
-    const [loadingMessages, setLoadingMessages] = useState(false);
+    const messageContainerRef = useRef(null);
+
+    const nextPageUrlRef = useRef(initMessages.next_page_url);
+    const previousPageUrlRef = useRef(initMessages.prev_page_url);
+    const isInfiniteScrollRef = useRef(false);
+    const preScrollPositionRef = useRef(null);
+    const [newMessageReceived, setNewMessageReceived] = useState(true);
+
     const [newMessageReactionReceive, setNewMessageReactionReceive] =
         useState(null);
     const channelConnectionRef = useRef(null);
-    const prevScrollHeightRef = useRef(0);
 
     function onSubmit(content, fileObjects, JSONContent) {
         let mentionsList = getMentionsFromContent(JSONContent);
@@ -91,6 +105,7 @@ export default function ChatArea() {
             {
                 only: [],
                 preserveState: true,
+                preserveScroll: true,
                 headers: {
                     "X-Socket-Id": Echo.socketId(),
                 },
@@ -104,22 +119,12 @@ export default function ChatArea() {
     let preValue = null;
     let hasChanged = false;
 
-    //close thread panel
-    useEffect(() => {
-        return () => {
-            dispatch(setThreadMessage(null));
-        };
-    }, [channel.id]);
     //
+    //reset state on channel changes
     useEffect(() => {
         dispatch(setMessages([...initMessages?.data]));
-        setNextPageUrl(initMessages?.next_page_url);
-        setPreviousPageUrl(initMessages?.prev_page_url);
-    }, [messageId, initMessages]);
-    useEffect(() => {
-        dispatch(setMessages([...initMessages?.data]));
-        setNextPageUrl(initMessages?.next_page_url);
-        setPreviousPageUrl(initMessages?.prev_page_url);
+        nextPageUrlRef.current = initMessages?.next_page_url;
+        previousPageUrlRef.current = initMessages?.prev_page_url;
         dispatch(resetMessageCountForChannel(channel));
         router.post(
             route("channel.last_read", channel.id),
@@ -127,6 +132,9 @@ export default function ChatArea() {
             { preserveScroll: true, preserveState: true, only: ["channels"] }
         );
         return () => {
+            setNewMessageReceived(true);
+            isInfiniteScrollRef.current = false;
+            preScrollPositionRef.current = null;
             router.post(
                 route("channel.last_read", channel.id),
                 {},
@@ -138,6 +146,14 @@ export default function ChatArea() {
             );
         };
     }, [channel.id]);
+    useEffect(() => {
+        if (!messageId) return;
+        console.log("set new messages on mentios?");
+        dispatch(setMessages([...initMessages?.data]));
+        nextPageUrlRef.current = initMessages?.next_page_url;
+        previousPageUrlRef.current = initMessages?.prev_page_url;
+    }, [messageId, initMessages]);
+
     const groupedMessages = useMemo(() => {
         const gMessages = groupMessagesByDate(messages);
         const currentDate = formatDDMMYYY(new Date());
@@ -164,14 +180,14 @@ export default function ChatArea() {
             //     console.log("leaving", user);
             // })
             .listen("MessageEvent", (e) => {
-                if (e.type == "newMessageCreated")
+                if (e.type == "newMessageCreated") {
                     dispatch(addMessage(e.message));
-                else if (e.type == "messageEdited")
+                    setNewMessageReceived(true);
+                } else if (e.type == "messageEdited")
                     dispatch(
                         editMessage({
                             message_id: e.message.id,
                             content: e.message.content,
-                            
                         })
                     );
                 // console.log(e);
@@ -253,49 +269,6 @@ export default function ChatArea() {
             Echo.leave(`channels.${channel.id}`);
         };
     }, [channel.id, huddleChannel]);
-    useEffect(() => {
-        if (messageContainerRef.current)
-            if (!infiniteScroll) {
-                messageContainerRef.current.scrollTop =
-                    messageContainerRef.current.scrollHeight;
-            } else {
-                setInfiniteScroll(false);
-                if (scrollDown) {
-                    messageContainerRef.current.scrollTop =
-                        prevScrollHeightRef.current;
-                } else {
-                    const newScrollHeight =
-                        messageContainerRef.current.scrollHeight;
-                    messageContainerRef.current.scrollTop =
-                        newScrollHeight -
-                        prevScrollHeightRef.current +
-                        messageContainerRef.current.scrollTop;
-                }
-                setScrollDown(false);
-            }
-    }, [messages]);
-    useEffect(() => {
-        if (messageId) {
-            const targetMessage = document.getElementById(
-                `message-${messageId}`
-            );
-
-            if (targetMessage) {
-                targetMessage.classList.add("bg-link/15");
-
-                setTimeout(() => {
-                    targetMessage.classList.remove("bg-link/15");
-                }, 1000);
-                targetMessage.scrollIntoView({
-                    behavior: "smooth",
-                    block: "center",
-                });
-                setTimeout(() => {
-                    dispatch(setMessageId(null));
-                }, 100);
-            }
-        }
-    }, [messageId, messages]);
 
     function handleHuddleButtonClicked() {
         if (huddleChannel && huddleChannel.id != channel.id) {
@@ -330,6 +303,149 @@ export default function ChatArea() {
         if (channelName.includes("social")) return welcomeMessages[2];
         return welcomeMessages[1];
     }, [channel.id]);
+
+    // const handleInfiniteScroll = () => {
+    //     let offset = 0;
+    //     console.log(
+    //         messageContainerRef.current.scrollTop,
+    //         messageContainerRef.current.clientHeight,
+    //         messageContainerRef.current.scrollHeight
+    //     );
+    //     if (messageContainerRef.current.scrollTop == offset) {
+    //         console.log("Top");
+    //         if (nextPageUrlRef.current && !isInfiniteLoadRef.current) {
+    //
+    //         }
+    //     } else if (
+    //         messageContainerRef.current.scrollTop ==
+    //         messageContainerRef.current.scrollHeight -
+    //             messageContainerRef.current.clientHeight -
+    //             offset
+    //     ) {
+    //         if (previousPageUrlRef.current && !isInfiniteLoadRef.current) {
+    //             axios.get(previousPageUrlRef.current).then((response) => {
+    //                 if (response.status == 200) {
+    //                     previousPageUrlRef.current =
+    //                         response.data.messages.prev_page_url;
+    //                     dispatch(
+    //                         setMessages([
+    //                             ...response.data.messages.data,
+    //                             ...messages,
+    //                         ])
+    //                     );
+    //                     isInfiniteLoadRef.current = true;
+    //                     preScrollPositionRef.current = {
+    //                         oldScrollHeight:
+    //                             messageContainerRef.current.scrollHeight,
+    //                         position: "bottom",
+    //                     };
+    //                 }
+    //             });
+    //         }
+    //     }
+    // };
+    useEffect(() => {
+        if (newMessageReceived && messageId) setNewMessageReceived(false);
+        if (newMessageReceived && !messageId) {
+            console.log("new message received");
+            if (messageContainerRef.current) {
+                messageContainerRef.current.scrollTop =
+                    messageContainerRef.current.scrollHeight -
+                    messageContainerRef.current.clientHeight;
+                setNewMessageReceived(false);
+            }
+        }
+    }, [newMessageReceived, messageId, groupedMessages]); //why messageId? beacause it needs track new messageId value
+
+    useEffect(() => {
+        if (messageId) {
+            const targetMessage = document.getElementById(
+                `message-${messageId}`
+            );
+            console.log(targetMessage);
+            if (targetMessage) {
+                console.log("did it");
+                targetMessage.classList.add("bg-link/15");
+
+                setTimeout(() => {
+                    targetMessage.classList.remove("bg-link/15");
+                }, 2000);
+                targetMessage.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center",
+                });
+                setTimeout(() => {
+                    dispatch(setMessageId(null));
+                }, 100);
+            }
+        }
+    }, [
+        messageId,
+        groupedMessages,
+    ]); /* groupedMessages changes based on messages, make rerender again, so
+        we know that groupedMessages is the last state changes, so it should trigger target message element again
+    */
+
+    useEffect(() => {
+        console.log("top_inView", top_inView);
+        if (!top_inView) return;
+        if (!nextPageUrlRef.current) return;
+        axios.get(nextPageUrlRef.current).then((response) => {
+            if (response.status == 200) {
+                nextPageUrlRef.current = response.data.messages.next_page_url;
+                dispatch(
+                    setMessages([...response.data.messages.data, ...messages])
+                );
+                isInfiniteScrollRef.current = true;
+                preScrollPositionRef.current = {
+                    oldScrollHeight: messageContainerRef.current.scrollHeight,
+                    oldScrollTop: messageContainerRef.current.scrollTop,
+                    position: "top",
+                };
+            }
+        });
+    }, [top_inView]); //hande scroll top
+
+    useEffect(() => {
+        console.log("bottom_inView", bottom_inView);
+        if (!bottom_inView) return;
+        if (!previousPageUrlRef.current) return;
+        axios.get(previousPageUrlRef.current).then((response) => {
+            if (response.status == 200) {
+                previousPageUrlRef.current =
+                    response.data.messages.prev_page_url;
+                dispatch(
+                    setMessages([...response.data.messages.data, ...messages])
+                );
+                isInfiniteScrollRef.current = true;
+                preScrollPositionRef.current = {
+                    oldScrollHeight: messageContainerRef.current.scrollHeight,
+                    oldScrollTop: messageContainerRef.current.scrollTop,
+                    position: "bottom",
+                };
+            }
+        });
+    }, [bottom_inView]); //hande scroll top
+
+    useEffect(() => {
+        console.log("isInfiniteScroll");
+        if (!isInfiniteScrollRef.current) return;
+        if (!messageContainerRef.current) return;
+        if (!preScrollPositionRef.current) return;
+        if (preScrollPositionRef.current.position == "top") {
+            console.log("scroll top persists");
+            messageContainerRef.current.scrollTop =
+                messageContainerRef.current.scrollHeight -
+                preScrollPositionRef.current.oldScrollHeight +
+                preScrollPositionRef.current.oldScrollTop;
+            isInfiniteScrollRef.current = false;
+        } else if (preScrollPositionRef.current.position == "bottom") {
+            console.log("scroll bottom persists");
+            messageContainerRef.current.scrollTop =
+                preScrollPositionRef.current.oldScrollTop;
+            isInfiniteScrollRef.current = false;
+        }
+    }, [groupedMessages]);
     return (
         <div className="col-span-3 flex min-h-0 max-h-full w-full">
             <div className="bg-background  chat-area-container flex-1 ">
@@ -423,11 +539,12 @@ export default function ChatArea() {
                     className="overflow-y-auto max-w-full scrollbar"
                     ref={messageContainerRef}
                 >
-                    <div className="p-8">
+                    <div className="p-8" ref={top_ref}>
                         <h1 className="text-3xl font-extrabold text-white/85">
                             {" "}
                             {welcomeMessage}
                         </h1>
+
                         <div className="text-white/85 mt-2">
                             {channel.description}{" "}
                             <div className="inline-block">
@@ -435,30 +552,7 @@ export default function ChatArea() {
                             </div>
                         </div>
                     </div>
-                    <InView
-                        onChange={(inView, entry) => {
-                            if (inView && nextPageUrl) {
-                                setInfiniteScroll(true);
-                                setLoadingMessages(true);
-                                prevScrollHeightRef.current =
-                                    messageContainerRef.current.scrollHeight;
-                                axios.get(nextPageUrl).then((response) => {
-                                    if (response.status == 200) {
-                                        setLoadingMessages(false);
-                                        setNextPageUrl(
-                                            response.data.messages.next_page_url
-                                        );
-                                        dispatch(
-                                            setMessages([
-                                                ...response.data.messages.data,
-                                                ...messages,
-                                            ])
-                                        );
-                                    }
-                                });
-                            }
-                        }}
-                    ></InView>
+
                     {groupedMessages.map(({ date, mgs }, pIndex) => {
                         return (
                             <div className="relative pb-4" key={date}>
@@ -517,69 +611,7 @@ export default function ChatArea() {
                             </div>
                         );
                     })}
-                    <InView
-                        onChange={(inView, entry) => {
-                            if (inView && previousPageUrl && !messageId) {
-                                setInfiniteScroll(true);
-                                setScrollDown(true);
-                                setLoadingMessages(true);
-                                prevScrollHeightRef.current =
-                                    messageContainerRef.current.scrollTop;
-                                axios.get(previousPageUrl).then((response) => {
-                                    if (response.status == 200) {
-                                        setLoadingMessages(false);
-
-                                        setPreviousPageUrl(
-                                            response.data.messages.prev_page_url
-                                        );
-                                        dispatch(
-                                            setMessages([
-                                                ...response.data.messages.data,
-                                                ...messages,
-                                            ])
-                                        );
-                                    }
-                                });
-                            }
-                        }}
-                    ></InView>
-                    <div className="flex  justify-center items-center">
-                        {!loadingMessages && previousPageUrl != null && (
-                            <button
-                                className="flex items-center gap-x-2 hover:text-white text-white/75"
-                                onClick={() => {
-                                    if (previousPageUrl) {
-                                        setInfiniteScroll(true);
-                                        setScrollDown(true);
-                                        setLoadingMessages(true);
-                                        prevScrollHeightRef.current =
-                                            messageContainerRef.current.scrollTop;
-                                        axios
-                                            .get(previousPageUrl)
-                                            .then((response) => {
-                                                if (response.status == 200) {
-                                                    setLoadingMessages(false);
-
-                                                    setPreviousPageUrl(
-                                                        response.data.messages
-                                                            .prev_page_url
-                                                    );
-                                                    dispatch(
-                                                        setMessages([
-                                                            ...response.data
-                                                                .messages.data,
-                                                            ...messages,
-                                                        ])
-                                                    );
-                                                }
-                                            });
-                                    }
-                                }}
-                            >
-                                <TfiReload /> Load more
-                            </button>
-                        )}
-                    </div>
+                    <div ref={bottom_ref} className="h-4  "></div>
                 </div>
                 <div className="m-6 border border-white/15 pt-4 px-2 rounded-lg">
                     {permissions.chat && <TipTapEditor onSubmit={onSubmit} />}

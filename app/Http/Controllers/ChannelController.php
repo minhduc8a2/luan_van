@@ -197,13 +197,19 @@ class ChannelController extends Controller
             'workspaces' => $workspaces,
             "directChannels" => $directChannels,
             'selfChannel' => $selfChannel,
-            'messages' => fn() => $channel->messages()->with([
+            'messages' => $messageId ? $channel->messages()->with([
                 'attachments',
                 'reactions',
                 'thread' => function ($query) {
                     $query->withCount('messages');
                 }
-            ])->latest()->simplePaginate($perPage, ['*'], 'page', $pageNumber),
+            ])->latest()->simplePaginate($perPage, ['*'], 'page', $pageNumber) : $channel->messages()->with([
+                'attachments',
+                'reactions',
+                'thread' => function ($query) {
+                    $query->withCount('messages');
+                }
+            ])->latest()->simplePaginate($perPage),
             'channelUsers' => fn() => $channel->users,
             'newNoftificationsCount' => $newNotificationsCount
         ]);

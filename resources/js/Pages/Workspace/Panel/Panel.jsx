@@ -7,10 +7,11 @@ import { LuLock } from "react-icons/lu";
 import { router, usePage } from "@inertiajs/react";
 import { InvitationForm } from "./InvitationForm";
 import { DirectChannel } from "./DirectChannel";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import Activity from "./Activity/Activity";
 import { CreateChannelForm } from "./createChannelForm";
 import { FiArchive } from "react-icons/fi";
+import { setThreadMessage } from "@/Store/threadSlice";
 
 export default function Panel({}) {
     const {
@@ -24,11 +25,13 @@ export default function Panel({}) {
         permissions,
     } = usePage().props;
     const { type } = useSelector((state) => state.panel);
+    const dispatch = useDispatch();
     const newMessageCountsMap = useSelector(
         (state) => state.newMessageCountsMap
     );
     // const { messages } = useSelector((state) => state.messages);
     function changeChannel(channel) {
+        dispatch(setThreadMessage(null));
         router.get(
             route("channel.show", channel.id),
             {},
@@ -61,7 +64,6 @@ export default function Panel({}) {
                     </div>
                     <ul className="max-h-[30vh] overflow-y-auto scrollbar">
                         {channels.map((channel) => {
-                            console.log(channel);
                             if (channel.type === "PUBLIC")
                                 return (
                                     <li key={channel.id}>

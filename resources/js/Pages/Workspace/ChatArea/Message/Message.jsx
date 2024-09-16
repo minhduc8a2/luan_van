@@ -109,6 +109,8 @@ export default function Message({
             {
                 only: [],
                 preserveState: true,
+                preserveScroll: true,
+
                 headers: {
                     "X-Socket-Id": Echo.socketId(),
                 },
