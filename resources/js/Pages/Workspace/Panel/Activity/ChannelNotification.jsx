@@ -7,7 +7,7 @@ import { VscMention } from "react-icons/vsc";
 import { useDispatch, useSelector } from "react-redux";
 import { isChannelsNotificationBroadcast } from "@/helpers/notificationTypeHelper";
 import { getChannelName } from "@/helpers/channelHelper";
-import { setMessageId } from "@/Store/mentionSlice";
+import { setMention } from "@/Store/mentionSlice";
 import { FaLock } from "react-icons/fa";
 
 export default function ChannelNotification({

@@ -22,7 +22,7 @@ import Reactions from "./Reactions";
 import { FaAngleRight } from "react-icons/fa6";
 import { useDispatch, useSelector } from "react-redux";
 import { setThreadMessage } from "@/Store/threadSlice";
-import { setMessageId } from "@/Store/mentionSlice";
+import { setMention } from "@/Store/mentionSlice";
 import TipTapEditor from "@/Components/TipTapEditor";
 import { editMessage as editMessageInStore } from "@/Store/messagesSlice";
 import { getMentionsFromContent } from "@/helpers/tiptapHelper";
@@ -39,8 +39,10 @@ export default function Message({
     const { auth, channel, channelUsers, permissions } = usePage().props;
     const dispatch = useDispatch();
     const { messageId } = useSelector((state) => state.mention);
-    const attachments = message.attachments;
-    const [reactions, setReactions] = useState([...message.reactions]);
+    const attachments = message.attachments || [];
+    const [reactions, setReactions] = useState(
+        message.reactions ? [...message.reactions] : []
+    );
     const imageAttachments = [];
     const videoAttachments = [];
     const documentAttachments = [];
@@ -59,7 +61,7 @@ export default function Message({
         return groupReactions(reactions, channelUsers, auth.user);
     }, [reactions]);
     useEffect(() => {
-        setReactions([...message.reactions]);
+        setReactions(message.reactions ? [...message.reactions] : []);
     }, [message]);
 
     useEffect(() => {

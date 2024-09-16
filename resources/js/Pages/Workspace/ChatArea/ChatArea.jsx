@@ -35,7 +35,7 @@ import {
     editMessage,
     setMessages,
 } from "@/Store/messagesSlice";
-import { setMessageId } from "@/Store/mentionSlice";
+import { setMention } from "@/Store/mentionSlice";
 import ChannelSettings from "./ChannelSettings/ChannelSettings";
 import { resetMessageCountForChannel } from "@/Store/newMessageCountsMapSlice";
 import { setThreadMessage } from "@/Store/threadSlice";
@@ -371,11 +371,11 @@ export default function ChatArea() {
                     targetMessage.classList.remove("bg-link/15");
                 }, 2000);
                 targetMessage.scrollIntoView({
-                    behavior: "smooth",
+                    behavior: "instant",
                     block: "center",
                 });
                 setTimeout(() => {
-                    dispatch(setMessageId(null));
+                    dispatch(setMention(null));
                 }, 100);
             }
         }

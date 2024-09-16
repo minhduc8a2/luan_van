@@ -40,6 +40,7 @@ export function EditDescriptionForm() {
     return (
         <div>
             <Form1
+                className="p-3"
                 errors={errors}
                 success={success}
                 submit={onSubmit}

@@ -383,7 +383,7 @@ export default function TipTapEditor({
         // }),
     ];
 
-    const content = message?.content ? message.content : ``;
+    const content = message?.content && isEditMessage ? message.content : ``;
     const editorProps = {
         attributes: {
             class: "prose prose-invert  text-white/85  focus:outline-none  ",

@@ -3,16 +3,18 @@ import { createSlice } from "@reduxjs/toolkit";
 export const mentionSlice = createSlice({
     name: "mention",
     initialState: {
-        messageId:null
+        messageId: null,
+        threadMessage: null,
     },
     reducers: {
-        setMessageId(state, action) {
-            state.messageId = action.payload;
+        setMention(state, action) {
+            state.messageId = action.payload.messageId;
+            state.threadMessage = action.payload.threadMessage;
         },
     },
 });
 
 // Action creators are generated for each case reducer function
-export const { setMessageId } = mentionSlice.actions;
+export const { setMention } = mentionSlice.actions;
 
 export default mentionSlice.reducer;

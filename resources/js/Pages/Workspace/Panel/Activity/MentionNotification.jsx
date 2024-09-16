@@ -7,8 +7,9 @@ import { VscMention } from "react-icons/vsc";
 import { useDispatch, useSelector } from "react-redux";
 import { isMentionNotificationBroadcast } from "@/helpers/notificationTypeHelper";
 import { getChannelName } from "@/helpers/channelHelper";
-import { setMessageId } from "@/Store/mentionSlice";
+import { setMention } from "@/Store/mentionSlice";
 import { setMessages } from "@/Store/messagesSlice";
+import { setThreadMessage } from "@/Store/threadSlice";
 export default function MentionNotification({
     notification,
     handleNotificationClick,
@@ -20,7 +21,7 @@ export default function MentionNotification({
         channel: currentChannel,
     } = usePage().props;
     const { messages } = useSelector((state) => state.messages);
-    const { fromUser, toUser, channel, workspace, message } =
+    const { fromUser, toUser, channel, workspace, message, threadMessage } =
         isMentionNotificationBroadcast(notification.type)
             ? notification
             : notification.data;
@@ -28,12 +29,13 @@ export default function MentionNotification({
     const created_at = notification.created_at;
     const view_at = notification.view_at;
     const dispatch = useDispatch();
+    console.log("thread message", threadMessage);
     function handleNotificationClickedPart() {
         if (
             channel.id === currentChannel.id &&
             messages.find((msg) => msg.id == message.id)
         ) {
-            dispatch(setMessageId(message.id));
+            dispatch(setMention({ messageId: message.id }));
             const targetMessage = document.getElementById(
                 `message-${message.id}`
             );
@@ -48,7 +50,7 @@ export default function MentionNotification({
                     behavior: "smooth",
                     block: "center",
                 });
-                dispatch(setMessageId(null));
+                dispatch(setMention(null));
             }
         } else
             router.get(
@@ -56,9 +58,16 @@ export default function MentionNotification({
                 { message_id: message.id },
                 {
                     preserveState: true,
-                  
+
                     onFinish: () => {
-                        dispatch(setMessageId(message.id));
+                        dispatch(
+                            setMention({
+                                messageId: message.id,
+                                threadMessage,
+                            })
+                        );
+
+                        if (threadMessage) dispatch(setThreadMessage(message));
                     },
                 }
             );
@@ -83,8 +92,9 @@ export default function MentionNotification({
                         <span className="font-bold">
                             #
                             {getChannelName(channel, auth.user, workspaceUsers)}
-                        </span>{" "}
-                        (<span className="">{workspace.name}</span>)
+                        </span>
+                        {threadMessage ? " thread " : " "}(
+                        <span className="">{workspace.name}</span>)
                     </div>
                 </div>
                 <div className="flex gap-x-2 justify-between">
@@ -107,7 +117,9 @@ export default function MentionNotification({
                                 <div
                                     className="prose prose-invert "
                                     dangerouslySetInnerHTML={{
-                                        __html: message.content,
+                                        __html: threadMessage
+                                            ? threadMessage.content
+                                            : message.content,
                                     }}
                                 ></div>
                             </div>

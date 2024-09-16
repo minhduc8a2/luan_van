@@ -21,7 +21,7 @@ class MentionNotification extends Notification
     /**
      * Create a new notification instance.
      */
-    public function __construct(public Channel $channel, public Workspace $workspace, public User $fromUser, public User $toUser, public Message $message)
+    public function __construct(public Channel $channel, public Workspace $workspace, public User $fromUser, public User $toUser, public Message $message, public $threadMessage=null)
     {
         //
     }
@@ -55,6 +55,7 @@ class MentionNotification extends Notification
             "toUser" => $this->toUser,
             "workspace" => $this->workspace,
             "message"=>$this->message,
+            "threadMessage" => $this->threadMessage,
             "created_at" => Carbon::now()
 
 
@@ -73,6 +74,8 @@ class MentionNotification extends Notification
             "toUser" => $this->toUser,
             "workspace" => $this->workspace,
             "message"=>$this->message,
+            "threadMessage" => $this->threadMessage,
+
 
 
         ];

@@ -106,7 +106,7 @@ class MessageController extends Controller
     {
         if ($request->user()->cannot('create', [Thread::class, $channel])) return abort(403);
         try {
-            $validated = $request->validate(['content' => 'string', 'fileObjects' => 'array']);
+            $validated = $request->validate(['content' => 'string', 'fileObjects' => 'array', 'mentionsList' => 'array|required']);
             $content = $validated['content'];
             DB::beginTransaction();
             $content = Helper::sanitizeContent($content);
@@ -138,11 +138,11 @@ class MessageController extends Controller
             if (isset($newMessage)) {
 
                 //handle mentions list
-                $mentionsList = $request->mentionsList;
+                $mentionsList = $validated['mentionsList'];
 
                 foreach ($mentionsList as $u) {
                     $mentionedUser = User::find($u['id']);
-                    $mentionedUser->notify(new MentionNotification($channel, $channel->workspace, $request->user(), $mentionedUser, $message));
+                    $mentionedUser->notify(new MentionNotification($channel, $channel->workspace, $request->user(), $mentionedUser, $message->load(['attachments', 'reactions']),$newMessage));
                 }
                 //notify others about new message
 
