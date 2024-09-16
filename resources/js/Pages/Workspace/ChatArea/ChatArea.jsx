@@ -69,7 +69,9 @@ export default function ChatArea() {
         initialInView: true,
     });
     const { message: threadMessage } = useSelector((state) => state.thread);
-    const { messageId } = useSelector((state) => state.mention);
+    const { messageId, threadMessage: mentionThreadMessage } = useSelector(
+        (state) => state.mention
+    );
     const { messages } = useSelector((state) => state.messages);
     const [focus, setFocus] = useState(1);
     const dispatch = useDispatch();
@@ -196,7 +198,8 @@ export default function ChatArea() {
             .listen("ThreadMessageEvent", (e) => {
                 console.log(e);
                 if (e.thread) dispatch(addThreadToMessages(e.thread));
-                else dispatch(addThreadMessagesCount(e.masterMessageId));
+                else if (e.type == "newMessageCreated")
+                    dispatch(addThreadMessagesCount(e.masterMessageId));
                 // console.log(e);
             })
             .listen("SettingsEvent", (e) => {
@@ -362,7 +365,7 @@ export default function ChatArea() {
             const targetMessage = document.getElementById(
                 `message-${messageId}`
             );
-            console.log(targetMessage);
+
             if (targetMessage) {
                 console.log("did it");
                 targetMessage.classList.add("bg-link/15");
@@ -374,9 +377,11 @@ export default function ChatArea() {
                     behavior: "instant",
                     block: "center",
                 });
-                setTimeout(() => {
-                    dispatch(setMention(null));
-                }, 100);
+                if (!mentionThreadMessage) {
+                    setTimeout(() => {
+                        dispatch(setMention(null));
+                    }, 100);
+                }
             }
         }
     }, [
@@ -425,7 +430,7 @@ export default function ChatArea() {
                 };
             }
         });
-    }, [bottom_inView]); //hande scroll top
+    }, [bottom_inView]); //hande scroll bottom
 
     useEffect(() => {
         console.log("isInfiniteScroll");
@@ -445,7 +450,7 @@ export default function ChatArea() {
                 preScrollPositionRef.current.oldScrollTop;
             isInfiniteScrollRef.current = false;
         }
-    }, [groupedMessages]);
+    }, [groupedMessages]); //for infinite scrolling
     return (
         <div className="col-span-3 flex min-h-0 max-h-full w-full">
             <div className="bg-background  chat-area-container flex-1 ">

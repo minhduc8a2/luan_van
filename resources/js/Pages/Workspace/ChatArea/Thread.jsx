@@ -9,81 +9,49 @@ import TipTapEditor from "@/Components/TipTapEditor";
 import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
 import { compareDateTime, differenceInSeconds } from "@/helpers/dateTimeHelper";
 import { getMentionsFromContent } from "@/helpers/tiptapHelper";
+import { useInView } from "react-intersection-observer";
+import { setMention } from "@/Store/mentionSlice";
 export default function Thread() {
     const dispatch = useDispatch();
     const { channel, permissions } = usePage().props;
+    const { threadMessage } = useSelector((state) => state.mention);
     const { message } = useSelector((state) => state.thread);
     const { channelUsers } = usePage().props;
     const [messages, setMessages] = useState([]);
     const nextPageUrlRef = useRef(null);
+    const previousPageUrlRef = useRef(null);
     const messageContainerRef = useRef(null);
+    const isInfiniteScrollRef = useRef(false);
     const user = channelUsers.filter((mem) => mem.id === message.user_id)[0];
     const [loadingMessages, setLoadingMessages] = useState(false);
-    const [infiniteScroll, setInfiniteScroll] = useState(false);
+
+    const preScrollPositionRef = useRef(null);
+
     const [newMessageReactionReceive, setNewMessageReactionReceive] =
         useState(null);
     const threadConnectionRef = useRef(null);
+    const [newMessageReceived, setNewMessageReceived] = useState(true);
+
     let preValue = null;
     let hasChanged = false;
-    useEffect(() => {
-        threadConnectionRef.current = Echo.join(`threads.${message.id}`);
-        threadConnectionRef.current
-            .here((users) => {})
-            .joining((user) => {
-                // console.log("join thread", user);
-            })
-            .leaving((user) => {
-                // console.log("leaving thread", user);
-            })
-            .listen("ThreadMessageEvent", (e) => {
-                setMessages((pre) => [...pre, e.message]);
-                console.log(e);
-            })
-            .listenForWhisper("messageReaction", (e) => {
-                setNewMessageReactionReceive(e);
-            })
-            .error((error) => {
-                console.error(error);
-            });
-
-        setLoadingMessages(true);
-        axios
-            .get(
-                route("thread.messages", {
-                    channel: channel.id,
-                    message: message.id,
-                })
-            )
-            .then((response) => {
-                nextPageUrlRef.current = response.data?.messages?.next_page_url;
-                setMessages(response.data?.messages?.data || []);
-                setLoadingMessages(false);
-            });
-        return () => {
-            setMessages([]);
-            Echo.leave(`threads.${message.id}`);
-        };
-    }, [message.id]);
-    useEffect(() => {
-        if (messageContainerRef.current)
-            if (!infiniteScroll) {
-                messageContainerRef.current.scrollTop =
-                    messageContainerRef.current.scrollHeight;
-            } else {
-                setInfiniteScroll(false);
-                const newScrollHeight =
-                    messageContainerRef.current.scrollHeight;
-                messageContainerRef.current.scrollTop =
-                    newScrollHeight -
-                    prevScrollHeightRef.current +
-                    messageContainerRef.current.scrollTop;
-            }
-    }, [messages]);
-    const sortedMessages = useMemo(() => {
-        const temp = [...messages];
-        temp.sort((a, b) => compareDateTime(a.created_at, b.created_at));
-        return temp;
-    }, [messages]);
+    const {
+        ref: top_ref,
+        inView: top_inView,
+        entry: top_entry,
+    } = useInView({
+        /* Optional options */
+        threshold: 0,
+        initialInView: true,
+    });
+    const {
+        ref: bottom_ref,
+        inView: bottom_inView,
+        entry: bottom_entry,
+    } = useInView({
+        /* Optional options */
+        threshold: 0,
+        initialInView: true,
+    });
     function onSubmit(content, fileObjects, JSONContent) {
         let mentionsList = getMentionsFromContent(JSONContent);
         if (
@@ -103,6 +71,9 @@ export default function Thread() {
                 mentionsList: getMentionsFromContent(JSONContent),
             },
             {
+                onSuccess: () => {
+                    setNewMessageReceived(true);
+                },
                 preserveState: true,
                 preserveScroll: true,
                 headers: {
@@ -111,6 +82,192 @@ export default function Thread() {
             }
         );
     }
+    useEffect(() => {
+        threadConnectionRef.current = Echo.join(`threads.${message.id}`);
+        threadConnectionRef.current
+            .here((users) => {})
+            .joining((user) => {
+                // console.log("join thread", user);
+            })
+            .leaving((user) => {
+                // console.log("leaving thread", user);
+            })
+            .listen("ThreadMessageEvent", (e) => {
+                if (e.type == "newMessageCreated")
+                    setMessages((pre) => [...pre, e.message]);
+                else if (e.type == "messageEdited") {
+                    setMessages((pre) => {
+                        const temp = [...pre];
+                        const messageIndex = pre.findIndex(
+                            (m) => m.id == e.message.id
+                        );
+                        if (messageIndex >= 0) {
+                            temp[messageIndex].content = e.message.content;
+                        }
+                        return temp;
+                    });
+                }
+                console.log(e);
+            })
+            .listenForWhisper("messageReaction", (e) => {
+                setNewMessageReactionReceive(e);
+            })
+            .error((error) => {
+                console.error(error);
+            });
+
+        setLoadingMessages(true);
+        axios
+            .get(
+                route("thread.messages", {
+                    channel: channel.id,
+                    message: message.id,
+                }),
+                {
+                    params: threadMessage
+                        ? { message_id: threadMessage.id }
+                        : {},
+                }
+            )
+            .then((response) => {
+                console.log(response);
+                nextPageUrlRef.current = response.data?.messages?.next_page_url;
+                previousPageUrlRef.current =
+                    response.data?.messages?.prev_page_url;
+                setMessages(response.data?.messages?.data || []);
+                setLoadingMessages(false);
+            });
+        return () => {
+            setMessages([]);
+            Echo.leave(`threads.${message.id}`);
+        };
+    }, [message.id]);
+
+    useEffect(() => {
+        if (!threadMessage) return;
+        setLoadingMessages(true);
+        axios
+            .get(
+                route("thread.messages", {
+                    channel: channel.id,
+                    message: message.id,
+                }),
+                {
+                    params: threadMessage
+                        ? { message_id: threadMessage.id }
+                        : {},
+                }
+            )
+            .then((response) => {
+                console.log(response);
+                nextPageUrlRef.current = response.data?.messages?.next_page_url;
+                previousPageUrlRef.current =
+                    response.data?.messages?.prev_page_url;
+                setMessages(response.data?.messages?.data || []);
+                setLoadingMessages(false);
+            });
+    }, [threadMessage]);
+
+    const sortedMessages = useMemo(() => {
+        const temp = [...messages];
+        temp.sort((a, b) => compareDateTime(a.created_at, b.created_at));
+        return temp;
+    }, [messages]);
+
+    useEffect(() => {
+        if (newMessageReceived && threadMessage) setNewMessageReceived(false);
+        if (newMessageReceived && !threadMessage) {
+            console.log("new message received");
+            if (messageContainerRef.current) {
+                messageContainerRef.current.scrollTop =
+                    messageContainerRef.current.scrollHeight -
+                    messageContainerRef.current.clientHeight;
+                setNewMessageReceived(false);
+            }
+        }
+    }, [newMessageReceived, threadMessage, sortedMessages]);
+
+    useEffect(() => {
+        if (threadMessage) {
+            const targetMessage = document.getElementById(
+                `message-${threadMessage.id}`
+            );
+            console.log(targetMessage);
+            if (targetMessage) {
+                console.log("did it in thread");
+                targetMessage.classList.add("bg-link/15");
+
+                setTimeout(() => {
+                    targetMessage.classList.remove("bg-link/15");
+                }, 2000);
+                targetMessage.scrollIntoView({
+                    behavior: "instant",
+                    block: "center",
+                });
+                setTimeout(() => {
+                    dispatch(setMention(null));
+                }, 100);
+            }
+        }
+    }, [threadMessage, sortedMessages]);
+    useEffect(() => {
+        console.log("thread_top_inView", top_inView);
+        if (!top_inView) return;
+        if (!nextPageUrlRef.current) return;
+        axios.get(nextPageUrlRef.current).then((response) => {
+            if (response.status == 200) {
+                nextPageUrlRef.current = response.data.messages.next_page_url;
+
+                setMessages([...response.data.messages.data, ...messages]);
+                isInfiniteScrollRef.current = true;
+                preScrollPositionRef.current = {
+                    oldScrollHeight: messageContainerRef.current.scrollHeight,
+                    oldScrollTop: messageContainerRef.current.scrollTop,
+                    position: "top",
+                };
+            }
+        });
+    }, [top_inView]); //hande scroll top
+
+    useEffect(() => {
+        console.log("bottom_thread_inView", bottom_inView);
+        if (!bottom_inView) return;
+        if (!previousPageUrlRef.current) return;
+        axios.get(previousPageUrlRef.current).then((response) => {
+            if (response.status == 200) {
+                previousPageUrlRef.current =
+                    response.data.messages.prev_page_url;
+                setMessages([...response.data.messages.data, ...messages]);
+                isInfiniteScrollRef.current = true;
+                preScrollPositionRef.current = {
+                    oldScrollHeight: messageContainerRef.current.scrollHeight,
+                    oldScrollTop: messageContainerRef.current.scrollTop,
+                    position: "bottom",
+                };
+            }
+        });
+    }, [bottom_inView]); //hande scroll bottom
+
+    useEffect(() => {
+        console.log("isInfiniteScroll");
+        if (!isInfiniteScrollRef.current) return;
+        if (!messageContainerRef.current) return;
+        if (!preScrollPositionRef.current) return;
+        if (preScrollPositionRef.current.position == "top") {
+            console.log("scroll top persists");
+            messageContainerRef.current.scrollTop =
+                messageContainerRef.current.scrollHeight -
+                preScrollPositionRef.current.oldScrollHeight +
+                preScrollPositionRef.current.oldScrollTop;
+            isInfiniteScrollRef.current = false;
+        } else if (preScrollPositionRef.current.position == "bottom") {
+            console.log("scroll bottom persists");
+            messageContainerRef.current.scrollTop =
+                preScrollPositionRef.current.oldScrollTop;
+            isInfiniteScrollRef.current = false;
+        }
+    }, [sortedMessages]); //for infinite scrolling
+
     return (
         <div className="w-[35%] bg-background flex flex-col border-l border-white/15">
             <div className="p-4 z-10">
@@ -155,6 +312,7 @@ export default function Thread() {
                 ref={messageContainerRef}
             >
                 <ul className="mt-8">
+                    <div ref={top_ref} className="h-4  "></div>
                     {sortedMessages.map((message, index) => {
                         const user = channelUsers.filter(
                             (mem) => mem.id === message.user_id
@@ -190,6 +348,7 @@ export default function Thread() {
                             />
                         );
                     })}
+                    <div ref={bottom_ref} className="h-4  "></div>
                 </ul>
             </div>
             <div className="m-6 border border-white/15 pt-4 px-2 rounded-lg">

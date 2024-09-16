@@ -7,6 +7,7 @@ import { addActivity } from "@/Store/activitySlice";
 import { isChannelsNotificationBroadcast } from "@/helpers/notificationTypeHelper";
 import { addMessageCountForChannel } from "@/Store/newMessageCountsMapSlice";
 import { toggleHuddle } from "@/Store/huddleSlice";
+import { setThreadMessage } from "@/Store/threadSlice";
 export default function Event() {
     const {
         workspace,
@@ -64,10 +65,14 @@ export default function Event() {
                         preserveState: true,
                     });
                 } else if (e.type == "deleteChannel") {
-                    if (huddleChannel.id == e.data) {
+                    console.log("deletechannel", e);
+                   
+                    if (huddleChannel && huddleChannel?.id == e?.data) {
                         dispatch(toggleHuddle());
+                       
                     }
-                    if (channel.id == e.data) {
+                    if (channel?.id == e?.data) {
+                        dispatch(setThreadMessage(null));
                         router.visit(route("channel.show", mainChannelId), {
                             preserveState: true,
                         });

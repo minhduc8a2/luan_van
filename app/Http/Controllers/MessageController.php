@@ -11,10 +11,11 @@ use App\Models\Message;
 use App\Models\Workspace;
 use App\Models\Attachment;
 use App\Events\MessageEvent;
-use App\Events\ThreadCreatedEvent;
 use Illuminate\Http\Request;
+use App\Events\ThreadCreatedEvent;
 use App\Events\ThreadMessageEvent;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use App\Notifications\MentionNotification;
 
@@ -106,7 +107,7 @@ class MessageController extends Controller
     {
         if ($request->user()->cannot('create', [Thread::class, $channel])) return abort(403);
         try {
-            $validated = $request->validate(['content' => 'string', 'fileObjects' => 'array', 'mentionsList' => 'array|required']);
+            $validated = $request->validate(['content' => 'string', 'fileObjects' => 'array', 'mentionsList' => 'array']);
             $content = $validated['content'];
             DB::beginTransaction();
             $content = Helper::sanitizeContent($content);
@@ -138,11 +139,11 @@ class MessageController extends Controller
             if (isset($newMessage)) {
 
                 //handle mentions list
-                $mentionsList = $validated['mentionsList'];
+                $mentionsList = $validated['mentionsList'] ?? [];
 
                 foreach ($mentionsList as $u) {
                     $mentionedUser = User::find($u['id']);
-                    $mentionedUser->notify(new MentionNotification($channel, $channel->workspace, $request->user(), $mentionedUser, $message->load(['attachments', 'reactions']),$newMessage));
+                    $mentionedUser->notify(new MentionNotification($channel, $channel->workspace, $request->user(), $mentionedUser, $message->load(['attachments', 'reactions']), $newMessage));
                 }
                 //notify others about new message
 
@@ -184,7 +185,11 @@ class MessageController extends Controller
 
         try {
             DB::beginTransaction();
-            $channel = Channel::find($message->messagable_id);
+            $isThreadMessage = $message->messagable_type == Thread::class;
+            // thread message
+            $masterMessage = $isThreadMessage ? $message->messagable->message : null;
+            //
+            $channel = $isThreadMessage ? $masterMessage->messagable : Channel::find($message->messagable_id);
             $content = Helper::sanitizeContent($content);
             $message->content = $content;
             $message->is_edited = true;
@@ -197,19 +202,23 @@ class MessageController extends Controller
                 $mentionedUser->notify(new MentionNotification($channel, $channel->workspace, $request->user(), $mentionedUser, $message));
             }
             //notify others about new message
-            broadcast(new MessageEvent($channel, $message->load([
-                'attachments',
-                'reactions',
-                'thread' => function ($query) {
-                    $query->withCount('messages');
-                }
-            ]), "messageEdited"));
+            if (!$isThreadMessage) { //channel Message
+                broadcast(new MessageEvent($channel, $message->load([
+                    'attachments',
+                    'reactions',
+                    'thread' => function ($query) {
+                        $query->withCount('messages');
+                    }
+                ]), "messageEdited"));
+            } else {
+                broadcast(new ThreadMessageEvent($masterMessage, $message->load(['attachments', 'reactions']), null, "messageEdited"));
+            }
 
             DB::commit();
             back();
         } catch (\Throwable $th) {
             DB::rollBack();
-            // dd($th);
+            dd($th);
             return back()->withErrors(['server' => "Something went wrong, please try later!"]);
         }
     }

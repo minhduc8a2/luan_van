@@ -20,7 +20,7 @@ class ThreadMessageEvent implements ShouldBroadcastNow
     /**
      * Create a new event instance.
      */
-    public function __construct(public Message $masterMessage, public Message $message, public  $thread)
+    public function __construct(public Message $masterMessage, public Message $message, public  $thread, public string $type = "newMessageCreated")
     {
         //
     }
@@ -42,7 +42,8 @@ class ThreadMessageEvent implements ShouldBroadcastNow
         return [
             'masterMessageId' => $this->masterMessage->id,
             'message' => $this->message,
-            'thread'=> $this->thread
+            'thread' => $this->thread,
+            "type" => $this->type,
         ];
     }
 }

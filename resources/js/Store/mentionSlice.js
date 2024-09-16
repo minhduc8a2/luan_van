@@ -8,8 +8,8 @@ export const mentionSlice = createSlice({
     },
     reducers: {
         setMention(state, action) {
-            state.messageId = action.payload.messageId;
-            state.threadMessage = action.payload.threadMessage;
+            state.messageId = action.payload?.messageId || null;
+            state.threadMessage = action.payload?.threadMessage || null;
         },
     },
 });

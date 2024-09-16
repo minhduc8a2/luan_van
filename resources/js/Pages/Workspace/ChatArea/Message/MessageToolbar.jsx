@@ -11,6 +11,7 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { setThreadMessage } from "@/Store/threadSlice";
 import { IoMdMore } from "react-icons/io";
+import { usePage } from "@inertiajs/react";
 export default function MessageToolbar({
     message,
     threadStyle = false,
@@ -19,6 +20,7 @@ export default function MessageToolbar({
     setIsEditing,
 }) {
     const dispatch = useDispatch();
+    const { auth, permissions } = usePage().props;
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [showMore, setShowMore] = useState(false);
 
@@ -193,27 +195,39 @@ export default function MessageToolbar({
                                                     <button className="hover:bg-blue-500 hover:text-white px-4  py-2 w-full text-left">
                                                         Pin to channel
                                                     </button>
-                                                    <hr />
-                                                    {!message.is_auto_generated && (
-                                                        <button
-                                                            className="hover:bg-blue-500 hover:text-white px-4  py-2 w-full text-left"
-                                                            onClick={() => {
-                                                                setIsEditing(
-                                                                    true
-                                                                );
-                                                                setIsHovered(
-                                                                    false
-                                                                );
-                                                                close();
-                                                            }}
-                                                        >
-                                                            Edit message
-                                                        </button>
+
+                                                    {message.user_id ==
+                                                        auth.user.id && (
+                                                        <>
+                                                            <hr />
+                                                            {!message.is_auto_generated && (
+                                                                <button
+                                                                    className="hover:bg-blue-500 hover:text-white px-4  py-2 w-full text-left"
+                                                                    onClick={() => {
+                                                                        setIsEditing(
+                                                                            true
+                                                                        );
+                                                                        setIsHovered(
+                                                                            false
+                                                                        );
+                                                                        close();
+                                                                    }}
+                                                                >
+                                                                    Edit message
+                                                                </button>
+                                                            )}
+                                                        </>
                                                     )}
-                                                    <hr />
-                                                    <button className="hover:bg-danger hover:text-white px-4  py-2 w-full text-left text-danger-light">
-                                                        Delete message
-                                                    </button>
+                                                    {(permissions.deleteAnyMessages ||
+                                                        message.user_id ==
+                                                            auth.user.id) && (
+                                                        <>
+                                                            <hr />
+                                                            <button className="hover:bg-danger hover:text-white px-4  py-2 w-full text-left text-danger-light">
+                                                                Delete message
+                                                            </button>
+                                                        </>
+                                                    )}
                                                 </div>
                                                 <div
                                                     className="fixed top-0 bottom-0 right-0 left-0 bg-transparent overflow-hidden z-10"

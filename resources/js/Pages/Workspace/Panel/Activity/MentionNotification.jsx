@@ -10,6 +10,8 @@ import { getChannelName } from "@/helpers/channelHelper";
 import { setMention } from "@/Store/mentionSlice";
 import { setMessages } from "@/Store/messagesSlice";
 import { setThreadMessage } from "@/Store/threadSlice";
+import OverlaySimpleNotification from "@/Components/Overlay/OverlaySimpleNotification";
+import { useState } from "react";
 export default function MentionNotification({
     notification,
     handleNotificationClick,
@@ -19,8 +21,11 @@ export default function MentionNotification({
         users: workspaceUsers,
         messages: initMessages,
         channel: currentChannel,
+        channels,
+        availableChannels,
     } = usePage().props;
     const { messages } = useSelector((state) => state.messages);
+    const [errors, setErrors] = useState(null);
     const { fromUser, toUser, channel, workspace, message, threadMessage } =
         isMentionNotificationBroadcast(notification.type)
             ? notification
@@ -29,51 +34,81 @@ export default function MentionNotification({
     const created_at = notification.created_at;
     const view_at = notification.view_at;
     const dispatch = useDispatch();
-    console.log("thread message", threadMessage);
+
     function handleNotificationClickedPart() {
-        if (
-            channel.id === currentChannel.id &&
-            messages.find((msg) => msg.id == message.id)
-        ) {
-            dispatch(setMention({ messageId: message.id }));
-            const targetMessage = document.getElementById(
-                `message-${message.id}`
-            );
+        //check channel is available
+        axios
+            .get(route("channel.checkExists"), {
+                params: { channelId: channel.id },
+            })
+            .then((response) => {
+                let result = response?.data?.result;
+                if (!result) {
+                    setErrors(true);
+                    return;
+                }
 
-            if (targetMessage) {
-                targetMessage.classList.add("bg-link/15");
-
-                setTimeout(() => {
-                    targetMessage.classList.remove("bg-link/15");
-                }, 1000);
-                targetMessage.scrollIntoView({
-                    behavior: "smooth",
-                    block: "center",
-                });
-                dispatch(setMention(null));
-            }
-        } else
-            router.get(
-                route("channel.show", channel.id),
-                { message_id: message.id },
-                {
-                    preserveState: true,
-
-                    onFinish: () => {
-                        dispatch(
-                            setMention({
-                                messageId: message.id,
-                                threadMessage,
-                            })
+                if (
+                    channel.id === currentChannel.id &&
+                    messages.find((msg) => msg.id == message.id)
+                ) {
+                    dispatch(
+                        setMention({
+                            messageId: message.id,
+                            threadMessage,
+                        })
+                    );
+                    if (!threadMessage) {
+                        const targetMessage = document.getElementById(
+                            `message-${message.id}`
                         );
 
-                        if (threadMessage) dispatch(setThreadMessage(message));
-                    },
-                }
-            );
+                        if (targetMessage) {
+                            targetMessage.classList.add("bg-link/15");
+
+                            setTimeout(() => {
+                                targetMessage.classList.remove("bg-link/15");
+                            }, 1000);
+                            targetMessage.scrollIntoView({
+                                behavior: "smooth",
+                                block: "center",
+                            });
+                            dispatch(setMention(null));
+                        }
+                    }
+                    if (threadMessage) dispatch(setThreadMessage(message));
+                } else
+                    router.get(
+                        route("channel.show", channel.id),
+                        { message_id: message.id },
+                        {
+                            preserveState: true,
+
+                            onFinish: () => {
+                                dispatch(
+                                    setMention({
+                                        messageId: message.id,
+                                        threadMessage,
+                                    })
+                                );
+
+                                if (threadMessage)
+                                    dispatch(setThreadMessage(message));
+                            },
+                        }
+                    );
+            });
+
+        //
     }
     return (
         <li>
+            <OverlaySimpleNotification
+                show={errors}
+                onClose={() => setErrors(null)}
+            >
+                <div className="text-red-500">Channel was deleted!</div>
+            </OverlaySimpleNotification>
             <button
                 className={`p-4 pl-8 w-full hover:bg-white/15 border-t border-white/15 ${
                     read_at != null ? "" : "bg-primary-lighter/15"

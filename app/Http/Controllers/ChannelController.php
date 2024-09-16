@@ -593,6 +593,18 @@ class ChannelController extends Controller
             return back()->withErrors(['server' => "Something went wrong! Please try later."]);
         }
     }
+
+    function checkChannelExists(Request $request)
+    {
+        $channelId = $request->query("channelId");
+
+        if (!$channelId) return [
+            'result' => false,
+        ];
+        return  [
+            'result' => $request->user()->channels()->where('channels.id',  $channelId)->exists()
+        ];
+    }
     /**
      * Remove the specified resource from storage.
      */
@@ -601,9 +613,10 @@ class ChannelController extends Controller
         if ($request->user()->cannot('delete', $channel)) abort(403);
         try {
             DB::beginTransaction();
-            $user = $request->user;
+            $user = $request->user();
+            $copiedChannel = $channel->replicate();
+            $copiedChannel->id = $channel->id;
             $channelUsers = $channel->users;
-            $channelId = $channel->id;
             $workspace = $channel->workspace;
             $messages = $channel->messages()->with('thread')->get();
             $messages->each(function ($message) {
@@ -620,13 +633,14 @@ class ChannelController extends Controller
                 $channelUser->notify(new ChannelsNotification(
                     fromUser: $user,
                     toUser: null,
-                    channel: $channel,
-                    workspace: $channel->workspace,
+                    channel: $copiedChannel,
+                    workspace: $workspace,
                     changesType: 'deleteChannel',
 
                 ));
             }
-            broadcast(new WorkspaceEvent(workspace: $workspace, type: 'deleteChannel', data: $channelId))->toOthers();
+
+            broadcast(new WorkspaceEvent(workspace: $workspace, type: 'deleteChannel', data: $copiedChannel->id))->toOthers();
             DB::commit();
             return redirect(route('channel.show', $workspace->mainChannel()->id));
         } catch (\Throwable $th) {
