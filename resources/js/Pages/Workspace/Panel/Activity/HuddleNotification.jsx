@@ -7,6 +7,8 @@ import { toggleHuddle } from "@/Store/huddleSlice";
 import { isHuddleInvitationNotificationBroadcast } from "@/helpers/notificationTypeHelper";
 import { useDispatch, useSelector } from "react-redux";
 import { getChannelName } from "@/helpers/channelHelper";
+import {useState} from 'react'
+import OverlaySimpleNotification from "@/Components/Overlay/OverlaySimpleNotification";
 export default function HuddleNotification({
     notification,
     handleNotificationClick,
@@ -26,59 +28,82 @@ export default function HuddleNotification({
     const read_at = notification.read_at;
     const created_at = notification.created_at;
     const view_at = notification.view_at;
+    const [errors, setErrors] = useState(null);
+
     function handleNotificationClickedPart() {
-        if (huddleChannel && huddleChannel.id != channel.id) {
-            if (confirm("Are you sure you want to switch to other huddle")) {
-                if (workspace.id != currentWorkspace.id) {
-                    router.get(
-                        route("channel.show", channel.id),
-                        {},
-                        {
-                            preserveState: true,
-                            onSuccess: () =>
-                                dispatch(
-                                    toggleHuddle({
-                                        channel,
-                                        user: auth.user,
-                                    })
-                                ),
-                        }
-                    );
-                } else
-                    dispatch(
-                        toggleHuddle({
-                            channel,
-                            user: auth.user,
-                        })
-                    );
-            }
-        } else {
-            if (workspace.id != currentWorkspace.id) {
-                router.get(
-                    route("channel.show", channel.id),
-                    {},
-                    {
-                        preserveState: true,
-                        onSuccess: () =>
+        axios
+            .get(route("channel.checkExists"), {
+                params: { channelId: channel.id },
+            })
+            .then((response) => {
+                let result = response?.data?.result;
+                if (!result) {
+                    setErrors(true);
+                    return;
+                }
+                if (huddleChannel && huddleChannel.id != channel.id) {
+                    if (
+                        confirm(
+                            "Are you sure you want to switch to other huddle"
+                        )
+                    ) {
+                        if (workspace.id != currentWorkspace.id) {
+                            router.get(
+                                route("channel.show", channel.id),
+                                {},
+                                {
+                                    preserveState: true,
+                                    onSuccess: () =>
+                                        dispatch(
+                                            toggleHuddle({
+                                                channel,
+                                                user: auth.user,
+                                            })
+                                        ),
+                                }
+                            );
+                        } else
                             dispatch(
                                 toggleHuddle({
                                     channel,
                                     user: auth.user,
                                 })
-                            ),
+                            );
                     }
-                );
-            } else
-                dispatch(
-                    toggleHuddle({
-                        channel,
-                        user: auth.user,
-                    })
-                );
-        }
+                } else {
+                    if (workspace.id != currentWorkspace.id) {
+                        router.get(
+                            route("channel.show", channel.id),
+                            {},
+                            {
+                                preserveState: true,
+                                onSuccess: () =>
+                                    dispatch(
+                                        toggleHuddle({
+                                            channel,
+                                            user: auth.user,
+                                        })
+                                    ),
+                            }
+                        );
+                    } else
+                        dispatch(
+                            toggleHuddle({
+                                channel,
+                                user: auth.user,
+                            })
+                        );
+                }
+            });
     }
     return (
-        <li >
+        <li>
+            <OverlaySimpleNotification
+                show={errors}
+                onClose={() => setErrors(null)}
+            >
+                <div className="text-red-500">Channel was deleted!</div>
+            </OverlaySimpleNotification>
             <button
                 className={`p-4 pl-8  hover:bg-white/15 border-t border-white/15 ${
                     read_at != null ? "" : "bg-primary-lighter/15"
@@ -120,7 +145,8 @@ export default function HuddleNotification({
                             <div className="text-left">
                                 {`${fromUser.name} has invited you to join huddle in channel `}{" "}
                                 <span className="font-bold">
-                                    #{getChannelName(
+                                    #
+                                    {getChannelName(
                                         channel,
                                         auth.user,
                                         workspaceUsers

@@ -267,7 +267,7 @@ export default function Thread() {
             isInfiniteScrollRef.current = false;
         }
     }, [sortedMessages]); //for infinite scrolling
-
+   
     return (
         <div className="w-[35%] bg-background flex flex-col border-l border-white/15">
             <div className="p-4 z-10">
@@ -294,8 +294,8 @@ export default function Thread() {
 
             <div className="flex items-center gap-x-4 pl-4 my-4">
                 <h3 className="text-sm text-white/75">
-                    {messages.length}{" "}
-                    {messages.length > 1 ? "replies" : "reply"}
+                    {message.thread.messages_count}{" "}
+                    {message.thread.messages_count > 1 ? "replies" : "reply"}
                 </h3>{" "}
                 <hr className="border-white/15 flex-1" />
             </div>

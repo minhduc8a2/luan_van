@@ -27,6 +27,8 @@ export const activitySlice = createSlice({
                     ? notification.read_at
                     : new Date().toUTCString(),
             }));
+            state.new_count -= 1;
+
         },
         setAsView(state, action) {
             const index = state.notifications.findIndex(
@@ -38,6 +40,7 @@ export const activitySlice = createSlice({
                     .read_at
                     ? state.notifications[index].read_at
                     : new Date().toUTCString();
+                state.new_count -= 1;
             }
         },
     },
@@ -51,7 +54,7 @@ export const {
     setAsView,
     pushActivity,
     pushManyActivity,
-    setNotificationsCount
+    setNotificationsCount,
 } = activitySlice.actions;
 
 export default activitySlice.reducer;

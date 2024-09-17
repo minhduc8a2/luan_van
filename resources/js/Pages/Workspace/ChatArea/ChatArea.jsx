@@ -84,7 +84,7 @@ export default function ChatArea() {
     const isInfiniteScrollRef = useRef(false);
     const preScrollPositionRef = useRef(null);
     const [newMessageReceived, setNewMessageReceived] = useState(true);
-
+    const [loadingMessages, setLoadingMessages] = useState(false);
     const [newMessageReactionReceive, setNewMessageReactionReceive] =
         useState(null);
     const channelConnectionRef = useRef(null);
@@ -392,48 +392,69 @@ export default function ChatArea() {
     */
 
     useEffect(() => {
-        console.log("top_inView", top_inView);
+        // console.log("top_inView", top_inView);
         if (!top_inView) return;
         if (!nextPageUrlRef.current) return;
-        axios.get(nextPageUrlRef.current).then((response) => {
-            if (response.status == 200) {
-                nextPageUrlRef.current = response.data.messages.next_page_url;
-                dispatch(
-                    setMessages([...response.data.messages.data, ...messages])
-                );
-                isInfiniteScrollRef.current = true;
-                preScrollPositionRef.current = {
-                    oldScrollHeight: messageContainerRef.current.scrollHeight,
-                    oldScrollTop: messageContainerRef.current.scrollTop,
-                    position: "top",
-                };
-            }
-        });
+        setLoadingMessages(true);
+        axios
+            .get(nextPageUrlRef.current)
+            .then((response) => {
+                if (response.status == 200) {
+                    nextPageUrlRef.current =
+                        response.data.messages.next_page_url;
+                    dispatch(
+                        setMessages([
+                            ...response.data.messages.data,
+                            ...messages,
+                        ])
+                    );
+                    isInfiniteScrollRef.current = true;
+                    preScrollPositionRef.current = {
+                        oldScrollHeight:
+                            messageContainerRef.current.scrollHeight,
+                        oldScrollTop: messageContainerRef.current.scrollTop,
+                        position: "top",
+                    };
+                }
+            })
+            .finally(() => {
+                setLoadingMessages(false);
+            });
     }, [top_inView]); //hande scroll top
 
     useEffect(() => {
-        console.log("bottom_inView", bottom_inView);
+        // console.log("bottom_inView", bottom_inView);
         if (!bottom_inView) return;
         if (!previousPageUrlRef.current) return;
-        axios.get(previousPageUrlRef.current).then((response) => {
-            if (response.status == 200) {
-                previousPageUrlRef.current =
-                    response.data.messages.prev_page_url;
-                dispatch(
-                    setMessages([...response.data.messages.data, ...messages])
-                );
-                isInfiniteScrollRef.current = true;
-                preScrollPositionRef.current = {
-                    oldScrollHeight: messageContainerRef.current.scrollHeight,
-                    oldScrollTop: messageContainerRef.current.scrollTop,
-                    position: "bottom",
-                };
-            }
-        });
+        setLoadingMessages(true);
+        axios
+            .get(previousPageUrlRef.current)
+            .then((response) => {
+                if (response.status == 200) {
+                    previousPageUrlRef.current =
+                        response.data.messages.prev_page_url;
+                    dispatch(
+                        setMessages([
+                            ...response.data.messages.data,
+                            ...messages,
+                        ])
+                    );
+                    isInfiniteScrollRef.current = true;
+                    preScrollPositionRef.current = {
+                        oldScrollHeight:
+                            messageContainerRef.current.scrollHeight,
+                        oldScrollTop: messageContainerRef.current.scrollTop,
+                        position: "bottom",
+                    };
+                }
+            })
+            .finally(() => {
+                setLoadingMessages(false);
+            });
     }, [bottom_inView]); //hande scroll bottom
 
     useEffect(() => {
-        console.log("isInfiniteScroll");
+        // console.log("isInfiniteScroll");
         if (!isInfiniteScrollRef.current) return;
         if (!messageContainerRef.current) return;
         if (!preScrollPositionRef.current) return;
@@ -456,7 +477,17 @@ export default function ChatArea() {
             <div className="bg-background  chat-area-container flex-1 ">
                 <div className="p-4 border-b border-b-white/10 z-10">
                     <div className="flex justify-between font-bold text-lg opacity-75">
-                        <ChannelSettings channelName={channelName} />
+                        <div className="flex items-center gap-x-4">
+                            <ChannelSettings channelName={channelName} />
+                            {loadingMessages && (
+                                <div className="flex gap-x-2 items-center">
+                                    <div className="h-6 w-6 relative">
+                                        <OverlayLoadingSpinner />
+                                    </div>
+                                    <div className="text-xs">Loading messages...</div>
+                                </div>
+                            )}
+                        </div>
                         <div className="">
                             {!channel.is_archived && (
                                 <div className="flex items-center gap-x-4 ">

@@ -9,7 +9,8 @@ import { isChannelsNotificationBroadcast } from "@/helpers/notificationTypeHelpe
 import { getChannelName } from "@/helpers/channelHelper";
 import { setMention } from "@/Store/mentionSlice";
 import { FaLock } from "react-icons/fa";
-
+import OverlaySimpleNotification from "@/Components/Overlay/OverlaySimpleNotification";
+import {useState} from 'react'
 export default function ChannelNotification({
     notification,
     handleNotificationClick,
@@ -20,7 +21,7 @@ export default function ChannelNotification({
 
         channel: currentChannel,
     } = usePage().props;
-    console.log(notification);
+   
     const { messages } = useSelector((state) => state.messages);
     const { fromUser, channel, workspace, data, changesType } =
         isChannelsNotificationBroadcast(notification.type)
@@ -30,12 +31,25 @@ export default function ChannelNotification({
     const created_at = notification.created_at;
     const view_at = notification.view_at;
     const dispatch = useDispatch();
+    const [errors, setErrors] = useState(null);
+
     function handleNotificationClickedPart() {
-        if (changesType != "deleteChannel") {
-            router.visit(route("channel.show", channel.id), {
-                preserveState: true,
+        axios
+            .get(route("channel.checkExists"), {
+                params: { channelId: channel.id },
+            })
+            .then((response) => {
+                let result = response?.data?.result;
+                if (!result) {
+                    setErrors(true);
+                    return;
+                }
+                if (changesType != "deleteChannel") {
+                    router.visit(route("channel.show", channel.id), {
+                        preserveState: true,
+                    });
+                }
             });
-        }
     }
     const channelName = useMemo(
         () => getChannelName(channel, workspaceUsers, auth.user),
@@ -136,6 +150,12 @@ export default function ChannelNotification({
     }, [notification]);
     return (
         <li>
+            <OverlaySimpleNotification
+                show={errors}
+                onClose={() => setErrors(null)}
+            >
+                <div className="text-red-500">Channel was deleted!</div>
+            </OverlaySimpleNotification>
             <button
                 className={`p-4 pl-8 w-full hover:bg-white/15 border-t border-white/15 ${
                     read_at != null ? "" : "bg-primary-lighter/15"
