@@ -12,12 +12,14 @@ import { useDispatch } from "react-redux";
 import { setThreadMessage } from "@/Store/threadSlice";
 import { IoMdMore } from "react-icons/io";
 import { usePage } from "@inertiajs/react";
+import DeleteMessage from "./DeleteMessage";
 export default function MessageToolbar({
     message,
     threadStyle = false,
     reactToMessage,
     setIsHovered,
     setIsEditing,
+    user,
 }) {
     const dispatch = useDispatch();
     const { auth, permissions } = usePage().props;
@@ -223,9 +225,7 @@ export default function MessageToolbar({
                                                             auth.user.id) && (
                                                         <>
                                                             <hr />
-                                                            <button className="hover:bg-danger hover:text-white px-4  py-2 w-full text-left text-danger-light">
-                                                                Delete message
-                                                            </button>
+                                                           <DeleteMessage message={message} user={user}/>
                                                         </>
                                                     )}
                                                 </div>

@@ -195,6 +195,7 @@ export default function Message({
                     reactToMessage={reactToMessage}
                     setIsHovered={(pre) => setIsHovered(pre)}
                     setIsEditing={(pre) => setIsEditing(pre)}
+                    user={user}
                 />
             )}
             {hasChanged || index == 0 ? (

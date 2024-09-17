@@ -13,6 +13,7 @@ export default function Form1({
     submitting = false,
     className = "",
     disabled = false,
+    submitButtonClassName = "",
 }) {
     return (
         <OverlayPanel buttonNode={activateButtonNode} success={success} disabled={disabled}>
@@ -57,7 +58,7 @@ export default function Form1({
                                     <Button
                                         className={`text-white/65 ${
                                             disabled ? "opacity-50" : ""
-                                        }`}
+                                        } ${submitButtonClassName}`}
                                         loading={submitting}
                                         onClick={(e) => {
                                             if (disabled) return;
