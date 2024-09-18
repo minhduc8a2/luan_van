@@ -30,12 +30,33 @@ export const messagesSlice = createSlice({
                 state.messages[messageIndex].is_edited = true;
             }
         },
+        deleteMessage(state, action) {
+            let messageIndex = state.messages.findIndex(
+                (message) => message.id == action.payload
+            );
+            if (messageIndex >= 0) {
+                state.messages[messageIndex].deleted_at =
+                    new Date().toUTCString();
+                state.messages[messageIndex].reactions = [];
+                state.messages[messageIndex].thread = null;
+                state.messages[messageIndex].attachments = [];
+            }
+        },
+
         addThreadMessagesCount(state, action) {
             let messageIndex = state.messages.findIndex(
                 (message) => message.id == action.payload
             );
             if (messageIndex >= 0) {
                 state.messages[messageIndex].thread.messages_count += 1;
+            }
+        },
+        subtractThreadMessagesCount(state, action) {
+            let messageIndex = state.messages.findIndex(
+                (message) => message.id == action.payload
+            );
+            if (messageIndex >= 0) {
+                state.messages[messageIndex].thread.messages_count -= 1;
             }
         },
     },
@@ -48,6 +69,8 @@ export const {
     addThreadToMessages,
     addThreadMessagesCount,
     editMessage,
+    deleteMessage,
+    subtractThreadMessagesCount
 } = messagesSlice.actions;
 
 export default messagesSlice.reducer;

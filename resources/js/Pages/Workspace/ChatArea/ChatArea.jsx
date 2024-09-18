@@ -32,8 +32,10 @@ import {
     addMessage,
     addThreadMessagesCount,
     addThreadToMessages,
+    deleteMessage,
     editMessage,
     setMessages,
+    subtractThreadMessagesCount,
 } from "@/Store/messagesSlice";
 import { setMention } from "@/Store/mentionSlice";
 import ChannelSettings from "./ChannelSettings/ChannelSettings";
@@ -57,7 +59,6 @@ export default function ChatArea() {
     } = useInView({
         /* Optional options */
         threshold: 0,
-        initialInView: true,
     });
     const {
         ref: bottom_ref,
@@ -66,7 +67,6 @@ export default function ChatArea() {
     } = useInView({
         /* Optional options */
         threshold: 0,
-        initialInView: true,
     });
     const { message: threadMessage } = useSelector((state) => state.thread);
     const { messageId, threadMessage: mentionThreadMessage } = useSelector(
@@ -192,6 +192,12 @@ export default function ChatArea() {
                             content: e.message.content,
                         })
                     );
+                else if (e.type == "messageDeleted") {
+                    if (threadMessage?.id == e.message?.id)
+                        dispatch(setThreadMessage(null));
+                    dispatch(deleteMessage(e.message?.id));
+                }
+
                 // console.log(e);
             })
 
@@ -200,6 +206,8 @@ export default function ChatArea() {
                 if (e.thread) dispatch(addThreadToMessages(e.thread));
                 else if (e.type == "newMessageCreated")
                     dispatch(addThreadMessagesCount(e.masterMessageId));
+                else if (e.type == "messageDeleted")
+                    dispatch(subtractThreadMessagesCount(e.masterMessageId));
                 // console.log(e);
             })
             .listen("SettingsEvent", (e) => {
@@ -271,7 +279,7 @@ export default function ChatArea() {
             channelConnectionRef.current = null;
             Echo.leave(`channels.${channel.id}`);
         };
-    }, [channel.id, huddleChannel]);
+    }, [channel.id, huddleChannel, threadMessage]);
 
     function handleHuddleButtonClicked() {
         if (huddleChannel && huddleChannel.id != channel.id) {
@@ -484,7 +492,9 @@ export default function ChatArea() {
                                     <div className="h-6 w-6 relative">
                                         <OverlayLoadingSpinner />
                                     </div>
-                                    <div className="text-xs">Loading messages...</div>
+                                    <div className="text-xs">
+                                        Loading messages...
+                                    </div>
                                 </div>
                             )}
                         </div>

@@ -14,7 +14,9 @@ export default function Index({
     newNoftificationsCount,
     channels,
     directChannels,
+   messages,
 }) {
+   console.log(messages);
     const storeRef = useRef();
     if (!storeRef.current) {
         // Create the store instance the first time this renders

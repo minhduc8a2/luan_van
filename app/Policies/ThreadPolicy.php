@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\User;
 use App\Models\Channel;
+use App\Models\Message;
 use App\Helpers\ChannelTypes;
 use App\Helpers\PermissionTypes;
 use Illuminate\Support\Facades\DB;
@@ -28,7 +29,8 @@ class ThreadPolicy
 
     public function create(User $user, Channel $channel): bool
     {
-        if($channel->is_archived) return false;
+        
+        if ($channel->is_archived) return false;
         return $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name)
             || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_THREAD->name);
     }

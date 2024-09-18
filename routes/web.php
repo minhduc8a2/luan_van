@@ -66,6 +66,7 @@ Route::middleware('auth')->group(function () {
     Route::delete("/channels/{channel}", [ChannelController::class, 'destroy'])->name("channel.delete");
     Route::post("/channels/{channel}/messages", [MessageController::class, 'store'])->name('message.store');
     Route::post("/messages/{message}", [MessageController::class, 'update'])->name('message.update');
+    Route::delete("/messages/{message}", [MessageController::class, 'destroy'])->name('message.delete');
     Route::post("/channels/{channel}/messages/{message}", [MessageController::class, 'storeThreadMessage'])->name('thread_message.store');
     Route::get("/channels/{channel}/messages/{message}/thread_messages", [ThreadController::class, 'getMessages'])->name("thread.messages");
     Route::post("/channels/{channel}/huddle_invitation", [HuddleController::class, 'invite'])->name("huddle.invitation");

@@ -74,7 +74,7 @@ export default function MessageToolbar({
                     🤲
                 </button>
             </Tooltip>
-            {!threadStyle && (
+            {!threadStyle && !message.is_auto_generated && (
                 <Tooltip
                     content={
                         <div className="whitespace-nowrap p-1 text-center text-sm ">

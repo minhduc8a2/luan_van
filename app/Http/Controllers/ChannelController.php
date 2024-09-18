@@ -93,7 +93,7 @@ class ChannelController extends Controller
             $message = Message::find($messageId);
             if ($message) {
 
-                $messagePosition = $channel->messages()
+                $messagePosition = $channel->messages()->withTrashed()
                     ->latest() // Order by latest first
                     ->where('created_at', '>=', $message->created_at) // Messages that are newer or equal to the mentioned one
                     ->count();
@@ -103,7 +103,7 @@ class ChannelController extends Controller
 
         if ($request->expectsJson()) {
             return [
-                'messages' => $channel->messages()->with([
+                'messages' => $channel->messages()->withTrashed()->with([
                     'attachments',
                     'reactions',
                     'thread' => function ($query) {
@@ -197,13 +197,13 @@ class ChannelController extends Controller
             'workspaces' => $workspaces,
             "directChannels" => $directChannels,
             'selfChannel' => $selfChannel,
-            'messages' => $messageId ? $channel->messages()->with([
+            'messages' => $messageId ? $channel->messages()->withTrashed()->with([
                 'attachments',
                 'reactions',
                 'thread' => function ($query) {
                     $query->withCount('messages');
                 }
-            ])->latest()->simplePaginate($perPage, ['*'], 'page', $pageNumber) : $channel->messages()->with([
+            ])->latest()->simplePaginate($perPage, ['*'], 'page', $pageNumber) : $channel->messages()->withTrashed()->with([
                 'attachments',
                 'reactions',
                 'thread' => function ($query) {

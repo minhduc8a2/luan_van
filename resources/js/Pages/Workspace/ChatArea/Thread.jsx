@@ -1,4 +1,10 @@
-import { setThreadMessage } from "@/Store/threadSlice";
+import {
+    addThreadMessage,
+    deleteThreadMessage,
+    editThreadMessage,
+    setThreadMessage,
+    setThreadMessages,
+} from "@/Store/threadSlice";
 import React, { useMemo } from "react";
 import { IoClose } from "react-icons/io5";
 import { useDispatch, useSelector } from "react-redux";
@@ -15,9 +21,9 @@ export default function Thread() {
     const dispatch = useDispatch();
     const { channel, permissions } = usePage().props;
     const { threadMessage } = useSelector((state) => state.mention);
-    const { message } = useSelector((state) => state.thread);
+    const { message, messages } = useSelector((state) => state.thread);
     const { channelUsers } = usePage().props;
-    const [messages, setMessages] = useState([]);
+
     const nextPageUrlRef = useRef(null);
     const previousPageUrlRef = useRef(null);
     const messageContainerRef = useRef(null);
@@ -82,6 +88,12 @@ export default function Thread() {
             }
         );
     }
+
+    useEffect(() => {
+        return () => {
+            dispatch(setThreadMessages([]));
+        };
+    }, []);
     useEffect(() => {
         threadConnectionRef.current = Echo.join(`threads.${message.id}`);
         threadConnectionRef.current
@@ -94,20 +106,12 @@ export default function Thread() {
             })
             .listen("ThreadMessageEvent", (e) => {
                 if (e.type == "newMessageCreated")
-                    setMessages((pre) => [...pre, e.message]);
+                    dispatch(addThreadMessage(e.message));
                 else if (e.type == "messageEdited") {
-                    setMessages((pre) => {
-                        const temp = [...pre];
-                        const messageIndex = pre.findIndex(
-                            (m) => m.id == e.message.id
-                        );
-                        if (messageIndex >= 0) {
-                            temp[messageIndex].content = e.message.content;
-                        }
-                        return temp;
-                    });
+                    dispatch(editThreadMessage(e.message));
+                } else if (e.type == "messageDeleted") {
+                    dispatch(deleteThreadMessage(e.message.id));
                 }
-                console.log(e);
             })
             .listenForWhisper("messageReaction", (e) => {
                 setNewMessageReactionReceive(e);
@@ -134,11 +138,13 @@ export default function Thread() {
                 nextPageUrlRef.current = response.data?.messages?.next_page_url;
                 previousPageUrlRef.current =
                     response.data?.messages?.prev_page_url;
-                setMessages(response.data?.messages?.data || []);
+                dispatch(
+                    setThreadMessages(response.data?.messages?.data || [])
+                );
                 setLoadingMessages(false);
             });
         return () => {
-            setMessages([]);
+            dispatch(setThreadMessages([]));
             Echo.leave(`threads.${message.id}`);
         };
     }, [message.id]);
@@ -163,7 +169,9 @@ export default function Thread() {
                 nextPageUrlRef.current = response.data?.messages?.next_page_url;
                 previousPageUrlRef.current =
                     response.data?.messages?.prev_page_url;
-                setMessages(response.data?.messages?.data || []);
+                dispatch(
+                    setThreadMessages(response.data?.messages?.data || [])
+                );
                 setLoadingMessages(false);
             });
     }, [threadMessage]);
@@ -218,7 +226,12 @@ export default function Thread() {
             if (response.status == 200) {
                 nextPageUrlRef.current = response.data.messages.next_page_url;
 
-                setMessages([...response.data.messages.data, ...messages]);
+                dispatch(
+                    setThreadMessages([
+                        ...response.data.messages.data,
+                        ...messages,
+                    ])
+                );
                 isInfiniteScrollRef.current = true;
                 preScrollPositionRef.current = {
                     oldScrollHeight: messageContainerRef.current.scrollHeight,
@@ -237,7 +250,12 @@ export default function Thread() {
             if (response.status == 200) {
                 previousPageUrlRef.current =
                     response.data.messages.prev_page_url;
-                setMessages([...response.data.messages.data, ...messages]);
+                dispatch(
+                    setThreadMessages([
+                        ...response.data.messages.data,
+                        ...messages,
+                    ])
+                );
                 isInfiniteScrollRef.current = true;
                 preScrollPositionRef.current = {
                     oldScrollHeight: messageContainerRef.current.scrollHeight,
@@ -267,7 +285,7 @@ export default function Thread() {
             isInfiniteScrollRef.current = false;
         }
     }, [sortedMessages]); //for infinite scrolling
-   
+    const thread_messages_count = message.thread?.messages_count || 0;
     return (
         <div className="w-[35%] bg-background flex flex-col border-l border-white/15">
             <div className="p-4 z-10">
@@ -294,8 +312,8 @@ export default function Thread() {
 
             <div className="flex items-center gap-x-4 pl-4 my-4">
                 <h3 className="text-sm text-white/75">
-                    {message.thread.messages_count}{" "}
-                    {message.thread.messages_count > 1 ? "replies" : "reply"}
+                    {thread_messages_count}{" "}
+                    {thread_messages_count > 1 ? "replies" : "reply"}
                 </h3>{" "}
                 <hr className="border-white/15 flex-1" />
             </div>

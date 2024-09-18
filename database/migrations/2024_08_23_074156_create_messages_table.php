@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('user_name')->nullable();
             $table->boolean('is_auto_generated')->default(false);
             $table->boolean('is_edited')->default(false);
+            $table->softDeletes();
             $table->timestamps();
         });
     }

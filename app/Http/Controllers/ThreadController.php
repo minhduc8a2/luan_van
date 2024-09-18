@@ -36,12 +36,14 @@ class ThreadController extends Controller
             'messages' => $messageId ?
                 $thread
                 ->messages()
+                ->withTrashed()
                 ->with(['attachments', 'reactions'])
                 ->latest()
                 ->simplePaginate($perPage, ['*'], 'page', $pageNumber)
                 :
                 $thread
                 ->messages()
+                ->withTrashed()
                 ->with(['attachments', 'reactions'])
                 ->latest()
                 ->simplePaginate($perPage)

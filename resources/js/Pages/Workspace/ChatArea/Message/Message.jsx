@@ -184,11 +184,11 @@ export default function Message({
     return (
         <div
             className={`message-container transition-all pl-8 pt-1 pr-4 pb-2 relative break-all group hover:bg-white/10 ${
-                isHovered ? "bg-white/10" : ""
+                isHovered && !message.deleted_at ? "bg-white/10" : ""
             } ${hasChanged || index == 0 ? "pt-4" : "mt-0"}`}
             id={`message-${message.id}`}
         >
-            {!channel.is_archived && (
+            {!channel.is_archived && !message.deleted_at && (
                 <MessageToolbar
                     message={message}
                     threadStyle={threadStyle}
@@ -246,7 +246,9 @@ export default function Message({
                         <div
                             className="prose prose-invert "
                             dangerouslySetInnerHTML={{
-                                __html: message.content,
+                                __html: message.deleted_at
+                                    ? "<p class=\"italic text-white/50\">Deleted message</p>"
+                                    : message.content,
                             }}
                         ></div>
                         {message.is_edited == true && (

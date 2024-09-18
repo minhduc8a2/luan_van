@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Helpers\Helper;
 use App\Events\MessageEvent;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -15,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 class Message extends Model
 {
     use HasFactory;
+    use SoftDeletes;
     protected $fillable = ['content', 'user_id', 'messagable_id', 'messagable_type', 'created_at', 'is_auto_generated'];
     public function user(): BelongsTo
     {

@@ -76,7 +76,21 @@ class MessagePolicy
      */
     public function delete(User $user, Message $message): bool
     {
-        //
+        $isChannelMessage = $message->messagable_type == Channel::class;
+        $channel = null;
+        try {
+            if ($isChannelMessage) $channel = $message->messagable;
+            else $channel = Thread::find($message->messagable_id)->message->messagable;
+            if ($channel->is_archived) return false;
+            return $user->workspacePermissionCheck($channel->workspace, PermissionTypes::WORKSPACE_ALL->name)
+                || $user->id == $message->user_id;
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
+
+
+
+        return false;
     }
 
     /**

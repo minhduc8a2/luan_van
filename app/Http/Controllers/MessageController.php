@@ -106,6 +106,7 @@ class MessageController extends Controller
     public function storeThreadMessage(Request $request, Channel $channel, Message $message)
     {
         if ($request->user()->cannot('create', [Thread::class, $channel])) return abort(403);
+        if ($message->is_auto_generated) return abort(403);
         try {
             $validated = $request->validate(['content' => 'string', 'fileObjects' => 'array', 'mentionsList' => 'array']);
             $content = $validated['content'];
@@ -180,6 +181,7 @@ class MessageController extends Controller
     public function update(Request $request, Message $message)
     {
         if ($request->user()->cannot('update', [Message::class, $message])) return abort(403);
+        if ($message->is_auto_generated) return abort(403);
         $validated = $request->validate(['content' => 'string']);
         $content = $validated['content'];
 
@@ -226,8 +228,36 @@ class MessageController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Message $message)
+    public function destroy(Request $request, Message $message)
     {
-        //
+        if ($request->user()->cannot('delete', [Message::class, $message])) return abort(403);
+        try {
+            DB::beginTransaction();
+            $isChannelMessage = $message->messagable_type == Channel::class;
+            $copiedMessage = $message->replicate();
+            $copiedMessage->id = $message->id;
+            if ($isChannelMessage) {
+                $message->thread?->messages()->forceDelete();
+                $message->thread?->delete();
+
+                //no need to delete attachments, not depend on message
+
+            }
+            $message->reactions()->delete();
+            $message->attachments()->update(["message_id" => null]);
+            $message->delete();
+
+            if ($isChannelMessage) {
+                broadcast(new MessageEvent($message->messagable, $copiedMessage, "messageDeleted"));
+            } else {
+                broadcast(new ThreadMessageEvent(Thread::find($message->messagable_id)->message, $copiedMessage, null, "messageDeleted"));
+            }
+            DB::commit();
+            back();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            dd($th);
+            return back()->withErrors(['server' => "Something went wrong, please try later!"]);
+        }
     }
 }
