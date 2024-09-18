@@ -41,6 +41,7 @@ export default function HuddleNotification({
                     setErrors(true);
                     return;
                 }
+                if (huddleChannel && huddleChannel.id == channel.id) return;
                 if (huddleChannel && huddleChannel.id != channel.id) {
                     if (
                         confirm(

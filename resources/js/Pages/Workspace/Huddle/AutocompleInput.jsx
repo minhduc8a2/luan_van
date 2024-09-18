@@ -3,6 +3,7 @@ import { useState, useRef } from "react";
 import Avatar from "@/Components/Avatar";
 import AvatarAndName from "@/Components/AvatarAndName";
 import { IoMdClose } from "react-icons/io";
+import { useSelector } from "react-redux";
 export default function AutocompleInput({
     users,
     choosenUsers,
@@ -10,6 +11,8 @@ export default function AutocompleInput({
 }) {
     const [showSuggested, setShowSuggested] = useState(false);
     const [inputValue, setInputValue] = useState("");
+    const onlineStatusMap = useSelector((state) => state.onlineStatus);
+
     return (
         <div className="border rounded-xl p-2 relative">
             <div className="flex gap-x-2">
@@ -19,7 +22,11 @@ export default function AutocompleInput({
                             className="flex gap-x-1 items-center bg-white/15 p-1 px-2 rounded-lg w-fit"
                             key={user.id}
                         >
-                            <AvatarAndName user={user} className="h-4 w-4" />
+                            <AvatarAndName
+                                user={user}
+                                className="h-4 w-4"
+                                isOnline={ onlineStatusMap[user.id]}
+                            />
                             <button
                                 className=""
                                 onClick={() => {
@@ -73,6 +80,9 @@ export default function AutocompleInput({
                                     <AvatarAndName
                                         user={user}
                                         className="h-6 w-6"
+                                        isOnline={
+                                            onlineStatusMap[user.id]
+                                        }
                                     />
                                 </button>
                             </li>

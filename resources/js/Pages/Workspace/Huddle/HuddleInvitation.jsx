@@ -4,10 +4,13 @@ import AvatarAndName from "@/Components/AvatarAndName";
 import AutocompleInput from "./AutocompleInput";
 import Button from "@/Components/Button";
 import { useState } from "react";
+import { useSelector } from "react-redux";
 export default function HuddleInvitation({ close }) {
     const { flash } = usePage().props;
     const { channelUsers, auth, channel, data } = usePage().props;
     const [choosenUsers, setChoosenUsers] = useState({});
+    const onlineStatusMap = useSelector((state) => state.onlineStatus);
+
     function submit() {
         router.post(
             route("huddle.invitation", channel.id),
@@ -85,6 +88,7 @@ export default function HuddleInvitation({ close }) {
                                 <AvatarAndName
                                     user={user}
                                     className="h-10 w-10"
+                                    isOnline={onlineStatusMap[user.id]}
                                 />
                             </button>
                         </li>

@@ -10,7 +10,7 @@ import { getChannelName } from "@/helpers/channelHelper";
 import { setMention } from "@/Store/mentionSlice";
 import { FaLock } from "react-icons/fa";
 import OverlaySimpleNotification from "@/Components/Overlay/OverlaySimpleNotification";
-import {useState} from 'react'
+import { useState } from "react";
 export default function ChannelNotification({
     notification,
     handleNotificationClick,
@@ -21,7 +21,7 @@ export default function ChannelNotification({
 
         channel: currentChannel,
     } = usePage().props;
-   
+    console.log(notification);
     const { messages } = useSelector((state) => state.messages);
     const { fromUser, channel, workspace, data, changesType } =
         isChannelsNotificationBroadcast(notification.type)
@@ -142,6 +142,38 @@ export default function ChannelNotification({
                 return (
                     <div className="text-left">
                         {`${fromUser.name} has changed channel privacy from ${data.oldType} to ${data.newType}`}
+                    </div>
+                );
+            case "unarchiveChannel":
+                return (
+                    <div className="text-left">
+                        {`${fromUser.name} has unarchived channel `}
+                        <div className="inline-block">
+                            <div className="flex items-baseline ">
+                                {channel.type == "PUBLIC" ? (
+                                    <span className="">#</span>
+                                ) : (
+                                    <FaLock className="text-sm inline" />
+                                )}{" "}
+                                {channelName}
+                            </div>
+                        </div>
+                    </div>
+                );
+            case "archiveChannel":
+                return (
+                    <div className="text-left">
+                        {`${fromUser.name} has archived channel `}
+                        <div className="inline-block">
+                            <div className="flex items-baseline ">
+                                {channel.type == "PUBLIC" ? (
+                                    <span className="">#</span>
+                                ) : (
+                                    <FaLock className="text-sm inline" />
+                                )}{" "}
+                                {channelName}
+                            </div>
+                        </div>
                     </div>
                 );
             default:

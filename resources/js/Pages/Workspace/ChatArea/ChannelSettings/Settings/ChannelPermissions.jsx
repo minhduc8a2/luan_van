@@ -43,6 +43,20 @@ export default function ChannelPermissions() {
             },
         });
     }
+    function description() {
+        switch (channelPermissions.channelPostPermission) {
+            case "everyone":
+                return "Everyone can post";
+            case "everyone_except_guests":
+                return "Everyone, except guests, can post";
+
+            case "channel_managers_only":
+                return "Only channel managers can post.";
+
+            default:
+                return "";
+        }
+    }
     return (
         <OverlayNotification
             success={success}
@@ -53,7 +67,7 @@ export default function ChannelPermissions() {
                     }}
                     className="border-none"
                     title="Channel permissions"
-                    description={<div>Everyone can post</div>}
+                    description={description()}
                 />
             }
             title={<div className="font-semibold ">Channel permissions</div>}
