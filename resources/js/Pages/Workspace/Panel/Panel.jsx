@@ -30,6 +30,7 @@ export default function Panel({}) {
     const dispatch = useDispatch();
     const panelRef = useRef(null);
     const isDraggingRef = useRef(null);
+    const draggingBarRef = useRef(null);
     const newMessageCountsMap = useSelector(
         (state) => state.newMessageCountsMap
     );
@@ -56,10 +57,12 @@ export default function Panel({}) {
 
             dispatch(setPanelWidth(width));
         };
-        const onMouseUp = () => {
+        const onMouseUp = (e) => {
+            if (e.target != draggingBarRef.current) return;
             isDraggingRef.current = false;
         };
         const onMouseDown = (e) => {
+            if (e.target != draggingBarRef.current) return;
             x = e.clientX;
             isDraggingRef.current = true;
         };
@@ -85,7 +88,8 @@ export default function Panel({}) {
             className="bg-secondary h-full relative rounded-l-lg rounded-s-lg border-r border-r-white/15"
         >
             <div
-                className={`bg-transparent transition hover:bg-link w-1 cursor-col-resize h-full absolute top-0 right-0`}
+                ref={draggingBarRef}
+                className={`bg-transparent transition z-20 hover:bg-link w-1 cursor-col-resize h-full absolute top-0 right-0`}
             ></div>
             <div className="flex justify-between items-center p-4">
                 <div className="flex gap-x-1 items-center">

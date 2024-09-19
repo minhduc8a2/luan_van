@@ -4,6 +4,7 @@ import {
     editThreadMessage,
     setThreadMessage,
     setThreadMessages,
+    setThreadWidth,
 } from "@/Store/threadSlice";
 import React, { useMemo } from "react";
 import { IoClose } from "react-icons/io5";
@@ -23,7 +24,13 @@ export default function Thread() {
     const { threadMessage } = useSelector((state) => state.mention);
     const { message, messages } = useSelector((state) => state.thread);
     const { channelUsers } = usePage().props;
+    //resize
+    const threadContainerRef = useRef(null);
+    const isDraggingRef = useRef(null);
+    const { width: threadWidth } = useSelector((state) => state.thread);
+    const draggingBarRef = useRef(null);
 
+    //
     const nextPageUrlRef = useRef(null);
     const previousPageUrlRef = useRef(null);
     const messageContainerRef = useRef(null);
@@ -285,9 +292,54 @@ export default function Thread() {
             isInfiniteScrollRef.current = false;
         }
     }, [sortedMessages]); //for infinite scrolling
+
+    //resize thread width
+    useEffect(() => {
+        let x = 0;
+        let styles = window.getComputedStyle(threadContainerRef.current);
+        let width = parseInt(styles.width);
+        const onMouseMoveRightResize = (e) => {
+            if (!isDraggingRef.current) return;
+            const dx = e.clientX - x;
+            x = e.clientX;
+            width -= dx;
+
+            dispatch(setThreadWidth(width));
+        };
+        const onMouseUp = (e) => {
+            isDraggingRef.current = false;
+        };
+        const onMouseDown = (e) => {
+            console.log("is dragging");
+            x = e.clientX;
+            isDraggingRef.current = true;
+        };
+
+        //listeners
+        document.addEventListener("mousemove", onMouseMoveRightResize);
+
+        document.addEventListener("mouseup", onMouseUp);
+
+        document.addEventListener("mousedown", onMouseDown);
+        return () => {
+            document.removeEventListener("mousemove", onMouseMoveRightResize);
+
+            document.removeEventListener("mouseup", onMouseUp);
+
+            document.removeEventListener("mousedown", onMouseDown);
+        };
+    }, []);
     const thread_messages_count = message.thread?.messages_count || 0;
     return (
-        <div className="w-[35%] bg-background flex flex-col border-l border-white/15">
+        <div
+            className=" bg-background flex flex-col relative border-l border-white/15"
+            style={{ width: threadWidth }}
+            ref={threadContainerRef}
+        >
+            <div
+                ref={draggingBarRef}
+                className={`bg-transparent transition hover:bg-link w-1 cursor-col-resize h-full absolute top-0 left-0`}
+            ></div>
             <div className="p-4 z-10">
                 <div className="flex justify-between font-bold text-lg opacity-75 items-center">
                     <div className="">Thread</div>

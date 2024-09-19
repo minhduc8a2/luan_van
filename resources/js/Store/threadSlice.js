@@ -5,6 +5,7 @@ export const threadSlice = createSlice({
     initialState: {
         message: null,
         messages: [],
+        width: 500,
     },
     reducers: {
         setThreadMessage(state, action) {
@@ -37,6 +38,10 @@ export const threadSlice = createSlice({
                 state.messages[messageIndex].attachments = [];
             }
         },
+        setThreadWidth(state, action) {
+            console.log("set thread width");
+            state.width = action.payload;
+        },
     },
 });
 
@@ -47,6 +52,7 @@ export const {
     deleteThreadMessage,
     addThreadMessage,
     editThreadMessage,
+    setThreadWidth,
 } = threadSlice.actions;
 
 export default threadSlice.reducer;
