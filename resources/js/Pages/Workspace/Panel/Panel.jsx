@@ -43,7 +43,6 @@ export default function Panel({}) {
             { preserveState: true }
         );
     }
-    if (type == "activity") return <Activity />;
 
     useEffect(() => {
         let x = 0;
@@ -82,152 +81,163 @@ export default function Panel({}) {
         };
     }, []);
     return (
-        <div
-            ref={panelRef}
-            style={{ width }}
-            className="bg-secondary h-full relative rounded-l-lg rounded-s-lg border-r border-r-white/15"
-        >
+        <div ref={panelRef} style={{ width }} className="relative">
             <div
                 ref={draggingBarRef}
                 className={`bg-transparent transition z-20 hover:bg-link w-1 cursor-col-resize h-full absolute top-0 right-0`}
             ></div>
-            <div className="flex justify-between items-center p-4">
-                <div className="flex gap-x-1 items-center">
-                    <h3 className="text-xl font-semibold">{workspace.name}</h3>
-                    <IoIosArrowDown className="text-lg" />
-                </div>
-                <HiOutlinePencilAlt className="text-xl opacity-75" />
-            </div>
-            <hr className=" opacity-10" />
-            <div className="opacity-85 pl-4 pr-4 pt-4">
-                <div className=" grid-item  px-4">
-                    <BiMessageRoundedDetail className="text-xl" />
-                    <div className="">Threads</div>
-                </div>
-                <div className="mt-6">
-                    <div className="grid-item  px-4">
-                        <div className="flex items-center">
-                            <FaCaretDown className="text-lg" />
+            {type == "activity" && <Activity />}
+            {type == "home" && (
+                <div className="bg-secondary h-full  rounded-l-lg rounded-s-lg border-r border-r-white/15">
+                    <div className="flex justify-between items-center p-4">
+                        <div className="flex gap-x-1 items-center">
+                            <h3 className="text-xl font-semibold">
+                                {workspace.name}
+                            </h3>
+                            <IoIosArrowDown className="text-lg" />
                         </div>
-                        <div className="">Channels</div>
+                        <HiOutlinePencilAlt className="text-xl opacity-75" />
                     </div>
-                    <ul className="max-h-[30vh] overflow-y-auto scrollbar">
-                        {channels.map((channel) => {
-                            if (channel.type === "PUBLIC")
-                                return (
-                                    <li key={channel.id}>
-                                        <button
-                                            onClick={() =>
-                                                changeChannel(channel)
-                                            }
-                                            className={`flex items-center mt-2 w-full px-4 justify-between rounded-lg ${
-                                                channel.id == currentChannel.id
-                                                    ? "bg-primary-lighter"
-                                                    : "hover:bg-white/10"
-                                            }`}
-                                        >
-                                            {channel.is_archived ? (
-                                                <div className="grid-item">
-                                                    <div className="flex items-center h-full justify-center">
-                                                        <FiArchive className="text-sm " />
-                                                    </div>
-                                                    <div className="font-semibold flex items-center leading-7">
-                                                        {channel.name}
-                                                    </div>
-                                                </div>
-                                            ) : (
-                                                <div className="grid-item">
-                                                    <div className="text-lg">
-                                                        #
-                                                    </div>
-                                                    <div className="flex items-center">
-                                                        {channel.name}
-                                                    </div>
-                                                </div>
-                                            )}
-                                            <div className="text-sm text-white">
-                                                {newMessageCountsMap[channel.id]
-                                                    ? newMessageCountsMap[
-                                                          channel.id
-                                                      ]
-                                                    : ""}
-                                            </div>
-                                        </button>
-                                    </li>
-                                );
-                            else if (channel.type === "PRIVATE")
-                                return (
-                                    <li key={channel.id}>
-                                        <button
-                                            onClick={() =>
-                                                changeChannel(channel)
-                                            }
-                                            className={`flex items-center justify-between mt-2 px-4 w-full rounded-lg ${
-                                                channel.id == currentChannel.id
-                                                    ? "bg-primary-lighter"
-                                                    : "hover:bg-white/10"
-                                            }`}
-                                        >
-                                            <div className="grid-item">
-                                                <div className="flex items-center h-full justify-center">
+                    <hr className=" opacity-10" />
+                    <div className="opacity-85 pl-4 pr-4 pt-4">
+                        <div className=" grid-item  px-4">
+                            <BiMessageRoundedDetail className="text-xl" />
+                            <div className="">Threads</div>
+                        </div>
+                        <div className="mt-6">
+                            <div className="grid-item  px-4">
+                                <div className="flex items-center">
+                                    <FaCaretDown className="text-lg" />
+                                </div>
+                                <div className="">Channels</div>
+                            </div>
+                            <ul className="max-h-[30vh] overflow-y-auto scrollbar">
+                                {channels.map((channel) => {
+                                    if (channel.type === "PUBLIC")
+                                        return (
+                                            <li key={channel.id}>
+                                                <button
+                                                    onClick={() =>
+                                                        changeChannel(channel)
+                                                    }
+                                                    className={`flex items-center mt-2 w-full px-4 justify-between rounded-lg ${
+                                                        channel.id ==
+                                                        currentChannel.id
+                                                            ? "bg-primary-lighter"
+                                                            : "hover:bg-white/10"
+                                                    }`}
+                                                >
                                                     {channel.is_archived ? (
-                                                        <FiArchive className="text-sm " />
+                                                        <div className="grid-item">
+                                                            <div className="flex items-center h-full justify-center">
+                                                                <FiArchive className="text-sm " />
+                                                            </div>
+                                                            <div className="font-semibold flex items-center leading-7">
+                                                                {channel.name}
+                                                            </div>
+                                                        </div>
                                                     ) : (
-                                                        <LuLock className="text-sm " />
+                                                        <div className="grid-item">
+                                                            <div className="text-lg">
+                                                                #
+                                                            </div>
+                                                            <div className="flex items-center">
+                                                                {channel.name}
+                                                            </div>
+                                                        </div>
                                                     )}
-                                                </div>
-                                                <div className="font-semibold flex items-center leading-7">
-                                                    {channel.name}
-                                                </div>
-                                            </div>
-                                            <div className="text-sm text-white">
-                                                {newMessageCountsMap[channel.id]
-                                                    ? newMessageCountsMap[
-                                                          channel.id
-                                                      ]
-                                                    : ""}
-                                            </div>
-                                        </button>
-                                    </li>
-                                );
-                            else return "";
-                        })}
-                    </ul>
-                    <CreateChannelForm />
-                </div>
-                <div className="mt-6">
-                    <div className="grid-item px-4">
-                        <div className="flex items-center ">
-                            <FaCaretDown className="text-lg" />
+                                                    <div className="text-sm text-white">
+                                                        {newMessageCountsMap[
+                                                            channel.id
+                                                        ]
+                                                            ? newMessageCountsMap[
+                                                                  channel.id
+                                                              ]
+                                                            : ""}
+                                                    </div>
+                                                </button>
+                                            </li>
+                                        );
+                                    else if (channel.type === "PRIVATE")
+                                        return (
+                                            <li key={channel.id}>
+                                                <button
+                                                    onClick={() =>
+                                                        changeChannel(channel)
+                                                    }
+                                                    className={`flex items-center justify-between mt-2 px-4 w-full rounded-lg ${
+                                                        channel.id ==
+                                                        currentChannel.id
+                                                            ? "bg-primary-lighter"
+                                                            : "hover:bg-white/10"
+                                                    }`}
+                                                >
+                                                    <div className="grid-item">
+                                                        <div className="flex items-center h-full justify-center">
+                                                            {channel.is_archived ? (
+                                                                <FiArchive className="text-sm " />
+                                                            ) : (
+                                                                <LuLock className="text-sm " />
+                                                            )}
+                                                        </div>
+                                                        <div className="font-semibold flex items-center leading-7">
+                                                            {channel.name}
+                                                        </div>
+                                                    </div>
+                                                    <div className="text-sm text-white">
+                                                        {newMessageCountsMap[
+                                                            channel.id
+                                                        ]
+                                                            ? newMessageCountsMap[
+                                                                  channel.id
+                                                              ]
+                                                            : ""}
+                                                    </div>
+                                                </button>
+                                            </li>
+                                        );
+                                    else return "";
+                                })}
+                            </ul>
+                            <CreateChannelForm />
                         </div>
-                        <div className="">Direct messages</div>
-                    </div>
-                    <ul className="max-h-[30vh] overflow-y-auto scrollbar">
-                        {directChannels.map((directCn) => {
-                            const userIds = directCn.name.split("_");
-                            const userId = userIds.find(
-                                (id) => id != auth.user.id
-                            );
-                            let user;
-                            if (userId)
-                                user = users.find((u) => u.id == userId);
-                            return (
+                        <div className="mt-6">
+                            <div className="grid-item px-4">
+                                <div className="flex items-center ">
+                                    <FaCaretDown className="text-lg" />
+                                </div>
+                                <div className="">Direct messages</div>
+                            </div>
+                            <ul className="max-h-[30vh] overflow-y-auto scrollbar">
+                                {directChannels.map((directCn) => {
+                                    const userIds = directCn.name.split("_");
+                                    const userId = userIds.find(
+                                        (id) => id != auth.user.id
+                                    );
+                                    let user;
+                                    if (userId)
+                                        user = users.find(
+                                            (u) => u.id == userId
+                                        );
+                                    return (
+                                        <DirectChannel
+                                            key={user.id}
+                                            user={user}
+                                            channel={directCn}
+                                        />
+                                    );
+                                })}
                                 <DirectChannel
-                                    key={user.id}
-                                    user={user}
-                                    channel={directCn}
+                                    isOnline={true}
+                                    user={{ ...auth.user, online: true }}
+                                    channel={selfChannel}
                                 />
-                            );
-                        })}
-                        <DirectChannel
-                            isOnline={true}
-                            user={{ ...auth.user, online: true }}
-                            channel={selfChannel}
-                        />
-                    </ul>
-                    <InvitationForm workspace={workspace} />
+                            </ul>
+                            <InvitationForm workspace={workspace} />
+                        </div>
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 }
