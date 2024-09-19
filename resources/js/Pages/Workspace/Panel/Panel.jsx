@@ -12,6 +12,8 @@ import Activity from "./Activity/Activity";
 import { CreateChannelForm } from "./createChannelForm";
 import { FiArchive } from "react-icons/fi";
 import { setThreadMessage } from "@/Store/threadSlice";
+import { useEffect, useRef, useState } from "react";
+import { setPanelWidth } from "@/Store/panelSlice";
 
 export default function Panel({}) {
     const {
@@ -24,8 +26,10 @@ export default function Panel({}) {
         selfChannel,
         permissions,
     } = usePage().props;
-    const { type } = useSelector((state) => state.panel);
+    const { type, width } = useSelector((state) => state.panel);
     const dispatch = useDispatch();
+    const panelRef = useRef(null);
+    const isDraggingRef = useRef(null);
     const newMessageCountsMap = useSelector(
         (state) => state.newMessageCountsMap
     );
@@ -40,8 +44,49 @@ export default function Panel({}) {
     }
     if (type == "activity") return <Activity />;
 
+    useEffect(() => {
+        let x = 0;
+        let styles = window.getComputedStyle(panelRef.current);
+        let width = parseInt(styles.width);
+        const onMouseMoveRightResize = (e) => {
+            if (!isDraggingRef.current) return;
+            const dx = e.clientX - x;
+            x = e.clientX;
+            width += dx;
+
+            dispatch(setPanelWidth(width));
+        };
+        const onMouseUp = () => {
+            isDraggingRef.current = false;
+        };
+        const onMouseDown = (e) => {
+            x = e.clientX;
+            isDraggingRef.current = true;
+        };
+
+        //listeners
+        document.addEventListener("mousemove", onMouseMoveRightResize);
+
+        document.addEventListener("mouseup", onMouseUp);
+
+        document.addEventListener("mousedown", onMouseDown);
+        return () => {
+            document.removeEventListener("mousemove", onMouseMoveRightResize);
+
+            document.removeEventListener("mouseup", onMouseUp);
+
+            document.removeEventListener("mousedown", onMouseDown);
+        };
+    }, []);
     return (
-        <div className="bg-secondary h-full rounded-l-lg rounded-s-lg ">
+        <div
+            ref={panelRef}
+            style={{ width }}
+            className="bg-secondary h-full relative rounded-l-lg rounded-s-lg border-r border-r-white/15"
+        >
+            <div
+                className={`bg-transparent transition hover:bg-link w-1 cursor-col-resize h-full absolute top-0 right-0`}
+            ></div>
             <div className="flex justify-between items-center p-4">
                 <div className="flex gap-x-1 items-center">
                     <h3 className="text-xl font-semibold">{workspace.name}</h3>

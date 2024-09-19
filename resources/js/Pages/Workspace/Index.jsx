@@ -10,17 +10,25 @@ import { makeStore } from "@/Store/store";
 import { Provider } from "react-redux";
 import { setActivity, setNotificationsCount } from "@/Store/activitySlice";
 import { initMessageCountForChannel } from "@/Store/newMessageCountsMapSlice";
+import { setPanelWidth } from "@/Store/panelSlice";
 export default function Index({
     newNoftificationsCount,
     channels,
     directChannels,
-   messages,
+    messages,
 }) {
-   console.log(messages);
+    console.log(messages);
     const storeRef = useRef();
     if (!storeRef.current) {
         // Create the store instance the first time this renders
         storeRef.current = makeStore();
+        //update panel width in localStorage
+        try {
+            const panelWidth = parseInt(localStorage.getItem("panelWidth"));
+            console.log(typeof panelWidth);
+            if (Number.isInteger(panelWidth))
+                storeRef.current.dispatch(setPanelWidth(panelWidth));
+        } catch (error) {}
 
         storeRef.current.dispatch(
             setNotificationsCount(newNoftificationsCount)
@@ -43,8 +51,9 @@ export default function Index({
                     <SideBar />
                 </div>
 
-                <div className="client-workspace-container grid grid-cols-4  rounded-lg border border-white/5 border-b-2">
+                <div className="client-workspace-container flex flex-nowrap   rounded-lg border border-white/5 border-b-2">
                     <Panel />
+
                     <ChatArea />
                 </div>
             </div>

@@ -481,7 +481,7 @@ export default function ChatArea() {
         }
     }, [groupedMessages]); //for infinite scrolling
     return (
-        <div className="col-span-3 flex min-h-0 max-h-full w-full">
+        <div className="flex-1 flex min-h-0 max-h-full w-full" >
             <div className="bg-background  chat-area-container flex-1 ">
                 <div className="p-4 border-b border-b-white/10 z-10">
                     <div className="flex justify-between font-bold text-lg opacity-75">

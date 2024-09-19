@@ -48,8 +48,6 @@
     max-height: 100%;
     min-height: 0;
     grid-area: main;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
 }
 
 .grid-item {
@@ -118,8 +116,7 @@
     @apply bg-link/15 text-link p-1 rounded;
 }
 
-
-body  {
+body {
     @apply text-white/75;
 }
 
@@ -132,4 +129,16 @@ input[type="checkbox"] {
 }
 hr {
     @apply border-white/15;
+}
+
+div,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+span,
+p {
+    @apply select-none;
 }
