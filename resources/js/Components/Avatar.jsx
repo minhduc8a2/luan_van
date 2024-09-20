@@ -20,14 +20,14 @@ const Avatar = memo(function ({
             ) : isOnline ? (
                 <div
                     className={
-                        "absolute -bottom-1 -right-1 h-3 w-3 rounded-full bg-green-600  border-2 border-primary " +
+                        "absolute -bottom-1 -right-1 h-3 w-3 rounded-full bg-green-600  border-2 border-primary-500 " +
                         onlineClassName
                     }
                 ></div>
             ) : (
                 <div
                     className={
-                        "absolute -bottom-1 -right-1 h-3 w-3 rounded-full   border-2 border-white/75 bg-primary " +
+                        "absolute -bottom-1 -right-1 h-3 w-3 rounded-full   border-2 border-white/75 bg-primary-500 " +
                         offlineClassName
                     }
                 ></div>

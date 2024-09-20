@@ -23,7 +23,7 @@ export function DirectChannel({ channel, user, isOnline = false }) {
                 onClick={changeChannel}
                 className={`flex mt-2 items-center justify-between gap-x-2 px-4 py-1 rounded-lg w-full ${
                     channel.id == currentChannel.id
-                        ? "bg-primary-lighter"
+                        ? "bg-primary-300"
                         : "hover:bg-white/10"
                 }`}
             >

@@ -92,7 +92,7 @@ export default function Activity() {
         });
     }, [notifications, onlyUnread]);
     return (
-        <div className="bg-secondary flex flex-col max-h-full min-h-0 rounded-l-lg rounded-s-lg pb-4">
+        <div className="bg-secondary flex flex-col h-full rounded-l-lg rounded-s-lg pb-4">
             <div className="flex justify-between items-end p-4">
                 <h3 className="text-xl font-semibold">Activity</h3>
 

@@ -7,18 +7,18 @@ import { useRef } from "react";
 import Huddle from "./Huddle/Huddle";
 import Event from "./Event";
 import { makeStore } from "@/Store/store";
-import { Provider } from "react-redux";
+import { Provider, useSelector } from "react-redux";
 import { setActivity, setNotificationsCount } from "@/Store/activitySlice";
 import { initMessageCountForChannel } from "@/Store/newMessageCountsMapSlice";
 import { setPanelWidth } from "@/Store/panelSlice";
 import { setThreadWidth } from "@/Store/threadSlice";
+import BrowseChannels from "./BrowseChannels/BrowseChannels";
 export default function Index({
     newNoftificationsCount,
     channels,
     directChannels,
     messages,
 }) {
-    console.log(messages);
     const storeRef = useRef();
     if (!storeRef.current) {
         // Create the store instance the first time this renders
@@ -50,7 +50,7 @@ export default function Index({
     return (
         <Provider store={storeRef.current}>
             <Event />
-            <div className="client-container bg-primary text-white ">
+            <div className="client-container bg-primary-500 text-white ">
                 <div className="client-headbar ">
                     <HeadBar />
                 </div>
@@ -59,12 +59,27 @@ export default function Index({
                 </div>
 
                 <div className="client-workspace-container flex flex-nowrap   rounded-lg border border-white/5 border-b-2">
-                    <Panel />
-
-                    <ChatArea />
+                    <MainArea />
                 </div>
             </div>
             <Huddle />
         </Provider>
     );
+}
+
+function MainArea() {
+    const { name: pageName } = useSelector((state) => state.page);
+    switch (pageName) {
+        case "normal":
+            return (
+                <>
+                    <Panel />
+                    <ChatArea />
+                </>
+            );
+        case "browseChannels":
+            return <BrowseChannels />;
+        default:
+            return "";
+    }
 }

@@ -8,6 +8,7 @@ import threadReducer from "./threadSlice";
 import mentionReducer from "./mentionSlice";
 import messagesReducer from "./messagesSlice";
 import newMessageCountsMapReducer from "./newMessageCountsMapSlice";
+import pageReducer from "./pageSlice";
 export const makeStore = () => {
     return configureStore({
         reducer: {
@@ -20,6 +21,7 @@ export const makeStore = () => {
             mention: mentionReducer,
             messages: messagesReducer,
             newMessageCountsMap: newMessageCountsMapReducer,
+            page: pageReducer,
         },
     });
 };

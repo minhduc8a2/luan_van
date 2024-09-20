@@ -326,7 +326,7 @@ export default function Huddle() {
 
     return (
         <div
-            className="bg-primary-light w-96  text-white/85  fixed bottom-12 rounded-xl"
+            className="bg-primary-400 w-96  text-white/85  fixed bottom-12 rounded-xl"
             style={{ left: width + 16 }}
         >
             <div className="flex justify-between p-4 items-center">

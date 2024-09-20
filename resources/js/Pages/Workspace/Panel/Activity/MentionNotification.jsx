@@ -111,7 +111,7 @@ export default function MentionNotification({
             </OverlaySimpleNotification>
             <button
                 className={`p-4 pl-8 w-full hover:bg-white/15 border-t border-white/15 ${
-                    read_at != null ? "" : "bg-primary-lighter/15"
+                    read_at != null ? "" : "bg-primary-300/15"
                 }`}
                 onClick={() => {
                     handleNotificationClick(

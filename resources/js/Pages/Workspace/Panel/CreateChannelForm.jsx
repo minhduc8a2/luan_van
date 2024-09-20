@@ -6,7 +6,7 @@ import TextArea from "@/Components/Input/TextArea";
 import SelectInput from "@/Components/Input/SelectInput";
 import { LuPlus } from "react-icons/lu";
 
-export function CreateChannelForm() {
+export function CreateChannelForm({ activateButtonNode }) {
     const { workspace, permissions } = usePage().props;
     const channelTypes = [
         { type: "PUBLIC", label: "Public - Anyone in " + workspace.name },
@@ -46,16 +46,12 @@ export function CreateChannelForm() {
             buttonName="Create"
             activateButtonNode={
                 <div
-                    className="grid-item mt-2 px-4"
                     onClick={() => {
                         clearErrors();
                         setSuccess(false);
                     }}
                 >
-                    <div className="flex items-center ">
-                        <LuPlus className="text-sm" />
-                    </div>
-                    <div className="">Add channels</div>
+                   { activateButtonNode}
                 </div>
             }
             title="Add channel"
@@ -72,7 +68,6 @@ export function CreateChannelForm() {
                 }`}
             >
                 <TextArea
-                    
                     placeholder=""
                     label="Channel name:"
                     value={data.name}

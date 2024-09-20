@@ -2,7 +2,7 @@ import { IoIosArrowDown } from "react-icons/io";
 import { HiOutlinePencilAlt } from "react-icons/hi";
 import { BiMessageRoundedDetail } from "react-icons/bi";
 import { FaCaretDown } from "react-icons/fa";
-import { LuLock } from "react-icons/lu";
+import { LuLock, LuPlus } from "react-icons/lu";
 
 import { router, usePage } from "@inertiajs/react";
 import { InvitationForm } from "./InvitationForm";
@@ -123,7 +123,7 @@ export default function Panel({}) {
                                                     className={`flex items-center mt-2 w-full px-4 justify-between rounded-lg ${
                                                         channel.id ==
                                                         currentChannel.id
-                                                            ? "bg-primary-lighter"
+                                                            ? "bg-primary-300"
                                                             : "hover:bg-white/10"
                                                     }`}
                                                 >
@@ -168,7 +168,7 @@ export default function Panel({}) {
                                                     className={`flex items-center justify-between mt-2 px-4 w-full rounded-lg ${
                                                         channel.id ==
                                                         currentChannel.id
-                                                            ? "bg-primary-lighter"
+                                                            ? "bg-primary-300"
                                                             : "hover:bg-white/10"
                                                     }`}
                                                 >
@@ -199,7 +199,19 @@ export default function Panel({}) {
                                     else return "";
                                 })}
                             </ul>
-                            <CreateChannelForm />
+                            <CreateChannelForm
+                                activateButtonNode={
+                                    <div
+                                        className="grid-item mt-2 px-4"
+                                       
+                                    >
+                                        <div className="flex items-center ">
+                                            <LuPlus className="text-sm" />
+                                        </div>
+                                        <div className="">Add channels</div>
+                                    </div>
+                                }
+                            />
                         </div>
                         <div className="mt-6">
                             <div className="grid-item px-4">

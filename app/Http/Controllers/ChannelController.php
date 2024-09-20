@@ -117,7 +117,7 @@ class ChannelController extends Controller
          * @var Workspace $workspace
          */
         $workspace = $channel->workspace;
-        $availableChannels = fn() => $workspace->channels()->where("type", "=", ChannelTypes::PUBLIC->name)->get();
+        $availableChannels = fn() => $workspace->channels()->where("type", ChannelTypes::PUBLIC->name)->get();
 
         $channels = fn() => $user->channels()
             ->whereIn("type", [ChannelTypes::PUBLIC->name, ChannelTypes::PRIVATE->name])

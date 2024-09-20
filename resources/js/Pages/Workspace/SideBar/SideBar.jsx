@@ -17,11 +17,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { setSideBarWidth } from "@/Store/sideBarSlice";
 import { setPanelType } from "@/Store/panelSlice";
 import { usePage } from "@inertiajs/react";
+import More from "./More";
+import { setPageName } from "@/Store/pageSlice";
 export default function SideBar({}) {
     const { auth, url, workspace, workspaces } = usePage().props;
     const { type: panelType } = useSelector((state) => state.panel);
-    const {  new_count } = useSelector((state) => state.activity);
-  
+    const { new_count } = useSelector((state) => state.activity);
+
     const dispatch = useDispatch();
     const boxRef = useRef(null);
     const itemStyle = "flex flex-col items-center gap-y-2 group";
@@ -65,7 +67,10 @@ export default function SideBar({}) {
                 </Dropdown>
 
                 <button
-                    onClick={() => dispatch(setPanelType("home"))}
+                    onClick={() => {
+                        dispatch(setPanelType("home"));
+                        dispatch(setPageName("normal"));
+                    }}
                     className={itemStyle}
                 >
                     {panelType == "home" ? (
@@ -81,7 +86,10 @@ export default function SideBar({}) {
                     <div className="text-xs font-semibold">Home</div>
                 </button>
                 <button
-                    onClick={() => dispatch(setPanelType("direct_messages"))}
+                    onClick={() => {
+                        dispatch(setPanelType("direct_messages"));
+                        dispatch(setPageName("normal"));
+                    }}
                     className={itemStyle}
                 >
                     <div className="p-2 rounded-lg group-hover:bg-white/10 group-hover:scale-105 transition">
@@ -110,13 +118,10 @@ export default function SideBar({}) {
                         </div>
                     )}
                 </button>
-                <div className={itemStyle}>
-                    <div className="p-2 rounded-lg group-hover:bg-white/10 group-hover:scale-105 transition">
-                        <IoIosMore className="text-lg " />
-                    </div>
-                    <div className="text-xs font-semibold">More</div>
-                </div>
+
+                <More />
             </div>
+
             <div className="flex flex-col items-center gap-y-2">
                 <div className="p-2 bg-white/25 rounded-full">
                     <LuPlus className="text-xl opacity-75" />
