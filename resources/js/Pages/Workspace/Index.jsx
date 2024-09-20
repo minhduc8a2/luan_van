@@ -11,6 +11,7 @@ import { Provider } from "react-redux";
 import { setActivity, setNotificationsCount } from "@/Store/activitySlice";
 import { initMessageCountForChannel } from "@/Store/newMessageCountsMapSlice";
 import { setPanelWidth } from "@/Store/panelSlice";
+import { setThreadWidth } from "@/Store/threadSlice";
 export default function Index({
     newNoftificationsCount,
     channels,
@@ -28,6 +29,12 @@ export default function Index({
             console.log(typeof panelWidth);
             if (Number.isInteger(panelWidth))
                 storeRef.current.dispatch(setPanelWidth(panelWidth));
+        } catch (error) {}
+        try {
+            const threadWidth = parseInt(localStorage.getItem("threadWidth"));
+            console.log(typeof threadWidth);
+            if (Number.isInteger(threadWidth))
+                storeRef.current.dispatch(setThreadWidth(threadWidth));
         } catch (error) {}
 
         storeRef.current.dispatch(

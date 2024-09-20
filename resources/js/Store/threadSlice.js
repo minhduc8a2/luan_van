@@ -39,7 +39,7 @@ export const threadSlice = createSlice({
             }
         },
         setThreadWidth(state, action) {
-            console.log("set thread width");
+            localStorage.setItem("threadWidth", action.payload);
             state.width = action.payload;
         },
     },
