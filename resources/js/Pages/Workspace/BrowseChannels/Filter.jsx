@@ -3,7 +3,7 @@ import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
 import { FaChevronDown, FaLock } from "react-icons/fa";
 import { FaCheck } from "react-icons/fa";
 import { FaBoxArchive } from "react-icons/fa6";
-export default function Filter() {
+export default function Filter({ setFilter }) {
     const ownTypes = [
         {
             inside: "All channels",
@@ -94,10 +94,25 @@ export default function Filter() {
     return (
         <div className="flex justify-between mt-8">
             <div className="flex gap-x-4">
-                <FilterButton list={ownTypes} action={() => {}} />
-                <FilterButton list={privacyTypes} action={() => {}} />
+                <FilterButton
+                    list={ownTypes}
+                    action={(value) => {
+                        setFilter((pre) => ({ ...pre, ownType: value }));
+                    }}
+                />
+                <FilterButton
+                    list={privacyTypes}
+                    action={(value) => {
+                        setFilter((pre) => ({ ...pre, privacyType: value }));
+                    }}
+                />
             </div>
-            <FilterButton list={sortTypes} action={() => {}} />
+            <FilterButton
+                list={sortTypes}
+                action={(value) => {
+                    setFilter((pre) => ({ ...pre, sort: value }));
+                }}
+            />
         </div>
     );
 }
@@ -130,9 +145,10 @@ function FilterButton({ list, action }) {
                                 onClick={() => {
                                     setSelectedValue(item);
 
-                                    action(item);
+                                    action(item.value);
                                     close();
                                 }}
+                                key={item.value}
                             >
                                 <FaCheck
                                     className={`group-hover:text-white text-xs ${

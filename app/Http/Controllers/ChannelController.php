@@ -117,7 +117,7 @@ class ChannelController extends Controller
          * @var Workspace $workspace
          */
         $workspace = $channel->workspace;
-        $availableChannels = fn() => $workspace->channels()->where("type", ChannelTypes::PUBLIC->name)->get();
+        $availableChannels = fn() => $workspace->channels()->where("type", ChannelTypes::PUBLIC->name)->withCount('users')->get();
 
         $channels = fn() => $user->channels()
             ->whereIn("type", [ChannelTypes::PUBLIC->name, ChannelTypes::PRIVATE->name])
@@ -132,7 +132,7 @@ class ChannelController extends Controller
                             ->limit(1);
                     })->orWhereNull('last_read_at');
                 }
-            ])->get();
+            ])->withCount('users')->get();
 
         $directChannels = fn() => $user->channels()
             ->where("type",  ChannelTypes::DIRECT->name)
