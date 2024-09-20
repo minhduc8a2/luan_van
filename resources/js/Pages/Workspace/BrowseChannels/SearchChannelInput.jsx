@@ -1,9 +1,10 @@
 import TextInput from "@/Components/Input/TextInput";
-import { usePage } from "@inertiajs/react";
+import { setPageName } from "@/Store/pageSlice";
+import { Link, router, usePage } from "@inertiajs/react";
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import { FaLock } from "react-icons/fa";
 import { IoIosSearch } from "react-icons/io";
-export default function SearchChannelInput({ allChannels }) {
+export default function SearchChannelInput({ allChannels, changeChannel }) {
     const [isOpen, setIsOpen] = useState(false);
     const [searchValue, setSearchValue] = useState();
     const panelRef = useRef(null);
@@ -31,7 +32,7 @@ export default function SearchChannelInput({ allChannels }) {
             cn.name.toLowerCase().includes(searchValue)
         );
     }, [searchValue, allChannels]);
-
+   
     return (
         <div className="relative mt-4">
             <div
@@ -56,21 +57,24 @@ export default function SearchChannelInput({ allChannels }) {
             {resultChannels.length > 0 && searchValue && isOpen && (
                 <ul
                     ref={panelRef}
-                    className="absolute z-10 w-[104%] left-1/2 -translate-x-1/2 bg-foreground overflow-hidden border border-white/15  text-white rounded-lg shadow-lg mt-1"
+                    className="absolute z-10 w-[104%] left-1/2 -translate-x-1/2 bg-foreground overflow-hidden border border-white/15 max-h-96 overflow-y-auto scrollbar text-white rounded-lg shadow-lg mt-1"
                 >
                     {resultChannels.map((cn, index) => (
                         <li
                             key={index}
                             className="cursor-pointer p-4 hover:bg-white/15 "
                         >
-                            <div className="flex items-baseline gap-x-2">
+                            <button
+                                onClick={() => changeChannel(cn)}
+                                className="flex items-baseline gap-x-2"
+                            >
                                 {cn.type == "PUBLIC" ? (
                                     <span className="text-xl">#</span>
                                 ) : (
                                     <FaLock className="text-sm inline" />
                                 )}{" "}
                                 {cn.name}
-                            </div>
+                            </button>
                         </li>
                     ))}
                 </ul>

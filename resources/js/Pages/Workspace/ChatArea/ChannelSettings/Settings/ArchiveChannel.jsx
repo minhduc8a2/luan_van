@@ -50,7 +50,7 @@ export default function ArchiveChannel() {
                     <ErrorsList errors={errors} />
                 </OverlaySimpleNotification>
                 <Button
-                    className=" !hover:text-danger bg-transparent w-full py-4 !rounded-none"
+                    className=" !hover:text-danger-500  bg-transparent w-full py-4 !rounded-none"
                     loading={processing}
                     onClick={submit}
                 >
@@ -60,7 +60,7 @@ export default function ArchiveChannel() {
                             channel
                         </div>
                     ) : (
-                        <div className="flex items-center gap-x-2 text-danger">
+                        <div className="flex items-center gap-x-2 text-danger-500 ">
                             <FiArchive className="" /> Archive channel for
                             everyone
                         </div>
@@ -83,7 +83,7 @@ export default function ArchiveChannel() {
             }
             buttonNode={
                 <Button
-                    className=" !hover:text-danger bg-transparent w-full py-4 !rounded-none"
+                    className=" !hover:text-danger-500  bg-transparent w-full py-4 !rounded-none"
                     onClick={() => {
                         setSuccess(false);
                         setErrors(null);
@@ -95,7 +95,7 @@ export default function ArchiveChannel() {
                             channel
                         </div>
                     ) : (
-                        <div className="flex items-center gap-x-2 text-danger">
+                        <div className="flex items-center gap-x-2 text-danger-500 ">
                             <FiArchive className="" /> Archive channel for
                             everyone
                         </div>
@@ -106,7 +106,7 @@ export default function ArchiveChannel() {
                 <Button
                     loading={processing}
                     className={
-                        channel.is_archived ? "" : "!bg-danger text-white"
+                        channel.is_archived ? "" : "!bg-danger-500  text-white"
                     }
                     disabled={!confirm}
                     onClick={submit}

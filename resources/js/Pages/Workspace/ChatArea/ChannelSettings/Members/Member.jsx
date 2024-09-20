@@ -90,7 +90,7 @@ export default function Member({
                                     {!channel.is_main_channel &&
                                         permissions.removeUserFromChannel && (
                                             <CloseButton
-                                                className="p-2 px-4 text-start hover:bg-danger"
+                                                className="p-2 px-4 text-start hover:bg-danger-500 "
                                                 onClick={() =>
                                                     removeFromChannel(user)
                                                 }

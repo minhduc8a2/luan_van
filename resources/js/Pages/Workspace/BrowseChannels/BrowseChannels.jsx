@@ -2,15 +2,18 @@ import React, { useMemo, useState } from "react";
 import { CreateChannelForm } from "../Panel/CreateChannelForm";
 import SearchChannelInput from "./SearchChannelInput";
 import Button from "@/Components/Button";
-import { usePage } from "@inertiajs/react";
+import { router, usePage } from "@inertiajs/react";
 import Filter from "./Filter";
 import { FaCheck } from "react-icons/fa6";
 import { FaLock } from "react-icons/fa";
 import { LuDot } from "react-icons/lu";
 import { compareDateTime } from "@/helpers/dateTimeHelper";
+import { useDispatch } from "react-redux";
+import { setThreadMessage } from "@/Store/threadSlice";
+import { setPageName } from "@/Store/pageSlice";
 export default function BrowseChannels() {
     const { availableChannels, channels, auth } = usePage().props;
-
+    const dispatch = useDispatch();
     const allChannels = useMemo(() => {
         const result = [...availableChannels];
         channels.forEach((cn) => {
@@ -86,10 +89,21 @@ export default function BrowseChannels() {
         }
         return tempChannels;
     }, [filter, allChannels, availableChannels, channels]);
+    function changeChannel(channel) {
+        dispatch(setThreadMessage(null));
 
+        router.get(
+            route("channel.show", channel.id),
+            {},
+            {
+                preserveState: true,
+                onSuccess: () => dispatch(setPageName("normal")),
+            }
+        );
+    }
     return (
         <div className="bg-foreground w-full h-full">
-            <div className="mx-auto w-1/2 py-4">
+            <div className="mx-auto w-1/2 py-4 flex flex-col max-h-full">
                 <div className="flex justify-between items-center">
                     <h3 className="text-xl font-bold text-white">
                         All Channels
@@ -103,16 +117,22 @@ export default function BrowseChannels() {
                     />
                 </div>
                 <SearchChannelInput allChannels={allChannels} />
-                <Filter setFilter={(a) => setFilter(a)} />
+                <Filter
+                    setFilter={(a) => setFilter(a)}
+                    changeChannel={changeChannel}
+                />
                 {filteredChannels.length > 0 && (
-                    <ul className="mt-4 bg-background  rounded-lg border border-white/15">
+                    <ul className="mt-4 bg-background flex-1 max-h-full overflow-y-auto scrollbar rounded-lg border border-white/15">
                         {filteredChannels.map((channel) => {
                             return (
                                 <li
                                     className="border-t first:border-none border-t-white/15"
                                     key={channel.id}
                                 >
-                                    <ChannelItem channel={channel} />
+                                    <ChannelItem
+                                        channel={channel}
+                                        changeChannel={changeChannel}
+                                    />
                                 </li>
                             );
                         })}
@@ -123,7 +143,7 @@ export default function BrowseChannels() {
     );
 }
 
-function ChannelItem({ channel }) {
+function ChannelItem({ channel, changeChannel }) {
     const { channels } = usePage().props;
     const isChannelMember = useMemo(
         () => channels.find((cn) => cn.id === channel.id),
@@ -163,7 +183,10 @@ function ChannelItem({ channel }) {
                 )}
             </ul>
             <div className="hidden gap-x-4 group-hover/browse_channel_item:flex absolute top-1/2 right-2 -translate-y-1/2 ">
-                <Button className="!bg-background hover:!bg-foreground border border-white/15">
+                <Button
+                    className="!bg-background hover:!bg-foreground border border-white/15"
+                    onClick={() => changeChannel(channel)}
+                >
                     Open in Home
                 </Button>
                 {isChannelMember ? (

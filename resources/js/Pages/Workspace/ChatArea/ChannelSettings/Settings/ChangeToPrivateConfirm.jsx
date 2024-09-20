@@ -73,7 +73,7 @@ export default function ChangeToPrivateConfirm({ channelName }) {
                 </Button>
             }
             submitButtonNode={
-                <Button className="!bg-danger relative" onClick={onSubmit}>
+                <Button className="!bg-danger-500  relative" onClick={onSubmit}>
                     {processing ? <OverlayLoadingSpinner /> : ""}
                     <span className={processing ? "invisible" : ""}>
                         Change to{" "}

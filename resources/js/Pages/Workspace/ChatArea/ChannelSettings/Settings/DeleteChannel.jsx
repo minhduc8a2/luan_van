@@ -63,8 +63,8 @@ export default function DeleteChannel() {
                 </div>
             }
             buttonNode={
-                <Button className=" !hover:text-danger bg-transparent w-full !rounded-none py-4 ">
-                    <div className="flex items-center gap-x-2 text-danger">
+                <Button className=" !hover:text-danger-500  bg-transparent w-full !rounded-none py-4 ">
+                    <div className="flex items-center gap-x-2 text-danger-500">
                         <FaRegTrashCan className="" /> Delete this channel
                     </div>
                 </Button>
@@ -72,7 +72,7 @@ export default function DeleteChannel() {
             submitButtonNode={
                 <Button
                     loading={processing}
-                    className={confirm ? " !bg-danger text-white" : ""}
+                    className={confirm ? " !bg-danger-500  text-white" : ""}
                     disabled={!confirm}
                     onClick={submit}
                 >

@@ -26,6 +26,7 @@ import { setMention } from "@/Store/mentionSlice";
 import TipTapEditor from "@/Components/TipTapEditor";
 import { editMessage as editMessageInStore } from "@/Store/messagesSlice";
 import { getMentionsFromContent } from "@/helpers/tiptapHelper";
+import Image from "@/Components/Image";
 export default function Message({
     message,
     user,
@@ -247,7 +248,7 @@ export default function Message({
                             className="prose prose-invert "
                             dangerouslySetInnerHTML={{
                                 __html: message.deleted_at
-                                    ? "<p class=\"italic text-white/50\">Deleted message</p>"
+                                    ? '<p class="italic text-white/50">Deleted message</p>'
                                     : message.content,
                             }}
                         ></div>
@@ -304,18 +305,11 @@ export default function Message({
                         >
                             {imageAttachments.map((attachment) => {
                                 return (
-                                    <div
-                                        className="h-64"
-                                        key={"attachment_" + attachment.id}
-                                    >
-                                        <PhotoView src={attachment.url}>
-                                            <img
-                                                src={attachment.url}
-                                                alt=""
-                                                className="max-h-full rounded-lg cursor-pointer"
-                                            />
-                                        </PhotoView>
-                                    </div>
+                                    <Image
+                                        isInPhotoView={true}
+                                        url={attachment.url}
+                                        key={attachment.id}
+                                    />
                                 );
                             })}
                         </PhotoProvider>
@@ -327,12 +321,13 @@ export default function Message({
                             {videoAttachments.map((attachment) => {
                                 return (
                                     <PhotoView
+                                        
                                         key={"attachment_" + attachment.id}
                                         width={window.innerWidth}
                                         height={window.innerHeight}
                                         render={({ scale, attrs }) => {
                                             return (
-                                                <div {...attrs}>
+                                                <div {...attrs} >
                                                     <Video
                                                         autoPlay
                                                         controls
@@ -348,7 +343,7 @@ export default function Message({
                                             controls
                                             muted
                                             src={attachment.url}
-                                            className="h-64 rounded-lg  "
+                                            className="h-80 rounded-lg  "
                                         />
                                     </PhotoView>
                                 );

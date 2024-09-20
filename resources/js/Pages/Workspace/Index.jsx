@@ -8,7 +8,7 @@ import Huddle from "./Huddle/Huddle";
 import Event from "./Event";
 import { makeStore } from "@/Store/store";
 import { Provider, useSelector } from "react-redux";
-import { setActivity, setNotificationsCount } from "@/Store/activitySlice";
+import { setNotificationsCount } from "@/Store/activitySlice";
 import { initMessageCountForChannel } from "@/Store/newMessageCountsMapSlice";
 import { setPanelWidth } from "@/Store/panelSlice";
 import { setThreadWidth } from "@/Store/threadSlice";

@@ -40,13 +40,13 @@ export default function DeleteMessage({ message, user }) {
             errors={errors}
             submitting={processing}
             activateButtonNode={
-                <button className="hover:bg-danger hover:text-white px-4  py-2 w-full text-left text-danger-light">
+                <button className="hover:bg-danger-500  hover:text-white px-4  py-2 w-full text-left text-danger-400">
                     Delete message
                 </button>
             }
             title="Delete message"
             buttonName="Delete Message"
-            submitButtonClassName="bg-danger"
+            submitButtonClassName="bg-danger-500 "
         >
             <h5>
                 Are you sure you want to delete this message? This cannot be
