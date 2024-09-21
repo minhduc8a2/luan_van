@@ -13,6 +13,7 @@ import { initMessageCountForChannel } from "@/Store/newMessageCountsMapSlice";
 import { setPanelWidth } from "@/Store/panelSlice";
 import { setThreadWidth } from "@/Store/threadSlice";
 import BrowseChannels from "./BrowseChannels/BrowseChannels";
+import BrowseFiles from "./BrowseFiles/BrowseFiles";
 export default function Index({
     newNoftificationsCount,
     channels,
@@ -79,6 +80,8 @@ function MainArea() {
             );
         case "browseChannels":
             return <BrowseChannels />;
+        case "browseFiles":
+            return <BrowseFiles />;
         default:
             return "";
     }

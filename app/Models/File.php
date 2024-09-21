@@ -3,10 +3,10 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class Attachment extends Model
+class File extends Model
 {
     static $type = ['doc', 'pdf', 'image', 'video', 'other'];
     use HasFactory;
@@ -14,19 +14,15 @@ class Attachment extends Model
         'type',
         'url',
         'name',
-        'message_id',
         'path',
         'user_id'
     ];
     protected $hidden = [
         'path'
     ];
-    public function message(): BelongsTo
+
+    public function messages(): BelongsToMany
     {
-        return $this->belongsTo(Message::class);
-    }
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
+        return $this->belongsToMany(Message::class);
     }
 }

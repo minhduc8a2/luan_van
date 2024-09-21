@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\Attachment;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,14 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('attachments', function (Blueprint $table) {
+        Schema::create('file_message', function (Blueprint $table) {
             $table->id();
-            $table->string('type');
-            $table->string('url', 2083);
-            $table->string('path')->nullable();
-            $table->string('name');
+            $table->foreignId('file_id')->constrained()->cascadeOnDelete();
             $table->unsignedBigInteger('message_id')->nullable();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }
@@ -29,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('attachments');
+        Schema::dropIfExists('file_message');
     }
 };

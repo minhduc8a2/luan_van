@@ -39,7 +39,7 @@ export const messagesSlice = createSlice({
                     new Date().toUTCString();
                 state.messages[messageIndex].reactions = [];
                 state.messages[messageIndex].thread = null;
-                state.messages[messageIndex].attachments = [];
+                state.messages[messageIndex].files = [];
             }
         },
 

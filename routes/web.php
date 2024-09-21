@@ -2,13 +2,10 @@
 
 use App\Models\User;
 use Inertia\Inertia;
-use App\Models\Channel;
-use App\Models\Attachment;
-use App\Mail\InvitationMail;
+
 use Illuminate\Http\Request;
 use App\Jobs\DeleteTemporaryFiles;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Foundation\Application;
 use Laravel\Socialite\Facades\Socialite;
 use App\Http\Controllers\HuddleController;
 use App\Http\Controllers\ThreadController;
@@ -20,7 +17,7 @@ use App\Http\Controllers\WorkspaceController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Auth\ProviderController;
-
+use App\Http\Controllers\FileController;
 
 Route::get('/auth/redirect', function () {
     return Socialite::driver('github')->redirect();
@@ -106,3 +103,6 @@ Route::get("/notifications", [NotificationController::class, 'get'])->name('noti
 // Route::get('/mailable', function () {
 //     return new  InvitationMail("https://google.com", "company A", "A", "B");
 // });
+Route::resource('files', FileController::class)->only([
+    'index'
+]);

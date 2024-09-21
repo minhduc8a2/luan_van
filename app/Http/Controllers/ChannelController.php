@@ -104,7 +104,7 @@ class ChannelController extends Controller
         if ($request->expectsJson()) {
             return [
                 'messages' => $channel->messages()->withTrashed()->with([
-                    'attachments',
+                    'files',
                     'reactions',
                     'thread' => function ($query) {
                         $query->withCount('messages');
@@ -198,13 +198,13 @@ class ChannelController extends Controller
             "directChannels" => $directChannels,
             'selfChannel' => $selfChannel,
             'messages' => $messageId ? $channel->messages()->withTrashed()->with([
-                'attachments',
+                'files',
                 'reactions',
                 'thread' => function ($query) {
                     $query->withCount('messages');
                 }
             ])->latest()->simplePaginate($perPage, ['*'], 'page', $pageNumber) : $channel->messages()->withTrashed()->with([
-                'attachments',
+                'files',
                 'reactions',
                 'thread' => function ($query) {
                     $query->withCount('messages');

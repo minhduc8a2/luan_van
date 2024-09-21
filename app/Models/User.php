@@ -83,9 +83,9 @@ class User extends Authenticatable
         return $this->hasMany(Message::class);
     }
 
-    public function attachments(): HasMany
+    public function files(): HasMany
     {
-        return $this->hasMany(Attachment::class);
+        return $this->hasMany(File::class);
     }
 
     public  function isWorkspaceMember(Workspace $workspace): bool

@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from "react";
 import { CreateChannelForm } from "../Panel/CreateChannelForm";
-import SearchChannelInput from "./SearchChannelInput";
 import Button from "@/Components/Button";
 import { router, usePage } from "@inertiajs/react";
 import Filter from "./Filter";
@@ -11,6 +10,7 @@ import { compareDateTime } from "@/helpers/dateTimeHelper";
 import { useDispatch } from "react-redux";
 import { setThreadMessage } from "@/Store/threadSlice";
 import { setPageName } from "@/Store/pageSlice";
+import SearchInput from "../../../Components/Input/SearchInput";
 export default function BrowseChannels() {
     const { availableChannels, channels, auth } = usePage().props;
     const dispatch = useDispatch();
@@ -130,7 +130,7 @@ export default function BrowseChannels() {
         );
     }
     return (
-        <div className="bg-foreground w-full h-full">
+        <div className="bg-foreground w-full h-full border border-white/15 ">
             <div className="mx-auto w-1/2 py-4 flex flex-col max-h-full">
                 <div className="flex justify-between items-center">
                     <h3 className="text-xl font-bold text-white">
@@ -144,7 +144,33 @@ export default function BrowseChannels() {
                         }
                     />
                 </div>
-                <SearchChannelInput allChannels={allChannels} />
+                <SearchInput
+                    list={allChannels}
+                    onItemClick={changeChannel}
+                    filterFunction={(searchValue, list) => {
+                        return list.filter((cn) =>
+                            cn.name.toLowerCase().includes(searchValue)
+                        );
+                    }}
+                    renderItemNode={(item) => {
+                        return (
+                            <button
+                                onClick={() => {
+                                    console.log(item);
+                                    changeChannel(item);
+                                }}
+                                className="flex items-baseline gap-x-2 w-full"
+                            >
+                                {item.type == "PUBLIC" ? (
+                                    <span className="text-xl">#</span>
+                                ) : (
+                                    <FaLock className="text-sm inline" />
+                                )}{" "}
+                                {item.name}
+                            </button>
+                        );
+                    }}
+                />
                 <Filter
                     setFilter={(a) => setFilter(a)}
                     changeChannel={changeChannel}

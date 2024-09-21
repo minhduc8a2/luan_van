@@ -85,7 +85,7 @@ export default function SideBar({}) {
                     )}
                     <div className="text-xs font-semibold">Home</div>
                 </button>
-                <button
+                {/* <button
                     onClick={() => {
                         dispatch(setPanelType("direct_messages"));
                         dispatch(setPageName("normal"));
@@ -96,7 +96,7 @@ export default function SideBar({}) {
                         <FaRegMessage className="text-lg " />
                     </div>
                     <div className="text-xs font-semibold">DMs</div>
-                </button>
+                </button> */}
                 <button
                     onClick={() => dispatch(setPanelType("activity"))}
                     className={itemStyle + " relative"}

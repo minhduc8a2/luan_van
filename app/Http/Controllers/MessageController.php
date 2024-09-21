@@ -41,13 +41,13 @@ class MessageController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    function createAttachments($fileObjects, $user)
+    function createFiles($fileObjects, $user)
     {
-        $attachments = [];
+        $files = [];
         foreach ($fileObjects as $fileObject) {
-            array_push($attachments, ['name' => $fileObject['name'], 'path' => $fileObject['path'], 'type' => $fileObject['type'], 'url' => Storage::url($fileObject['path']), 'user_id' => $user->id]);
+            array_push($files, ['name' => $fileObject['name'], 'path' => $fileObject['path'], 'type' => $fileObject['type'], 'url' => Storage::url($fileObject['path']), 'user_id' => $user->id]);
         }
-        return $attachments;
+        return $files;
     }
     public function store(Request $request,  Channel $channel)
     {
@@ -72,9 +72,9 @@ class MessageController extends Controller
                 $fileObject['path'] = $newPath;
                 array_push($fileObjects, $fileObject);
             }
-            $attachments = $this->createAttachments($fileObjects, $request->user());
+            $files = $this->createFiles($fileObjects, $request->user());
 
-            $message->attachments()->createMany($attachments);
+            $message->files()->createMany($files);
 
 
             if (isset($message)) {
@@ -87,7 +87,7 @@ class MessageController extends Controller
                 }
                 //notify others about new message
                 broadcast(new MessageEvent($channel, $message->load([
-                    'attachments',
+                    'files',
                     'reactions',
                     'thread' => function ($query) {
                         $query->withCount('messages');
@@ -98,7 +98,7 @@ class MessageController extends Controller
             back();
         } catch (\Throwable $th) {
             DB::rollBack();
-            // dd($th);
+            dd($th);
             return back()->withErrors(['server' => "Something went wrong, please try later!"]);
         }
     }
@@ -133,9 +133,9 @@ class MessageController extends Controller
                 array_push($fileObjects, $fileObject);
             }
 
-            $attachments = $this->createAttachments($fileObjects, $request->user());
+            $files = $this->createFiles($fileObjects, $request->user());
 
-            $newMessage->attachments()->createMany($attachments);
+            $newMessage->files()->createMany($files);
 
             if (isset($newMessage)) {
 
@@ -144,11 +144,11 @@ class MessageController extends Controller
 
                 foreach ($mentionsList as $u) {
                     $mentionedUser = User::find($u['id']);
-                    $mentionedUser->notify(new MentionNotification($channel, $channel->workspace, $request->user(), $mentionedUser, $message->load(['attachments', 'reactions']), $newMessage));
+                    $mentionedUser->notify(new MentionNotification($channel, $channel->workspace, $request->user(), $mentionedUser, $message->load(['files', 'reactions']), $newMessage));
                 }
                 //notify others about new message
 
-                broadcast(new ThreadMessageEvent($message, $newMessage->load(['attachments', 'reactions']), $isNewThread ? $thread : null));
+                broadcast(new ThreadMessageEvent($message, $newMessage->load(['files', 'reactions']), $isNewThread ? $thread : null));
             }
             DB::commit();
             return back();
@@ -206,14 +206,14 @@ class MessageController extends Controller
             //notify others about new message
             if (!$isThreadMessage) { //channel Message
                 broadcast(new MessageEvent($channel, $message->load([
-                    'attachments',
+                    'files',
                     'reactions',
                     'thread' => function ($query) {
                         $query->withCount('messages');
                     }
                 ]), "messageEdited"));
             } else {
-                broadcast(new ThreadMessageEvent($masterMessage, $message->load(['attachments', 'reactions']), null, "messageEdited"));
+                broadcast(new ThreadMessageEvent($masterMessage, $message->load(['files', 'reactions']), null, "messageEdited"));
             }
 
             DB::commit();
@@ -240,11 +240,11 @@ class MessageController extends Controller
                 $message->thread?->messages()->forceDelete();
                 $message->thread?->delete();
 
-                //no need to delete attachments, not depend on message
+                //no need to delete files, not depend on message
 
             }
             $message->reactions()->delete();
-            $message->attachments()->update(["message_id" => null]);
+            $message->files()->detach();
             $message->delete();
 
             if ($isChannelMessage) {

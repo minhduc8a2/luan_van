@@ -40,7 +40,7 @@ export default function Message({
     const { auth, channel, channelUsers, permissions } = usePage().props;
     const dispatch = useDispatch();
     const { messageId } = useSelector((state) => state.mention);
-    const attachments = message.attachments || [];
+    const files = message.files || [];
     const [reactions, setReactions] = useState(
         message.reactions ? [...message.reactions] : []
     );
@@ -48,12 +48,12 @@ export default function Message({
     const videoAttachments = [];
     const documentAttachments = [];
     const otherAttachments = [];
-    attachments.forEach((attachment) => {
-        if (isImage(attachment.type)) imageAttachments.push(attachment);
-        else if (isDocument(attachment.type))
-            documentAttachments.push(attachment);
-        else if (isVideo(attachment.type)) videoAttachments.push(attachment);
-        else otherAttachments.push(attachment);
+    files.forEach((file) => {
+        if (isImage(file.type)) imageAttachments.push(file);
+        else if (isDocument(file.type))
+            documentAttachments.push(file);
+        else if (isVideo(file.type)) videoAttachments.push(file);
+        else otherAttachments.push(file);
     });
     const [openOverlay, setOpenOverlay] = useState(false);
     const [isHovered, setIsHovered] = useState(false);

@@ -51,6 +51,7 @@ export default function ChatArea() {
         channel,
         channels,
         channelUsers,
+        directChannels,
         messages: initMessages,
         permissions,
     } = usePage().props;
@@ -472,7 +473,7 @@ export default function ChatArea() {
     }, [groupedMessages]); //for infinite scrolling
 
     const isChannelMember = useMemo(
-        () => channels.find((cn) => cn.id === channel.id),
+        () => channels.find((cn) => cn.id === channel.id) || directChannels.find((cn) => cn.id === channel.id) ,
         [channels, channel]
     );
     return (

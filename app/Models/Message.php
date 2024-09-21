@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Message extends Model
@@ -27,11 +28,10 @@ class Message extends Model
         return $this->morphTo();
     }
 
-    public function attachments(): HasMany
+    public function files(): BelongsToMany
     {
-        return $this->hasMany(Attachment::class);
+        return $this->belongsToMany(File::class);
     }
-
     public function thread(): HasOne
     {
         return $this->hasOne(Thread::class);
@@ -57,7 +57,7 @@ class Message extends Model
             'is_auto_generated' => true,
         ]);
         broadcast(new MessageEvent($channel, $message->load([
-            'attachments',
+            'files',
             'reactions',
             'thread' => function ($query) {
                 $query->withCount('messages');

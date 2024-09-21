@@ -99,6 +99,14 @@ export default function Video({
                 !smallLoaded ? loadingClassname : ""
             } ${className}`}
         >
+            {!playing && (
+                <button className="p-2 rounded gap-x-2 flex bg-black/75 justify-center items-center group-hover/video:hidden absolute bottom-2 left-2">
+                    <FaPlay className="text-sm" />
+                    <div className="font-bold ">
+                        {formatToMinuteSecond(duration)}
+                    </div>
+                </button>
+            )}
             {fullscreen && (
                 <div
                     className="top-0 left-0 right-0 bottom-0 fixed bg-black flex group/video justify-center z-50 "
@@ -148,7 +156,7 @@ export default function Video({
 
                     {largeLoaded && (
                         <div
-                            className={`absolute bottom-2 left-1/2  flex-col -translate-x-1/2 w-[98%] rounded-lg h-16 bg-black/75 hidden items-center justify-between  px-3  ${
+                            className={`absolute bottom-2 left-1/2  flex-col -translate-x-1/2 w-[98%] rounded-lg h-16 bg-black/75 hidden items-center justify-between hover:!flex  px-3  ${
                                 isMouseMoving ? "!flex" : ""
                             }`}
                         >
