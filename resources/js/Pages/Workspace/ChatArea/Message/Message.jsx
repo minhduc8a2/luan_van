@@ -316,40 +316,18 @@ export default function Message({
                     </div>
                 )}
                 {videoAttachments.length != 0 && (
-                    <PhotoProvider>
-                        <div className="flex gap-x-4 flex-wrap mt-4">
-                            {videoAttachments.map((attachment) => {
-                                return (
-                                    <PhotoView
-                                        
-                                        key={"attachment_" + attachment.id}
-                                        width={window.innerWidth}
-                                        height={window.innerHeight}
-                                        render={({ scale, attrs }) => {
-                                            return (
-                                                <div {...attrs} >
-                                                    <Video
-                                                        autoPlay
-                                                        controls
-                                                        muted
-                                                        src={attachment.url}
-                                                        className="h-full mx-auto rounded-lg"
-                                                    />
-                                                </div>
-                                            );
-                                        }}
-                                    >
-                                        <Video
-                                            controls
-                                            muted
-                                            src={attachment.url}
-                                            className="h-80 rounded-lg  "
-                                        />
-                                    </PhotoView>
-                                );
-                            })}
-                        </div>
-                    </PhotoProvider>
+                    <div className="flex gap-x-4 flex-wrap mt-4">
+                        {videoAttachments.map((attachment) => {
+                            return (
+                                <Video
+                                    key={attachment.id}
+                                    src={attachment.url}
+                                    name={attachment.name}
+                                    className="h-96 rounded-lg  "
+                                />
+                            );
+                        })}
+                    </div>
                 )}
                 {documentAttachments.length != 0 && (
                     <div className="flex gap-x-4 flex-wrap mt-4">

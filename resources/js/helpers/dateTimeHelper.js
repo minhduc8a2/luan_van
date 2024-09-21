@@ -100,3 +100,10 @@ export function compareDateTime(dateString1, dateString2) {
     const date2 = new Date(dateString2);
     return date1 - date2;
 }
+
+export const formatToMinuteSecond = (timeInSeconds) => {
+    
+    const minutes = Math.floor(timeInSeconds / 60);
+    const seconds = Math.floor(timeInSeconds % 60);
+    return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+};
