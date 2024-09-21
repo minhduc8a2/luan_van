@@ -43,11 +43,13 @@ import { resetMessageCountForChannel } from "@/Store/newMessageCountsMapSlice";
 import { setThreadMessage } from "@/Store/threadSlice";
 import OverlayNotification from "@/Components/Overlay/OverlayNotification";
 import { FaLock } from "react-icons/fa";
+import Button from "@/Components/Button";
 
 export default function ChatArea() {
     const {
         auth,
         channel,
+        channels,
         channelUsers,
         messages: initMessages,
         permissions,
@@ -88,7 +90,26 @@ export default function ChatArea() {
     const [newMessageReactionReceive, setNewMessageReactionReceive] =
         useState(null);
     const channelConnectionRef = useRef(null);
-
+    function joinChannel() {
+        router.post(
+            route("channel.join", channel.id),
+            {},
+            {
+                preserveState: true,
+                only: [
+                    "channels",
+                    "availableChannels",
+                    "channel",
+                    "permissions",
+                    "channelPermissions",
+                    "channelUsers",
+                ],
+                headers: {
+                    "X-Socket-Id": Echo.socketId(),
+                },
+            }
+        );
+    }
     function onSubmit(content, fileObjects, JSONContent) {
         let mentionsList = getMentionsFromContent(JSONContent);
         if (
@@ -235,13 +256,17 @@ export default function ChatArea() {
                         });
                         break;
                     case "leave":
+                        router.reload({
+                            only: ["channelUsers"],
+                        });
+                        break;
                     case "removeUserFromChannel":
                     case "addUsersToChannel":
                         router.reload({
                             only: [
                                 "channelUsers",
                                 "channels",
-                                "availableChannels",
+
                                 "permissions",
                                 "channelPermissions",
                             ],
@@ -262,6 +287,11 @@ export default function ChatArea() {
                                 "permissions",
                                 "channelPermissions",
                             ],
+                        });
+                        break;
+                    case "join":
+                        router.reload({
+                            only: ["channelUsers"],
                         });
                         break;
                     default:
@@ -315,46 +345,6 @@ export default function ChatArea() {
         return welcomeMessages[1];
     }, [channel.id]);
 
-    // const handleInfiniteScroll = () => {
-    //     let offset = 0;
-    //     console.log(
-    //         messageContainerRef.current.scrollTop,
-    //         messageContainerRef.current.clientHeight,
-    //         messageContainerRef.current.scrollHeight
-    //     );
-    //     if (messageContainerRef.current.scrollTop == offset) {
-    //         console.log("Top");
-    //         if (nextPageUrlRef.current && !isInfiniteLoadRef.current) {
-    //
-    //         }
-    //     } else if (
-    //         messageContainerRef.current.scrollTop ==
-    //         messageContainerRef.current.scrollHeight -
-    //             messageContainerRef.current.clientHeight -
-    //             offset
-    //     ) {
-    //         if (previousPageUrlRef.current && !isInfiniteLoadRef.current) {
-    //             axios.get(previousPageUrlRef.current).then((response) => {
-    //                 if (response.status == 200) {
-    //                     previousPageUrlRef.current =
-    //                         response.data.messages.prev_page_url;
-    //                     dispatch(
-    //                         setMessages([
-    //                             ...response.data.messages.data,
-    //                             ...messages,
-    //                         ])
-    //                     );
-    //                     isInfiniteLoadRef.current = true;
-    //                     preScrollPositionRef.current = {
-    //                         oldScrollHeight:
-    //                             messageContainerRef.current.scrollHeight,
-    //                         position: "bottom",
-    //                     };
-    //                 }
-    //             });
-    //         }
-    //     }
-    // };
     useEffect(() => {
         if (newMessageReceived && messageId) setNewMessageReceived(false);
         if (newMessageReceived && !messageId) {
@@ -480,13 +470,39 @@ export default function ChatArea() {
             isInfiniteScrollRef.current = false;
         }
     }, [groupedMessages]); //for infinite scrolling
+
+    const isChannelMember = useMemo(
+        () => channels.find((cn) => cn.id === channel.id),
+        [channels, channel]
+    );
     return (
-        <div className="flex-1 flex min-h-0 max-h-full w-full" >
+        <div className="flex-1 flex min-h-0 max-h-full w-full">
             <div className="bg-background  chat-area-container flex-1 ">
                 <div className="p-4 border-b border-b-white/10 z-10">
                     <div className="flex justify-between font-bold text-lg opacity-75">
                         <div className="flex items-center gap-x-4">
-                            <ChannelSettings channelName={channelName} />
+                            <ChannelSettings
+                                channelName={channelName}
+                                buttonNode={
+                                    <div
+                                        className="flex items-center gap-x-2"
+                                        onClick={() => setShow(true)}
+                                    >
+                                        <div className="flex items-baseline gap-x-1">
+                                            {channel.type == "PUBLIC" ? (
+                                                <span className="text-xl">
+                                                    #
+                                                </span>
+                                            ) : (
+                                                <FaLock className="text-sm inline" />
+                                            )}{" "}
+                                            {channelName}
+                                        </div>
+
+                                        <FaAngleDown className="text-sm" />
+                                    </div>
+                                }
+                            />
                             {loadingMessages && (
                                 <div className="flex gap-x-2 items-center">
                                     <div className="h-6 w-6 relative">
@@ -659,13 +675,43 @@ export default function ChatArea() {
                     })}
                     <div ref={bottom_ref} className="h-4  "></div>
                 </div>
-                <div className="m-6 border border-white/15 pt-4 px-2 rounded-lg">
+                <div className="m-6 border border-white/15 pt-4 px-2 rounded-lg ">
                     {permissions.chat && <TipTapEditor onSubmit={onSubmit} />}
-                    {!permissions.chat && !channel.is_archived && (
-                        <h5 className="mb-4 text-center ml-4">
-                            You're not allowed to post in channel. Contact
-                            Admins or Channel managers for more information!
-                        </h5>
+                    {!permissions.chat &&
+                        !channel.is_archived &&
+                        isChannelMember && (
+                            <h5 className="mb-4 text-center ml-4">
+                                You're not allowed to post in channel. Contact
+                                Admins or Channel managers for more information!
+                            </h5>
+                        )}
+                    {!isChannelMember && (
+                        <div className="">
+                            <div className="flex items-baseline gap-x-1 font-bold justify-center text-lg">
+                                {channel.type == "PUBLIC" ? (
+                                    <span className="text-xl">#</span>
+                                ) : (
+                                    <FaLock className="text-sm inline" />
+                                )}{" "}
+                                {channelName}
+                            </div>
+                            <div className="flex gap-x-4 justify-center my-4 ">
+                                <ChannelSettings
+                                    channelName={channelName}
+                                    buttonNode={
+                                        <Button className="bg-black/15 border border-white/15">
+                                            Detail
+                                        </Button>
+                                    }
+                                />
+                                <Button
+                                    className="bg-green-900"
+                                    onClick={joinChannel}
+                                >
+                                    Join Channel
+                                </Button>
+                            </div>
+                        </div>
                     )}
                     {channel.is_archived == true && (
                         <div className="mb-4 justify-center flex ml-4 items-baseline gap-x-1 text-white/75">

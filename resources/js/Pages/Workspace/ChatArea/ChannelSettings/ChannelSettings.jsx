@@ -8,7 +8,7 @@ import {useEffect} from 'react'
 import About from "./About/About";
 import Settings from "./Settings/Settings";
 import Members from "./Members/Members";
-export default function ChannelSettings({ channelName }) {
+export default function ChannelSettings({ channelName , buttonNode}) {
     const { channel, workspace } = usePage().props;
     const [tabIndex, setTabIndex] = useState(0);
     const [show, setShow] = useState(false);
@@ -19,21 +19,7 @@ export default function ChannelSettings({ channelName }) {
         <OverlayPanel
             success={!show}
             buttonNode={
-                <div
-                    className="flex items-center gap-x-2"
-                    onClick={() => setShow(true)}
-                >
-                    <div className="flex items-baseline gap-x-1">
-                        {channel.type == "PUBLIC" ? (
-                            <span className="text-xl">#</span>
-                        ) : (
-                            <FaLock className="text-sm inline" />
-                        )}{" "}
-                        {channelName}
-                    </div>
-
-                    <FaAngleDown className="text-sm" />
-                </div>
+               buttonNode
             }
             className="p-0"
         >

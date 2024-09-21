@@ -88,7 +88,7 @@ export default function BrowseChannels() {
                 break;
         }
         return tempChannels;
-    }, [filter, allChannels, availableChannels, channels]);
+    }, [filter, allChannels]);
     function changeChannel(channel) {
         dispatch(setThreadMessage(null));
 
@@ -98,6 +98,34 @@ export default function BrowseChannels() {
             {
                 preserveState: true,
                 onSuccess: () => dispatch(setPageName("normal")),
+            }
+        );
+    }
+    function joinChannel(channel, options) {
+        router.post(
+            route("channel.join", channel.id),
+            {},
+            {
+                preserveState: true,
+                only: ["channels", "availableChannels"],
+                headers: {
+                    "X-Socket-Id": Echo.socketId(),
+                },
+                ...options,
+            }
+        );
+    }
+    function leaveChannel(channel, options) {
+        router.post(
+            route("channel.leave", channel.id),
+            {},
+            {
+                preserveState: true,
+                only: ["channels", "availableChannels"],
+                headers: {
+                    "X-Socket-Id": Echo.socketId(),
+                },
+                ...options,
             }
         );
     }
@@ -123,15 +151,17 @@ export default function BrowseChannels() {
                 />
                 {filteredChannels.length > 0 && (
                     <ul className="mt-4 bg-background flex-1 max-h-full overflow-y-auto scrollbar rounded-lg border border-white/15">
-                        {filteredChannels.map((channel) => {
+                        {filteredChannels.map((cn) => {
                             return (
                                 <li
                                     className="border-t first:border-none border-t-white/15"
-                                    key={channel.id}
+                                    key={cn.id}
                                 >
                                     <ChannelItem
-                                        channel={channel}
+                                        channel={cn}
                                         changeChannel={changeChannel}
+                                        joinChannel={joinChannel}
+                                        leaveChannel={leaveChannel}
                                     />
                                 </li>
                             );
@@ -143,12 +173,15 @@ export default function BrowseChannels() {
     );
 }
 
-function ChannelItem({ channel, changeChannel }) {
+function ChannelItem({ channel, changeChannel, joinChannel, leaveChannel }) {
     const { channels } = usePage().props;
+    const [joinProcessing, setJoinProcessing] = useState(false);
+    const [leaveProcessing, setLeaveProcessing] = useState(false);
     const isChannelMember = useMemo(
         () => channels.find((cn) => cn.id === channel.id),
         [channels, channel]
     );
+
     return (
         <div className="p-4 relative group/browse_channel_item">
             <div className="flex items-baseline gap-x-1">
@@ -160,14 +193,19 @@ function ChannelItem({ channel, changeChannel }) {
                 {channel.name}
             </div>
             <ul className="flex items-center gap-x-[2px] mt-1">
-                <li className="flex gap-x-1 items-center text-xs text-green-800 font-semibold">
-                    {" "}
-                    <FaCheck className="text-[8px]" />
-                    Joined
-                </li>
-                <li>
-                    <LuDot className="text-sm" />
-                </li>
+                {isChannelMember && (
+                    <>
+                        <li className="flex gap-x-1 items-center text-xs text-green-800 font-semibold">
+                            {" "}
+                            <FaCheck className="text-[8px]" />
+                            Joined
+                        </li>
+                        <li>
+                            <LuDot className="text-sm" />
+                        </li>
+                    </>
+                )}
+
                 <li className="text-xs">
                     {channel.users_count}{" "}
                     {channel.users_count > 1 ? "members" : "member"}
@@ -185,16 +223,46 @@ function ChannelItem({ channel, changeChannel }) {
             <div className="hidden gap-x-4 group-hover/browse_channel_item:flex absolute top-1/2 right-2 -translate-y-1/2 ">
                 <Button
                     className="!bg-background hover:!bg-foreground border border-white/15"
-                    onClick={() => changeChannel(channel)}
+                    onClick={() => {
+                        changeChannel(channel);
+                    }}
                 >
                     Open in Home
                 </Button>
                 {isChannelMember ? (
-                    <Button className="!bg-background hover:!bg-foreground border border-white/15">
-                        Leave
-                    </Button>
+                    !channel.is_main_channel && (
+                        <Button
+                            loading={leaveProcessing}
+                            className="!bg-background hover:!bg-foreground border border-white/15"
+                            onClick={() =>
+                                leaveChannel(channel, {
+                                    onBefore: () => {
+                                        setLeaveProcessing(true);
+                                    },
+                                    onSuccess: () => {
+                                        setLeaveProcessing(false);
+                                    },
+                                })
+                            }
+                        >
+                            Leave
+                        </Button>
+                    )
                 ) : (
-                    <Button className="!bg-background hover:!bg-foreground border border-white/15">
+                    <Button
+                        loading={joinProcessing}
+                        className="!bg-background hover:!bg-foreground border border-white/15"
+                        onClick={() =>
+                            joinChannel(channel, {
+                                onBefore: () => {
+                                    setJoinProcessing(true);
+                                },
+                                onSuccess: () => {
+                                    setJoinProcessing(false);
+                                },
+                            })
+                        }
+                    >
                         Join
                     </Button>
                 )}

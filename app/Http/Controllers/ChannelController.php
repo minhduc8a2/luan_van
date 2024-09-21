@@ -333,7 +333,28 @@ class ChannelController extends Controller
             return back()->withErrors(["server" => "Something went wrong! Please try later"]);
         }
     }
+    public function join(Request $request, Channel $channel)
+    {
+        if ($request->user()->cannot('view', $channel)) {
+            return  abort(403);
+        }
 
+        try {
+            DB::beginTransaction();
+            if (!$request->user()->channels()->where('channels.id', $channel->id)->exists()) {
+
+                $request->user()->channels()->attach($channel->id, ['role_id' => Role::getRoleIdByName(BaseRoles::MEMBER->name)]);
+            }
+            broadcast(new SettingsEvent($channel, "join"))->toOthers();
+            DB::commit();
+
+            return back();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            dd($th);
+            return back()->withErrors(["server" => "Something went wrong! Please try later"]);
+        }
+    }
     public function removeUserFromChannel(Request $request, Channel $channel)
     {
         if ($request->user()->cannot('removeUserFromChannel', $channel)) {
