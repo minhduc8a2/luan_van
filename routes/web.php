@@ -103,6 +103,6 @@ Route::get("/notifications", [NotificationController::class, 'get'])->name('noti
 // Route::get('/mailable', function () {
 //     return new  InvitationMail("https://google.com", "company A", "A", "B");
 // });
-Route::resource('files', FileController::class)->only([
+Route::resource('workspaces/{workspace}/files', FileController::class)->only([
     'index'
 ]);

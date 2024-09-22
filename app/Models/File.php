@@ -15,7 +15,8 @@ class File extends Model
         'url',
         'name',
         'path',
-        'user_id'
+        'user_id',
+        'workspace_id'
     ];
     protected $hidden = [
         'path'

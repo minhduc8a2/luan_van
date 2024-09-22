@@ -41,11 +41,11 @@ class MessageController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    function createFiles($fileObjects, $user)
+    function createFiles($fileObjects, $user, $workspace)
     {
         $files = [];
         foreach ($fileObjects as $fileObject) {
-            array_push($files, ['name' => $fileObject['name'], 'path' => $fileObject['path'], 'type' => $fileObject['type'], 'url' => Storage::url($fileObject['path']), 'user_id' => $user->id]);
+            array_push($files, ['name' => $fileObject['name'], 'path' => $fileObject['path'], 'type' => $fileObject['type'], 'url' => Storage::url($fileObject['path']), 'user_id' => $user->id, 'workspace_id' => $workspace->id]);
         }
         return $files;
     }
@@ -72,7 +72,7 @@ class MessageController extends Controller
                 $fileObject['path'] = $newPath;
                 array_push($fileObjects, $fileObject);
             }
-            $files = $this->createFiles($fileObjects, $request->user());
+            $files = $this->createFiles($fileObjects, $request->user(), $channel->workspace);
 
             $message->files()->createMany($files);
 
@@ -133,7 +133,7 @@ class MessageController extends Controller
                 array_push($fileObjects, $fileObject);
             }
 
-            $files = $this->createFiles($fileObjects, $request->user());
+            $files = $this->createFiles($fileObjects, $request->user(), $channel->workspace);
 
             $newMessage->files()->createMany($files);
 

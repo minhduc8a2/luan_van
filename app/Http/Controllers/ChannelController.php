@@ -173,6 +173,7 @@ class ChannelController extends Controller
             'addUsersToChannel' => $user->can('addUsersToChannel', [Channel::class, $channel]),
             'deleteChannel' => $user->can('delete', [Channel::class, $channel]),
             'huddle' => $channel->allowHuddlePermission(),
+            'deleteAnyMessage' => $user->can('deleteAnyMessageInChannel', [Message::class, $channel]),
 
         ];
 

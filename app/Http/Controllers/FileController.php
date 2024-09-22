@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ChannelTypes;
 use App\Models\File;
 use App\Models\Thread;
 use App\Models\Channel;
 use App\Models\Message;
+use App\Models\Workspace;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -20,11 +22,11 @@ class FileController extends Controller
     /**
      * Display a listing of the resource.
      */
-    function getSharedFiles($user, $name, $perPage = 10, $page = 1)
+    function getSharedFiles($user, $name, $workspace, $perPage = 10, $page = 1)
     {
 
         $messages = Message::where('messagable_type', Channel::class)
-            ->whereIn('messagable_id', $user->channels()->pluck('channels.id'))
+            ->whereIn('messagable_id', $user->channels()->where('workspace_id', $workspace->id)->pluck('channels.id'))
             ->with([
                 'files' => function ($query) use ($user, $name) {
                     $query->where('user_id', '<>', $user->id)
@@ -64,15 +66,19 @@ class FileController extends Controller
             ['path' => request()->url(), 'query' => request()->query()]
         );
     }
-    function selfFiles($user, $name, $perPage = 10, $page = 1)
+    function selfFiles($user, $name, $workspace, $perPage = 10, $page = 1)
     {
-        return $user->files()->where('name', 'like', "%" . $name . "%")->simplePaginate($perPage, ['*'], 'page', $page);
+        return $user->files()->where('name', 'like', "%" . $name . "%")->where('workspace_id', $workspace->id)->simplePaginate($perPage, ['*'], 'page', $page);
     }
 
-    function all($user, $name, $perPage = 10, $page = 1)
+    function all($user, $name, $workspace, $perPage = 10, $page = 1)
     {
         $messages = Message::where('messagable_type', Channel::class)
-            ->whereIn('messagable_id', $user->channels()->pluck('channels.id'))
+            ->whereIn('messagable_id', Channel::where('workspace_id', $workspace->id)->where(function ($query) use ($user) {
+                $query->where('type', ChannelTypes::PUBLIC->name)->orWhereHas('users', function ($query) use ($user) {
+                    $query->where('users.id', $user->id);
+                });
+            })->pluck('channels.id'))
             ->with([
                 'files' => function ($query) use ($user, $name) {
                     $query
@@ -112,7 +118,7 @@ class FileController extends Controller
             ['path' => request()->url(), 'query' => request()->query()]
         );
     }
-    public function index(Request $request)
+    public function index(Request $request, Workspace $workspace)
     {
         $perPage = 10;
         $filter = $request->query('filter');
@@ -125,15 +131,15 @@ class FileController extends Controller
         try {
             switch ($filter) {
                 case "shared":
-                    $files = $this->getSharedFiles($user, $name, $perPage, $page);
+                    $files = $this->getSharedFiles($user, $name, $workspace, $perPage, $page);
                     return $files;
                     // return back()->with('data', $files);
 
                 case "self":
-                    $files = $this->selfFiles($user, $name);
+                    $files = $this->selfFiles($user, $name, $workspace, $perPage, $page);
                     return  $files;
                 default:
-                    $files = $this->all($user, $name, $perPage, $page);
+                    $files = $this->all($user, $name, $workspace, $perPage, $page);
                     return $files;
             }
         } catch (\Throwable $th) {

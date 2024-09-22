@@ -22,10 +22,10 @@ import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
 import Video from "@/Components/Video";
 import { InView } from "react-intersection-observer";
 export default function BrowseFiles() {
-    const { auth, flash } = usePage().props;
+    const { auth, flash, workspace } = usePage().props;
     const [files, setFiles] = useState(new Map());
     const [loading, setLoading] = useState(false);
-    const [filter, setFilter] = useState("shared");
+    const [filter, setFilter] = useState("all");
     const localFoundRef = useRef(false);
     const [searchValue, setSearchValue] = useState("");
     const [showVideo, setShowVideo] = useState(false);
@@ -44,33 +44,33 @@ export default function BrowseFiles() {
         return temp;
     }
     // useEffect(() => {
-    //     // router.get(
-    //     //     route("files.index"),
-    //     //     { filter, name: searchValue, page: 1 },
-    //     //     {
-    //     //         preserveState: true,
-    //     //         only: [],
-    //     //     }
-    //     // );
-    //     const controller = new AbortController();
-    //     setLoading(true);
-    //     axios
-    //         .get(route("files.index"), {
-    //             signal: controller.signal,
-    //             params: { filter, name: searchValue, page: 1 },
-    //         })
-    //         .then((response) => {
-    //             console.log(response);
-    //             setFiles((pre) => mutateFiles(pre, response.data?.data));
-    //             setLoading(false);
-    //         })
-    //         .catch((err) => {
-    //             console.log(err);
-    //         });
+    //     router.get(
+    //         route("files.index", workspace.id),
+    //         { filter, name: searchValue, page: 1 },
+    //         {
+    //             preserveState: true,
+    //             only: [],
+    //         }
+    //     );
+    //     // const controller = new AbortController();
+    //     // setLoading(true);
+    //     // axios
+    //     //     .get(route("files.index"), {
+    //     //         signal: controller.signal,
+    //     //         params: { filter, name: searchValue, page: 1 },
+    //     //     })
+    //     //     .then((response) => {
+    //     //         console.log(response);
+    //     //         setFiles((pre) => mutateFiles(pre, response.data?.data));
+    //     //         setLoading(false);
+    //     //     })
+    //     //     .catch((err) => {
+    //     //         console.log(err);
+    //     //     });
 
-    //     return () => {
-    //         controller.abort();
-    //     };
+    //     // return () => {
+    //     //     controller.abort();
+    //     // };
     // }, []);
     // useEffect(() => {
     //     console.log(flash);
@@ -110,7 +110,7 @@ export default function BrowseFiles() {
             setLoading(true);
 
             axios
-                .get(route("files.index"), {
+                .get(route("files.index", workspace.id), {
                     params: { filter, name: searchValue, page: 1 },
                     signal: controller.signal,
                 })
@@ -121,6 +121,8 @@ export default function BrowseFiles() {
                     setLoading(false);
                 })
                 .catch((error) => {
+                    console.log(error);
+
                     setLoading(false);
                 });
         }, 500);
@@ -320,6 +322,10 @@ export default function BrowseFiles() {
                                                                         (
                                                                             error
                                                                         ) => {
+                                                                            console.log(
+                                                                                error
+                                                                            );
+
                                                                             setLoading(
                                                                                 false
                                                                             );

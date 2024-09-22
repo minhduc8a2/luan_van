@@ -10,12 +10,16 @@ import { MdMoreVert } from "react-icons/md";
 import DocumentAttachment from "../ChatArea/Message/DocumentAttachment";
 import ImageFile from "./ImageFile";
 import { isDocument, isImage, isVideo } from "@/helpers/fileHelpers";
-import FileItem from "@/Components/FileItem";
+
 import VideoFile from "./VideoFile";
+import copy from "copy-to-clipboard";
+import { usePage } from "@inertiajs/react";
 
 export default function Item({ file }) {
+    const { publicAppUrl } = usePage().props;
     const [openOverlay, setOpenOverlay] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
+    const close = useClose();
 
     return (
         <div className="mt-4 relative group/file_item" key={file.id}>
@@ -32,15 +36,12 @@ export default function Item({ file }) {
                     <IoCloudDownloadOutline className="text-xl" />
                 </a>
                 <Popover className="relative">
-                    {({ open }) => {
-                        if (!open) setIsHovered(false);
-                        return (
-                            <>
+                    
                                 <PopoverButton className="p-1 rounded hover:bg-white/15 transition">
                                     <div
                                         onClick={() => {
                                             setIsHovered(true);
-                                            console.log("is hovered");
+                                           
                                         }}
                                     >
                                         <MdMoreVert className="text-xl" />
@@ -55,17 +56,31 @@ export default function Item({ file }) {
                                         >
                                             Open in new tab
                                         </a>
-                                        <button className=" hover:bg-white/15 py-1 text-left px-4">
+                                        <button
+                                            className=" hover:bg-white/15 py-1 text-left px-4"
+                                            onClick={() => {
+                                                copy(publicAppUrl + file.url);
+                                                close();
+                                                setIsHovered(false);
+                                            }}
+                                        >
                                             Copy link to file
                                         </button>
                                         <button className="text-danger-500 hover:bg-white/15 py-1 text-left px-4">
                                             Delete
                                         </button>
                                     </div>
+                                    <div
+                                        className="fixed top-0 bottom-0 right-0 left-0 bg-transparent overflow-hidden z-10"
+                                        onClick={() => {
+                                            close();
+
+                                            setIsHovered(false);
+                                        }}
+                                    ></div>
                                 </PopoverPanel>
-                            </>
-                        );
-                    }}
+                           
+                       
                 </Popover>
             </div>
             {isDocument(file.type) && (
@@ -78,7 +93,6 @@ export default function Item({ file }) {
             )}
             {isImage(file.type) && <ImageFile file={file} />}
             {isVideo(file.type) && <VideoFile file={file} />}
-            
         </div>
     );
 }

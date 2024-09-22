@@ -220,7 +220,7 @@ export default function MessageToolbar({
                                                             )}
                                                         </>
                                                     )}
-                                                    {(permissions.deleteAnyMessages ||
+                                                    {(permissions.deleteAnyMessage ||
                                                         message.user_id ==
                                                             auth.user.id) && (
                                                         <>

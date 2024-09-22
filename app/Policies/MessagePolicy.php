@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Helpers\ChannelTypes;
 use App\Models\User;
 use App\Models\Thread;
 use App\Models\Channel;
@@ -82,8 +83,15 @@ class MessagePolicy
             if ($isChannelMessage) $channel = $message->messagable;
             else $channel = Thread::find($message->messagable_id)->message->messagable;
             if ($channel->is_archived) return false;
-            return $user->workspacePermissionCheck($channel->workspace, PermissionTypes::WORKSPACE_ALL->name)
-                || $user->id == $message->user_id;
+            if ($channel->type == ChannelTypes::PUBLIC->name) {
+                if ($user->workspacePermissionCheck($channel->workspace, PermissionTypes::WORKSPACE_ALL->name))
+                    return true;
+            } else {
+                if ($user->workspacePermissionCheck($channel->workspace, PermissionTypes::WORKSPACE_ALL->name) && $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_VIEW->name))
+                    return true;
+            }
+            return
+                $user->id == $message->user_id;
         } catch (\Throwable $th) {
             //throw $th;
         }
@@ -93,6 +101,25 @@ class MessagePolicy
         return false;
     }
 
+
+    public function deleteAnyMessageInChannel(User $user, Channel $channel): bool
+    {
+
+
+
+        if ($channel->is_archived) return false;
+        if ($channel->type == ChannelTypes::PUBLIC->name) {
+            if ($user->workspacePermissionCheck($channel->workspace, PermissionTypes::WORKSPACE_ALL->name))
+                return true;
+        } else {
+            if ($user->workspacePermissionCheck($channel->workspace, PermissionTypes::WORKSPACE_ALL->name) && $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_VIEW->name))
+                return true;
+        }
+
+
+
+        return false;
+    }
     /**
      * Determine whether the user can restore the model.
      */
