@@ -346,9 +346,9 @@ export default function Message({
                     </div>
                 )}
                 {otherAttachments.length != 0 && (
-                    <div className="flex gap-x-4 flex-wrap mt-4">
+                    <div className="flex gap-x-4 flex-wrap mt-4" >
                         {otherAttachments.map((attachment) => (
-                            <a href={attachment.url} download={attachment.name}>
+                            <a href={attachment.url} download={attachment.name} key={attachment.id}>
                                 <FileItem file={attachment} />
                             </a>
                         ))}

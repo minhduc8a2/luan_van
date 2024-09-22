@@ -1,14 +1,9 @@
 import React from "react";
-import {
-    getLogo,
-    getDocumentType,
-    isImage,
-    isVideo,
-} from "@/helpers/fileHelpers";
+import { getDocumentType, isImage } from "@/helpers/fileHelpers";
 import { IoMdCloseCircle } from "react-icons/io";
 import { useState, useEffect } from "react";
 import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
-import { LuFileVideo } from "react-icons/lu";
+import FileIcon from "./FileIcon";
 
 export default function FileItem({
     file,
@@ -22,6 +17,7 @@ export default function FileItem({
     useEffect(() => {
         if (percentage == 100) setUploaded(true);
     }, [percentage]);
+
     return (
         <div className="relative group">
             {!uploaded && uploadable && percentage < 100 && (
@@ -45,20 +41,16 @@ export default function FileItem({
                 } `}
             >
                 <div className="h-8 w-8 flex-shrink-0 relative overflow-hidden rounded">
-                    {isVideo(file.type) ? (
-                        <div className="w-full h-full flex justify-center items-center bg-link">
-                            <LuFileVideo className="text-xl" />
-                        </div>
-                    ) : (
+                    {isImage(file.type) ? (
                         <img
-                            src={
-                                isImage(file.type)
-                                    ? file.url
-                                    : `/storage/${getLogo(file.type)}`
-                            }
+                            src={file.url}
                             alt="document"
                             className="object-cover object-center "
                         />
+                    ) : (
+                        <div className="w-full h-full flex justify-center items-center bg-link text-lg">
+                            <FileIcon type={file.type} />
+                        </div>
                     )}
                 </div>
                 <div className="text-left max-w-full min-w-0 ">

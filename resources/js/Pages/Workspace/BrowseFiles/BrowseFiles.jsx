@@ -13,12 +13,8 @@ import {
     isImage,
     isVideo,
 } from "@/helpers/fileHelpers";
-import { FaImage } from "react-icons/fa6";
-import { FaFile } from "react-icons/fa";
-import {
-    MdOutlineRotate90DegreesCcw,
-    MdOutlineVideoLibrary,
-} from "react-icons/md";
+
+import { MdOutlineRotate90DegreesCcw } from "react-icons/md";
 
 import {
     compareDateTime,
@@ -34,6 +30,7 @@ import { PhotoProvider, PhotoView } from "react-photo-view";
 import { IoMdCloudDownload } from "react-icons/io";
 import { AiOutlineZoomIn, AiOutlineZoomOut } from "react-icons/ai";
 import DocumentInSearch from "./DocumentInSearch";
+import FileIcon from "@/Components/FileIcon";
 export default function BrowseFiles() {
     const { auth, flash, workspace } = usePage().props;
     const [files, setFiles] = useState(new Map());
@@ -48,11 +45,7 @@ export default function BrowseFiles() {
     const prevScrollHeightRef = useRef(null);
     const containerRef = useRef(null);
     const nextPageUrlRef = useRef(null);
-    function getIcon(type) {
-        if (isImage(type)) return <FaImage />;
-        if (isVideo(type)) return <MdOutlineVideoLibrary />;
-        return <FaFile />;
-    }
+
     function mutateFiles(pre, list) {
         const temp = new Map(pre);
         if (!list) return temp;
@@ -327,7 +320,9 @@ export default function BrowseFiles() {
                                             <button className="flex items-center gap-x-4 w-full  ">
                                                 <div className="flex-1 items-center flex gap-x-4 min-w-0 max-w-full overflow-hidden">
                                                     <div className="text-link">
-                                                        {getIcon(item.type)}
+                                                        <FileIcon
+                                                            type={item.type}
+                                                        />
                                                     </div>
                                                     <div className="text-left flex-1 min-w-0 max-w-full truncate overflow-hidden">
                                                         {item.name}
@@ -345,7 +340,7 @@ export default function BrowseFiles() {
                                 return (
                                     <DocumentInSearch
                                         file={item}
-                                        Icon={getIcon(item.type)}
+                                        Icon={<FileIcon type={item.type} />}
                                     />
                                 );
                             }
@@ -365,7 +360,7 @@ export default function BrowseFiles() {
                                 >
                                     <div className="flex-1 items-center flex gap-x-4 min-w-0 max-w-full overflow-hidden">
                                         <div className="text-link">
-                                            {getIcon(item.type)}
+                                            <FileIcon type={item.type} />
                                         </div>
                                         <div className="text-left flex-1 min-w-0 max-w-full truncate overflow-hidden">
                                             {item.name}

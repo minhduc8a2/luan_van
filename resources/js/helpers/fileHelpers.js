@@ -1,3 +1,5 @@
+
+
 export function isImage(type) {
     return type.startsWith("image/");
 }
@@ -105,3 +107,4 @@ export function downloadFile(url, filename) {
 
     document.body.removeChild(a);
 }
+

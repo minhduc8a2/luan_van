@@ -119,7 +119,7 @@ export default function Video({
             )}
             {fullscreen && (
                 <div
-                    className="top-0 left-0 right-0 bottom-0 fixed bg-black flex group/video justify-center z-50 "
+                    className="top-8 left-8 right-8 bottom-8 fixed bg-black/95 ring-[40px] ring-black/50  rounded-lg flex group/video justify-center z-50 "
                     onMouseMove={handleMouseMove}
                 >
                     {!largeLoaded && <OverlayLoadingSpinner />}
@@ -154,13 +154,13 @@ export default function Video({
                         <a
                             href={src}
                             download={name}
-                            className=" p-2 bg-black/75 rounded-lg text-white/85 hover:text-white hover:bg-black/85  "
+                            className=" p-2  rounded-lg text-white/85 hover:text-white hover:bg-white/15  "
                         >
                             <MdDownload className="text-lg" />
                         </a>
 
                         <button
-                            className=" p-2 bg-black/75 rounded-lg text-white/85 hover:text-white hover:bg-black/85  "
+                            className=" p-2  rounded-lg text-white/85 hover:text-white hover:bg-white/15  "
                             onClick={toggleFullScreen}
                         >
                             <IoClose className="text-lg" />
@@ -191,12 +191,12 @@ export default function Video({
                                 }}
                             />
                             <div className="flex gap-x-4 py-3 w-full  items-center">
-                                <div className="flex gap-x-2">
+                                <div className="flex gap-x-2 items-center">
                                     <button
                                         onClick={() =>
                                             playVideo(largeVideoRef.current)
                                         }
-                                        className="h-6 w-6 flex justify-center items-center "
+                                        className="h-8 w-8 rounded flex justify-center items-center hover:bg-white/10 p-1"
                                     >
                                         {playing ? (
                                             <IoIosPause className="text-xl" />
@@ -225,7 +225,7 @@ export default function Video({
                                             <HiVolumeUp className="text-xl" />
                                         )}
                                     </button>
-                                    <div className="absolute hidden group-hover/volume:flex -bottom-full gap-x-2 -mb-[22px] -rotate-90 origin-left left-1/2  bg-black/75 p-4 rounded  items-center ">
+                                    <div className="absolute hidden group-hover/volume:flex -bottom-full gap-x-2 -mb-[22px] -rotate-90 origin-left left-1/2  bg-white/10 p-4 rounded  items-center ">
                                         {" "}
                                         <button
                                             className="rotate-90"
@@ -315,7 +315,7 @@ export default function Video({
             )}
 
             {smallLoaded && (
-                <div className="absolute bottom-2 left-1/2 group-hover/video:flex flex-col -translate-x-1/2 w-[98%] rounded-lg h-16 bg-black/75 hidden items-center justify-between  px-3">
+                <div className="absolute bottom-2 left-1/2 group-hover/video:flex flex-col -translate-x-1/2 w-[98%] rounded-lg h-18 bg-black/75 hidden items-center justify-between  px-3">
                     <input
                         type="range"
                         min="0"
@@ -331,10 +331,10 @@ export default function Video({
                         }}
                     />
                     <div className="flex gap-x-4 py-3 w-full  items-center">
-                        <div className="flex gap-x-2">
+                        <div className="flex gap-x-2 items-center">
                             <button
                                 onClick={() => playVideo(smallVideoRef.current)}
-                                className="h-6 w-6 flex justify-center items-center "
+                                className="h-8 w-8 flex justify-center items-center hover:bg-white/10 rounded"
                             >
                                 {playing ? (
                                     <IoIosPause className="text-xl" />
