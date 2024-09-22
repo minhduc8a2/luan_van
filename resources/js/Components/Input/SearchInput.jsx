@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useMemo } from "react";
 import { FaLock } from "react-icons/fa";
 import { IoIosSearch } from "react-icons/io";
 export default function SearchInput({
+    placeholder="",
     list,
     filterFunction,
     renderItemNode,
@@ -44,7 +45,7 @@ export default function SearchInput({
                 <IoIosSearch className="text-2xl text-white/85" />
                 <input
                     type="text"
-                    placeholder="Search for channels"
+                    placeholder={placeholder}
                     onFocus={() => setFocused(true)}
                     onBlur={() => setFocused(false)}
                     className="w-full bg-transparent focus:ring-0 focus:border-none border-none"

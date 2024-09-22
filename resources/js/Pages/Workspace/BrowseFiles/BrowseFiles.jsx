@@ -6,10 +6,19 @@ import { FaRegUser } from "react-icons/fa6";
 import { TbStack2 } from "react-icons/tb";
 import SearchInput from "@/Components/Input/SearchInput";
 import { router, usePage } from "@inertiajs/react";
-import { getDocumentType, isImage, isVideo } from "@/helpers/fileHelpers";
+import {
+    downloadFile,
+    getDocumentType,
+    isDocument,
+    isImage,
+    isVideo,
+} from "@/helpers/fileHelpers";
 import { FaImage } from "react-icons/fa6";
 import { FaFile } from "react-icons/fa";
-import { MdOutlineVideoLibrary } from "react-icons/md";
+import {
+    MdOutlineRotate90DegreesCcw,
+    MdOutlineVideoLibrary,
+} from "react-icons/md";
 
 import {
     compareDateTime,
@@ -21,15 +30,21 @@ import Item from "./Item";
 import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
 import Video from "@/Components/Video";
 import { InView } from "react-intersection-observer";
+import { PhotoProvider, PhotoView } from "react-photo-view";
+import { IoMdCloudDownload } from "react-icons/io";
+import { AiOutlineZoomIn, AiOutlineZoomOut } from "react-icons/ai";
+import DocumentInSearch from "./DocumentInSearch";
 export default function BrowseFiles() {
     const { auth, flash, workspace } = usePage().props;
     const [files, setFiles] = useState(new Map());
     const [sharedFiles, setSharedFiles] = useState(new Map());
     const [loading, setLoading] = useState(false);
-    const [filter, setFilter] = useState("");
+    const [filter, setFilter] = useState("shared");
     const localFoundRef = useRef(false);
+    const filterSwitchRef = useRef(false);
     const [searchValue, setSearchValue] = useState("");
     const [showVideo, setShowVideo] = useState(false);
+    const [showImage, setShowImage] = useState(false);
     const prevScrollHeightRef = useRef(null);
     const containerRef = useRef(null);
     const nextPageUrlRef = useRef(null);
@@ -108,7 +123,8 @@ export default function BrowseFiles() {
         // if (!searchValue) {
         //     return;
         // }
-        if (localFoundRef.current) return;
+        if (localFoundRef.current && !filterSwitchRef.current) return;
+        if (filterSwitchRef.current) filterSwitchRef.current = false;
         const controller = new AbortController();
         const delayDebounceFn = setTimeout(() => {
             setLoading(true);
@@ -174,13 +190,17 @@ export default function BrowseFiles() {
             <div className="h-full col-span-1 bg-black/35 px-2">
                 <h3 className="text-xl font-semibold p-4">Files</h3>
                 <div className="">
-                    <Button className=" bg-transparent">
+                    <Button
+                        className={` bg-transparent ${
+                            filter == "shared" ? "bg-white/15" : ""
+                        }`}
+                    >
                         <div
                             className="flex gap-x-2 items-center"
                             onClick={() => {
+                                filterSwitchRef.current = true;
+                                nextPageUrlRef.current = false;
                                 setFilter("shared");
-                                localFoundRef.current = false;
-                                nextPageUrlRef.current = null;
                             }}
                         >
                             <PiShareFat />
@@ -188,11 +208,13 @@ export default function BrowseFiles() {
                         </div>
                     </Button>
                     <Button
-                        className=" bg-transparent"
+                        className={` bg-transparent ${
+                            filter == "self" ? "bg-white/15" : ""
+                        }`}
                         onClick={() => {
+                            filterSwitchRef.current = true;
+                            nextPageUrlRef.current = false;
                             setFilter("self");
-                            localFoundRef.current = false;
-                            nextPageUrlRef.current = null;
                         }}
                     >
                         <div className="flex gap-x-2 items-center">
@@ -203,11 +225,13 @@ export default function BrowseFiles() {
                     <hr className="my-2" />
 
                     <Button
-                        className=" bg-transparent"
+                        className={` bg-transparent  ${
+                            filter == "all" ? "bg-white/15" : ""
+                        }`}
                         onClick={() => {
+                            filterSwitchRef.current = true;
+                            nextPageUrlRef.current = false;
                             setFilter("all");
-                            localFoundRef.current = false;
-                            nextPageUrlRef.current = null;
                         }}
                     >
                         <div className="flex gap-x-2 items-center">
@@ -238,7 +262,7 @@ export default function BrowseFiles() {
                     </div>
                     <SearchInput
                         list={filesList}
-                        onItemClick={() => {}}
+                        placeholder="Search files"
                         filterFunction={(searchValue, list) => {
                             return list.filter((item) =>
                                 item.name.toLowerCase().includes(searchValue)
@@ -249,12 +273,93 @@ export default function BrowseFiles() {
                             localFoundRef.current = false;
                         }}
                         renderItemNode={(item) => {
+                            if (isImage(item.type)) {
+                                return (
+                                    <PhotoProvider
+                                        toolbarRender={({
+                                            onScale,
+                                            scale,
+                                            rotate,
+                                            onRotate,
+                                            images,
+                                            index,
+                                        }) => {
+                                            return (
+                                                <>
+                                                    <a
+                                                        href={images[index].src}
+                                                        className="PhotoView-Slider__toolbarIcon"
+                                                        download={true}
+                                                    >
+                                                        <IoMdCloudDownload className="text-xl" />
+                                                    </a>
+                                                    <button
+                                                        className="PhotoView-Slider__toolbarIcon"
+                                                        onClick={() =>
+                                                            onRotate(
+                                                                rotate + 90
+                                                            )
+                                                        }
+                                                    >
+                                                        <MdOutlineRotate90DegreesCcw className="text-xl" />
+                                                    </button>
+                                                    <button
+                                                        className="PhotoView-Slider__toolbarIcon"
+                                                        onClick={() =>
+                                                            onScale(scale + 1)
+                                                        }
+                                                    >
+                                                        <AiOutlineZoomIn className="text-xl" />
+                                                    </button>
+                                                    <button
+                                                        className="PhotoView-Slider__toolbarIcon"
+                                                        onClick={() =>
+                                                            onScale(scale - 1)
+                                                        }
+                                                    >
+                                                        <AiOutlineZoomOut className="text-xl" />
+                                                    </button>
+                                                </>
+                                            );
+                                        }}
+                                    >
+                                        <PhotoView src={item.url}>
+                                            <button className="flex items-center gap-x-4 w-full  ">
+                                                <div className="flex-1 items-center flex gap-x-4 min-w-0 max-w-full overflow-hidden">
+                                                    <div className="text-link">
+                                                        {getIcon(item.type)}
+                                                    </div>
+                                                    <div className="text-left flex-1 min-w-0 max-w-full truncate overflow-hidden">
+                                                        {item.name}
+                                                    </div>
+                                                </div>
+                                                <div className="text-xs text-white/75">
+                                                    {getDocumentType(item.type)}
+                                                </div>
+                                            </button>
+                                        </PhotoView>
+                                    </PhotoProvider>
+                                );
+                            }
+                            if (isDocument(item.type)) {
+                                return (
+                                    <DocumentInSearch
+                                        file={item}
+                                        Icon={getIcon(item.type)}
+                                    />
+                                );
+                            }
+
                             return (
                                 <button
                                     onClick={() => {
                                         if (isVideo(item.type)) {
                                             setShowVideo(item);
-                                        }
+                                        } else if (
+                                            getDocumentType(item.type) ==
+                                            "Unknown file type"
+                                        )
+                                            downloadFile(item.url, item.name);
                                     }}
                                     className="flex items-center gap-x-4 w-full  "
                                 >
@@ -299,7 +404,8 @@ export default function BrowseFiles() {
                                                             ) {
                                                                 prevScrollHeightRef.current =
                                                                     containerRef.current.scrollHeight;
-
+                                                                const localFilter =
+                                                                    filter;
                                                                 axios
                                                                     .get(
                                                                         nextPageUrlRef.current
@@ -312,7 +418,7 @@ export default function BrowseFiles() {
                                                                             nextPageUrlRef.current =
                                                                                 response.data?.next_page_url;
                                                                             if (
-                                                                                filter ==
+                                                                                localFilter ==
                                                                                 "shared"
                                                                             ) {
                                                                                 setSharedFiles(

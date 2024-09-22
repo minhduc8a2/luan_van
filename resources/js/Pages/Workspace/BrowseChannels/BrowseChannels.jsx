@@ -145,6 +145,7 @@ export default function BrowseChannels() {
                     />
                 </div>
                 <SearchInput
+                    placeholder="Search for channels"
                     list={allChannels}
                     onItemClick={changeChannel}
                     filterFunction={(searchValue, list) => {

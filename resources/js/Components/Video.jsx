@@ -123,7 +123,7 @@ export default function Video({
                     onMouseMove={handleMouseMove}
                 >
                     {!largeLoaded && <OverlayLoadingSpinner />}
-                    <button onClick={() => playVideo(largeVideoRef.current)}>
+                    <button onClick={() => playVideo(largeVideoRef.current)} className="h-ful">
                         <video
                             ref={largeVideoRef}
                             autoPlay
@@ -131,7 +131,9 @@ export default function Video({
                             onTimeUpdate={() =>
                                 handleTimeUpdate(largeVideoRef.current)
                             }
-                            className={`  ${largeLoaded ? "" : "hidden"} `}
+                            className={`  ${
+                                largeLoaded ? "max-h-full" : "hidden"
+                            } `}
                             src={src}
                             onLoadedMetadata={() => {
                                 setDuration(largeVideoRef.current.duration);
@@ -147,7 +149,7 @@ export default function Video({
                             }}
                         />
                     </button>
-                    
+
                     <div className="absolute top-2 right-2 hidden gap-x-2 group-hover/video:flex">
                         <a
                             href={src}
@@ -164,7 +166,7 @@ export default function Video({
                             <IoClose className="text-lg" />
                         </button>
                     </div>
-                    
+
                     {largeLoaded && (
                         <div
                             className={`absolute bottom-2 left-1/2  flex-col -translate-x-1/2 w-[98%] rounded-lg h-16 bg-black/75 hidden items-center justify-between hover:!flex  px-3  ${
