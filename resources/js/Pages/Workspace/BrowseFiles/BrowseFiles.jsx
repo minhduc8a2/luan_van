@@ -24,8 +24,9 @@ import { InView } from "react-intersection-observer";
 export default function BrowseFiles() {
     const { auth, flash, workspace } = usePage().props;
     const [files, setFiles] = useState(new Map());
+    const [sharedFiles, setSharedFiles] = useState(new Map());
     const [loading, setLoading] = useState(false);
-    const [filter, setFilter] = useState("all");
+    const [filter, setFilter] = useState("");
     const localFoundRef = useRef(false);
     const [searchValue, setSearchValue] = useState("");
     const [showVideo, setShowVideo] = useState(false);
@@ -75,7 +76,10 @@ export default function BrowseFiles() {
     // useEffect(() => {
     //     console.log(flash);
     // }, [flash]);
-    const filesList = useMemo(() => [...files.values()], [files]);
+    const filesList = useMemo(() => {
+        if (filter == "shared") return [...sharedFiles.values()];
+        return [...files.values()];
+    }, [files, sharedFiles, filter]);
     const filteredFilesList = useMemo(
         () =>
             filesList.filter((file) => {
@@ -117,6 +121,11 @@ export default function BrowseFiles() {
                 .then((response) => {
                     // console.log(response.data?.data);
                     nextPageUrlRef.current = response.data?.next_page_url;
+                    if (filter == "shared") {
+                        setSharedFiles((pre) =>
+                            mutateFiles(pre, response.data?.data)
+                        );
+                    }
                     setFiles((pre) => mutateFiles(pre, response.data?.data));
                     setLoading(false);
                 })
@@ -302,6 +311,22 @@ export default function BrowseFiles() {
                                                                             // console.log(response.data?.data);
                                                                             nextPageUrlRef.current =
                                                                                 response.data?.next_page_url;
+                                                                            if (
+                                                                                filter ==
+                                                                                "shared"
+                                                                            ) {
+                                                                                setSharedFiles(
+                                                                                    (
+                                                                                        pre
+                                                                                    ) =>
+                                                                                        mutateFiles(
+                                                                                            pre,
+                                                                                            response
+                                                                                                .data
+                                                                                                ?.data
+                                                                                        )
+                                                                                );
+                                                                            }
                                                                             setFiles(
                                                                                 (
                                                                                     pre
