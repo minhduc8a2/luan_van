@@ -59,7 +59,7 @@ export default function SearchInput({
             {resultList.length > 0 && searchValue && isOpen && (
                 <ul
                     ref={panelRef}
-                    className="absolute z-10 w-[104%] left-1/2 -translate-x-1/2 bg-foreground overflow-hidden border border-white/15 max-h-96 overflow-y-auto scrollbar text-white rounded-lg shadow-lg mt-1"
+                    className="absolute z-10 w-[104%] left-1/2 -translate-x-1/2 bg-foreground  border border-white/15 max-h-96 overflow-y-auto scrollbar text-white rounded-lg shadow-lg mt-1"
                 >
                     {resultList.map((item, index) => (
                         <li

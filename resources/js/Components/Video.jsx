@@ -14,6 +14,8 @@ export default function Video({
     loadingClassname = " border border-white/15",
     name = "",
     src = "",
+    fullScreenMode = false,
+    onFullScreenClose,
 }) {
     const [smallLoaded, setSmallLoaded] = useState(false);
     const [largeLoaded, setLargeLoaded] = useState(false);
@@ -24,9 +26,10 @@ export default function Video({
     const [progress, setProgress] = useState(0);
     const [duration, setDuration] = useState(0);
     const [isDirty, setIsDirty] = useState(false);
-    const [fullscreen, setFullscreen] = useState(false);
+    const [fullscreen, setFullscreen] = useState(fullScreenMode);
     const timeoutRef = useRef(null);
     const [isMouseMoving, setIsMouseMoving] = useState(false);
+    if (!src) return "";
     const showController = () => {
         setIsMouseMoving(true);
     };
@@ -81,6 +84,10 @@ export default function Video({
     };
 
     function toggleFullScreen() {
+        if (onFullScreenClose) {
+            onFullScreenClose();
+            return;
+        }
         if (!fullscreen) {
             smallVideoRef.current.pause();
             setPlaying(false);
@@ -90,9 +97,12 @@ export default function Video({
             setPlaying(false);
             largeVideoRef.current.currentTime = 0;
         }
-        setFullscreen((pre) => !pre);
+        setFullscreen((pre) => {
+            return !pre;
+        });
     }
 
+    if (!fullscreen && fullScreenMode) return "";
     return (
         <div
             className={`relative aspect-[4/5]   overflow-hidden group/video ${
@@ -112,6 +122,7 @@ export default function Video({
                     className="top-0 left-0 right-0 bottom-0 fixed bg-black flex group/video justify-center z-50 "
                     onMouseMove={handleMouseMove}
                 >
+                    {!largeLoaded && <OverlayLoadingSpinner />}
                     <button onClick={() => playVideo(largeVideoRef.current)}>
                         <video
                             ref={largeVideoRef}
@@ -136,24 +147,24 @@ export default function Video({
                             }}
                         />
                     </button>
-                    {largeLoaded && (
-                        <div className="absolute top-2 right-2 hidden gap-x-2 group-hover/video:flex">
-                            <a
-                                href={src}
-                                download={name}
-                                className=" p-2 bg-black/75 rounded-lg text-white/85 hover:text-white hover:bg-black/85  "
-                            >
-                                <MdDownload className="text-lg" />
-                            </a>
-                            <button
-                                className=" p-2 bg-black/75 rounded-lg text-white/85 hover:text-white hover:bg-black/85  "
-                                onClick={toggleFullScreen}
-                            >
-                                <IoClose className="text-lg" />
-                            </button>
-                        </div>
-                    )}
+                    
+                    <div className="absolute top-2 right-2 hidden gap-x-2 group-hover/video:flex">
+                        <a
+                            href={src}
+                            download={name}
+                            className=" p-2 bg-black/75 rounded-lg text-white/85 hover:text-white hover:bg-black/85  "
+                        >
+                            <MdDownload className="text-lg" />
+                        </a>
 
+                        <button
+                            className=" p-2 bg-black/75 rounded-lg text-white/85 hover:text-white hover:bg-black/85  "
+                            onClick={toggleFullScreen}
+                        >
+                            <IoClose className="text-lg" />
+                        </button>
+                    </div>
+                    
                     {largeLoaded && (
                         <div
                             className={`absolute bottom-2 left-1/2  flex-col -translate-x-1/2 w-[98%] rounded-lg h-16 bg-black/75 hidden items-center justify-between hover:!flex  px-3  ${

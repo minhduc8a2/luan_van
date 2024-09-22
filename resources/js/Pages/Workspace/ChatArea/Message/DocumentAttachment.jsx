@@ -7,12 +7,13 @@ export default function DocumentAttachment({
     attachment,
     openOverlay,
     setOpenOverlay,
+    className = "",
 }) {
     const { publicAppUrl } = usePage().props;
     return (
-        <div className="" key={"attachment_" + attachment.id}>
-            <button onClick={() => setOpenOverlay(true)}>
-                <FileItem file={attachment} />
+        <div className={className} key={"attachment_" + attachment.id}>
+            <button onClick={() => setOpenOverlay(true)} className="w-full">
+                <FileItem file={attachment} maxWidth="w-full" />
             </button>
             <Overlay
                 show={openOverlay}

@@ -14,7 +14,7 @@ import {
     compareDateTime,
     differenceInSeconds,
     formatDDMMYYY,
-    groupMessagesByDate,
+    groupListByDate,
 } from "@/helpers/dateTimeHelper";
 
 import Message from "./Message/Message";
@@ -179,7 +179,7 @@ export default function ChatArea() {
     }, [messageId, initMessages]);
 
     const groupedMessages = useMemo(() => {
-        const gMessages = groupMessagesByDate(messages);
+        const gMessages = groupListByDate(messages);
         const currentDate = formatDDMMYYY(new Date());
         return Object.keys(gMessages)
             .sort((a, b) => {
@@ -473,7 +473,9 @@ export default function ChatArea() {
     }, [groupedMessages]); //for infinite scrolling
 
     const isChannelMember = useMemo(
-        () => channels.find((cn) => cn.id === channel.id) || directChannels.find((cn) => cn.id === channel.id) ,
+        () =>
+            channels.find((cn) => cn.id === channel.id) ||
+            directChannels.find((cn) => cn.id === channel.id),
         [channels, channel]
     );
     return (

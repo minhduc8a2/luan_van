@@ -25,7 +25,7 @@ import { InView } from "react-intersection-observer";
 import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
 import { FaToggleOn } from "react-icons/fa";
 export default function Activity() {
-    const { auth } = usePage().props;
+   
     const { type: panelType } = useSelector((state) => state.panel);
     const nextPageUrlRef = useRef(null);
     const dispatch = useDispatch();

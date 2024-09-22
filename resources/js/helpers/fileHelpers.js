@@ -91,5 +91,6 @@ export function getLogo(type) {
     if (isPowerPoint(type)) return "powerpoint_jpg.jpg";
     if (isPdf(type)) return "pdf.jpg";
     if (isPlainText(type)) return "plaintext.jpg";
+    
     return "file.png";
 }

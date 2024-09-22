@@ -65,10 +65,10 @@ export function formatDDMMYYY(dateObj) {
 
     return `${day}/${month}/${year}`;
 }
-export function groupMessagesByDate(messages) {
-    const groupedMessages = messages.reduce((grouped, message) => {
+export function groupListByDate(list) {
+    const groupedList = list.reduce((grouped, item) => {
         // Convert the timestamp to a Date object
-        const dateObj = new Date(message.created_at);
+        const dateObj = new Date(item.created_at);
 
         // Format the date to "dd/mm/yyyy"
         const day = String(dateObj.getDate()).padStart(2, "0"); // Get the day and add leading zero if needed
@@ -82,17 +82,17 @@ export function groupMessagesByDate(messages) {
             grouped[formattedDate] = [];
         }
 
-        // Add the current message to the corresponding date group
-        grouped[formattedDate].push(message);
+        // Add the current item to the corresponding date group
+        grouped[formattedDate].push(item);
 
         return grouped;
     }, {});
-    Object.keys(groupedMessages).forEach((key) => {
-        groupedMessages[key].sort((a, b) =>
+    Object.keys(groupedList).forEach((key) => {
+        groupedList[key].sort((a, b) =>
             compareDateTime(a.created_at, b.created_at)
         );
     });
-    return groupedMessages;
+    return groupedList;
 }
 
 export function compareDateTime(dateString1, dateString2) {

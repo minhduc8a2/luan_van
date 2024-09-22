@@ -436,7 +436,7 @@ export default function TipTapEditor({
                             <div className="" key={"file_" + file.name}>
                                 <FileItem
                                     file={file}
-                                    maxWidth="max-w-36"
+                                    maxWidth="max-w-72"
                                     removable
                                     remove={() => handleRemoveFile(file)}
                                     uploadable={true}
