@@ -21,11 +21,10 @@ export default function DeleteChannel() {
             {
                 preserveState: true,
                 preserveScroll: true,
+                
                 onError: (errors) => setErrors(errors),
                 onSuccess: () => {
-                   
                     setSuccess(true);
-                    
                 },
                 onFinish: () => {
                     setProcessing(false);

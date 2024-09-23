@@ -65,7 +65,7 @@ class ChannelController extends Controller
             $channel = $request->user()->ownChannels()->create(['name' => $validated['name'], 'type' => $validated['type'], 'workspace_id' => $workspace->id]);
             $channel->assignManagerRoleAndManagerPermissions($request->user());
             $channel->initChannelPermissions();
-            broadcast(new WorkspaceEvent(workspace: $workspace, type: "storeChannel", fromUserId: $request->user()->id))->toOthers();
+           
 
             DB::commit();
             return back();
@@ -668,7 +668,7 @@ class ChannelController extends Controller
                 ));
             }
 
-            broadcast(new WorkspaceEvent(workspace: $workspace, type: 'deleteChannel', data: $copiedChannel->id))->toOthers();
+           
             DB::commit();
             return redirect(route('channel.show', $workspace->mainChannel()->id));
         } catch (\Throwable $th) {

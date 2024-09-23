@@ -60,11 +60,11 @@ export default function Event() {
                 dispatch(setManyOnline(users));
             })
             .listen("WorkspaceEvent", (e) => {
-                console.log(e);
+               
                 switch (e.type) {
-                    case "storeChannel":
+                    case "ChannelObserver_storeChannel":
                         break;
-                    case "deleteChannel":
+                    case "ChannelObserver_deleteChannel":
                         if (huddleChannel && huddleChannel?.id == e?.data) {
                             dispatch(toggleHuddle());
                         }
