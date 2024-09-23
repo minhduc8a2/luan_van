@@ -32,7 +32,7 @@ import { AiOutlineZoomIn, AiOutlineZoomOut } from "react-icons/ai";
 import DocumentInSearch from "./DocumentInSearch";
 import FileIcon from "@/Components/FileIcon";
 export default function BrowseFiles() {
-    const { auth, flash, workspace } = usePage().props;
+    const { auth, flash, workspace, channels } = usePage().props;
     const [files, setFiles] = useState(new Map());
     const [sharedFiles, setSharedFiles] = useState(new Map());
     const [loading, setLoading] = useState(false);
@@ -41,11 +41,53 @@ export default function BrowseFiles() {
     const filterSwitchRef = useRef(false);
     const [searchValue, setSearchValue] = useState("");
     const [showVideo, setShowVideo] = useState(false);
-    const [showImage, setShowImage] = useState(false);
+
     const prevScrollHeightRef = useRef(null);
     const containerRef = useRef(null);
     const nextPageUrlRef = useRef(null);
-
+    useEffect(() => {
+        Echo.private(`private_workspaces.${workspace.id}`).listen(
+            "WorkspaceEvent",
+            (e) => {
+                switch (e.type) {
+                    case "FileObserver_fileDeleted":
+                        setSharedFiles((pre) => {
+                            const temp = new Map(pre);
+                            temp.delete(e.data);
+                            return temp;
+                        });
+                        setFiles((pre) => {
+                            const temp = new Map(pre);
+                            temp.delete(e.data);
+                            return temp;
+                        });
+                        break;
+                    case "ThreadMessage_fileCreated":
+                    case "ChannelMessage_fileCreated":
+                        if (channels.find((cn) => cn.id === e.data.channelId)) {
+                            setSharedFiles((pre) => {
+                                const temp = new Map(pre);
+                                e.data.files.forEach((f) => {
+                                    temp.set(f.id, f);
+                                });
+                                return temp;
+                            });
+                        } else {
+                            setFiles((pre) => {
+                                const temp = new Map(pre);
+                                e.data.files.forEach((f) => {
+                                    temp.set(f.id, f);
+                                });
+                                return temp;
+                            });
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+        );
+    }, []);
     function mutateFiles(pre, list) {
         const temp = new Map(pre);
         if (!list) return temp;

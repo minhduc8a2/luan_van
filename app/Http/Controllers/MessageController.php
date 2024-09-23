@@ -12,6 +12,7 @@ use App\Models\Workspace;
 use App\Models\Attachment;
 use App\Events\MessageEvent;
 use Illuminate\Http\Request;
+use App\Events\WorkspaceEvent;
 use App\Events\ThreadCreatedEvent;
 use App\Events\ThreadMessageEvent;
 use Illuminate\Support\Facades\DB;
@@ -74,7 +75,9 @@ class MessageController extends Controller
             }
             $files = $this->createFiles($fileObjects, $request->user(), $channel->workspace);
 
-            $message->files()->createMany($files);
+            $fileInstances = $message->files()->createMany($files);
+
+            broadcast(new WorkspaceEvent(workspace: $channel->workspace, type: "ChannelMessage_fileCreated", fromUserId: "", data: ['channelId' => $channel->id, 'files' => $fileInstances]));
 
 
             if (isset($message)) {
@@ -87,7 +90,9 @@ class MessageController extends Controller
                 }
                 //notify others about new message
                 broadcast(new MessageEvent($channel, $message->load([
-                    'files',
+                    'files' => function ($query) {
+                        $query->withTrashed();
+                    },
                     'reactions',
                     'thread' => function ($query) {
                         $query->withCount('messages');
@@ -135,8 +140,8 @@ class MessageController extends Controller
 
             $files = $this->createFiles($fileObjects, $request->user(), $channel->workspace);
 
-            $newMessage->files()->createMany($files);
-
+            $fileInstances = $newMessage->files()->createMany($files);
+            broadcast(new WorkspaceEvent(workspace: $channel->workspace, type: "ThreadMessage_fileCreated", fromUserId: "", data: ['channelId' => $channel->id, 'files' => $fileInstances]));
             if (isset($newMessage)) {
 
                 //handle mentions list
@@ -144,11 +149,15 @@ class MessageController extends Controller
 
                 foreach ($mentionsList as $u) {
                     $mentionedUser = User::find($u['id']);
-                    $mentionedUser->notify(new MentionNotification($channel, $channel->workspace, $request->user(), $mentionedUser, $message->load(['files', 'reactions']), $newMessage));
+                    $mentionedUser->notify(new MentionNotification($channel, $channel->workspace, $request->user(), $mentionedUser, $message->load(['files' => function ($query) {
+                        $query->withTrashed();
+                    }, 'reactions']), $newMessage));
                 }
                 //notify others about new message
 
-                broadcast(new ThreadMessageEvent($message, $newMessage->load(['files', 'reactions']), $isNewThread ? $thread : null));
+                broadcast(new ThreadMessageEvent($message, $newMessage->load(['files' => function ($query) {
+                    $query->withTrashed();
+                }, 'reactions']), $isNewThread ? $thread : null));
             }
             DB::commit();
             return back();
@@ -206,14 +215,18 @@ class MessageController extends Controller
             //notify others about new message
             if (!$isThreadMessage) { //channel Message
                 broadcast(new MessageEvent($channel, $message->load([
-                    'files',
+                    'files' => function ($query) {
+                        $query->withTrashed();
+                    },
                     'reactions',
                     'thread' => function ($query) {
                         $query->withCount('messages');
                     }
                 ]), "messageEdited"));
             } else {
-                broadcast(new ThreadMessageEvent($masterMessage, $message->load(['files', 'reactions']), null, "messageEdited"));
+                broadcast(new ThreadMessageEvent($masterMessage, $message->load(['files' => function ($query) {
+                    $query->withTrashed();
+                }, 'reactions']), null, "messageEdited"));
             }
 
             DB::commit();

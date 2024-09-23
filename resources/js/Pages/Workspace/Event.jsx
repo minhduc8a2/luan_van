@@ -7,7 +7,8 @@ import { addActivity } from "@/Store/activitySlice";
 import { isChannelsNotificationBroadcast } from "@/helpers/notificationTypeHelper";
 import { addMessageCountForChannel } from "@/Store/newMessageCountsMapSlice";
 import { toggleHuddle } from "@/Store/huddleSlice";
-import { setThreadMessage } from "@/Store/threadSlice";
+import { deleteFileInThread, setThreadMessage } from "@/Store/threadSlice";
+import { deleteFile } from "@/Store/messagesSlice";
 export default function Event() {
     const {
         workspace,
@@ -36,7 +37,7 @@ export default function Event() {
                                     "messages",
                                     "channelUsers",
                                     "channels",
-                                    "availableChannels",
+
                                     "permissions",
                                 ],
                             });
@@ -59,40 +60,48 @@ export default function Event() {
                 dispatch(setManyOnline(users));
             })
             .listen("WorkspaceEvent", (e) => {
-                if (e.type === "storeChannel") {
-                    router.reload({
-                        only: ["availableChannels"],
-                        preserveState: true,
-                    });
-                } else if (e.type == "deleteChannel") {
-                    console.log("deletechannel", e);
-                   
-                    if (huddleChannel && huddleChannel?.id == e?.data) {
-                        dispatch(toggleHuddle());
-                       
-                    }
-                    if (channel?.id == e?.data) {
-                        dispatch(setThreadMessage(null));
-                        router.visit(route("channel.show", mainChannelId), {
-                            preserveState: true,
-                        });
-                    } else {
-                        router.reload({
-                            only: ["availableChannels", "channels"],
-                            preserveState: true,
-                        });
-                    }
-                } else if (e.type == "newUserJoinWorkspace") {
-                    if (channel.id == mainChannelId) {
-                        router.reload({
-                            only: ["directChannels", "users", "channelUsers"],
-                            preserveState: true,
-                        });
-                    } else
-                        router.reload({
-                            only: ["directChannels", "users"],
-                            preserveState: true,
-                        });
+                console.log(e);
+                switch (e.type) {
+                    case "storeChannel":
+                        break;
+                    case "deleteChannel":
+                        if (huddleChannel && huddleChannel?.id == e?.data) {
+                            dispatch(toggleHuddle());
+                        }
+                        if (channel?.id == e?.data) {
+                            dispatch(setThreadMessage(null));
+                            router.visit(route("channel.show", mainChannelId), {
+                                preserveState: true,
+                            });
+                        } else {
+                            router.reload({
+                                only: ["channels"],
+                                preserveState: true,
+                            });
+                        }
+                        break;
+                    case "newUserJoinWorkspace":
+                        if (channel.id == mainChannelId) {
+                            router.reload({
+                                only: [
+                                    "directChannels",
+                                    "users",
+                                    "channelUsers",
+                                ],
+                                preserveState: true,
+                            });
+                        } else
+                            router.reload({
+                                only: ["directChannels", "users"],
+                                preserveState: true,
+                            });
+                        break;
+                    case "FileObserver_fileDeleted":
+                        dispatch(deleteFile(e.data));
+                        dispatch(deleteFileInThread(e.data));
+                        break;
+                    default:
+                        break;
                 }
             })
             .error((error) => {

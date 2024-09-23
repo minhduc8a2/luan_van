@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('file_message', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('file_id')->constrained()->nullable();
-            $table->unsignedBigInteger('message_id')->nullable();
+            $table->foreignId('file_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('message_id')->nullable();
             $table->timestamps();
         });
     }

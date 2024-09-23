@@ -99,7 +99,7 @@ export default function ChatArea() {
                 preserveState: true,
                 only: [
                     "channels",
-                    "availableChannels",
+                   
                     "channel",
                     "permissions",
                     "channelPermissions",
@@ -284,7 +284,7 @@ export default function ChatArea() {
                             only: [
                                 "channel",
                                 "channels",
-                                "availableChannels",
+                                
                                 "permissions",
                                 "channelPermissions",
                             ],

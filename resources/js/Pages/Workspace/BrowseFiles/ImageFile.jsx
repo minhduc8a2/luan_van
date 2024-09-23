@@ -1,57 +1,22 @@
 import FileItem from "@/Components/FileItem";
-import React from "react";
-import { AiOutlineZoomIn, AiOutlineZoomOut } from "react-icons/ai";
-import { IoMdCloudDownload } from "react-icons/io";
-import { MdOutlineRotate90DegreesCcw } from "react-icons/md";
-import { PhotoProvider, PhotoView } from "react-photo-view";
+import Image from "@/Components/Image";
+import React, { useState } from "react";
 
 export default function ImageFile({ file }) {
+    const [show, setShow] = useState(false);
     return (
-        <PhotoProvider
-            toolbarRender={({
-                onScale,
-                scale,
-                rotate,
-                onRotate,
-                images,
-                index,
-            }) => {
-                return (
-                    <>
-                        <a
-                            href={images[index].src}
-                            className="PhotoView-Slider__toolbarIcon"
-                            download={true}
-                        >
-                            <IoMdCloudDownload className="text-xl" />
-                        </a>
-                        <button
-                            className="PhotoView-Slider__toolbarIcon"
-                            onClick={() => onRotate(rotate + 90)}
-                        >
-                            <MdOutlineRotate90DegreesCcw className="text-xl" />
-                        </button>
-                        <button
-                            className="PhotoView-Slider__toolbarIcon"
-                            onClick={() => onScale(scale + 1)}
-                        >
-                            <AiOutlineZoomIn className="text-xl" />
-                        </button>
-                        <button
-                            className="PhotoView-Slider__toolbarIcon"
-                            onClick={() => onScale(scale - 1)}
-                        >
-                            <AiOutlineZoomOut className="text-xl" />
-                        </button>
-                    </>
-                );
-            }}
-        >
-            <PhotoView src={file.url}>
-                <button className="w-full">
-                    <FileItem file={file} maxWidth="w-full" />
-                </button>
-            </PhotoView>
-        </PhotoProvider>
+        <div className="">
+            {show && (
+                <Image
+                    fullScreenMode
+                    url={file.url}
+                    name={file.name}
+                    onFullScreenClose={() => setShow(false)}
+                />
+            )}
+            <button className="w-full" onClick={() => setShow(true)}>
+                <FileItem file={file} maxWidth="w-full" />
+            </button>
+        </div>
     );
 }

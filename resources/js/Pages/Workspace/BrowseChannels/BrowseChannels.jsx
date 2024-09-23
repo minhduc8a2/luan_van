@@ -107,7 +107,7 @@ export default function BrowseChannels() {
             {},
             {
                 preserveState: true,
-                only: ["channels", "availableChannels"],
+                only: ["channels", ],
                 headers: {
                     "X-Socket-Id": Echo.socketId(),
                 },
@@ -121,7 +121,7 @@ export default function BrowseChannels() {
             {},
             {
                 preserveState: true,
-                only: ["channels", "availableChannels"],
+                only: ["channels", ],
                 headers: {
                     "X-Socket-Id": Echo.socketId(),
                 },

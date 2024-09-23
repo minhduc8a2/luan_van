@@ -4,6 +4,7 @@ import { IoMdCloseCircle } from "react-icons/io";
 import { useState, useEffect } from "react";
 import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
 import FileIcon from "./FileIcon";
+import { FaRegTrashAlt } from "react-icons/fa";
 
 export default function FileItem({
     file,
@@ -47,6 +48,10 @@ export default function FileItem({
                             alt="document"
                             className="object-cover object-center "
                         />
+                    ) : file.deleted_at ? (
+                        <div className="w-full h-full flex justify-center items-center bg-foreground text-lg">
+                            <FaRegTrashAlt />
+                        </div>
                     ) : (
                         <div className="w-full h-full flex justify-center items-center bg-link text-lg">
                             <FileIcon type={file.type} />
@@ -54,8 +59,14 @@ export default function FileItem({
                     )}
                 </div>
                 <div className="text-left max-w-full min-w-0 ">
-                    <div className={`truncate   `}>{file.name}</div>
-                    <p className="">{getDocumentType(file.type)}</p>
+                    {file.deleted_at ? (
+                        "This file was deleted."
+                    ) : (
+                        <>
+                            <div className={`truncate   `}>{file.name}</div>
+                            <p className="">{getDocumentType(file.type)}</p>
+                        </>
+                    )}
                 </div>
             </div>
         </div>

@@ -185,6 +185,7 @@ export default function TipTapEditor({
     const mentionsListRef = useRef({});
     const abortControllers = useRef([]);
     const [uploadProgress, setUploadProgress] = useState(0);
+    const uploadingRef = useRef(false);
     const inputFileRef = useRef(null);
     function handleRemoveFile(file) {
         const index = fileList.findIndex((f) => f.name == file.name);
@@ -204,6 +205,7 @@ export default function TipTapEditor({
     }
 
     function submit(editor) {
+        if (uploadingRef.current) return;
         onSubmit(
             editor.getHTML(),
             serverResponseFileList.current,
@@ -231,6 +233,7 @@ export default function TipTapEditor({
             const file = filesValues[index];
             const controller = new AbortController();
             abortControllers.current.push(controller);
+            uploadingRef.current = true;
             try {
                 const res = await axios.postForm(
                     `/upload_file/${auth.user.id}`,
@@ -255,8 +258,10 @@ export default function TipTapEditor({
                     ...serverResponseFileList.current,
                     ...jsonRes.data,
                 ];
+                uploadingRef.current = false;
             } catch (error) {
                 console.log("abort, continue", error);
+                uploadingRef.current = false;
             }
         }
         inputFileRef.current.value = null;
@@ -417,7 +422,7 @@ export default function TipTapEditor({
             <div className="max-h-96 overflow-y-auto ">
                 <EditorContent editor={editor} />
             </div>
-            <div className="flex gap-x-2 flex-wrap">
+            <div className="flex gap-2 max-h-48 overflow-y-auto scrollbar flex-wrap">
                 {fileList.map((file, index) => {
                     if (isImage(file.type)) {
                         return (

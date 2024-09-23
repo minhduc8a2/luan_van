@@ -98,7 +98,10 @@ export default function SideBar({}) {
                     <div className="text-xs font-semibold">DMs</div>
                 </button> */}
                 <button
-                    onClick={() => dispatch(setPanelType("activity"))}
+                    onClick={() => {
+                        dispatch(setPanelType("activity"));
+                        dispatch(setPageName("normal"));
+                    }}
                     className={itemStyle + " relative"}
                 >
                     {panelType == "activity" ? (

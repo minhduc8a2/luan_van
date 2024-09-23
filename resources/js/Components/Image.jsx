@@ -18,6 +18,7 @@ export default function Image({
     className = "",
     fullScreenMode = false,
     onFullScreenClose,
+    deleteFn = () => {},
 }) {
     const { publicAppUrl } = usePage().props;
     const [loading, setLoading] = useState(true);
@@ -44,16 +45,13 @@ export default function Image({
     if (!fullscreen && fullScreenMode) return "";
     function toggleScale() {
         if (isDraggingRef.current) return;
-        if (scale == 1) {
-            setScale(1.5);
-
-            largeImageRef.current.style.cursor = "zoom-in";
-        }
-        if (scale == 1.5) {
+        if (scale < 2) {
             setScale(2);
+
             largeImageRef.current.style.cursor = "zoom-out";
         }
-        if (scale == 2) {
+
+        if (scale >= 2) {
             setScale(1);
 
             largeImageRef.current.style.cursor = "zoom-in";
@@ -104,7 +102,16 @@ export default function Image({
         document.removeEventListener("mousemove", handleMouseMove);
         document.removeEventListener("mouseup", handleMouseUp);
     }
-
+    function handleWheel(e) {
+        if (e.deltaY < 0) {
+            setScale((pre) => pre + 0.1);
+            if (scale + 0.1 > 2)
+                largeImageRef.current.style.cursor = "zoom-out";
+        } else if (e.deltaY > 0) {
+            setScale((pre) => pre - 0.1);
+            if (scale - 0.1 < 2) largeImageRef.current.style.cursor = "zoom-in";
+        }
+    }
     return (
         <div
             className={`h-64 aspect-[4/5] overflow-hidden relative group/image rounded-lg ${className} ${
@@ -138,11 +145,12 @@ export default function Image({
                         alt=""
                         onLoad={() => setLargeLoading(false)}
                         onMouseDown={handleMouseDown}
+                        onWheel={handleWheel}
                         onClick={toggleScale}
                         style={{
                             transform: `scale(${scale}) `,
                         }}
-                        className=" h-full z-20 cursor-zoom-in absolute"
+                        className=" min-h-full max-h-full z-20 cursor-zoom-in absolute "
                     />
                     <img
                         src={url}
@@ -193,7 +201,10 @@ export default function Image({
                             >
                                 Copy link to file
                             </button>
-                            <button className="text-danger-500 hover:bg-white/15 py-1 text-left px-4">
+                            <button
+                                onClick={() => deleteFn()}
+                                className="text-danger-500 hover:bg-white/15 py-1 text-left px-4"
+                            >
                                 Delete
                             </button>
                         </div>
@@ -209,14 +220,14 @@ export default function Image({
                 </Popover>
             </div>
             <button
-                className="w-full h-full"
+                className="w-full h-full relative overflow-hidden"
                 onClick={() => setFullscreen(true)}
             >
                 <img
                     src={url}
                     alt=""
                     onLoad={() => setLoading(false)}
-                    className=" object-cover object-center  cursor-pointer"
+                    className=" object-cover object-center min-w-full min-h-full  cursor-pointer"
                 />
             </button>
         </div>

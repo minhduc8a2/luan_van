@@ -22,7 +22,7 @@ import Reactions from "./Reactions";
 import { FaAngleRight } from "react-icons/fa6";
 import { useDispatch, useSelector } from "react-redux";
 import { setThreadMessage } from "@/Store/threadSlice";
-import { setMention } from "@/Store/mentionSlice";
+
 import TipTapEditor from "@/Components/TipTapEditor";
 import { editMessage as editMessageInStore } from "@/Store/messagesSlice";
 import { getMentionsFromContent } from "@/helpers/tiptapHelper";
@@ -44,16 +44,19 @@ export default function Message({
     const [reactions, setReactions] = useState(
         message.reactions ? [...message.reactions] : []
     );
-    const imageAttachments = [];
-    const videoAttachments = [];
-    const documentAttachments = [];
-    const otherAttachments = [];
+    const imageFiles = [];
+    const videoFiles = [];
+    const documentFiles = [];
+    const deletedFiles = [];
+    const otherFiles = [];
     files.forEach((file) => {
-        if (isImage(file.type)) imageAttachments.push(file);
-        else if (isDocument(file.type)) documentAttachments.push(file);
-        else if (isVideo(file.type)) videoAttachments.push(file);
-        else otherAttachments.push(file);
+        if (isImage(file.type)) imageFiles.push(file);
+        else if (isDocument(file.type)) documentFiles.push(file);
+        else if (isVideo(file.type)) videoFiles.push(file);
+        else if (file.deleted_at) deletedFiles.push(file);
+        else otherFiles.push(file);
     });
+
     const [openOverlay, setOpenOverlay] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -62,6 +65,7 @@ export default function Message({
     }, [reactions]);
     useEffect(() => {
         setReactions(message.reactions ? [...message.reactions] : []);
+        console.log(message, "changed");
     }, [message]);
 
     useEffect(() => {
@@ -181,6 +185,24 @@ export default function Message({
             }
         );
     }
+    function deleteFile(file) {
+        router.delete(
+            route("files.destroy", {
+                workspace: file.workspace_id,
+                file: file.id,
+            }),
+            {
+                headers: {
+                    "X-Socket-Id": Echo.socketId(),
+                },
+                preserveState: true,
+                only: [],
+                onError: (errors) => {
+                    console.log(errors);
+                },
+            }
+        );
+    }
     return (
         <div
             className={`message-container transition-all pl-8 pt-1 pr-4 pb-2 relative break-all group hover:bg-white/10 ${
@@ -258,22 +280,23 @@ export default function Message({
                         )}
                     </>
                 )}
-                {imageAttachments.length != 0 && (
+                {imageFiles.length != 0 && (
                     <div className="flex mt-4 gap-4 flex-wrap">
-                        {imageAttachments.map((attachment) => {
+                        {imageFiles.map((file) => {
                             return (
                                 <Image
                                     isInPhotoView={true}
-                                    url={attachment.url}
-                                    key={attachment.id}
+                                    url={file.url}
+                                    key={file.id}
+                                    deleteFn={() => deleteFile(file)}
                                 />
                             );
                         })}
                     </div>
                 )}
-                {videoAttachments.length != 0 && (
-                    <div className="flex gap-x-4 flex-wrap mt-4">
-                        {videoAttachments.map((attachment) => {
+                {videoFiles.length != 0 && (
+                    <div className="flex gap-4 flex-wrap mt-4">
+                        {videoFiles.map((attachment) => {
                             return (
                                 <Video
                                     key={attachment.id}
@@ -285,13 +308,13 @@ export default function Message({
                         })}
                     </div>
                 )}
-                {documentAttachments.length != 0 && (
-                    <div className="flex gap-x-4 flex-wrap mt-4">
-                        {documentAttachments.map((attachment) => {
+                {documentFiles.length != 0 && (
+                    <div className="flex gap-4 flex-wrap mt-4">
+                        {documentFiles.map((file) => {
                             return (
                                 <DocumentAttachment
-                                    key={attachment.id}
-                                    attachment={attachment}
+                                    key={file.id}
+                                    attachment={file}
                                     openOverlay={openOverlay}
                                     setOpenOverlay={(status) =>
                                         setOpenOverlay(status)
@@ -301,16 +324,23 @@ export default function Message({
                         })}
                     </div>
                 )}
-                {otherAttachments.length != 0 && (
-                    <div className="flex gap-x-4 flex-wrap mt-4">
-                        {otherAttachments.map((attachment) => (
+                {otherFiles.length != 0 && (
+                    <div className="flex gap-4 flex-wrap mt-4">
+                        {otherFiles.map((file) => (
                             <a
-                                href={attachment.url}
-                                download={attachment.name}
-                                key={attachment.id}
+                                href={file.url}
+                                download={file.name}
+                                key={file.id}
                             >
-                                <FileItem file={attachment} />
+                                <FileItem file={file} />
                             </a>
+                        ))}
+                    </div>
+                )}
+                {deletedFiles.length != 0 && (
+                    <div className="flex gap-4 flex-wrap mt-4">
+                        {deletedFiles.map((file) => (
+                            <FileItem file={file} key={file.id} />
                         ))}
                     </div>
                 )}

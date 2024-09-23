@@ -59,6 +59,28 @@ export const messagesSlice = createSlice({
                 state.messages[messageIndex].thread.messages_count -= 1;
             }
         },
+
+        deleteFile(state, action) {
+            for (
+                let msgIndex = 0;
+                msgIndex < state.messages.length;
+                msgIndex++
+            ) {
+                const files = state.messages[msgIndex].files; // Access the 'files' array
+
+                for (let fileIndex = 0; fileIndex < files.length; fileIndex++) {
+                    if (files[fileIndex].id == action.payload) {
+                        files[fileIndex].deleted_at = new Date().toUTCString();
+                        files[fileIndex].url = ""
+                        files[fileIndex].type = ""
+                        files[fileIndex].path = ""
+                        files[fileIndex].name = ""
+                        
+                        return;
+                    }
+                }
+            }
+        },
     },
 });
 
@@ -70,7 +92,8 @@ export const {
     addThreadMessagesCount,
     editMessage,
     deleteMessage,
-    subtractThreadMessagesCount
+    subtractThreadMessagesCount,
+    deleteFile,
 } = messagesSlice.actions;
 
 export default messagesSlice.reducer;

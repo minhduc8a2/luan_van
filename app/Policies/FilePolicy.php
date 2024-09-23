@@ -42,10 +42,10 @@ class FilePolicy
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, File $file, Workspace $workspace): bool
+    public function delete(User $user, File $file ): bool
     {
-        if ($user->id == $file->id) return true;
-
+        if ($user->id == $file->user_id) return true;
+        $workspace = $file->workspace;
         if ($user->workspacePermissionCheck($workspace, PermissionTypes::WORKSPACE_ALL->name)) {
             return $workspace->channels()->whereHas('users', function ($query) use ($user, $file) {
                 $query->where('users.id', $user->id);

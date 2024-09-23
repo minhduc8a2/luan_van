@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Helpers\ChannelTypes;
 use App\Models\File;
 use App\Models\Thread;
 use App\Models\Channel;
 use App\Models\Message;
 use App\Models\Workspace;
 use Illuminate\Http\Request;
+use App\Helpers\ChannelTypes;
+use App\Events\WorkspaceEvent;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class FileController extends Controller
@@ -190,8 +193,27 @@ class FileController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Request $request, Workspace $workspace, File $file)
     {
-        //
+        if ($request->user()->cannot('delete', [File::class, $file])) return abort(403);
+        try {
+            DB::beginTransaction();
+            Storage::delete($file->path);
+            $file->path = "";
+            $file->url = "";
+            $file->name = "";
+            $file->type = "";
+            $file->save();
+            $file->delete();
+           
+
+            DB::commit();
+
+            return back();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            dd($th);
+            return back()->withErrors(['server' => "Something went wrong! Please try later."]);
+        }
     }
 }

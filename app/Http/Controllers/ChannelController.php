@@ -104,7 +104,9 @@ class ChannelController extends Controller
         if ($request->expectsJson()) {
             return [
                 'messages' => $channel->messages()->withTrashed()->with([
-                    'files',
+                    'files' => function ($query) {
+                        $query->withTrashed();
+                    },
                     'reactions',
                     'thread' => function ($query) {
                         $query->withCount('messages');
@@ -117,7 +119,7 @@ class ChannelController extends Controller
          * @var Workspace $workspace
          */
         $workspace = $channel->workspace;
-        $availableChannels = fn() => $workspace->channels()->where("type", ChannelTypes::PUBLIC->name)->withCount('users')->get();
+       
 
         $channels = fn() => $user->channels()
             ->whereIn("type", [ChannelTypes::PUBLIC->name, ChannelTypes::PRIVATE->name])
@@ -190,7 +192,7 @@ class ChannelController extends Controller
             'channelPermissions' => $channelPermissions,
             'workspace' => $workspace,
             'permissions' => $permissions,
-            'availableChannels' => $availableChannels,
+           
             'channels' => $channels,
             'users' => $users,
             'channel' => $channel->load('user'),
@@ -199,13 +201,17 @@ class ChannelController extends Controller
             "directChannels" => $directChannels,
             'selfChannel' => $selfChannel,
             'messages' => $messageId ? $channel->messages()->withTrashed()->with([
-                'files',
+                'files' => function ($query) {
+                    $query->withTrashed();
+                },
                 'reactions',
                 'thread' => function ($query) {
                     $query->withCount('messages');
                 }
             ])->latest()->simplePaginate($perPage, ['*'], 'page', $pageNumber) : $channel->messages()->withTrashed()->with([
-                'files',
+                'files' => function ($query) {
+                    $query->withTrashed();
+                },
                 'reactions',
                 'thread' => function ($query) {
                     $query->withCount('messages');

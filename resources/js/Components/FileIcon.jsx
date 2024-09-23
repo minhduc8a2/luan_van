@@ -29,6 +29,7 @@ export default function FileIcon({ type }) {
         if (isPlainText(type)) return <IoDocumentTextOutline />;
         if (isImage(type)) return <FaRegFileImage />;
         if (isVideo(type)) return <FaRegFileVideo />;
+        
         return <FaFile />;
     }
     const Icon = useMemo(() => {

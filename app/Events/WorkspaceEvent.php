@@ -34,6 +34,7 @@ class WorkspaceEvent implements ShouldBroadcastNow
     {
         return [
             new PresenceChannel('workspaces.' . $this->workspace->id),
+            new PrivateChannel('private_workspaces.' . $this->workspace->id),
         ];
     }
 
