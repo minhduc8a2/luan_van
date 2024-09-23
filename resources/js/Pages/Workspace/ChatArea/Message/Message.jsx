@@ -50,8 +50,7 @@ export default function Message({
     const otherAttachments = [];
     files.forEach((file) => {
         if (isImage(file.type)) imageAttachments.push(file);
-        else if (isDocument(file.type))
-            documentAttachments.push(file);
+        else if (isDocument(file.type)) documentAttachments.push(file);
         else if (isVideo(file.type)) videoAttachments.push(file);
         else otherAttachments.push(file);
     });
@@ -261,58 +260,15 @@ export default function Message({
                 )}
                 {imageAttachments.length != 0 && (
                     <div className="flex mt-4 gap-4 flex-wrap">
-                        <PhotoProvider
-                            toolbarRender={({
-                                onScale,
-                                scale,
-                                rotate,
-                                onRotate,
-                                images,
-                                index,
-                            }) => {
-                                return (
-                                    <>
-                                        <a
-                                            href={images[index].src}
-                                            className="PhotoView-Slider__toolbarIcon"
-                                            download={true}
-                                        >
-                                            <IoMdCloudDownload className="text-xl" />
-                                        </a>
-                                        <button
-                                            className="PhotoView-Slider__toolbarIcon"
-                                            onClick={() =>
-                                                onRotate(rotate + 90)
-                                            }
-                                        >
-                                            <MdOutlineRotate90DegreesCcw className="text-xl" />
-                                        </button>
-                                        <button
-                                            className="PhotoView-Slider__toolbarIcon"
-                                            onClick={() => onScale(scale + 1)}
-                                        >
-                                            <AiOutlineZoomIn className="text-xl" />
-                                        </button>
-                                        <button
-                                            className="PhotoView-Slider__toolbarIcon"
-                                            onClick={() => onScale(scale - 1)}
-                                        >
-                                            <AiOutlineZoomOut className="text-xl" />
-                                        </button>
-                                    </>
-                                );
-                            }}
-                        >
-                            {imageAttachments.map((attachment) => {
-                                return (
-                                    <Image
-                                        isInPhotoView={true}
-                                        url={attachment.url}
-                                        key={attachment.id}
-                                    />
-                                );
-                            })}
-                        </PhotoProvider>
+                        {imageAttachments.map((attachment) => {
+                            return (
+                                <Image
+                                    isInPhotoView={true}
+                                    url={attachment.url}
+                                    key={attachment.id}
+                                />
+                            );
+                        })}
                     </div>
                 )}
                 {videoAttachments.length != 0 && (
@@ -346,9 +302,13 @@ export default function Message({
                     </div>
                 )}
                 {otherAttachments.length != 0 && (
-                    <div className="flex gap-x-4 flex-wrap mt-4" >
+                    <div className="flex gap-x-4 flex-wrap mt-4">
                         {otherAttachments.map((attachment) => (
-                            <a href={attachment.url} download={attachment.name} key={attachment.id}>
+                            <a
+                                href={attachment.url}
+                                download={attachment.name}
+                                key={attachment.id}
+                            >
                                 <FileItem file={attachment} />
                             </a>
                         ))}

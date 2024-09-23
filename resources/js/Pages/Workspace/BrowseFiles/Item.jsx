@@ -48,7 +48,7 @@ export default function Item({ file }) {
                                     </div>
                                 </PopoverButton>
                                 <PopoverPanel anchor="bottom" className="">
-                                    <div className="w-64 flex flex-col rounded-lg mt-4 border border-white/15 py-2 bg-background ">
+                                    <div className="w-64 flex flex-col z-20 relative rounded-lg mt-4 border border-white/15 py-2 bg-background ">
                                         <a
                                             href={file.url}
                                             target="_blank"

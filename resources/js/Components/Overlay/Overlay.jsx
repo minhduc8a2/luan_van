@@ -4,7 +4,7 @@ import {
     Transition,
     TransitionChild,
 } from "@headlessui/react";
-import { IoMdCloseCircleOutline } from "react-icons/io";
+
 export default function Overlay({
     children,
     show = false,
