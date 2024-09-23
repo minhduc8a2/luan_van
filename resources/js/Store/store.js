@@ -9,6 +9,7 @@ import mentionReducer from "./mentionSlice";
 import messagesReducer from "./messagesSlice";
 import newMessageCountsMapReducer from "./newMessageCountsMapSlice";
 import pageReducer from "./pageSlice";
+import notificationPopupReducer from "./notificationPopupSlice";
 export const makeStore = () => {
     return configureStore({
         reducer: {
@@ -22,6 +23,7 @@ export const makeStore = () => {
             messages: messagesReducer,
             newMessageCountsMap: newMessageCountsMapReducer,
             page: pageReducer,
+            notificationPopup: notificationPopupReducer,
         },
     });
 };

@@ -27,6 +27,8 @@ import TipTapEditor from "@/Components/TipTapEditor";
 import { editMessage as editMessageInStore } from "@/Store/messagesSlice";
 import { getMentionsFromContent } from "@/helpers/tiptapHelper";
 import Image from "@/Components/Image";
+import { setNotificationPopup } from "@/Store/notificationPopupSlice";
+import OverlayConfirm from "@/Components/Overlay/OverlayConfirm";
 export default function Message({
     message,
     user,
@@ -60,6 +62,7 @@ export default function Message({
     const [openOverlay, setOpenOverlay] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
+    const [showConfirm, setShowConfirm] = useState(null);
     const groupedReactions = useMemo(() => {
         return groupReactions(reactions, channelUsers, auth.user);
     }, [reactions]);
@@ -198,11 +201,17 @@ export default function Message({
                 preserveState: true,
                 only: [],
                 onError: (errors) => {
-                    console.log(errors);
+                    dispatch(
+                        setNotificationPopup({
+                            type: "error",
+                            message: errors.server,
+                        })
+                    );
                 },
             }
         );
     }
+
     return (
         <div
             className={`message-container transition-all pl-8 pt-1 pr-4 pb-2 relative break-all group hover:bg-white/10 ${
@@ -210,6 +219,16 @@ export default function Message({
             } ${hasChanged || index == 0 ? "pt-4" : "mt-0"}`}
             id={`message-${message.id}`}
         >
+            <OverlayConfirm
+                show={showConfirm}
+                onClose={() => setShowConfirm(false)}
+                onConfirm={() => {
+                    deleteFile(showConfirm);
+                    setShowConfirm(null);
+                }}
+                title="Delete file"
+                message="Are you sure you want to delete this file permanently?"
+            />
             {!channel.is_archived && !message.deleted_at && (
                 <MessageToolbar
                     message={message}
@@ -288,7 +307,7 @@ export default function Message({
                                     isInPhotoView={true}
                                     url={file.url}
                                     key={file.id}
-                                    deleteFn={() => deleteFile(file)}
+                                    deleteFn={() => setShowConfirm(file)}
                                 />
                             );
                         })}
@@ -296,13 +315,14 @@ export default function Message({
                 )}
                 {videoFiles.length != 0 && (
                     <div className="flex gap-4 flex-wrap mt-4">
-                        {videoFiles.map((attachment) => {
+                        {videoFiles.map((file) => {
                             return (
                                 <Video
-                                    key={attachment.id}
-                                    src={attachment.url}
-                                    name={attachment.name}
+                                    key={file.id}
+                                    src={file.url}
+                                    name={file.name}
                                     className="h-96 rounded-lg  "
+                                    deleteFn={() => setShowConfirm(file)}
                                 />
                             );
                         })}

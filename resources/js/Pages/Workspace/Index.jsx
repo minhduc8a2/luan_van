@@ -7,13 +7,15 @@ import { useRef } from "react";
 import Huddle from "./Huddle/Huddle";
 import Event from "./Event";
 import { makeStore } from "@/Store/store";
-import { Provider, useSelector } from "react-redux";
+import { Provider, useDispatch, useSelector } from "react-redux";
 import { setNotificationsCount } from "@/Store/activitySlice";
 import { initMessageCountForChannel } from "@/Store/newMessageCountsMapSlice";
 import { setPanelWidth } from "@/Store/panelSlice";
 import { setThreadWidth } from "@/Store/threadSlice";
 import BrowseChannels from "./BrowseChannels/BrowseChannels";
 import BrowseFiles from "./BrowseFiles/BrowseFiles";
+import OverlaySimpleNotification from "@/Components/Overlay/OverlaySimpleNotification";
+import { setNotificationPopup } from "@/Store/notificationPopupSlice";
 export default function Index({
     newNoftificationsCount,
     channels,
@@ -64,6 +66,7 @@ export default function Index({
                 </div>
             </div>
             <Huddle />
+            <NotificationPopup />
         </Provider>
     );
 }
@@ -85,4 +88,24 @@ function MainArea() {
         default:
             return "";
     }
+}
+function NotificationPopup() {
+    const notificationPopup = useSelector((state) => state.notificationPopup);
+    const dispatch = useDispatch();
+
+    return (
+        <OverlaySimpleNotification
+            show={notificationPopup}
+            onClose={() => dispatch(setNotificationPopup(null))}
+        >
+            {notificationPopup?.type == "error" && (
+                <h5 className="text-danger-400 text-lg">
+                    {notificationPopup.message}
+                </h5>
+            )}
+            {notificationPopup?.type == "" && (
+                <h5 className=" text-lg">{notificationPopup.message}</h5>
+            )}
+        </OverlaySimpleNotification>
+    );
 }

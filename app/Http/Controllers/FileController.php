@@ -195,6 +195,7 @@ class FileController extends Controller
      */
     public function destroy(Request $request, Workspace $workspace, File $file)
     {
+        // return back()->withErrors(['server' => "Something went wrong! Please try later."]);
         if ($request->user()->cannot('delete', [File::class, $file])) return abort(403);
         try {
             DB::beginTransaction();
