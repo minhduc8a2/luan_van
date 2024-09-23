@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState, useEffect } from "react";
 import { CreateChannelForm } from "../Panel/CreateChannelForm";
 import Button from "@/Components/Button";
 import { router, usePage } from "@inertiajs/react";
@@ -11,39 +11,45 @@ import { useDispatch } from "react-redux";
 import { setThreadMessage } from "@/Store/threadSlice";
 import { setPageName } from "@/Store/pageSlice";
 import SearchInput from "../../../Components/Input/SearchInput";
+import { InView } from "react-intersection-observer";
+import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
 export default function BrowseChannels() {
-    const { availableChannels, channels, auth } = usePage().props;
+    const { channels, auth, workspace } = usePage().props;
     const dispatch = useDispatch();
-    const allChannels = useMemo(() => {
-        const result = [...availableChannels];
-        channels.forEach((cn) => {
-            if (!result.find((c) => c.id == cn.id)) result.push(cn);
-        });
-        return result;
-    }, [availableChannels, channels]);
+    const [allChannels, setAllChannels] = useState(new Map());
+    const localFoundRef = useRef(false);
+    const [searchValue, setSearchValue] = useState("");
+    const [loading, setLoading] = useState(false);
+    const containerRef = useRef(null);
+    const prevScrollHeightRef = useRef(null);
+    const nextPageUrlRef = useRef(null);
+    const filterSwitchRef = useRef(false);
 
     const [filter, setFilter] = useState({
         ownType: "all_channels",
         privacyType: "any_channel_type",
         sort: "a_to_z",
     });
-
+    const channelsList = useMemo(
+        () => [...allChannels.values()],
+        [allChannels]
+    );
     const filteredChannels = useMemo(() => {
-        let tempChannels = [];
+        let tempChannels = [...channelsList];
         //owntype
         switch (filter.ownType) {
             case "all_channels":
-                tempChannels = [...allChannels];
                 break;
             case "my_channels":
-                tempChannels = [
-                    ...allChannels.filter((cn) => cn.user_id == auth.user.id),
-                ];
+                tempChannels = tempChannels.filter(
+                    (cn) => cn.user_id == auth.user.id
+                );
+
                 break;
             case "other_channels":
-                tempChannels = [
-                    ...allChannels.filter((cn) => cn.user_id != auth.user.id),
-                ];
+                tempChannels = tempChannels.filter(
+                    (cn) => cn.user_id != auth.user.id
+                );
                 break;
         }
         //privacy type
@@ -62,7 +68,6 @@ export default function BrowseChannels() {
                 tempChannels = tempChannels.filter((cn) => cn.is_archived);
                 break;
         }
-        //sort
         switch (filter.sort) {
             case "a_to_z":
                 tempChannels.sort((a, b) => a.name.localeCompare(b.name));
@@ -87,8 +92,8 @@ export default function BrowseChannels() {
                 tempChannels.sort((a, b) => a.users_count - b.users_count);
                 break;
         }
-        return tempChannels;
-    }, [filter, allChannels]);
+        return tempChannels
+    }, [filter, channelsList, searchValue]);
     function changeChannel(channel) {
         dispatch(setThreadMessage(null));
 
@@ -107,7 +112,7 @@ export default function BrowseChannels() {
             {},
             {
                 preserveState: true,
-                only: ["channels", ],
+                only: ["channels"],
                 headers: {
                     "X-Socket-Id": Echo.socketId(),
                 },
@@ -121,7 +126,7 @@ export default function BrowseChannels() {
             {},
             {
                 preserveState: true,
-                only: ["channels", ],
+                only: ["channels"],
                 headers: {
                     "X-Socket-Id": Echo.socketId(),
                 },
@@ -129,13 +134,82 @@ export default function BrowseChannels() {
             }
         );
     }
+    function mutateChannels(pre, list) {
+        const temp = new Map(pre);
+        if (!list) return temp;
+        list.forEach((cn) => temp.set(cn.id, cn));
+        return temp;
+    }
+    useEffect(() => {
+        if (
+            filteredChannels.some((channel) => {
+                return channel.name
+                    .toLowerCase()
+                    .includes(searchValue.toLowerCase());
+            })
+        )
+            localFoundRef.current = true;
+    }, [filteredChannels, searchValue]);
+    useEffect(() => {
+        // if (!searchValue) {
+        //     return;
+        // }
+        if (localFoundRef.current && !filterSwitchRef.current) return;
+        if (filterSwitchRef.current) filterSwitchRef.current = false;
+
+        const controller = new AbortController();
+        const delayDebounceFn = setTimeout(() => {
+            setLoading(true);
+
+            axios
+                .get(route("channels.index", workspace.id), {
+                    params: {
+                        ownType: filter.ownType,
+                        privacyType: filter.privacyType,
+                        name: searchValue,
+                        page: 1,
+                    },
+                    signal: controller.signal,
+                })
+                .then((response) => {
+                    console.log(response.data?.data);
+                    nextPageUrlRef.current = response.data?.next_page_url;
+
+                    setAllChannels((pre) =>
+                        mutateChannels(pre, response.data?.data)
+                    );
+                    setLoading(false);
+                })
+                .catch((error) => {
+                    console.log(error);
+
+                    setLoading(false);
+                });
+        }, 500);
+
+        return () => {
+            controller.abort();
+            clearTimeout(delayDebounceFn);
+        };
+    }, [searchValue, filter]);
+
     return (
         <div className="bg-foreground w-full h-full border border-white/15 ">
             <div className="mx-auto w-1/2 py-4 flex flex-col max-h-full">
                 <div className="flex justify-between items-center">
-                    <h3 className="text-xl font-bold text-white">
-                        All Channels
-                    </h3>
+                    <div className="flex gap-x-4 items-center">
+                        <h3 className="text-xl font-bold text-white">
+                            All Channels
+                        </h3>
+                        {loading && (
+                            <div className="flex gap-x-2 items-center">
+                                <div className="h-6 w-6 relative">
+                                    <OverlayLoadingSpinner />
+                                </div>
+                                <div className="text-xs">Loading files...</div>
+                            </div>
+                        )}
+                    </div>
                     <CreateChannelForm
                         activateButtonNode={
                             <Button className="text-white/100 font-bold border border-white/15 !bg-background">
@@ -146,18 +220,21 @@ export default function BrowseChannels() {
                 </div>
                 <SearchInput
                     placeholder="Search for channels"
-                    list={allChannels}
+                    list={channelsList}
                     onItemClick={changeChannel}
                     filterFunction={(searchValue, list) => {
                         return list.filter((cn) =>
                             cn.name.toLowerCase().includes(searchValue)
                         );
                     }}
+                    onChange={(e) => {
+                        setSearchValue(e.target.value);
+                        localFoundRef.current = false;
+                    }}
                     renderItemNode={(item) => {
                         return (
                             <button
                                 onClick={() => {
-                                    console.log(item);
                                     changeChannel(item);
                                 }}
                                 className="flex items-baseline gap-x-2 w-full"
@@ -173,12 +250,19 @@ export default function BrowseChannels() {
                     }}
                 />
                 <Filter
-                    setFilter={(a) => setFilter(a)}
+                    setFilter={(a) => {
+                        filterSwitchRef.current = true;
+                        nextPageUrlRef.current = false;
+                        setFilter(a);
+                    }}
                     changeChannel={changeChannel}
                 />
                 {filteredChannels.length > 0 && (
-                    <ul className="mt-4 bg-background flex-1 max-h-full overflow-y-auto scrollbar rounded-lg border border-white/15">
-                        {filteredChannels.map((cn) => {
+                    <ul
+                        className="mt-4 bg-background flex-1 max-h-full overflow-y-auto scrollbar rounded-lg border border-white/15"
+                        ref={containerRef}
+                    >
+                        {filteredChannels.map((cn, index) => {
                             return (
                                 <li
                                     className="border-t first:border-none border-t-white/15"
@@ -190,6 +274,46 @@ export default function BrowseChannels() {
                                         joinChannel={joinChannel}
                                         leaveChannel={leaveChannel}
                                     />
+                                    {index == filteredChannels.length - 1 && (
+                                        <InView
+                                            onChange={(inView) => {
+                                                console.log(inView);
+                                                if (
+                                                    inView &&
+                                                    nextPageUrlRef.current
+                                                ) {
+                                                    prevScrollHeightRef.current =
+                                                        containerRef.current.scrollHeight;
+
+                                                    axios
+                                                        .get(
+                                                            nextPageUrlRef.current
+                                                        )
+                                                        .then((response) => {
+                                                            // console.log(response.data?.data);
+                                                            nextPageUrlRef.current =
+                                                                response.data?.next_page_url;
+
+                                                            setAllChannels(
+                                                                (pre) =>
+                                                                    mutateChannels(
+                                                                        pre,
+                                                                        response
+                                                                            .data
+                                                                            ?.data
+                                                                    )
+                                                            );
+                                                            setLoading(false);
+                                                        })
+                                                        .catch((error) => {
+                                                            console.log(error);
+
+                                                            setLoading(false);
+                                                        });
+                                                }
+                                            }}
+                                        ></InView>
+                                    )}
                                 </li>
                             );
                         })}

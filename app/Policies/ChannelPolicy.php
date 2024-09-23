@@ -33,6 +33,20 @@ class ChannelPolicy
             || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_VIEW->name);
     }
 
+    public function join(User $user, Channel $channel): bool
+    {
+        if($user->isChannelMember($channel)) return false;
+        if ($channel->is_archived) return false;
+        if ($channel->type == ChannelTypes::PUBLIC->name) {
+            if (
+                $user->workspacePermissionCheck($channel->workspace, PermissionTypes::WORKSPACE_ALL->name)
+                || $user->channelPermissionCheck($channel->workspace->mainChannel(), PermissionTypes::CHANNEL_VIEW->name)
+            )
+                return true;
+        }
+        return $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name)
+            || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_VIEW->name);
+    }
     /**
      * Determine whether the user can create models.
      */

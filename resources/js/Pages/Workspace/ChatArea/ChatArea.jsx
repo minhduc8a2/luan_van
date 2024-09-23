@@ -99,7 +99,7 @@ export default function ChatArea() {
                 preserveState: true,
                 only: [
                     "channels",
-                   
+
                     "channel",
                     "permissions",
                     "channelPermissions",
@@ -284,7 +284,7 @@ export default function ChatArea() {
                             only: [
                                 "channel",
                                 "channels",
-                                
+
                                 "permissions",
                                 "channelPermissions",
                             ],
@@ -688,7 +688,7 @@ export default function ChatArea() {
                                 Admins or Channel managers for more information!
                             </h5>
                         )}
-                    {!isChannelMember && (
+                    {!isChannelMember && permissions.join && (
                         <div className="">
                             <div className="flex items-baseline gap-x-1 font-bold justify-center text-lg">
                                 {channel.type == "PUBLIC" ? (

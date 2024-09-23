@@ -142,7 +142,7 @@ export default function BrowseFiles() {
                         return true;
                 }
             }),
-        [filesList, filter]
+        [filesList, filter, searchValue]
     );
     useEffect(() => {
         if (

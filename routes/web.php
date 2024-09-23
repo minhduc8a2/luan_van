@@ -46,8 +46,10 @@ Route::middleware('auth')->group(function () {
     Route::post("/workspaces", [WorkspaceController::class, 'store'])->name('workspace.store');
     Route::get("/workspaces/{workspace}", [WorkspaceController::class, 'show'])->name('workspace.show');
     Route::get("/workspaces/{workspace}/direct_channels", [WorkspaceController::class, 'getDirectChannels'])->name('workspace.direct_channels');
+    Route::get("workspaces/{workspace}/channels", [ChannelController::class, 'index'])->name('channels.index');
     Route::post("workspaces/{workspace}/channels", [ChannelController::class, 'store'])->name('channel.store');
     Route::get("/channels/check_exists", [ChannelController::class, 'checkChannelExists'])->name('channel.checkExists');
+   
     Route::get("/channels/{channel}", [ChannelController::class, 'show'])->name('channel.show');
     Route::post("/channels/{channel}/edit_description", [ChannelController::class, 'editDescription'])->name("channel.edit_description");
     Route::post("/channels/{channel}/edit_name", [ChannelController::class, 'editName'])->name("channel.edit_name");
