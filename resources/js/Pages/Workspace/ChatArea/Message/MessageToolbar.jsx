@@ -13,6 +13,7 @@ import { setThreadMessage } from "@/Store/threadSlice";
 import { IoMdMore } from "react-icons/io";
 import { usePage } from "@inertiajs/react";
 import DeleteMessage from "./DeleteMessage";
+import { PiShareFat } from "react-icons/pi";
 export default function MessageToolbar({
     message,
     threadStyle = false,
@@ -20,6 +21,7 @@ export default function MessageToolbar({
     setIsHovered,
     setIsEditing,
     user,
+    forwardFn,
 }) {
     const dispatch = useDispatch();
     const { auth, permissions } = usePage().props;
@@ -100,6 +102,20 @@ export default function MessageToolbar({
                 <div className="rounded p-2 hover:bg-white/15">
                     <FaRegBookmark className="text-lg" />
                 </div>
+            </Tooltip>
+            <Tooltip
+                content={
+                    <div className="whitespace-nowrap p-1 text-center text-sm ">
+                        Share message
+                    </div>
+                }
+            >
+                <button
+                    className="rounded p-2 hover:bg-white/15"
+                    onClick={forwardFn}
+                >
+                    <PiShareFat className="text-lg" />
+                </button>
             </Tooltip>
             <Tooltip
                 content={
@@ -225,7 +241,12 @@ export default function MessageToolbar({
                                                             auth.user.id) && (
                                                         <>
                                                             <hr />
-                                                           <DeleteMessage message={message} user={user}/>
+                                                            <DeleteMessage
+                                                                message={
+                                                                    message
+                                                                }
+                                                                user={user}
+                                                            />
                                                         </>
                                                     )}
                                                 </div>

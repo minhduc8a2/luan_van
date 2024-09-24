@@ -25,6 +25,7 @@ export default function Video({
     fullScreenMode = false,
     onFullScreenClose,
     deleteFn,
+    noToolbar = false,
 }) {
     const { publicAppUrl } = usePage().props;
     const [smallLoaded, setSmallLoaded] = useState(false);
@@ -309,7 +310,7 @@ export default function Video({
                 />
             </button>
 
-            {smallLoaded && (
+            {smallLoaded && !noToolbar && (
                 <div
                     className={`absolute top-2 right-2  gap-x-2  group-hover/video:flex ${
                         isHovered ? "flex" : "hidden"

@@ -177,6 +177,7 @@ export default function TipTapEditor({
     focus = 1,
     isEditMessage = false,
     closeEditMessageEditor = () => {},
+    onlyText = false,
 }) {
     const { auth, channel, channelUsers } = usePage().props;
     const inputId = useId();
@@ -456,27 +457,40 @@ export default function TipTapEditor({
                 <>
                     <div className="py-2 flex items-center justify-between">
                         <div className="flex items-center gap-x-4">
-                            <div className="">
-                                <label
-                                    className="bg-white/10 rounded-full w-fit p-2 block"
-                                    htmlFor={inputId}
-                                >
-                                    {" "}
-                                    <FaPlus className="text-sm opacity-75" />
-                                </label>
-                                <input
-                                    ref={inputFileRef}
-                                    type="file"
-                                    name=""
-                                    id={inputId}
-                                    multiple
-                                    onChange={handleFilePicked}
-                                    hidden
-                                />
-                            </div>
-                            <VscMention className="text-2xl opacity-75" />
-                            <PiVideoCamera className="text-xl opacity-75" />
-                            <TiMicrophoneOutline className="text-xl opacity-75" />
+                            {!onlyText && (
+                                <div className="">
+                                    <label
+                                        className="bg-white/10 rounded-full w-fit p-2 block"
+                                        htmlFor={inputId}
+                                    >
+                                        {" "}
+                                        <FaPlus className="text-sm opacity-75" />
+                                    </label>
+                                    <input
+                                        ref={inputFileRef}
+                                        type="file"
+                                        name=""
+                                        id={inputId}
+                                        multiple
+                                        onChange={handleFilePicked}
+                                        hidden
+                                    />
+                                </div>
+                            )}
+                            <button
+                                className="hover:bg-white/15 rounded w-fit p-1"
+                                onClick={() =>
+                                    editor.commands.insertContent("@")
+                                }
+                            >
+                                <VscMention className="text-2xl opacity-75" />
+                            </button>
+                            {!onlyText && (
+                                <PiVideoCamera className="text-xl opacity-75" />
+                            )}
+                            {!onlyText && (
+                                <TiMicrophoneOutline className="text-xl opacity-75" />
+                            )}
 
                             {uploadProgress > 0 && uploadProgress < 100 && (
                                 <div className="flex gap-x-2 items-center">

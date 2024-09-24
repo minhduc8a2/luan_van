@@ -20,6 +20,8 @@ return new class extends Migration
             $table->string('user_name')->nullable();
             $table->boolean('is_auto_generated')->default(false);
             $table->boolean('is_edited')->default(false);
+            $table->unsignedBigInteger('forwarded_message_id')->nullable()->index();
+            $table->foreign('forwarded_message_id')->references('id')->on('messages')->onDelete('cascade');
             $table->softDeletes();
             $table->timestamps();
         });

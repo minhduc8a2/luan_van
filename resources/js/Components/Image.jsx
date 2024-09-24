@@ -19,6 +19,7 @@ export default function Image({
     fullScreenMode = false,
     onFullScreenClose,
     deleteFn = () => {},
+    noToolbar = false,
 }) {
     const { publicAppUrl } = usePage().props;
     const [loading, setLoading] = useState(true);
@@ -104,11 +105,11 @@ export default function Image({
     }
     function handleWheel(e) {
         if (e.deltaY < 0) {
-            setScale((pre) => pre + 0.1);
+            setScale((pre) => pre + 0.2);
             if (scale + 0.1 > 2)
                 largeImageRef.current.style.cursor = "zoom-out";
         } else if (e.deltaY > 0) {
-            setScale((pre) => pre - 0.1);
+            setScale((pre) => pre - 0.2);
             if (scale - 0.1 < 2) largeImageRef.current.style.cursor = "zoom-in";
         }
     }
@@ -120,9 +121,9 @@ export default function Image({
         >
             {loading && <OverlayLoadingSpinner />}
             {fullscreen && (
-                <div className="top-8 left-8 right-8 bottom-8 overflow-hidden fixed bg-black/95 ring-[40px] ring-black/50  rounded-lg flex group/video justify-center z-50 ">
+                <div className="top-8 left-8 right-8 bottom-8 overflow-hidden fixed bg-black/95 ring-[40px] ring-black/50  rounded-lg flex group/image_fullscreen justify-center z-50 ">
                     {largeLoading && <OverlayLoadingSpinner />}
-                    <div className="absolute top-2 right-2 hidden gap-x-2 group-hover/video:flex z-20">
+                    <div className="absolute top-2 right-2 hidden gap-x-2 group-hover/image_fullscreen:flex z-20">
                         <a
                             href={url}
                             download={name}
@@ -150,7 +151,7 @@ export default function Image({
                         style={{
                             transform: `scale(${scale}) `,
                         }}
-                        className=" min-h-full max-h-full z-20 cursor-zoom-in absolute "
+                        className=" min-h-full max-h-full z-20 cursor-zoom-in absolute transition-transform ease-out duration-200"
                     />
                     <img
                         src={url}
@@ -160,65 +161,67 @@ export default function Image({
                     />
                 </div>
             )}
-            <div
-                className={` border border-white/15 group-hover/image:flex ${
-                    isHovered ? "flex" : "hidden"
-                }  transition z-20 gap-x-2 rounded bg-background p-1 absolute right-2 top-2 `}
-            >
-                <a
-                    className="p-1 rounded hover:bg-white/15 transition"
-                    download
-                    href={url}
+            {!noToolbar && (
+                <div
+                    className={` border border-white/15 group-hover/image:flex ${
+                        isHovered ? "flex" : "hidden"
+                    }  transition z-20 gap-x-2 rounded bg-background p-1 absolute right-2 top-2 `}
                 >
-                    <IoCloudDownloadOutline className="text-xl" />
-                </a>
-                <Popover className="relative">
-                    <PopoverButton className="p-1 rounded hover:bg-white/15 transition">
-                        <div
-                            onClick={() => {
-                                setIsHovered(true);
-                            }}
-                        >
-                            <MdMoreVert className="text-xl" />
-                        </div>
-                    </PopoverButton>
-                    <PopoverPanel anchor="bottom" className="">
-                        <div className="w-64 flex flex-col z-20 relative rounded-lg mt-4 border border-white/15 py-2 bg-background ">
-                            <a
-                                href={url}
-                                target="_blank"
-                                className=" hover:bg-white/15 py-1 text-left px-4"
-                            >
-                                Open in new tab
-                            </a>
-                            <button
-                                className=" hover:bg-white/15 py-1 text-left px-4"
+                    <a
+                        className="p-1 rounded hover:bg-white/15 transition"
+                        download
+                        href={url}
+                    >
+                        <IoCloudDownloadOutline className="text-xl" />
+                    </a>
+                    <Popover className="relative">
+                        <PopoverButton className="p-1 rounded hover:bg-white/15 transition">
+                            <div
                                 onClick={() => {
-                                    copy(publicAppUrl + url);
-                                    close();
-                                    setIsHovered(false);
+                                    setIsHovered(true);
                                 }}
                             >
-                                Copy link to file
-                            </button>
-                            <button
-                                onClick={() => deleteFn()}
-                                className="text-danger-500 hover:bg-white/15 py-1 text-left px-4"
-                            >
-                                Delete
-                            </button>
-                        </div>
-                        <div
-                            className="fixed top-0 bottom-0 right-0 left-0 bg-transparent overflow-hidden z-10"
-                            onClick={() => {
-                                close();
+                                <MdMoreVert className="text-xl" />
+                            </div>
+                        </PopoverButton>
+                        <PopoverPanel anchor="bottom" className="">
+                            <div className="w-64 flex flex-col z-20 relative rounded-lg mt-4 border border-white/15 py-2 bg-background ">
+                                <a
+                                    href={url}
+                                    target="_blank"
+                                    className=" hover:bg-white/15 py-1 text-left px-4"
+                                >
+                                    Open in new tab
+                                </a>
+                                <button
+                                    className=" hover:bg-white/15 py-1 text-left px-4"
+                                    onClick={() => {
+                                        copy(publicAppUrl + url);
+                                        close();
+                                        setIsHovered(false);
+                                    }}
+                                >
+                                    Copy link to file
+                                </button>
+                                <button
+                                    onClick={() => deleteFn()}
+                                    className="text-danger-500 hover:bg-white/15 py-1 text-left px-4"
+                                >
+                                    Delete
+                                </button>
+                            </div>
+                            <div
+                                className="fixed top-0 bottom-0 right-0 left-0 bg-transparent overflow-hidden z-10"
+                                onClick={() => {
+                                    close();
 
-                                setIsHovered(false);
-                            }}
-                        ></div>
-                    </PopoverPanel>
-                </Popover>
-            </div>
+                                    setIsHovered(false);
+                                }}
+                            ></div>
+                        </PopoverPanel>
+                    </Popover>
+                </div>
+            )}
             <button
                 className="w-full h-full relative overflow-hidden"
                 onClick={() => setFullscreen(true)}

@@ -53,8 +53,20 @@ class MessageController extends Controller
     public function store(Request $request,  Channel $channel)
     {
         if ($request->user()->cannot('create', [Message::class, $channel])) return abort(403);
-        $validated = $request->validate(['content' => 'string', 'fileObjects' => 'array']);
+        $forwardMode = false;
+        $forwardChannel = null;
+        if (isset($request->forwardedMessageId)) {
+            $forwardMode = true;
+        }
+
+        $validated = $forwardMode ?
+            $request->validate(['content' => 'string', 'forwardedMessageId' => 'integer', 'channelId' => 'integer'])
+            :  $request->validate(['content' => 'string', 'fileObjects' => 'array']);
         $content = $validated['content'];
+
+        if ($forwardMode) {
+            $forwardChannel = Channel::find($validated['channelId']);
+        }
         // dd($request->fileObjects);
         try {
             DB::beginTransaction();
@@ -62,22 +74,27 @@ class MessageController extends Controller
             $content = Helper::sanitizeContent($content);
             $message = Message::create([
                 'content' => $content,
-                'messagable_id' => $channel->id,
+                'messagable_id' => $forwardMode ? $validated['channelId'] : $channel->id,
                 'messagable_type' => Channel::class,
-                'user_id' => $request->user()->id
+                'user_id' => $request->user()->id,
+                "forwarded_message_id" => $forwardMode ? $validated['forwardedMessageId'] : null
             ]);
-            $fileObjects = [];
-            foreach ($validated['fileObjects'] as $i => $fileObject) {
-                $newPath = str_replace("temporary", "public", $fileObject['path']);
-                Storage::move($fileObject['path'], $newPath);
-                $fileObject['path'] = $newPath;
-                array_push($fileObjects, $fileObject);
+
+            if (!$forwardMode) {
+                $fileObjects = [];
+                foreach ($validated['fileObjects'] as $i => $fileObject) {
+                    $newPath = str_replace("temporary", "public", $fileObject['path']);
+                    Storage::move($fileObject['path'], $newPath);
+                    $fileObject['path'] = $newPath;
+                    array_push($fileObjects, $fileObject);
+                }
+                $files = $this->createFiles($fileObjects, $request->user(), $channel->workspace);
+
+                $fileInstances = $message->files()->createMany($files);
+
+                broadcast(new WorkspaceEvent(workspace: $channel->workspace, type: "ChannelMessage_fileCreated", fromUserId: "", data: ['channelId' => $channel->id, 'files' => $fileInstances]));
             }
-            $files = $this->createFiles($fileObjects, $request->user(), $channel->workspace);
 
-            $fileInstances = $message->files()->createMany($files);
-
-            broadcast(new WorkspaceEvent(workspace: $channel->workspace, type: "ChannelMessage_fileCreated", fromUserId: "", data: ['channelId' => $channel->id, 'files' => $fileInstances]));
 
 
             if (isset($message)) {
@@ -86,18 +103,34 @@ class MessageController extends Controller
 
                 foreach ($mentionsList as $u) {
                     $mentionedUser = User::find($u['id']);
-                    $mentionedUser->notify(new MentionNotification($channel, $channel->workspace, $request->user(), $mentionedUser, $message));
+                    $mentionedUser->notify(new MentionNotification($forwardMode ? $forwardChannel : $channel, $channel->workspace, $request->user(), $mentionedUser, $message));
                 }
                 //notify others about new message
-                broadcast(new MessageEvent($channel, $message->load([
-                    'files' => function ($query) {
-                        $query->withTrashed();
-                    },
-                    'reactions',
-                    'thread' => function ($query) {
-                        $query->withCount('messages');
-                    }
-                ])));
+                if ($forwardMode) {
+                    broadcast(new MessageEvent($forwardChannel, $message->load([
+                        'files' => function ($query) {
+                            $query->withTrashed();
+                        },
+                        'reactions',
+                        'thread' => function ($query) {
+                            $query->withCount('messages');
+                        },
+                        'forwardedMessage.files' => function ($query) {
+
+                            $query->withTrashed();
+                        },
+                    ])));
+                } else {
+                    broadcast(new MessageEvent($channel, $message->load([
+                        'files' => function ($query) {
+                            $query->withTrashed();
+                        },
+                        'reactions',
+                        'thread' => function ($query) {
+                            $query->withCount('messages');
+                        },
+                    ])));
+                }
             }
             DB::commit();
             back();

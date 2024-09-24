@@ -201,7 +201,11 @@ class ChannelController extends Controller
                     'reactions',
                     'thread' => function ($query) {
                         $query->withCount('messages');
-                    }
+                    },
+                    'forwardedMessage.files' => function ($query) {
+
+                        $query->withTrashed();
+                    },
                 ])->latest()->simplePaginate($perPage, ['*'], 'page', $pageNumber)
             ];
         }
@@ -299,7 +303,11 @@ class ChannelController extends Controller
                 'reactions',
                 'thread' => function ($query) {
                     $query->withCount('messages');
-                }
+                },
+                'forwardedMessage.files' => function ($query) {
+
+                    $query->withTrashed();
+                },
             ])->latest()->simplePaginate($perPage, ['*'], 'page', $pageNumber) : $channel->messages()->withTrashed()->with([
                 'files' => function ($query) {
                     $query->withTrashed();
@@ -307,7 +315,11 @@ class ChannelController extends Controller
                 'reactions',
                 'thread' => function ($query) {
                     $query->withCount('messages');
-                }
+                },
+                'forwardedMessage.files' => function ($query) {
+
+                    $query->withTrashed();
+                },
             ])->latest()->simplePaginate($perPage),
             'channelUsers' => fn() => $channel->users,
             'newNoftificationsCount' => $newNotificationsCount

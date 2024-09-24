@@ -18,7 +18,15 @@ class Message extends Model
 {
     use HasFactory;
     use SoftDeletes;
-    protected $fillable = ['content', 'user_id', 'messagable_id', 'messagable_type', 'created_at', 'is_auto_generated'];
+    protected $fillable = [
+        'content',
+        'user_id',
+        'messagable_id',
+        'messagable_type',
+        'created_at',
+        'is_auto_generated',
+        "forwarded_message_id"
+    ];
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -45,6 +53,14 @@ class Message extends Model
     public function threadMessages(): HasManyThrough
     {
         return $this->hasManyThrough(Thread::class, Message::class);
+    }
+    public function forwardedMessage(): BelongsTo
+    {
+        return $this->belongsTo(Message::class, 'forwarded_message_id');
+    }
+    public function forwardedMessages(): HasMany
+    {
+        return $this->hasMany(Message::class, 'forwarded_message_id');
     }
     public static function createStringMessageAndBroadcast(Channel $channel, User $user, string $content)
     {

@@ -49,7 +49,7 @@ Route::middleware('auth')->group(function () {
     Route::get("workspaces/{workspace}/channels", [ChannelController::class, 'index'])->name('channels.index');
     Route::post("workspaces/{workspace}/channels", [ChannelController::class, 'store'])->name('channel.store');
     Route::get("/channels/check_exists", [ChannelController::class, 'checkChannelExists'])->name('channel.checkExists');
-   
+
     Route::get("/channels/{channel}", [ChannelController::class, 'show'])->name('channel.show');
     Route::post("/channels/{channel}/edit_description", [ChannelController::class, 'editDescription'])->name("channel.edit_description");
     Route::post("/channels/{channel}/edit_name", [ChannelController::class, 'editName'])->name("channel.edit_name");
@@ -65,6 +65,7 @@ Route::middleware('auth')->group(function () {
     Route::post("/channels/{channel}/archive", [ChannelController::class, 'archive'])->name("channel.archive");
     Route::delete("/channels/{channel}", [ChannelController::class, 'destroy'])->name("channel.delete");
     Route::post("/channels/{channel}/messages", [MessageController::class, 'store'])->name('message.store');
+
     Route::post("/messages/{message}", [MessageController::class, 'update'])->name('message.update');
     Route::delete("/messages/{message}", [MessageController::class, 'destroy'])->name('message.delete');
     Route::post("/channels/{channel}/messages/{message}", [MessageController::class, 'storeThreadMessage'])->name('thread_message.store');
@@ -106,5 +107,6 @@ Route::get("/notifications", [NotificationController::class, 'get'])->name('noti
 //     return new  InvitationMail("https://google.com", "company A", "A", "B");
 // });
 Route::resource('workspaces/{workspace}/files', FileController::class)->only([
-    'index', 'destroy'
+    'index',
+    'destroy'
 ]);

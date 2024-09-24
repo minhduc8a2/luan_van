@@ -1,15 +1,8 @@
 import React, { useMemo } from "react";
 import { UTCToDateTime, UTCToTime } from "@/helpers/dateTimeHelper";
-import { generateHTML } from "@tiptap/core";
-import StarterKit from "@tiptap/starter-kit";
 import Avatar from "@/Components/Avatar";
 import { isDocument, isImage, isVideo } from "@/helpers/fileHelpers";
 import "react-photo-view/dist/react-photo-view.css";
-import { PhotoProvider, PhotoView } from "react-photo-view";
-import { AiOutlineZoomIn } from "react-icons/ai";
-import { AiOutlineZoomOut } from "react-icons/ai";
-import { MdOutlineRotate90DegreesCcw } from "react-icons/md";
-import { IoMdCloudDownload } from "react-icons/io";
 import { useState } from "react";
 import FileItem from "@/Components/FileItem";
 import DocumentAttachment from "./DocumentAttachment";
@@ -29,6 +22,7 @@ import { getMentionsFromContent } from "@/helpers/tiptapHelper";
 import Image from "@/Components/Image";
 import { setNotificationPopup } from "@/Store/notificationPopupSlice";
 import OverlayConfirm from "@/Components/Overlay/OverlayConfirm";
+import ForwardMessage from "./ForwardMessage/ForwardMessage";
 export default function Message({
     message,
     user,
@@ -38,6 +32,7 @@ export default function Message({
     messagableConnectionRef,
     newMessageReactionReceive,
     resetNewMessageReactionReceive,
+    noToolbar = false,
 }) {
     const { auth, channel, channelUsers, permissions } = usePage().props;
     const dispatch = useDispatch();
@@ -63,6 +58,7 @@ export default function Message({
     const [isHovered, setIsHovered] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [showConfirm, setShowConfirm] = useState(null);
+    const [forwardedMessage, setForwardedMessage] = useState(null);
     const groupedReactions = useMemo(() => {
         return groupReactions(reactions, channelUsers, auth.user);
     }, [reactions]);
@@ -219,6 +215,11 @@ export default function Message({
             } ${hasChanged || index == 0 ? "pt-4" : "mt-0"}`}
             id={`message-${message.id}`}
         >
+            <ForwardMessage
+                message={forwardedMessage}
+                show={forwardedMessage != null}
+                onClose={() => setForwardedMessage(null)}
+            />
             <OverlayConfirm
                 show={showConfirm}
                 onClose={() => setShowConfirm(false)}
@@ -227,9 +228,22 @@ export default function Message({
                     setShowConfirm(null);
                 }}
                 title="Delete file"
-                message="Are you sure you want to delete this file permanently?"
+                message={
+                    <div className="flex flex-col gap-y-4">
+                        <h5>
+                            Are you sure you want to delete this file
+                            permanently?
+                        </h5>
+                        {showConfirm && (
+                            <FileItem
+                                file={showConfirm}
+                                maxWidth="max-w-full"
+                            />
+                        )}
+                    </div>
+                }
             />
-            {!channel.is_archived && !message.deleted_at && (
+            {!channel.is_archived && !message.deleted_at && !noToolbar && (
                 <MessageToolbar
                     message={message}
                     threadStyle={threadStyle}
@@ -237,6 +251,7 @@ export default function Message({
                     setIsHovered={(pre) => setIsHovered(pre)}
                     setIsEditing={(pre) => setIsEditing(pre)}
                     user={user}
+                    forwardFn={() => setForwardedMessage(message)}
                 />
             )}
             {hasChanged || index == 0 ? (
@@ -308,6 +323,7 @@ export default function Message({
                                     url={file.url}
                                     key={file.id}
                                     deleteFn={() => setShowConfirm(file)}
+                                    noToolbar={noToolbar}
                                 />
                             );
                         })}
@@ -323,6 +339,7 @@ export default function Message({
                                     name={file.name}
                                     className="h-96 rounded-lg  "
                                     deleteFn={() => setShowConfirm(file)}
+                                    noToolbar={noToolbar}
                                 />
                             );
                         })}
@@ -333,12 +350,16 @@ export default function Message({
                         {documentFiles.map((file) => {
                             return (
                                 <DocumentAttachment
+                                    className="max-w-96"
                                     key={file.id}
                                     attachment={file}
                                     openOverlay={openOverlay}
                                     setOpenOverlay={(status) =>
                                         setOpenOverlay(status)
                                     }
+                                    deleteFn={() => setShowConfirm(file)}
+                                    noToolbar={noToolbar}
+
                                 />
                             );
                         })}
