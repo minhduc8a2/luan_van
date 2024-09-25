@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Role;
 use App\Models\User;
 use Inertia\Inertia;
-use App\Models\Thread;
+
 use App\Models\Channel;
 use App\Models\Message;
 use App\Models\Workspace;
@@ -199,14 +199,12 @@ class ChannelController extends Controller
                         $query->withTrashed();
                     },
                     'reactions',
-                    'thread' => function ($query) {
-                        $query->withCount('messages');
-                    },
+                    
                     'forwardedMessage.files' => function ($query) {
 
                         $query->withTrashed();
                     },
-                ])->latest()->simplePaginate($perPage, ['*'], 'page', $pageNumber)
+                ])->withCount('threadMessages')->latest()->simplePaginate($perPage, ['*'], 'page', $pageNumber)
             ];
         }
         $user = $request->user();
@@ -256,7 +254,7 @@ class ChannelController extends Controller
             'view' => $user->can('view', [Channel::class, $channel]),
             'archive' => $user->can('archive', [Channel::class, $channel]),
             'chat' => $user->can('create', [Message::class, $channel]),
-            'thread' => $user->can('create', [Thread::class, $channel]),
+            'thread' => $user->can('createThread', [Message::class, $channel]),
             'createReaction' => $user->can('create', [Reaction::class, $channel]),
             'deleteReaction' => $user->can('delete', [Reaction::class, $channel]),
             'createChannel' => $user->can('create', [Channel::class, $workspace]),
@@ -301,26 +299,22 @@ class ChannelController extends Controller
                     $query->withTrashed();
                 },
                 'reactions',
-                'thread' => function ($query) {
-                    $query->withCount('messages');
-                },
+               
                 'forwardedMessage.files' => function ($query) {
 
                     $query->withTrashed();
                 },
-            ])->latest()->simplePaginate($perPage, ['*'], 'page', $pageNumber) : $channel->messages()->withTrashed()->with([
+            ])->withCount('threadMessages')->latest()->simplePaginate($perPage, ['*'], 'page', $pageNumber) : $channel->messages()->withTrashed()->with([
                 'files' => function ($query) {
                     $query->withTrashed();
                 },
                 'reactions',
-                'thread' => function ($query) {
-                    $query->withCount('messages');
-                },
+               
                 'forwardedMessage.files' => function ($query) {
 
                     $query->withTrashed();
                 },
-            ])->latest()->simplePaginate($perPage),
+            ])->withCount('threadMessages')->latest()->simplePaginate($perPage),
             'channelUsers' => fn() => $channel->users,
             'newNoftificationsCount' => $newNotificationsCount
         ]);
@@ -483,19 +477,10 @@ class ChannelController extends Controller
             $user->channels()->detach($channel->id);
 
             //archive messages
-            $messages = Message::where('messagable_id', $channel->id)
-                ->where('messagable_type', Channel::class)
+            Message::where('channel_id', $channel->id)
                 ->where('user_id', $user->id)
-                ->get();
-            foreach ($messages as $message) {
-                $message->user_name = $user->name;
-                $message->save();
-                $thread = $message->thread;
-                if (isset($thread)) {
+                ->update('user_name', $user->name);
 
-                    $thread->messages()->update(['user_name' => $user->name]);
-                }
-            }
 
 
             //notify
@@ -751,14 +736,7 @@ class ChannelController extends Controller
             $copiedChannel->id = $channel->id;
             $channelUsers = $channel->users;
             $workspace = $channel->workspace;
-            $messages = $channel->messages()->with('thread')->get();
-            $messages->each(function ($message) {
-                if ($message->thread) {
-                    $message->thread->messages()->delete();
-                    // $message->thread->delete();  cascadeOnDelete
-                }
-            });
-            $channel->messages()->delete();
+            $channel->messages()->forceDelete();
             $channel->permissions()->delete();
             $channel->delete();
 

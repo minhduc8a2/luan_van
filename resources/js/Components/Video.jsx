@@ -148,7 +148,7 @@ export default function Video({
                                 handleTimeUpdate(largeVideoRef.current)
                             }
                             className={`  ${
-                                largeLoaded ? "max-h-full" : "hidden"
+                                largeLoaded ? "max-h-full min-h-full" : "hidden"
                             } `}
                             src={src}
                             onLoadedMetadata={() => {
@@ -286,13 +286,13 @@ export default function Video({
                 </div>
             )}
             {!smallLoaded && <OverlayLoadingSpinner />}
-            <button onClick={() => playVideo(smallVideoRef.current)}>
+            <button onClick={() => playVideo(smallVideoRef.current)} className="min-w-full min-h-full">
                 <video
                     ref={smallVideoRef}
                     controls={false}
                     onTimeUpdate={() => handleTimeUpdate(smallVideoRef.current)}
-                    className={`object-cover object-center  ${
-                        smallLoaded ? "" : "hidden"
+                    className={`  ${
+                        smallLoaded ? "min-w-full min-h-full" : "hidden"
                     } `}
                     src={src}
                     onLoadedMetadata={() => {

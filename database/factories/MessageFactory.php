@@ -22,8 +22,8 @@ class MessageFactory extends Factory
         return [
             "content" => Helper::contentToHTML(fake()->sentence()),
             "user_id" => 1,
-            "messagable_id" => 1,
-            "messagable_type" => Channel::class,
+            "channel_id" => 1,
+           
             "created_at" => Carbon::now()->subMinutes(random_int(24, 10000))
             
         ];

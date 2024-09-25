@@ -12,15 +12,15 @@ export const messagesSlice = createSlice({
         addMessage(state, action) {
             state.messages.push(action.payload);
         },
-        addThreadToMessages(state, action) {
-            let messageIndex = state.messages.findIndex(
-                (message) => message.id == action.payload.message_id
-            );
-            if (messageIndex >= 0) {
-                state.messages[messageIndex].thread = action.payload;
-                state.messages[messageIndex].thread.messages_count = 1;
-            }
-        },
+        // addThreadToMessages(state, action) {
+        //     let messageIndex = state.messages.findIndex(
+        //         (message) => message.id == action.payload.message_id
+        //     );
+        //     if (messageIndex >= 0) {
+
+        //         state.messages[messageIndex].threadMessages_count = 1;
+        //     }
+        // },
         editMessage(state, action) {
             let messageIndex = state.messages.findIndex(
                 (message) => message.id == action.payload.message_id
@@ -38,7 +38,7 @@ export const messagesSlice = createSlice({
                 state.messages[messageIndex].deleted_at =
                     new Date().toUTCString();
                 state.messages[messageIndex].reactions = [];
-                state.messages[messageIndex].thread = null;
+
                 state.messages[messageIndex].files = [];
             }
         },
@@ -48,7 +48,7 @@ export const messagesSlice = createSlice({
                 (message) => message.id == action.payload
             );
             if (messageIndex >= 0) {
-                state.messages[messageIndex].thread.messages_count += 1;
+                state.messages[messageIndex].messages_count += 1;
             }
         },
         subtractThreadMessagesCount(state, action) {
@@ -56,7 +56,7 @@ export const messagesSlice = createSlice({
                 (message) => message.id == action.payload
             );
             if (messageIndex >= 0) {
-                state.messages[messageIndex].thread.messages_count -= 1;
+                state.messages[messageIndex].messages_count -= 1;
             }
         },
 
@@ -71,11 +71,11 @@ export const messagesSlice = createSlice({
                 for (let fileIndex = 0; fileIndex < files.length; fileIndex++) {
                     if (files[fileIndex].id == action.payload) {
                         files[fileIndex].deleted_at = new Date().toUTCString();
-                        files[fileIndex].url = ""
-                        files[fileIndex].type = ""
-                        files[fileIndex].path = ""
-                        files[fileIndex].name = ""
-                        
+                        files[fileIndex].url = "";
+                        files[fileIndex].type = "";
+                        files[fileIndex].path = "";
+                        files[fileIndex].name = "";
+
                         return;
                     }
                 }

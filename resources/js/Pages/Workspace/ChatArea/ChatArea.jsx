@@ -44,6 +44,7 @@ import { setThreadMessage } from "@/Store/threadSlice";
 import OverlayNotification from "@/Components/Overlay/OverlayNotification";
 import { FaLock } from "react-icons/fa";
 import Button from "@/Components/Button";
+import ForwardedMessage from "./Message/ForwardedMessage";
 
 export default function ChatArea() {
     const {
@@ -224,12 +225,11 @@ export default function ChatArea() {
             })
 
             .listen("ThreadMessageEvent", (e) => {
-                console.log(e);
-                if (e.thread) dispatch(addThreadToMessages(e.thread));
-                else if (e.type == "newMessageCreated")
-                    dispatch(addThreadMessagesCount(e.masterMessageId));
+                
+                if (e.type == "newMessageCreated")
+                    dispatch(addThreadMessagesCount(e.threadedMessageId));
                 else if (e.type == "messageDeleted")
-                    dispatch(subtractThreadMessagesCount(e.masterMessageId));
+                    dispatch(subtractThreadMessagesCount(e.threadedMessageId));
                 // console.log(e);
             })
             .listen("SettingsEvent", (e) => {
@@ -366,20 +366,21 @@ export default function ChatArea() {
             );
 
             if (targetMessage) {
-                console.log("did it");
+                
+
+                targetMessage.scrollIntoView({
+                    behavior: "instant",
+                    block: "start",
+                });
                 targetMessage.classList.add("bg-link/15");
 
                 setTimeout(() => {
                     targetMessage.classList.remove("bg-link/15");
                 }, 2000);
-                targetMessage.scrollIntoView({
-                    behavior: "instant",
-                    block: "center",
-                });
                 if (!mentionThreadMessage) {
                     setTimeout(() => {
                         dispatch(setMention(null));
-                    }, 100);
+                    }, 300);
                 }
             }
         }
@@ -651,6 +652,28 @@ export default function ChatArea() {
                                                 preValue = { user, message };
                                             }
                                         } else preValue = { user, message };
+                                        if (message.forwarded_message) {
+                                            return (
+                                                <ForwardedMessage
+                                                    key={message.id}
+                                                    message={message}
+                                                    user={user}
+                                                    hasChanged={hasChanged}
+                                                    index={index}
+                                                    messagableConnectionRef={
+                                                        channelConnectionRef
+                                                    }
+                                                    newMessageReactionReceive={
+                                                        newMessageReactionReceive
+                                                    }
+                                                    resetNewMessageReactionReceive={() =>
+                                                        setNewMessageReactionReceive(
+                                                            null
+                                                        )
+                                                    }
+                                                />
+                                            );
+                                        }
                                         return (
                                             <Message
                                                 key={message.id}

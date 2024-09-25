@@ -54,9 +54,9 @@ class Channel extends Model
     {
         return $this->belongsToMany(User::class)->withPivot('role_id', 'last_read_at')->withTimestamps();
     }
-    public function messages(): MorphMany
+    public function messages(): HasMany
     {
-        return $this->morphMany(Message::class, 'messagable');
+        return $this->hasMany(Message::class);
     }
     public function permissions(): MorphMany
     {

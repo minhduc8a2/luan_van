@@ -59,8 +59,13 @@ export default function Event() {
             .here((users) => {
                 dispatch(setManyOnline(users));
             })
+            .joining((user) => {
+                dispatch(setOnlineStatus({ user, onlineStatus: true }));
+            })
+            .leaving((user) => {
+                dispatch(setOnlineStatus({ user, onlineStatus: false }));
+            })
             .listen("WorkspaceEvent", (e) => {
-               
                 switch (e.type) {
                     case "ChannelObserver_storeChannel":
                         break;

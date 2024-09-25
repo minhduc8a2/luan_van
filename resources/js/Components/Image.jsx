@@ -26,7 +26,7 @@ export default function Image({
     const [largeLoading, setLargeLoading] = useState(true);
     const [isHovered, setIsHovered] = useState(false);
     const [fullscreen, setFullscreen] = useState(fullScreenMode);
-    const [scale, setScale] = useState(1);
+    const scaleRef = useRef(1);
     const initialPositionRef = useRef({ x: 0, y: 0 });
 
     const isMouseDownRef = useRef(false);
@@ -44,15 +44,20 @@ export default function Image({
     }
     const close = useClose();
     if (!fullscreen && fullScreenMode) return "";
+
+    function setScale(scale) {
+        if (scale <= 0.2) return;
+        scaleRef.current = scale;
+        largeImageRef.current.style.transform = `scale(${scaleRef.current})`;
+    }
     function toggleScale() {
         if (isDraggingRef.current) return;
-        if (scale < 2) {
+
+        if (scaleRef.current < 2) {
             setScale(2);
 
             largeImageRef.current.style.cursor = "zoom-out";
-        }
-
-        if (scale >= 2) {
+        } else {
             setScale(1);
 
             largeImageRef.current.style.cursor = "zoom-in";
@@ -94,7 +99,7 @@ export default function Image({
     function handleMouseUp(e) {
         isMouseDownRef.current = false;
         if (isDraggingRef.current) {
-            if (scale == 2) {
+            if (scaleRef.current == 2) {
                 largeImageRef.current.style.cursor = "zoom-out";
             } else {
                 largeImageRef.current.style.cursor = "zoom-in";
@@ -105,12 +110,13 @@ export default function Image({
     }
     function handleWheel(e) {
         if (e.deltaY < 0) {
-            setScale((pre) => pre + 0.2);
-            if (scale + 0.1 > 2)
+            setScale(scaleRef.current + 0.2);
+            if (scaleRef.current + 0.2 > 2)
                 largeImageRef.current.style.cursor = "zoom-out";
         } else if (e.deltaY > 0) {
-            setScale((pre) => pre - 0.2);
-            if (scale - 0.1 < 2) largeImageRef.current.style.cursor = "zoom-in";
+            setScale(scaleRef.current - 0.2);
+            if (scaleRef.current - 0.2 < 2)
+                largeImageRef.current.style.cursor = "zoom-in";
         }
     }
     return (
@@ -123,7 +129,7 @@ export default function Image({
             {fullscreen && (
                 <div className="top-8 left-8 right-8 bottom-8 overflow-hidden fixed bg-black/95 ring-[40px] ring-black/50  rounded-lg flex group/image_fullscreen justify-center z-50 ">
                     {largeLoading && <OverlayLoadingSpinner />}
-                    <div className="absolute top-2 right-2 hidden gap-x-2 group-hover/image_fullscreen:flex z-20">
+                    <div className="absolute top-2 right-2 hidden gap-x-2 group-hover/image_fullscreen:flex z-30">
                         <a
                             href={url}
                             download={name}
@@ -148,9 +154,6 @@ export default function Image({
                         onMouseDown={handleMouseDown}
                         onWheel={handleWheel}
                         onClick={toggleScale}
-                        style={{
-                            transform: `scale(${scale}) `,
-                        }}
                         className=" min-h-full max-h-full z-20 cursor-zoom-in absolute transition-transform ease-out duration-200"
                     />
                     <img

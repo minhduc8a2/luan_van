@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\File;
-use App\Models\Thread;
 use App\Models\Channel;
 use App\Models\Message;
 use App\Models\Workspace;
@@ -28,46 +27,9 @@ class FileController extends Controller
     function getSharedFiles($user, $name, $workspace, $perPage = 10, $page = 1)
     {
 
-        $messages = Message::where('messagable_type', Channel::class)
-            ->whereIn('messagable_id', $user->channels()->where('workspace_id', $workspace->id)->pluck('channels.id'))
-            ->with([
-                'files' => function ($query) use ($user, $name) {
-                    $query->where('user_id', '<>', $user->id)
-                        ->where('files.name', 'like', "%" . $name . "%");
-                },
-                'thread.messages.files' => function ($query) use ($user, $name) {
-                    $query->where('user_id', '<>', $user->id)
-                        ->where('files.name', 'like', "%" . $name . "%");
-                }
-            ])
-            ->get();
-
-
-        $files = collect();
-        foreach ($messages as $message) {
-            $files = $files->merge($message->files);
-            if ($message->thread) {
-                foreach ($message->thread->messages as $threadMessage) {
-                    $files = $files->merge($threadMessage->files);
-                }
-            }
-        }
-
-
-        $uniqueFiles = $files->unique('id')->values();
-
-
-        $total = $uniqueFiles->count();
-        $filesForCurrentPage = $uniqueFiles->slice(($page - 1) * $perPage, $perPage)->values();
-
-
-        return new LengthAwarePaginator(
-            $filesForCurrentPage,
-            $total,
-            $perPage,
-            $page,
-            ['path' => request()->url(), 'query' => request()->query()]
-        );
+        return File::whereHas('messages', function ($query) use ($user, $workspace) {
+            $query->whereIn('channel_id', $user->channels()->where('workspace_id', $workspace->id)->pluck('id'));
+        })->where('name', 'like', "%" . $name . "%")->where('user_id', "<>", $user->id)->simplePaginate($perPage, ['*'], 'page', $page);
     }
     function selfFiles($user, $name, $workspace, $perPage = 10, $page = 1)
     {
@@ -76,50 +38,22 @@ class FileController extends Controller
 
     function all($user, $name, $workspace, $perPage = 10, $page = 1)
     {
-        $messages = Message::where('messagable_type', Channel::class)
-            ->whereIn('messagable_id', Channel::where('workspace_id', $workspace->id)->where(function ($query) use ($user) {
-                $query->where('type', ChannelTypes::PUBLIC->name)->orWhereHas('users', function ($query) use ($user) {
-                    $query->where('users.id', $user->id);
+        return File::whereHas('messages', function ($query) use ($user, $workspace) {
+            $query->where(function ($query) use ($workspace) {
+
+                $query->whereIn('channel_id', $workspace->channels()->where('type', ChannelTypes::PUBLIC->name)->pluck('id'));
+            })
+                ->orWhere(function ($query) use ($user, $workspace) {
+
+                    $query->whereIn('channel_id', $user->channels()->where('type', ChannelTypes::PRIVATE->name)
+                        ->where('workspace_id', $workspace->id)
+                        ->pluck('id'));
                 });
-            })->pluck('channels.id'))
-            ->with([
-                'files' => function ($query) use ($user, $name) {
-                    $query
-                        ->where('files.name', 'like', "%" . $name . "%");
-                },
-                'thread.messages.files' => function ($query) use ($user, $name) {
-                    $query
-                        ->where('files.name', 'like', "%" . $name . "%");
-                }
-            ])
-            ->get();
+        })
 
+            ->where('name', 'like', "%" . $name . "%")
 
-        $files = collect();
-        foreach ($messages as $message) {
-            $files = $files->merge($message->files);
-            if ($message->thread) {
-                foreach ($message->thread->messages as $threadMessage) {
-                    $files = $files->merge($threadMessage->files);
-                }
-            }
-        }
-
-
-        $uniqueFiles = $files->unique('id')->values();
-
-
-        $total = $uniqueFiles->count();
-        $filesForCurrentPage = $uniqueFiles->slice(($page - 1) * $perPage, $perPage)->values();
-
-
-        return new LengthAwarePaginator(
-            $filesForCurrentPage,
-            $total,
-            $perPage,
-            $page,
-            ['path' => request()->url(), 'query' => request()->query()]
-        );
+            ->simplePaginate($perPage, ['*'], 'page', $page);
     }
     public function index(Request $request, Workspace $workspace)
     {
@@ -206,7 +140,7 @@ class FileController extends Controller
             $file->type = "";
             $file->save();
             $file->delete();
-           
+
 
             DB::commit();
 

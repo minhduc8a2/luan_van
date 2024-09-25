@@ -2,7 +2,7 @@
 
 namespace App\Events;
 
-use App\Models\Thread;
+
 use App\Models\Channel;
 use App\Models\Message;
 use Illuminate\Queue\SerializesModels;
@@ -20,7 +20,7 @@ class ThreadMessageEvent implements ShouldBroadcastNow
     /**
      * Create a new event instance.
      */
-    public function __construct(public Message $masterMessage, public Message $message, public  $thread, public string $type = "newMessageCreated")
+    public function __construct(public Message $threadedMessage, public Message $threadMessage, public string $type = "newMessageCreated")
     {
         //
     }
@@ -33,16 +33,15 @@ class ThreadMessageEvent implements ShouldBroadcastNow
     public function broadcastOn(): array
     {
         return [
-            new PresenceChannel('channels.' . $this->masterMessage->messagable_id),
-            new PresenceChannel('threads.' . $this->masterMessage->id),
+            new PresenceChannel('channels.' . $this->threadedMessage->channel_id),
+            new PresenceChannel('threads.' . $this->threadedMessage->id),
         ];
     }
     public function broadcastWith(): array
     {
         return [
-            'masterMessageId' => $this->masterMessage->id,
-            'message' => $this->message,
-            'thread' => $this->thread,
+            'threadedMessageId' => $this->threadedMessage->id,
+            'message' => $this->threadMessage,
             "type" => $this->type,
         ];
     }

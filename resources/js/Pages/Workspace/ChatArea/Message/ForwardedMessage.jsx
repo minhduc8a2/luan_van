@@ -5,10 +5,9 @@ import { isDocument, isImage, isVideo } from "@/helpers/fileHelpers";
 import "react-photo-view/dist/react-photo-view.css";
 import { useState } from "react";
 import FileItem from "@/Components/FileItem";
-import DocumentAttachment from "./DocumentAttachment";
-import Video from "@/Components/Video";
+
 import MessageToolbar from "./MessageToolbar";
-import { Link, router, usePage } from "@inertiajs/react";
+import { router, usePage } from "@inertiajs/react";
 import { groupReactions } from "@/helpers/reactionHelper";
 import { useEffect } from "react";
 import Reactions from "./Reactions";
@@ -19,12 +18,12 @@ import { setThreadMessage } from "@/Store/threadSlice";
 import TipTapEditor from "@/Components/TipTapEditor";
 import { editMessage as editMessageInStore } from "@/Store/messagesSlice";
 import { getMentionsFromContent } from "@/helpers/tiptapHelper";
-import Image from "@/Components/Image";
+
 import { setNotificationPopup } from "@/Store/notificationPopupSlice";
 import OverlayConfirm from "@/Components/Overlay/OverlayConfirm";
 import ForwardMessage from "./ForwardMessage/ForwardMessage";
-import { setMention } from "@/Store/mentionSlice";
-export default function Message({
+import Message from "./Message";
+export default function ForwardedMessage({
     message,
     user,
     hasChanged,
@@ -33,10 +32,10 @@ export default function Message({
     messagableConnectionRef,
     newMessageReactionReceive,
     resetNewMessageReactionReceive,
-    forwardedMessageChannel = null,
-    forwarded = false,
+    noToolbar = false,
 }) {
-    const { auth, channel, channelUsers, permissions } = usePage().props;
+    const { auth, channel, channelUsers, permissions, users, channels } =
+        usePage().props;
     const dispatch = useDispatch();
     const { messageId } = useSelector((state) => state.mention);
     const files = message.files || [];
@@ -61,11 +60,21 @@ export default function Message({
     const [isEditing, setIsEditing] = useState(false);
     const [showConfirm, setShowConfirm] = useState(null);
     const [forwardedMessage, setForwardedMessage] = useState(null);
+
+    const forwardedMessageUser = useMemo(() => {
+        return users.find((u) => u.id == message.forwarded_message.user_id);
+    }, [users, message]);
+    const forwardedMessageChannel = useMemo(() => {
+        return channels.find(
+            (cn) => cn.id == message.forwarded_message.channel_id
+        );
+    }, [channels, message]);
     const groupedReactions = useMemo(() => {
         return groupReactions(reactions, channelUsers, auth.user);
     }, [reactions]);
     useEffect(() => {
         setReactions(message.reactions ? [...message.reactions] : []);
+        
     }, [message]);
 
     useEffect(() => {
@@ -208,27 +217,7 @@ export default function Message({
             }
         );
     }
-    function goToMessage(channel) {
-        console.log("Go to Original message");
-        router.get(
-            route("channel.show", channel.id),
-            { message_id: message.id },
-            {
-                preserveState: true,
 
-                onFinish: () => {
-                    dispatch(
-                        setMention({
-                            messageId: message.id,
-                            threadMessage: null,
-                        })
-                    );
-
-                    // if (threadMessage) dispatch(setThreadMessage(message));
-                },
-            }
-        );
-    }
     return (
         <div
             className={`message-container transition-all pl-8 pt-1 pr-4 pb-2 relative break-all group hover:bg-white/10 ${
@@ -241,30 +230,7 @@ export default function Message({
                 show={forwardedMessage != null}
                 onClose={() => setForwardedMessage(null)}
             />
-            <OverlayConfirm
-                show={showConfirm}
-                onClose={() => setShowConfirm(false)}
-                onConfirm={() => {
-                    deleteFile(showConfirm);
-                    setShowConfirm(null);
-                }}
-                title="Delete file"
-                message={
-                    <div className="flex flex-col gap-y-4">
-                        <h5>
-                            Are you sure you want to delete this file
-                            permanently?
-                        </h5>
-                        {showConfirm && (
-                            <FileItem
-                                file={showConfirm}
-                                maxWidth="max-w-full"
-                            />
-                        )}
-                    </div>
-                }
-            />
-            {!channel.is_archived && !message.deleted_at && !forwarded && (
+            {!channel.is_archived && !message.deleted_at && !noToolbar && (
                 <MessageToolbar
                     message={message}
                     threadStyle={threadStyle}
@@ -335,109 +301,24 @@ export default function Message({
                         )}
                     </>
                 )}
-                {imageFiles.length != 0 && (
-                    <div className="flex mt-4 gap-4 flex-wrap">
-                        {imageFiles.map((file) => {
-                            return (
-                                <Image
-                                    isInPhotoView={true}
-                                    url={file.url}
-                                    key={file.id}
-                                    deleteFn={() => setShowConfirm(file)}
-                                />
-                            );
-                        })}
-                    </div>
-                )}
-                {videoFiles.length != 0 && (
-                    <div className="flex gap-4 flex-wrap mt-4">
-                        {videoFiles.map((file) => {
-                            return (
-                                <Video
-                                    key={file.id}
-                                    src={file.url}
-                                    name={file.name}
-                                    className="h-96 rounded-lg  "
-                                    deleteFn={() => setShowConfirm(file)}
-                                />
-                            );
-                        })}
-                    </div>
-                )}
-                {documentFiles.length != 0 && (
-                    <div className="flex gap-4 flex-wrap mt-4">
-                        {documentFiles.map((file) => {
-                            return (
-                                <DocumentAttachment
-                                    className="max-w-96"
-                                    key={file.id}
-                                    attachment={file}
-                                    openOverlay={openOverlay}
-                                    setOpenOverlay={(status) =>
-                                        setOpenOverlay(status)
-                                    }
-                                    deleteFn={() => setShowConfirm(file)}
-                                />
-                            );
-                        })}
-                    </div>
-                )}
-                {otherFiles.length != 0 && (
-                    <div className="flex gap-4 flex-wrap mt-4">
-                        {otherFiles.map((file) => (
-                            <a
-                                href={file.url}
-                                download={file.name}
-                                key={file.id}
-                            >
-                                <FileItem file={file} />
-                            </a>
-                        ))}
-                    </div>
-                )}
-                {deletedFiles.length != 0 && (
-                    <div className="flex gap-4 flex-wrap mt-4">
-                        {deletedFiles.map((file) => (
-                            <FileItem file={file} key={file.id} />
-                        ))}
-                    </div>
-                )}
+                <div className="border-l-4 border-l-white/15">
+                    <Message
+                        forwarded
+                        threadStyle={true}
+                        message={message.forwarded_message}
+                        user={forwardedMessageUser}
+                        forwardedMessageChannel={forwardedMessageChannel}
+                        hasChanged={true}
+                        index={0}
+                    />
+                </div>
                 <Reactions
                     groupedReactions={groupedReactions}
                     reactToMessage={reactToMessage}
                     removeMessageReaction={removeMessageReaction}
                 />
-                {forwarded && forwardedMessageChannel && (
-                    <div className="text-sm flex items-baseline gap-x-1 mt-4">
-                        Posted in{" "}
-                        <Link
-                            className="text-link hover:underline"
-                            href={route("channel.show", message.channel_id)}
-                        >
-                            {forwardedMessageChannel.type != "DIRECT" ? (
-                                <div className="flex items-baseline gap-x-1  ">
-                                    {forwardedMessageChannel.type ==
-                                    "PUBLIC" ? (
-                                        <span className="">#</span>
-                                    ) : (
-                                        <FaLock className="text-sm inline" />
-                                    )}{" "}
-                                    {forwardedMessageChannel.name}
-                                </div>
-                            ) : (
-                                "Direct channel"
-                            )}
-                        </Link>
-                        <span className="text-white/85 mx-2">|</span>
-                        <button
-                            className="text-link text-sm"
-                            onClick={() => goToMessage(forwardedMessageChannel)}
-                        >
-                            View Message
-                        </button>
-                    </div>
-                )}
-                {message.threadMessages_count>0 && !threadStyle && !forwarded && (
+
+                {message.threadMessages_count>0 && !threadStyle && (
                     <button
                         className="border hover:bg-black/25 flex justify-between items-center border-white/15 w-96 rounded-lg mt-4 py-1 px-4"
                         onClick={() => dispatch(setThreadMessage(message))}

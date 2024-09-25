@@ -19,10 +19,9 @@ export default function MentionNotification({
     const {
         auth,
         users: workspaceUsers,
-        messages: initMessages,
+     
         channel: currentChannel,
-        channels,
-        availableChannels,
+       
     } = usePage().props;
     const { messages } = useSelector((state) => state.messages);
     const [errors, setErrors] = useState(null);

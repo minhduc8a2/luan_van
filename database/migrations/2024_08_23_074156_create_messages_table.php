@@ -14,14 +14,15 @@ return new class extends Migration
         Schema::create('messages', function (Blueprint $table) {
             $table->id();
             $table->string('content', 12000);
-            $table->unsignedBigInteger('messagable_id');
-            $table->string('messagable_type');
+            $table->foreignId('channel_id')->constrained()->cascadeOnDelete();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('user_name')->nullable();
             $table->boolean('is_auto_generated')->default(false);
             $table->boolean('is_edited')->default(false);
             $table->unsignedBigInteger('forwarded_message_id')->nullable()->index();
             $table->foreign('forwarded_message_id')->references('id')->on('messages')->onDelete('cascade');
+            $table->unsignedBigInteger('threaded_message_id')->nullable()->index();
+            $table->foreign('threaded_message_id')->references('id')->on('messages')->onDelete('cascade');
             $table->softDeletes();
             $table->timestamps();
         });

@@ -4,19 +4,16 @@ namespace App\Http\Controllers;
 
 
 use App\Models\User;
-use App\Models\Thread;
+
 use App\Helpers\Helper;
 use App\Models\Channel;
 use App\Models\Message;
-use App\Models\Workspace;
-use App\Models\Attachment;
-use App\Events\MessageEvent;
+
 use Illuminate\Http\Request;
 use App\Events\WorkspaceEvent;
-use App\Events\ThreadCreatedEvent;
-use App\Events\ThreadMessageEvent;
+
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
+
 use Illuminate\Support\Facades\Storage;
 use App\Notifications\MentionNotification;
 
@@ -30,7 +27,45 @@ class MessageController extends Controller
     {
         //
     }
+    public function getThreadMessages(Request $request,  Message $message)
+    {
+        $perPage = 10;
+        $channel = $message->channel;
+        if ($request->user()->cannot('viewThread', [Message::class, $channel])) return abort(403);
 
+        $messageId = $request->query('message_id');
+
+        $pageNumber = null;
+        if ($messageId) {
+            $threadMessage = Message::find($messageId);
+            if ($threadMessage) {
+
+                $threadMessagePosition = $message->threadMessages()
+                    ->latest() // Order by latest first
+                    ->where('created_at', '>=', $threadMessage->created_at) // Messages that are newer or equal to the mentioned one
+                    ->count();
+                $pageNumber = ceil($threadMessagePosition / $perPage);
+            }
+        }
+
+
+
+        return [
+            'messages' => $messageId ?
+                $message->threadMessages()
+                ->withTrashed()
+                ->with(['files', 'reactions'])
+                ->latest()
+                ->simplePaginate($perPage, ['*'], 'page', $pageNumber)
+                :
+                $message->threadMessages()
+                ->messages()
+                ->withTrashed()
+                ->with(['files', 'reactions'])
+                ->latest()
+                ->simplePaginate($perPage)
+        ];
+    }
     /**
      * Show the form for creating a new resource.
      */
@@ -72,11 +107,9 @@ class MessageController extends Controller
             DB::beginTransaction();
 
             $content = Helper::sanitizeContent($content);
-            $message = Message::create([
+            $message = $request->user()->messages()->create([
                 'content' => $content,
-                'messagable_id' => $forwardMode ? $validated['channelId'] : $channel->id,
-                'messagable_type' => Channel::class,
-                'user_id' => $request->user()->id,
+                'channel_id' => $forwardMode ? $forwardChannel->id : $channel->id,
                 "forwarded_message_id" => $forwardMode ? $validated['forwardedMessageId'] : null
             ]);
 
@@ -106,31 +139,7 @@ class MessageController extends Controller
                     $mentionedUser->notify(new MentionNotification($forwardMode ? $forwardChannel : $channel, $channel->workspace, $request->user(), $mentionedUser, $message));
                 }
                 //notify others about new message
-                if ($forwardMode) {
-                    broadcast(new MessageEvent($forwardChannel, $message->load([
-                        'files' => function ($query) {
-                            $query->withTrashed();
-                        },
-                        'reactions',
-                        'thread' => function ($query) {
-                            $query->withCount('messages');
-                        },
-                        'forwardedMessage.files' => function ($query) {
 
-                            $query->withTrashed();
-                        },
-                    ])));
-                } else {
-                    broadcast(new MessageEvent($channel, $message->load([
-                        'files' => function ($query) {
-                            $query->withTrashed();
-                        },
-                        'reactions',
-                        'thread' => function ($query) {
-                            $query->withCount('messages');
-                        },
-                    ])));
-                }
             }
             DB::commit();
             back();
@@ -143,7 +152,7 @@ class MessageController extends Controller
 
     public function storeThreadMessage(Request $request, Channel $channel, Message $message)
     {
-        if ($request->user()->cannot('create', [Thread::class, $channel])) return abort(403);
+        if ($request->user()->cannot('createThread', [Message::class, $channel])) return abort(403);
         if ($message->is_auto_generated) return abort(403);
         try {
             $validated = $request->validate(['content' => 'string', 'fileObjects' => 'array', 'mentionsList' => 'array']);
@@ -151,17 +160,11 @@ class MessageController extends Controller
             DB::beginTransaction();
             $content = Helper::sanitizeContent($content);
             //check thread is created already
-            $thread = $message->thread;
-            $isNewThread = false;
-            if (!$thread) {
-                $thread = $message->thread()->create([]);
-                $isNewThread = true;
-            }
-            $newMessage = Message::create([
+
+            $newMessage = $message->threadMessages()->create([
                 'content' =>  $content,
-                'messagable_id' => $thread->id,
-                'messagable_type' => Thread::class,
-                'user_id' => $request->user()->id
+                'channel_id' => $channel->id,
+                'user_id' => $request->user()->id,
             ]);
             $fileObjects = [];
             foreach ($validated['fileObjects'] as $i => $fileObject) {
@@ -186,11 +189,6 @@ class MessageController extends Controller
                         $query->withTrashed();
                     }, 'reactions']), $newMessage));
                 }
-                //notify others about new message
-
-                broadcast(new ThreadMessageEvent($message, $newMessage->load(['files' => function ($query) {
-                    $query->withTrashed();
-                }, 'reactions']), $isNewThread ? $thread : null));
             }
             DB::commit();
             return back();
@@ -229,11 +227,9 @@ class MessageController extends Controller
 
         try {
             DB::beginTransaction();
-            $isThreadMessage = $message->messagable_type == Thread::class;
-            // thread message
-            $masterMessage = $isThreadMessage ? $message->messagable->message : null;
-            //
-            $channel = $isThreadMessage ? $masterMessage->messagable : Channel::find($message->messagable_id);
+
+
+            $channel = $message->channel;
             $content = Helper::sanitizeContent($content);
             $message->content = $content;
             $message->is_edited = true;
@@ -246,21 +242,7 @@ class MessageController extends Controller
                 $mentionedUser->notify(new MentionNotification($channel, $channel->workspace, $request->user(), $mentionedUser, $message));
             }
             //notify others about new message
-            if (!$isThreadMessage) { //channel Message
-                broadcast(new MessageEvent($channel, $message->load([
-                    'files' => function ($query) {
-                        $query->withTrashed();
-                    },
-                    'reactions',
-                    'thread' => function ($query) {
-                        $query->withCount('messages');
-                    }
-                ]), "messageEdited"));
-            } else {
-                broadcast(new ThreadMessageEvent($masterMessage, $message->load(['files' => function ($query) {
-                    $query->withTrashed();
-                }, 'reactions']), null, "messageEdited"));
-            }
+
 
             DB::commit();
             back();
@@ -279,12 +261,12 @@ class MessageController extends Controller
         if ($request->user()->cannot('delete', [Message::class, $message])) return abort(403);
         try {
             DB::beginTransaction();
-            $isChannelMessage = $message->messagable_type == Channel::class;
+            $isChannelMessage = $message->thread_message_id == null;;
             $copiedMessage = $message->replicate();
             $copiedMessage->id = $message->id;
             if ($isChannelMessage) {
-                $message->thread?->messages()->forceDelete();
-                $message->thread?->delete();
+              
+                $message->threadMessages()->forceDelete();
 
                 //no need to delete files, not depend on message
 
@@ -293,11 +275,7 @@ class MessageController extends Controller
             $message->files()->detach();
             $message->delete();
 
-            if ($isChannelMessage) {
-                broadcast(new MessageEvent($message->messagable, $copiedMessage, "messageDeleted"));
-            } else {
-                broadcast(new ThreadMessageEvent(Thread::find($message->messagable_id)->message, $copiedMessage, null, "messageDeleted"));
-            }
+
             DB::commit();
             back();
         } catch (\Throwable $th) {

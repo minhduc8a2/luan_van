@@ -4,7 +4,7 @@ namespace App\Policies;
 
 use App\Helpers\ChannelTypes;
 use App\Models\User;
-use App\Models\Thread;
+
 use App\Models\Channel;
 use App\Models\Message;
 use App\Helpers\PermissionTypes;
@@ -43,10 +43,10 @@ class MessagePolicy
     public function update(User $user, Message $message): bool
     {
         if ($user->id != $message->user_id) return false;
-        if ($message->messagable_type == Channel::class) {
+        if ($message->threaded_message_id != null) {
 
             try {
-                $channel = Channel::find($message->messagable_id);
+                $channel = $message->channel;
                 if ($channel->is_archived) return false;
                 if ($message->is_auto_generated) return false;
                 return $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name)
@@ -54,13 +54,10 @@ class MessagePolicy
             } catch (\Throwable $th) {
                 return false;
             }
-        } else if ($message->messagable_type == Thread::class) {
+        } else {
 
             try {
-
-                $masterMessage = Thread::find($message->messagable_id)->message;
-
-                $channel = $masterMessage->messagable;
+                $channel = $message->channel;
                 if ($channel->is_archived) return false;
                 if ($message->is_auto_generated) return false;
                 return $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name)
@@ -77,11 +74,10 @@ class MessagePolicy
      */
     public function delete(User $user, Message $message): bool
     {
-        $isChannelMessage = $message->messagable_type == Channel::class;
-        $channel = null;
+
         try {
-            if ($isChannelMessage) $channel = $message->messagable;
-            else $channel = Thread::find($message->messagable_id)->message->messagable;
+
+            $channel = $message->channel;
             if ($channel->is_archived) return false;
             if ($channel->type == ChannelTypes::PUBLIC->name) {
                 if ($user->workspacePermissionCheck($channel->workspace, PermissionTypes::WORKSPACE_ALL->name))
@@ -119,6 +115,27 @@ class MessagePolicy
 
 
         return false;
+    }
+
+    public function viewThread(User $user, Channel $channel): bool
+    {
+        if ($channel->type == ChannelTypes::PUBLIC->name) {
+            if (
+                $user->workspacePermissionCheck($channel->workspace, PermissionTypes::WORKSPACE_ALL->name)
+                || $user->channelPermissionCheck($channel->workspace->mainChannel(), PermissionTypes::CHANNEL_VIEW->name)
+            )
+                return true;
+        }
+        return $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name)
+            || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_VIEW->name);
+    }
+
+    public function createThread(User $user, Channel $channel): bool
+    {
+
+        if ($channel->is_archived) return false;
+        return $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name)
+            || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_THREAD->name);
     }
     /**
      * Determine whether the user can restore the model.

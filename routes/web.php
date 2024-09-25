@@ -69,7 +69,7 @@ Route::middleware('auth')->group(function () {
     Route::post("/messages/{message}", [MessageController::class, 'update'])->name('message.update');
     Route::delete("/messages/{message}", [MessageController::class, 'destroy'])->name('message.delete');
     Route::post("/channels/{channel}/messages/{message}", [MessageController::class, 'storeThreadMessage'])->name('thread_message.store');
-    Route::get("/channels/{channel}/messages/{message}/thread_messages", [ThreadController::class, 'getMessages'])->name("thread.messages");
+    Route::get("messages/{message}/thread_messages", [MessageController::class, 'getThreadMessages'])->name("messages.threadMessages");
     Route::post("/channels/{channel}/huddle_invitation", [HuddleController::class, 'invite'])->name("huddle.invitation");
     Route::post("/notifications/mark_read", [NotificationController::class, "markRead"])->name("notifications.mark_read");
     Route::post("/notifications/{notificationId}/mark_view", [NotificationController::class, "markView"])->name("notifications.mark_view");

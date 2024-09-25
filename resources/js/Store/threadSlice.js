@@ -34,7 +34,7 @@ export const threadSlice = createSlice({
                 state.messages[messageIndex].deleted_at =
                     new Date().toUTCString();
                 state.messages[messageIndex].reactions = [];
-                state.messages[messageIndex].thread = null;
+
                 state.messages[messageIndex].files = [];
             }
         },

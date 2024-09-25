@@ -18,6 +18,8 @@ import { compareDateTime, differenceInSeconds } from "@/helpers/dateTimeHelper";
 import { getMentionsFromContent } from "@/helpers/tiptapHelper";
 import { useInView } from "react-intersection-observer";
 import { setMention } from "@/Store/mentionSlice";
+
+import ForwardedMessage from "./Message/ForwardedMessage";
 export default function Thread() {
     const dispatch = useDispatch();
     const { channel, permissions } = usePage().props;
@@ -128,28 +130,31 @@ export default function Thread() {
             });
 
         setLoadingMessages(true);
-        axios
-            .get(
-                route("thread.messages", {
-                    channel: channel.id,
-                    message: message.id,
-                }),
-                {
-                    params: threadMessage
-                        ? { message_id: threadMessage.id }
-                        : {},
-                }
-            )
-            .then((response) => {
-                console.log(response);
-                nextPageUrlRef.current = response.data?.messages?.next_page_url;
-                previousPageUrlRef.current =
-                    response.data?.messages?.prev_page_url;
-                dispatch(
-                    setThreadMessages(response.data?.messages?.data || [])
-                );
-                setLoadingMessages(false);
-            });
+        router.get(
+            route("messages.threadMessages", message.id),
+            threadMessage ? { message_id: threadMessage.id } : {}
+        );
+        // axios
+        //     .get(
+        //         route("messages.threadMessages", {
+        //             message: message.id,
+        //         }),
+        //         {
+        //             params: threadMessage
+        //                 ? { message_id: threadMessage.id }
+        //                 : {},
+        //         }
+        //     )
+        //     .then((response) => {
+        //         console.log(response);
+        //         nextPageUrlRef.current = response.data?.messages?.next_page_url;
+        //         previousPageUrlRef.current =
+        //             response.data?.messages?.prev_page_url;
+        //         dispatch(
+        //             setThreadMessages(response.data?.messages?.data || [])
+        //         );
+        //         setLoadingMessages(false);
+        //     });
         return () => {
             dispatch(setThreadMessages([]));
             Echo.leave(`threads.${message.id}`);
@@ -161,8 +166,7 @@ export default function Thread() {
         setLoadingMessages(true);
         axios
             .get(
-                route("thread.messages", {
-                    channel: channel.id,
+                route("messages.threadMessages", {
                     message: message.id,
                 }),
                 {
@@ -329,7 +333,7 @@ export default function Thread() {
             document.removeEventListener("mousedown", onMouseDown);
         };
     }, []);
-    const thread_messages_count = message.thread?.messages_count || 0;
+    const thread_messages_count = messages.length || 0;
     return (
         <div
             className=" bg-background flex flex-col relative border-l border-white/15"
@@ -352,14 +356,24 @@ export default function Thread() {
                 </div>
             </div>
 
-            <div className="max-h-[30%] overflow-y-auto scrollbar">
-                <Message
-                    threadStyle={true}
-                    message={message}
-                    user={user}
-                    hasChanged={true}
-                    index={0}
-                />
+            <div className="max-h-[30%] overflow-y-auto scrollbar py-8">
+                {message.forwarded_message ? (
+                    <ForwardedMessage
+                        threadStyle={true}
+                        message={message}
+                        user={user}
+                        hasChanged={true}
+                        index={0}
+                    />
+                ) : (
+                    <Message
+                        threadStyle={true}
+                        message={message}
+                        user={user}
+                        hasChanged={true}
+                        index={0}
+                    />
+                )}
             </div>
 
             <div className="flex items-center gap-x-4 pl-4 my-4">

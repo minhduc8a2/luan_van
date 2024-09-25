@@ -3,7 +3,9 @@
 namespace App\Models;
 
 use App\Helpers\Helper;
+
 use App\Events\MessageEvent;
+use App\Observers\MessageObserver;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -11,9 +13,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
+
+#[ObservedBy([MessageObserver::class])]
 class Message extends Model
 {
     use HasFactory;
@@ -21,28 +25,24 @@ class Message extends Model
     protected $fillable = [
         'content',
         'user_id',
-        'messagable_id',
-        'messagable_type',
+        'channel_id',
         'created_at',
         'is_auto_generated',
-        "forwarded_message_id"
+        "forwarded_message_id",
+        "threaded_message_id"
     ];
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
-    }
-    public function messagable(): MorphTo
-    {
-        return $this->morphTo();
     }
 
     public function files(): BelongsToMany
     {
         return $this->belongsToMany(File::class);
     }
-    public function thread(): HasOne
+    public function channel(): BelongsTo
     {
-        return $this->hasOne(Thread::class);
+        return $this->belongsTo(Channel::class);
     }
 
     public function reactions(): HasMany
@@ -50,10 +50,7 @@ class Message extends Model
         return $this->hasMany(Reaction::class);
     }
 
-    public function threadMessages(): HasManyThrough
-    {
-        return $this->hasManyThrough(Thread::class, Message::class);
-    }
+
     public function forwardedMessage(): BelongsTo
     {
         return $this->belongsTo(Message::class, 'forwarded_message_id');
@@ -62,23 +59,30 @@ class Message extends Model
     {
         return $this->hasMany(Message::class, 'forwarded_message_id');
     }
+
+    public function threadedMessage(): BelongsTo
+    {
+        return $this->belongsTo(Message::class, 'threaded_message_id');
+    }
+    public function threadMessages(): HasMany
+    {
+        return $this->hasMany(Message::class, 'threaded_message_id');
+    }
     public static function createStringMessageAndBroadcast(Channel $channel, User $user, string $content)
     {
         $content = Helper::sanitizeContent($content);
         $message = Message::create([
             'content' => $content,
-            'messagable_id' => $channel->id,
-            'messagable_type' => Channel::class,
+            'channel_id' => $channel->id,
+
             'user_id' => $user->id,
             'is_auto_generated' => true,
         ]);
         broadcast(new MessageEvent($channel, $message->load([
             'files',
             'reactions',
-            'thread' => function ($query) {
-                $query->withCount('messages');
-            }
-        ])));
+
+        ])->loadCount('threadMessages')));
         return $message;
     }
 }
