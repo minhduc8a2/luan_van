@@ -3,13 +3,23 @@ import { createSlice } from "@reduxjs/toolkit";
 export const threadSlice = createSlice({
     name: "thread",
     initialState: {
+        messageId: null,
         message: null,
         messages: [],
         width: 500,
     },
     reducers: {
-        setThreadMessage(state, action) {
+        setThreadedMessage(state, action) {
+           
             state.message = action.payload;
+          
+        
+
+
+        },
+        setThreadedMessageId(state, action) {
+            state.messageId = action.payload;
+            if(!state.messageId) state.message = null;
         },
         addThreadMessage(state, action) {
             state.messages.push(action.payload);
@@ -84,7 +94,8 @@ export const threadSlice = createSlice({
 
 // Action creators are generated for each case reducer function
 export const {
-    setThreadMessage,
+    setThreadedMessage,
+    setThreadedMessageId,
     setThreadMessages,
     deleteThreadMessage,
     addThreadMessage,

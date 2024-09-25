@@ -14,7 +14,7 @@ import { useEffect } from "react";
 import Reactions from "./Reactions";
 import { FaAngleRight } from "react-icons/fa6";
 import { useDispatch, useSelector } from "react-redux";
-import { setThreadMessage } from "@/Store/threadSlice";
+import { setThreadedMessageId } from "@/Store/threadSlice";
 
 import TipTapEditor from "@/Components/TipTapEditor";
 import { editMessage as editMessageInStore } from "@/Store/messagesSlice";
@@ -39,6 +39,7 @@ export default function Message({
     const { auth, channel, channelUsers, permissions } = usePage().props;
     const dispatch = useDispatch();
     const { messageId } = useSelector((state) => state.mention);
+
     const files = message.files || [];
     const [reactions, setReactions] = useState(
         message.reactions ? [...message.reactions] : []
@@ -208,8 +209,9 @@ export default function Message({
             }
         );
     }
+
     function goToMessage(channel) {
-        console.log("Go to Original message");
+        const isThreadMessage = message.threaded_message_id;
         router.get(
             route("channel.show", channel.id),
             { message_id: message.id },
@@ -219,12 +221,17 @@ export default function Message({
                 onFinish: () => {
                     dispatch(
                         setMention({
-                            messageId: message.id,
-                            threadMessage: null,
+                            messageId: isThreadMessage
+                                ? message.threaded_message_id
+                                : message.id,
+                            threadMessage: isThreadMessage ? message : null,
                         })
                     );
 
-                    // if (threadMessage) dispatch(setThreadMessage(message));
+                    if (isThreadMessage)
+                        dispatch(
+                            setThreadedMessageId(message.threaded_message_id)
+                        );
                 },
             }
         );
@@ -437,20 +444,26 @@ export default function Message({
                         </button>
                     </div>
                 )}
-                {message.threadMessages_count>0 && !threadStyle && !forwarded && (
-                    <button
-                        className="border hover:bg-black/25 flex justify-between items-center border-white/15 w-96 rounded-lg mt-4 py-1 px-4"
-                        onClick={() => dispatch(setThreadMessage(message))}
-                    >
-                        <div className="">
-                            <span className="text-link text-sm">
-                                {message.threadMessages_count} replies
-                            </span>
-                            <span className="text-sm ml-2">View thread</span>
-                        </div>
-                        <FaAngleRight className="text-sm text-white/50" />
-                    </button>
-                )}
+                {message.thread_messages_count > 0 &&
+                    !threadStyle &&
+                    !forwarded && (
+                        <button
+                            className="border hover:bg-black/25 flex justify-between items-center border-white/15 w-96 rounded-lg mt-4 py-1 px-4"
+                            onClick={() =>
+                                dispatch(setThreadedMessageId(message.id))
+                            }
+                        >
+                            <div className="">
+                                <span className="text-link text-sm">
+                                    {message.thread_messages_count} replies
+                                </span>
+                                <span className="text-sm ml-2">
+                                    View thread
+                                </span>
+                            </div>
+                            <FaAngleRight className="text-sm text-white/50" />
+                        </button>
+                    )}
             </div>
         </div>
     );

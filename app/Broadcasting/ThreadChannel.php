@@ -23,7 +23,7 @@ class ThreadChannel
     public function join(User $user, Message $message): array|bool
     {
         try {
-            $channel = $message->messagable;
+            $channel = $message->channel;
             if ($user->can('viewThread', [Message::class, $channel]))
                 return ['id' => $user->id, 'name' => $user->name, 'avatar_url' => $user->avatar_url];
         } catch (\Throwable $th) {

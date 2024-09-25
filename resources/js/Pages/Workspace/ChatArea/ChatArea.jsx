@@ -40,7 +40,7 @@ import {
 import { setMention } from "@/Store/mentionSlice";
 import ChannelSettings from "./ChannelSettings/ChannelSettings";
 import { resetMessageCountForChannel } from "@/Store/newMessageCountsMapSlice";
-import { setThreadMessage } from "@/Store/threadSlice";
+import { setThreadedMessageId } from "@/Store/threadSlice";
 import OverlayNotification from "@/Components/Overlay/OverlayNotification";
 import { FaLock } from "react-icons/fa";
 import Button from "@/Components/Button";
@@ -72,7 +72,7 @@ export default function ChatArea() {
         /* Optional options */
         threshold: 0,
     });
-    const { message: threadMessage } = useSelector((state) => state.thread);
+    const { messageId: threadMessageId } = useSelector((state) => state.thread);
     const { messageId, threadMessage: mentionThreadMessage } = useSelector(
         (state) => state.mention
     );
@@ -205,6 +205,7 @@ export default function ChatArea() {
             //     console.log("leaving", user);
             // })
             .listen("MessageEvent", (e) => {
+                console.log('messageEvent',e);
                 if (e.type == "newMessageCreated") {
                     dispatch(addMessage(e.message));
                     setNewMessageReceived(true);
@@ -216,8 +217,8 @@ export default function ChatArea() {
                         })
                     );
                 else if (e.type == "messageDeleted") {
-                    if (threadMessage?.id == e.message?.id)
-                        dispatch(setThreadMessage(null));
+                    if (threadMessageId == e.message?.id)
+                        dispatch(setThreadedMessageId(null));
                     dispatch(deleteMessage(e.message?.id));
                 }
 
@@ -310,7 +311,7 @@ export default function ChatArea() {
             channelConnectionRef.current = null;
             Echo.leave(`channels.${channel.id}`);
         };
-    }, [channel.id, huddleChannel, threadMessage]);
+    }, [channel.id, huddleChannel, threadMessageId]);
 
     function handleHuddleButtonClicked() {
         if (huddleChannel && huddleChannel.id != channel.id) {
@@ -755,7 +756,7 @@ export default function ChatArea() {
                     )}
                 </div>
             </div>
-            {threadMessage && <Thread />}
+            {threadMessageId && <Thread />}
         </div>
     );
 }

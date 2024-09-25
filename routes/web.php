@@ -66,6 +66,7 @@ Route::middleware('auth')->group(function () {
     Route::delete("/channels/{channel}", [ChannelController::class, 'destroy'])->name("channel.delete");
     Route::post("/channels/{channel}/messages", [MessageController::class, 'store'])->name('message.store');
 
+    Route::get("/messages", [MessageController::class, 'getMessage'])->name('messages.getMessage');
     Route::post("/messages/{message}", [MessageController::class, 'update'])->name('message.update');
     Route::delete("/messages/{message}", [MessageController::class, 'destroy'])->name('message.delete');
     Route::post("/channels/{channel}/messages/{message}", [MessageController::class, 'storeThreadMessage'])->name('thread_message.store');

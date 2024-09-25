@@ -9,7 +9,7 @@ import { LuSmilePlus } from "react-icons/lu";
 import data from "@emoji-mart/data";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { setThreadMessage } from "@/Store/threadSlice";
+import { setThreadedMessageId } from "@/Store/threadSlice";
 import { IoMdMore } from "react-icons/io";
 import { usePage } from "@inertiajs/react";
 import DeleteMessage from "./DeleteMessage";
@@ -86,7 +86,7 @@ export default function MessageToolbar({
                 >
                     <button
                         className="rounded p-2 hover:bg-white/15"
-                        onClick={() => dispatch(setThreadMessage(message))}
+                        onClick={() => dispatch(setThreadedMessageId(message.id))}
                     >
                         <BiMessageRoundedDetail className="text-lg" />
                     </button>

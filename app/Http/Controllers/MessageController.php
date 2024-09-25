@@ -9,11 +9,13 @@ use App\Helpers\Helper;
 use App\Models\Channel;
 use App\Models\Message;
 
+use App\Events\MessageEvent;
 use Illuminate\Http\Request;
+
 use App\Events\WorkspaceEvent;
 
+use App\Events\ThreadMessageEvent;
 use Illuminate\Support\Facades\DB;
-
 use Illuminate\Support\Facades\Storage;
 use App\Notifications\MentionNotification;
 
@@ -27,44 +29,78 @@ class MessageController extends Controller
     {
         //
     }
+    public function getMessage(Request $request)
+    {
+
+        $messageId = $request->query('messageId');
+        $message = Message::withTrashed()->find($messageId);
+        if ($request->user()->cannot('view', [Channel::class, $message->channel])) abort(403);
+        return $message->load([
+            'files' => function ($query) {
+                $query->withTrashed();
+            },
+            'reactions',
+
+            'forwardedMessage.files' => function ($query) {
+
+                $query->withTrashed();
+            },
+        ])->loadCount('threadMessages');
+    }
     public function getThreadMessages(Request $request,  Message $message)
     {
         $perPage = 10;
         $channel = $message->channel;
         if ($request->user()->cannot('viewThread', [Message::class, $channel])) return abort(403);
 
-        $messageId = $request->query('message_id');
+        try {
+            $messageId = $request->query('message_id');
 
-        $pageNumber = null;
-        if ($messageId) {
-            $threadMessage = Message::find($messageId);
-            if ($threadMessage) {
+            $pageNumber = null;
+            if ($messageId) {
+                $threadMessage = Message::find($messageId);
+                if ($threadMessage) {
 
-                $threadMessagePosition = $message->threadMessages()
-                    ->latest() // Order by latest first
-                    ->where('created_at', '>=', $threadMessage->created_at) // Messages that are newer or equal to the mentioned one
-                    ->count();
-                $pageNumber = ceil($threadMessagePosition / $perPage);
+                    $threadMessagePosition = $message->threadMessages()
+                        ->latest() // Order by latest first
+                        ->where('created_at', '>=', $threadMessage->created_at) // Messages that are newer or equal to the mentioned one
+                        ->count();
+                    $pageNumber = ceil($threadMessagePosition / $perPage);
+                }
             }
+
+
+            // return back()->with('data', [
+            //     'messages' => $messageId ?
+            //         $message->threadMessages()
+            //         ->withTrashed()
+            //         ->with(['files', 'reactions'])
+            //         ->latest()
+            //         ->simplePaginate($perPage, ['*'], 'page', $pageNumber)
+            //         :
+            //         $message->threadMessages()
+            //         ->withTrashed()
+            //         ->with(['files', 'reactions'])
+            //         ->latest()
+            //         ->simplePaginate($perPage)
+            // ]);
+            return [
+                'messages' => $messageId ?
+                    $message->threadMessages()
+                    ->withTrashed()
+                    ->with(['files', 'reactions'])
+                    ->latest()
+                    ->simplePaginate($perPage, ['*'], 'page', $pageNumber)
+                    :
+                    $message->threadMessages()
+                    ->withTrashed()
+                    ->with(['files', 'reactions'])
+                    ->latest()
+                    ->simplePaginate($perPage)
+            ];
+        } catch (\Throwable $th) {
+            dd($th);
         }
-
-
-
-        return [
-            'messages' => $messageId ?
-                $message->threadMessages()
-                ->withTrashed()
-                ->with(['files', 'reactions'])
-                ->latest()
-                ->simplePaginate($perPage, ['*'], 'page', $pageNumber)
-                :
-                $message->threadMessages()
-                ->messages()
-                ->withTrashed()
-                ->with(['files', 'reactions'])
-                ->latest()
-                ->simplePaginate($perPage)
-        ];
     }
     /**
      * Show the form for creating a new resource.
@@ -130,16 +166,37 @@ class MessageController extends Controller
 
 
 
-            if (isset($message)) {
-                //handle mentions list
-                $mentionsList = $request->mentionsList;
 
-                foreach ($mentionsList as $u) {
-                    $mentionedUser = User::find($u['id']);
-                    $mentionedUser->notify(new MentionNotification($forwardMode ? $forwardChannel : $channel, $channel->workspace, $request->user(), $mentionedUser, $message));
-                }
-                //notify others about new message
+            //handle mentions list
+            $mentionsList = $request->mentionsList;
 
+            foreach ($mentionsList as $u) {
+                $mentionedUser = User::find($u['id']);
+                $mentionedUser->notify(new MentionNotification($forwardMode ? $forwardChannel : $channel, $channel->workspace, $request->user(), $mentionedUser, $message));
+            }
+            //notify others about new message
+
+
+            if ($forwardMode) {
+                broadcast(new MessageEvent($message->channel, $message->load([
+                    'files' => function ($query) {
+                        $query->withTrashed();
+                    },
+                    'reactions',
+
+                    'forwardedMessage.files' => function ($query) {
+
+                        $query->withTrashed();
+                    },
+                ])->loadCount('threadMessages')));
+            } else {
+                broadcast(new MessageEvent($message->channel, $message->load([
+                    'files' => function ($query) {
+                        $query->withTrashed();
+                    },
+                    'reactions',
+
+                ])->loadCount('threadMessages')));
             }
             DB::commit();
             back();
@@ -177,6 +234,9 @@ class MessageController extends Controller
             $files = $this->createFiles($fileObjects, $request->user(), $channel->workspace);
 
             $fileInstances = $newMessage->files()->createMany($files);
+            broadcast(new ThreadMessageEvent($message, $newMessage->load(['files' => function ($query) {
+                $query->withTrashed();
+            }, 'reactions'])));
             broadcast(new WorkspaceEvent(workspace: $channel->workspace, type: "ThreadMessage_fileCreated", fromUserId: "", data: ['channelId' => $channel->id, 'files' => $fileInstances]));
             if (isset($newMessage)) {
 
@@ -265,7 +325,7 @@ class MessageController extends Controller
             $copiedMessage = $message->replicate();
             $copiedMessage->id = $message->id;
             if ($isChannelMessage) {
-              
+
                 $message->threadMessages()->forceDelete();
 
                 //no need to delete files, not depend on message

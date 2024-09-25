@@ -194,12 +194,12 @@ class ChannelController extends Controller
 
         if ($request->expectsJson()) {
             return [
-                'messages' => $channel->messages()->withTrashed()->with([
+                'messages' => $channel->messages()->where('threaded_message_id', null)->withTrashed()->with([
                     'files' => function ($query) {
                         $query->withTrashed();
                     },
                     'reactions',
-                    
+
                     'forwardedMessage.files' => function ($query) {
 
                         $query->withTrashed();
@@ -294,27 +294,29 @@ class ChannelController extends Controller
             'workspaces' => $workspaces,
             "directChannels" => $directChannels,
             'selfChannel' => $selfChannel,
-            'messages' => $messageId ? $channel->messages()->withTrashed()->with([
+            'messages' => $messageId ? $channel->messages()->where('threaded_message_id', null)->withTrashed()->with([
                 'files' => function ($query) {
                     $query->withTrashed();
                 },
                 'reactions',
-               
+
                 'forwardedMessage.files' => function ($query) {
 
                     $query->withTrashed();
                 },
-            ])->withCount('threadMessages')->latest()->simplePaginate($perPage, ['*'], 'page', $pageNumber) : $channel->messages()->withTrashed()->with([
-                'files' => function ($query) {
-                    $query->withTrashed();
-                },
-                'reactions',
-               
-                'forwardedMessage.files' => function ($query) {
+            ])->withCount('threadMessages')->latest()->simplePaginate($perPage, ['*'], 'page', $pageNumber)
+                //OR
+                : $channel->messages()->where('threaded_message_id', null)->withTrashed()->with([
+                    'files' => function ($query) {
+                        $query->withTrashed();
+                    },
+                    'reactions',
 
-                    $query->withTrashed();
-                },
-            ])->withCount('threadMessages')->latest()->simplePaginate($perPage),
+                    'forwardedMessage.files' => function ($query) {
+
+                        $query->withTrashed();
+                    },
+                ])->withCount('threadMessages')->latest()->simplePaginate($perPage),
             'channelUsers' => fn() => $channel->users,
             'newNoftificationsCount' => $newNotificationsCount
         ]);

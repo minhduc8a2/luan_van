@@ -7,7 +7,7 @@ import { addActivity } from "@/Store/activitySlice";
 import { isChannelsNotificationBroadcast } from "@/helpers/notificationTypeHelper";
 import { addMessageCountForChannel } from "@/Store/newMessageCountsMapSlice";
 import { toggleHuddle } from "@/Store/huddleSlice";
-import { deleteFileInThread, setThreadMessage } from "@/Store/threadSlice";
+import { deleteFileInThread,  setThreadedMessageId } from "@/Store/threadSlice";
 import { deleteFile } from "@/Store/messagesSlice";
 export default function Event() {
     const {
@@ -74,7 +74,7 @@ export default function Event() {
                             dispatch(toggleHuddle());
                         }
                         if (channel?.id == e?.data) {
-                            dispatch(setThreadMessage(null));
+                            dispatch(setThreadedMessageId(null));
                             router.visit(route("channel.show", mainChannelId), {
                                 preserveState: true,
                             });

@@ -13,7 +13,7 @@ import { useEffect } from "react";
 import Reactions from "./Reactions";
 import { FaAngleRight } from "react-icons/fa6";
 import { useDispatch, useSelector } from "react-redux";
-import { setThreadMessage } from "@/Store/threadSlice";
+import { setThreadedMessageId } from "@/Store/threadSlice";
 
 import TipTapEditor from "@/Components/TipTapEditor";
 import { editMessage as editMessageInStore } from "@/Store/messagesSlice";
@@ -318,14 +318,14 @@ export default function ForwardedMessage({
                     removeMessageReaction={removeMessageReaction}
                 />
 
-                {message.threadMessages_count>0 && !threadStyle && (
+                {message.thread_messages_count>0 && !threadStyle && (
                     <button
                         className="border hover:bg-black/25 flex justify-between items-center border-white/15 w-96 rounded-lg mt-4 py-1 px-4"
-                        onClick={() => dispatch(setThreadMessage(message))}
+                        onClick={() => dispatch(setThreadedMessageId(message.id))}
                     >
                         <div className="">
                             <span className="text-link text-sm">
-                                {message.threadMessages_count} replies
+                                {message.thread_messages_count} replies
                             </span>
                             <span className="text-sm ml-2">View thread</span>
                         </div>

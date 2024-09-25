@@ -46,6 +46,7 @@ export default function Image({
     if (!fullscreen && fullScreenMode) return "";
 
     function setScale(scale) {
+        largeImageRef.current.classList.add("absolute")
         if (scale <= 0.2) return;
         scaleRef.current = scale;
         largeImageRef.current.style.transform = `scale(${scaleRef.current})`;
@@ -127,7 +128,7 @@ export default function Image({
         >
             {loading && <OverlayLoadingSpinner />}
             {fullscreen && (
-                <div className="top-8 left-8 right-8 bottom-8 overflow-hidden fixed bg-black/95 ring-[40px] ring-black/50  rounded-lg flex group/image_fullscreen justify-center z-50 ">
+                <div className="top-8 left-8 right-8 bottom-8 overflow-hidden fixed bg-black/95 ring-[40px] ring-black/50  rounded-lg flex group/image_fullscreen justify-center items-center z-50 ">
                     {largeLoading && <OverlayLoadingSpinner />}
                     <div className="absolute top-2 right-2 hidden gap-x-2 group-hover/image_fullscreen:flex z-30">
                         <a
@@ -154,7 +155,7 @@ export default function Image({
                         onMouseDown={handleMouseDown}
                         onWheel={handleWheel}
                         onClick={toggleScale}
-                        className=" min-h-full max-h-full z-20 cursor-zoom-in absolute transition-transform ease-out duration-200"
+                        className=" max-h-full  z-20 cursor-zoom-in  transition-transform ease-out duration-200"
                     />
                     <img
                         src={url}
@@ -232,6 +233,7 @@ export default function Image({
                 <img
                     src={url}
                     alt=""
+                    loading="lazy"
                     onLoad={() => setLoading(false)}
                     className=" object-cover object-center min-w-full min-h-full  cursor-pointer"
                 />

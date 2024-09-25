@@ -13,34 +13,7 @@ class MessageObserver
      */
     public function created(Message $message): void
     {
-        if ($message->threaded_message_id == null) {
-
-            if ($message->forwarded_message_id!=null) {
-                broadcast(new MessageEvent($message->channel, $message->load([
-                    'files' => function ($query) {
-                        $query->withTrashed();
-                    },
-                    'reactions',
-                   
-                    'forwardedMessage.files' => function ($query) {
-
-                        $query->withTrashed();
-                    },
-                ])->loadCount('threadMessages')));
-            } else {
-                broadcast(new MessageEvent($message->channel, $message->load([
-                    'files' => function ($query) {
-                        $query->withTrashed();
-                    },
-                    'reactions',
-                    
-                ])->loadCount('threadMessages')));
-            }
-        } else {
-            broadcast(new ThreadMessageEvent($message->threadedMessage, $message->load(['files' => function ($query) {
-                $query->withTrashed();
-            }, 'reactions'])));
-        }
+       
     }
 
     /**

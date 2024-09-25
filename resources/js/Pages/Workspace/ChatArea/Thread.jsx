@@ -2,7 +2,8 @@ import {
     addThreadMessage,
     deleteThreadMessage,
     editThreadMessage,
-    setThreadMessage,
+    setThreadedMessage,
+    setThreadedMessageId,
     setThreadMessages,
     setThreadWidth,
 } from "@/Store/threadSlice";
@@ -23,8 +24,14 @@ import ForwardedMessage from "./Message/ForwardedMessage";
 export default function Thread() {
     const dispatch = useDispatch();
     const { channel, permissions } = usePage().props;
-    const { threadMessage } = useSelector((state) => state.mention);
-    const { message, messages } = useSelector((state) => state.thread);
+    const { threadMessage: mentionThreadMessage } = useSelector(
+        (state) => state.mention
+    );
+    const {
+        message: threadedMessage,
+        messageId: threadedMessageId,
+        messages,
+    } = useSelector((state) => state.thread);
     const { channelUsers } = usePage().props;
     //resize
     const threadContainerRef = useRef(null);
@@ -37,7 +44,12 @@ export default function Thread() {
     const previousPageUrlRef = useRef(null);
     const messageContainerRef = useRef(null);
     const isInfiniteScrollRef = useRef(false);
-    const user = channelUsers.filter((mem) => mem.id === message.user_id)[0];
+    const user = useMemo(() => {
+        if (!threadedMessage) return null;
+        return channelUsers.filter(
+            (mem) => mem.id === threadedMessage.user_id
+        )[0];
+    }, [threadedMessage, channelUsers]);
     const [loadingMessages, setLoadingMessages] = useState(false);
 
     const preScrollPositionRef = useRef(null);
@@ -78,7 +90,7 @@ export default function Thread() {
         router.post(
             route("thread_message.store", {
                 channel: channel.id,
-                message: message.id,
+                message: threadedMessageId,
             }),
             {
                 content,
@@ -104,7 +116,20 @@ export default function Thread() {
         };
     }, []);
     useEffect(() => {
-        threadConnectionRef.current = Echo.join(`threads.${message.id}`);
+        axios
+            .get(route("messages.getMessage"), {
+                params: {
+                    messageId: threadedMessageId,
+                },
+            })
+            .then((response) => {
+                console.log(response);
+
+                dispatch(setThreadedMessage(response.data));
+            });
+    }, [threadedMessageId]);
+    useEffect(() => {
+        threadConnectionRef.current = Echo.join(`threads.${threadedMessageId}`);
         threadConnectionRef.current
             .here((users) => {})
             .joining((user) => {
@@ -130,48 +155,18 @@ export default function Thread() {
             });
 
         setLoadingMessages(true);
-        router.get(
-            route("messages.threadMessages", message.id),
-            threadMessage ? { message_id: threadMessage.id } : {}
-        );
-        // axios
-        //     .get(
-        //         route("messages.threadMessages", {
-        //             message: message.id,
-        //         }),
-        //         {
-        //             params: threadMessage
-        //                 ? { message_id: threadMessage.id }
-        //                 : {},
-        //         }
-        //     )
-        //     .then((response) => {
-        //         console.log(response);
-        //         nextPageUrlRef.current = response.data?.messages?.next_page_url;
-        //         previousPageUrlRef.current =
-        //             response.data?.messages?.prev_page_url;
-        //         dispatch(
-        //             setThreadMessages(response.data?.messages?.data || [])
-        //         );
-        //         setLoadingMessages(false);
-        //     });
-        return () => {
-            dispatch(setThreadMessages([]));
-            Echo.leave(`threads.${message.id}`);
-        };
-    }, [message.id]);
-
-    useEffect(() => {
-        if (!threadMessage) return;
-        setLoadingMessages(true);
+        // router.get(
+        //     route("messages.threadMessages", message.id),
+        //     threadMessage ? { message_id: threadMessage.id } : {}
+        // );
         axios
             .get(
                 route("messages.threadMessages", {
-                    message: message.id,
+                    message: threadedMessageId,
                 }),
                 {
-                    params: threadMessage
-                        ? { message_id: threadMessage.id }
+                    params: mentionThreadMessage
+                        ? { message_id: mentionThreadMessage.id }
                         : {},
                 }
             )
@@ -185,7 +180,37 @@ export default function Thread() {
                 );
                 setLoadingMessages(false);
             });
-    }, [threadMessage]);
+        return () => {
+            dispatch(setThreadMessages([]));
+            Echo.leave(`threads.${threadedMessageId}`);
+        };
+    }, [threadedMessageId]);
+
+    useEffect(() => {
+        if (!mentionThreadMessage) return;
+        setLoadingMessages(true);
+        axios
+            .get(
+                route("messages.threadMessages", {
+                    message: threadedMessageId,
+                }),
+                {
+                    params: mentionThreadMessage
+                        ? { message_id: mentionThreadMessage.id }
+                        : {},
+                }
+            )
+            .then((response) => {
+                console.log(response);
+                nextPageUrlRef.current = response.data?.messages?.next_page_url;
+                previousPageUrlRef.current =
+                    response.data?.messages?.prev_page_url;
+                dispatch(
+                    setThreadMessages(response.data?.messages?.data || [])
+                );
+                setLoadingMessages(false);
+            });
+    }, [mentionThreadMessage]);
 
     const sortedMessages = useMemo(() => {
         const temp = [...messages];
@@ -194,8 +219,9 @@ export default function Thread() {
     }, [messages]);
 
     useEffect(() => {
-        if (newMessageReceived && threadMessage) setNewMessageReceived(false);
-        if (newMessageReceived && !threadMessage) {
+        if (newMessageReceived && mentionThreadMessage)
+            setNewMessageReceived(false);
+        if (newMessageReceived && !mentionThreadMessage) {
             console.log("new message received");
             if (messageContainerRef.current) {
                 messageContainerRef.current.scrollTop =
@@ -204,31 +230,39 @@ export default function Thread() {
                 setNewMessageReceived(false);
             }
         }
-    }, [newMessageReceived, threadMessage, sortedMessages]);
+    }, [newMessageReceived, mentionThreadMessage, sortedMessages]);
+
+    const timeOutRef = useRef(null);
 
     useEffect(() => {
-        if (threadMessage) {
-            const targetMessage = document.getElementById(
-                `message-${threadMessage.id}`
-            );
-            console.log(targetMessage);
-            if (targetMessage) {
-                console.log("did it in thread");
-                targetMessage.classList.add("bg-link/15");
+        timeOutRef.current = setTimeout(() => {
+            if (mentionThreadMessage && !loadingMessages) {
+                console.log("Jump to message");
+                const targetMessage = document.getElementById(
+                    `message-${mentionThreadMessage.id}`
+                );
+                console.log(targetMessage);
+                if (targetMessage) {
+                    console.log("did it in thread");
+                    targetMessage.classList.add("bg-link/15");
 
-                setTimeout(() => {
-                    targetMessage.classList.remove("bg-link/15");
-                }, 2000);
-                targetMessage.scrollIntoView({
-                    behavior: "instant",
-                    block: "center",
-                });
-                setTimeout(() => {
-                    dispatch(setMention(null));
-                }, 100);
+                    setTimeout(() => {
+                        targetMessage.classList.remove("bg-link/15");
+                    }, 2000);
+                    targetMessage.scrollIntoView({
+                        behavior: "instant",
+                        block: "start",
+                    });
+                    setTimeout(() => {
+                        dispatch(setMention(null));
+                    }, 500);
+                }
             }
-        }
-    }, [threadMessage, sortedMessages]);
+        }, 500);
+        return () => {
+            clearTimeout(timeOutRef.current);
+        };
+    }, [mentionThreadMessage, sortedMessages]);
     useEffect(() => {
         console.log("thread_top_inView", top_inView);
         if (!top_inView) return;
@@ -348,7 +382,7 @@ export default function Thread() {
                 <div className="flex justify-between font-bold text-lg opacity-75 items-center">
                     <div className="">Thread</div>
                     <button
-                        onClick={() => dispatch(setThreadMessage(null))}
+                        onClick={() => dispatch(setThreadedMessageId(null))}
                         className="hover:bg-white/15 rounded-lg p-2"
                     >
                         <IoClose className="text-xl" />
@@ -357,22 +391,24 @@ export default function Thread() {
             </div>
 
             <div className="max-h-[30%] overflow-y-auto scrollbar py-8">
-                {message.forwarded_message ? (
+                {threadedMessage && threadedMessage.forwarded_message ? (
                     <ForwardedMessage
                         threadStyle={true}
-                        message={message}
+                        message={threadedMessage}
                         user={user}
                         hasChanged={true}
                         index={0}
                     />
                 ) : (
-                    <Message
-                        threadStyle={true}
-                        message={message}
-                        user={user}
-                        hasChanged={true}
-                        index={0}
-                    />
+                    threadedMessage && (
+                        <Message
+                            threadStyle={true}
+                            message={threadedMessage}
+                            user={user}
+                            hasChanged={true}
+                            index={0}
+                        />
+                    )
                 )}
             </div>
 
@@ -395,29 +431,29 @@ export default function Thread() {
                 className="overflow-y-auto max-w-full flex-1 scrollbar"
                 ref={messageContainerRef}
             >
-                <ul className="mt-8">
+                <ul className="mt-8 pb-8">
                     <div ref={top_ref} className="h-4  "></div>
-                    {sortedMessages.map((message, index) => {
+                    {sortedMessages.map((msg, index) => {
                         const user = channelUsers.filter(
-                            (mem) => mem.id === message.user_id
+                            (mem) => mem.id === msg.user_id
                         )[0];
                         hasChanged = false;
                         if (preValue) {
                             if (
                                 preValue.user.id != user.id ||
                                 differenceInSeconds(
-                                    preValue.message.updated_at,
-                                    message.updated_at
+                                    preValue.msg.updated_at,
+                                    msg.updated_at
                                 ) > 10
                             ) {
                                 hasChanged = true;
-                                preValue = { user, message };
+                                preValue = { user, msg };
                             }
-                        } else preValue = { user, message };
+                        } else preValue = { user, msg };
                         return (
                             <Message
-                                key={message.id}
-                                message={message}
+                                key={msg.id}
+                                message={msg}
                                 user={user}
                                 hasChanged={hasChanged}
                                 index={index}
@@ -436,8 +472,11 @@ export default function Thread() {
                 </ul>
             </div>
             <div className="m-6 border border-white/15 pt-4 px-2 rounded-lg">
-                {permissions.thread && (
-                    <TipTapEditor onSubmit={onSubmit} message={message} />
+                {permissions.thread && threadedMessage && (
+                    <TipTapEditor
+                        onSubmit={onSubmit}
+                        message={threadedMessage}
+                    />
                 )}
                 {!permissions.thread && (
                     <h5 className="mb-4 text-center ml-4">

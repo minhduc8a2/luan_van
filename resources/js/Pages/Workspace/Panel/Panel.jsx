@@ -11,7 +11,7 @@ import { useDispatch, useSelector } from "react-redux";
 import Activity from "./Activity/Activity";
 import { CreateChannelForm } from "./createChannelForm";
 import { FiArchive } from "react-icons/fi";
-import { setThreadMessage } from "@/Store/threadSlice";
+import { setThreadedMessageId } from "@/Store/threadSlice";
 import { useEffect, useRef, useState } from "react";
 import { setPanelWidth } from "@/Store/panelSlice";
 
@@ -36,7 +36,7 @@ export default function Panel({}) {
     );
     // const { messages } = useSelector((state) => state.messages);
     function changeChannel(channel) {
-        dispatch(setThreadMessage(null));
+        dispatch(setThreadedMessageId(null));
         router.get(
             route("channel.show", channel.id),
             {},

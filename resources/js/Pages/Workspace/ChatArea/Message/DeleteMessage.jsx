@@ -1,14 +1,14 @@
 import Form1 from "@/Components/Form1";
 import OverlayNotification from "@/Components/Overlay/OverlayNotification";
 import { deleteMessage } from "@/Store/messagesSlice";
-import { deleteThreadMessage, setThreadMessage } from "@/Store/threadSlice";
+import { deleteThreadMessage, setThreadedMessageId } from "@/Store/threadSlice";
 import { useForm } from "@inertiajs/react";
 import React, { useRef, useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 export default function DeleteMessage({ message, user }) {
     const [willSubmit, setWillSubmit] = useState(false);
-    const { message: threadMessage } = useSelector((state) => state.thread);
+    const { messageId: threadMessageId } = useSelector((state) => state.thread);
     const { data, setData, delete: destroy, processing, errors } = useForm({});
     const [success, setSuccess] = useState(false);
     const dispatch = useDispatch();
@@ -22,8 +22,8 @@ export default function DeleteMessage({ message, user }) {
 
                     dispatch(deleteMessage(message.id));
                     dispatch(deleteThreadMessage(message.id));
-                    if (threadMessage?.id == message.id)
-                        dispatch(setThreadMessage(null));
+                    if (threadMessageId == message.id)
+                        dispatch(setThreadedMessageId(null));
                 },
             });
             setWillSubmit(false);

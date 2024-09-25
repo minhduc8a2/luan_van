@@ -11,7 +11,7 @@ import Message from "../Message";
 import { useDispatch } from "react-redux";
 import { setNotificationPopup } from "@/Store/notificationPopupSlice";
 import { getMentionsFromContent } from "@/helpers/tiptapHelper";
-import { setThreadMessage } from "@/Store/threadSlice";
+import { setThreadedMessageId } from "@/Store/threadSlice";
 
 export default function ForwardMessage({ message, show, onClose }) {
     const dispatch = useDispatch();
@@ -22,7 +22,7 @@ export default function ForwardMessage({ message, show, onClose }) {
     }, [channels, directChannels]);
     const [choosenChannelsList, setChoosenChannelsList] = useState([]);
     function changeChannel(channel) {
-        dispatch(setThreadMessage(null));
+        dispatch(setThreadedMessageId(null));
         router.get(
             route("channel.show", channel.id),
             {},

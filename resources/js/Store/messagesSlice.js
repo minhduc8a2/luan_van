@@ -42,13 +42,13 @@ export const messagesSlice = createSlice({
                 state.messages[messageIndex].files = [];
             }
         },
-
+       
         addThreadMessagesCount(state, action) {
             let messageIndex = state.messages.findIndex(
                 (message) => message.id == action.payload
             );
             if (messageIndex >= 0) {
-                state.messages[messageIndex].messages_count += 1;
+                state.messages[messageIndex].thread_messages_count += 1;
             }
         },
         subtractThreadMessagesCount(state, action) {
@@ -56,7 +56,7 @@ export const messagesSlice = createSlice({
                 (message) => message.id == action.payload
             );
             if (messageIndex >= 0) {
-                state.messages[messageIndex].messages_count -= 1;
+                state.messages[messageIndex].thread_messages_count -= 1;
             }
         },
 

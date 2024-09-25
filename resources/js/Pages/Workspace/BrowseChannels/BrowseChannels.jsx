@@ -8,7 +8,7 @@ import { FaLock } from "react-icons/fa";
 import { LuDot } from "react-icons/lu";
 import { compareDateTime } from "@/helpers/dateTimeHelper";
 import { useDispatch } from "react-redux";
-import { setThreadMessage } from "@/Store/threadSlice";
+import { setThreadedMessageId } from "@/Store/threadSlice";
 import { setPageName } from "@/Store/pageSlice";
 import SearchInput from "../../../Components/Input/SearchInput";
 import { InView } from "react-intersection-observer";
@@ -95,7 +95,7 @@ export default function BrowseChannels() {
         return tempChannels
     }, [filter, channelsList, searchValue]);
     function changeChannel(channel) {
-        dispatch(setThreadMessage(null));
+        dispatch(setThreadedMessageId(null));
 
         router.get(
             route("channel.show", channel.id),

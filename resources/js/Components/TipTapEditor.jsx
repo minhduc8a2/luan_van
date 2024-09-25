@@ -32,7 +32,7 @@ const MenuBar = ({ editor }) => {
 
     return (
         <div className="control-group">
-            <div className="flex gap-x-4 items-center">
+            <div className="flex gap-x-4 items-center flex-wrap">
                 <button
                     onClick={() => editor.chain().focus().toggleBold().run()}
                     disabled={!editor.can().chain().focus().toggleBold().run()}

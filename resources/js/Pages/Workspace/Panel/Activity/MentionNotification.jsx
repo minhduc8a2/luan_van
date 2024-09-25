@@ -9,7 +9,7 @@ import { isMentionNotificationBroadcast } from "@/helpers/notificationTypeHelper
 import { getChannelName } from "@/helpers/channelHelper";
 import { setMention } from "@/Store/mentionSlice";
 import { setMessages } from "@/Store/messagesSlice";
-import { setThreadMessage } from "@/Store/threadSlice";
+import { setThreadedMessageId } from "@/Store/threadSlice";
 import OverlaySimpleNotification from "@/Components/Overlay/OverlaySimpleNotification";
 import { useState } from "react";
 export default function MentionNotification({
@@ -75,7 +75,7 @@ export default function MentionNotification({
                             dispatch(setMention(null));
                         }
                     }
-                    if (threadMessage) dispatch(setThreadMessage(message));
+                    if (threadMessage) dispatch(setThreadedMessageId(message.id));
                 } else
                     router.get(
                         route("channel.show", channel.id),
@@ -92,7 +92,7 @@ export default function MentionNotification({
                                 );
 
                                 if (threadMessage)
-                                    dispatch(setThreadMessage(message));
+                                    dispatch(setThreadedMessageId(message.id));
                             },
                         }
                     );
