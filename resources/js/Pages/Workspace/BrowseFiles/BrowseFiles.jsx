@@ -1,6 +1,6 @@
 import Button from "@/Components/Button";
-import React, { useEffect, useMemo, useRef, useState } from "react";
-
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { debounce } from "lodash";
 import { PiShareFat } from "react-icons/pi";
 import { FaRegUser } from "react-icons/fa6";
 import { TbStack2 } from "react-icons/tb";
@@ -167,6 +167,9 @@ export default function BrowseFiles() {
             axios
                 .get(route("files.index", workspace.id), {
                     params: { filter, name: searchValue, page: 1 },
+                    headers: {
+                        "Cache-Control": "public",
+                    },
                     signal: controller.signal,
                 })
                 .then((response) => {
@@ -211,7 +214,33 @@ export default function BrowseFiles() {
 
         return result;
     }, [filteredFilesList]);
-
+    const handleInViewChange = useCallback(
+        debounce((inView) => {
+            if (inView && nextPageUrlRef.current) {
+                prevScrollHeightRef.current = containerRef.current.scrollHeight;
+                const localFilter = filter;
+                axios
+                    .get(nextPageUrlRef.current)
+                    .then((response) => {
+                        nextPageUrlRef.current = response.data?.next_page_url;
+                        if (localFilter === "shared") {
+                            setSharedFiles((prev) =>
+                                mutateFiles(prev, response.data?.data)
+                            );
+                        }
+                        setFiles((prev) =>
+                            mutateFiles(prev, response.data?.data)
+                        );
+                        setLoading(false);
+                    })
+                    .catch((error) => {
+                        console.error(error);
+                        setLoading(false);
+                    });
+            }
+        }),
+        [filter]
+    );
     return (
         <div className=" w-full h-full grid grid-cols-5">
             {showVideo && (
@@ -433,75 +462,10 @@ export default function BrowseFiles() {
                                                 groupedFiles.length - 1 &&
                                                 cIndex == fis.length - 1 && (
                                                     <InView
-                                                        onChange={(inView) => {
-                                                            console.log(inView);
-                                                            if (
-                                                                inView &&
-                                                                nextPageUrlRef.current
-                                                            ) {
-                                                                prevScrollHeightRef.current =
-                                                                    containerRef.current.scrollHeight;
-                                                                const localFilter =
-                                                                    filter;
-                                                                axios
-                                                                    .get(
-                                                                        nextPageUrlRef.current
-                                                                    )
-                                                                    .then(
-                                                                        (
-                                                                            response
-                                                                        ) => {
-                                                                            // console.log(response.data?.data);
-                                                                            nextPageUrlRef.current =
-                                                                                response.data?.next_page_url;
-                                                                            if (
-                                                                                localFilter ==
-                                                                                "shared"
-                                                                            ) {
-                                                                                setSharedFiles(
-                                                                                    (
-                                                                                        pre
-                                                                                    ) =>
-                                                                                        mutateFiles(
-                                                                                            pre,
-                                                                                            response
-                                                                                                .data
-                                                                                                ?.data
-                                                                                        )
-                                                                                );
-                                                                            }
-                                                                            setFiles(
-                                                                                (
-                                                                                    pre
-                                                                                ) =>
-                                                                                    mutateFiles(
-                                                                                        pre,
-                                                                                        response
-                                                                                            .data
-                                                                                            ?.data
-                                                                                    )
-                                                                            );
-                                                                            setLoading(
-                                                                                false
-                                                                            );
-                                                                        }
-                                                                    )
-                                                                    .catch(
-                                                                        (
-                                                                            error
-                                                                        ) => {
-                                                                            console.log(
-                                                                                error
-                                                                            );
-
-                                                                            setLoading(
-                                                                                false
-                                                                            );
-                                                                        }
-                                                                    );
-                                                            }
-                                                        }}
-                                                    ></InView>
+                                                        onChange={
+                                                            handleInViewChange
+                                                        }
+                                                    />
                                                 )}
                                         </div>
                                     ))}

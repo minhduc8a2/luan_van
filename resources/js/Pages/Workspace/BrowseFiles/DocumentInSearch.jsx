@@ -1,10 +1,9 @@
-import React, { useState } from "react";
+import React, { memo, useState } from "react";
 import Overlay from "@/Components/Overlay/Overlay";
-import FileItem from "@/Components/FileItem";
 import { IoMdCloudDownload } from "react-icons/io";
 import { usePage } from "@inertiajs/react";
 import { getDocumentType } from "@/helpers/fileHelpers";
-export default function DocumentInSearch({ file, Icon, className = "" }) {
+const DocumentInSearch = memo(({ file, Icon, className = "" }) => {
     const { publicAppUrl } = usePage().props;
     const [openOverlay, setOpenOverlay] = useState(false);
     console.log(file);
@@ -51,4 +50,8 @@ export default function DocumentInSearch({ file, Icon, className = "" }) {
             </Overlay>
         </div>
     );
+}, arePropsEqual);
+function arePropsEqual(oldProps, newProps) {
+    return oldProps.file.id === newProps.file.id;
 }
+export default DocumentInSearch;

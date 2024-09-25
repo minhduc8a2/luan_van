@@ -1,8 +1,8 @@
 import FileItem from "@/Components/FileItem";
 import Image from "@/Components/Image";
-import React, { useState } from "react";
+import React, { memo, useState } from "react";
 
-export default function ImageFile({ file }) {
+const ImageFile = memo(({ file }) => {
     const [show, setShow] = useState(false);
     return (
         <div className="">
@@ -19,4 +19,8 @@ export default function ImageFile({ file }) {
             </button>
         </div>
     );
+}, arePropsEqual);
+function arePropsEqual(oldProps, newProps) {
+    return oldProps.file.id === newProps.file.id;
 }
+export default ImageFile

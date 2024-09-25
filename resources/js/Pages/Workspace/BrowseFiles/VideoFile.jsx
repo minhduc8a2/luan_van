@@ -1,8 +1,8 @@
 import FileItem from "@/Components/FileItem";
 import Video from "@/Components/Video";
-import React, { useState } from "react";
+import React, { memo, useState } from "react";
 
-export default function VideoFile({ file }) {
+const VideoFile = memo(({ file }) => {
     const [show, setShow] = useState(false);
     return (
         <div className="w-full">
@@ -18,4 +18,8 @@ export default function VideoFile({ file }) {
             </div>
         </div>
     );
+}, arePropsEqual);
+function arePropsEqual(oldProps, newProps) {
+    return oldProps.file.id === newProps.file.id;
 }
+export default VideoFile;

@@ -28,7 +28,7 @@ class FileController extends Controller
     {
 
         return File::whereHas('messages', function ($query) use ($user, $workspace) {
-            $query->whereIn('channel_id', $user->channels()->where('workspace_id', $workspace->id)->pluck('id'));
+            $query->whereIn('channel_id', $user->channels()->where('workspace_id', $workspace->id)->pluck('channels.id'));
         })->where('name', 'like', "%" . $name . "%")->where('user_id', "<>", $user->id)->simplePaginate($perPage, ['*'], 'page', $page);
     }
     function selfFiles($user, $name, $workspace, $perPage = 10, $page = 1)
@@ -41,13 +41,13 @@ class FileController extends Controller
         return File::whereHas('messages', function ($query) use ($user, $workspace) {
             $query->where(function ($query) use ($workspace) {
 
-                $query->whereIn('channel_id', $workspace->channels()->where('type', ChannelTypes::PUBLIC->name)->pluck('id'));
+                $query->whereIn('channel_id', $workspace->channels()->where('type', ChannelTypes::PUBLIC->name)->pluck('channels.id'));
             })
                 ->orWhere(function ($query) use ($user, $workspace) {
 
                     $query->whereIn('channel_id', $user->channels()->where('type', ChannelTypes::PRIVATE->name)
                         ->where('workspace_id', $workspace->id)
-                        ->pluck('id'));
+                        ->pluck('channels.id'));
                 });
         })
 

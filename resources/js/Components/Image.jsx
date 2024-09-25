@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { memo, useEffect, useMemo, useRef, useState } from "react";
 import OverlayLoadingSpinner from "./Overlay/OverlayLoadingSpinner";
 import { PhotoView } from "react-photo-view";
 import { IoClose, IoCloudDownloadOutline } from "react-icons/io5";
@@ -12,7 +12,7 @@ import { usePage } from "@inertiajs/react";
 import copy from "copy-to-clipboard";
 import { MdDownload, MdMoreVert } from "react-icons/md";
 
-export default function Image({
+const Image = memo(function ({
     url,
     name,
     className = "",
@@ -46,7 +46,7 @@ export default function Image({
     if (!fullscreen && fullScreenMode) return "";
 
     function setScale(scale) {
-        largeImageRef.current.classList.add("absolute")
+        largeImageRef.current.classList.add("absolute");
         if (scale <= 0.2) return;
         scaleRef.current = scale;
         largeImageRef.current.style.transform = `scale(${scaleRef.current})`;
@@ -240,4 +240,9 @@ export default function Image({
             </button>
         </div>
     );
+},
+arePropsEqual);
+function arePropsEqual(oldProps, newProps) {
+    return oldProps.url === newProps.url;
 }
+export default Image;

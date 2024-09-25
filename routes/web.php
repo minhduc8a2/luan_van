@@ -107,7 +107,5 @@ Route::get("/notifications", [NotificationController::class, 'get'])->name('noti
 // Route::get('/mailable', function () {
 //     return new  InvitationMail("https://google.com", "company A", "A", "B");
 // });
-Route::resource('workspaces/{workspace}/files', FileController::class)->only([
-    'index',
-    'destroy'
-]);
+Route::get('/files/workspaces/{workspace}', [FileController::class, 'index'])->name('files.index');
+Route::delete('/files/{file}', [FileController::class, 'index'])->name('files.delete');

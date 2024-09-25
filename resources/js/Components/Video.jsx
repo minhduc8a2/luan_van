@@ -286,13 +286,13 @@ export default function Video({
                 </div>
             )}
             {!smallLoaded && <OverlayLoadingSpinner />}
-            <button onClick={() => playVideo(smallVideoRef.current)} className="min-w-full min-h-full">
+            <button onClick={() => playVideo(smallVideoRef.current)} className="min-w-full min-h-full relative">
                 <video
                     ref={smallVideoRef}
                     controls={false}
                     onTimeUpdate={() => handleTimeUpdate(smallVideoRef.current)}
                     className={`  ${
-                        smallLoaded ? "min-w-full min-h-full" : "hidden"
+                        smallLoaded ? "absolute top-0 left-0 w-full h-full object-cover " : "hidden"
                     } `}
                     src={src}
                     onLoadedMetadata={() => {

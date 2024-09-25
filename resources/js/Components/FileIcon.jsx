@@ -3,6 +3,7 @@ import { LuFileVideo } from "react-icons/lu";
 import {
     FaFile,
     FaRegFileExcel,
+    FaRegFileImage,
     FaRegFilePdf,
     FaRegFilePowerpoint,
     FaRegFileVideo,
