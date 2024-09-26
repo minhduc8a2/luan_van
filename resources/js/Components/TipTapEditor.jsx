@@ -159,7 +159,7 @@ import EmojiPicker from "@emoji-mart/react";
 import { CiFaceSmile } from "react-icons/ci";
 import { IoMdSend } from "react-icons/io";
 import { FaAngleDown } from "react-icons/fa6";
-import { useRef, useState, useEffect, useId } from "react";
+import { useRef, useState, useEffect, useId, useMemo } from "react";
 import { router, usePage } from "@inertiajs/react";
 import { isImage } from "@/helpers/fileHelpers";
 import SquareImage from "./SquareImage";
@@ -185,7 +185,8 @@ export default function TipTapEditor({
     const [fileList, setFileList] = useState([]);
     const mentionsListRef = useRef({});
     const abortControllers = useRef([]);
-    const [uploadProgress, setUploadProgress] = useState(0);
+    const [uploadProgress, setUploadProgress] = useState([]);
+    const [uploading, setUploading] = useState(false);
     const uploadingRef = useRef(false);
     const inputFileRef = useRef(null);
     function handleRemoveFile(file) {
@@ -221,7 +222,7 @@ export default function TipTapEditor({
         const files = e.target.files;
 
         // return;
-        setUploadProgress(0);
+
         setFileList((pre) => {
             let tempList = [...pre];
             Object.values(files).forEach((file) => {
@@ -230,41 +231,48 @@ export default function TipTapEditor({
             return tempList;
         });
         const filesValues = Object.values(files);
-        for (let index = 0; index < filesValues.length; index++) {
-            const file = filesValues[index];
-            const controller = new AbortController();
-            abortControllers.current.push(controller);
-            uploadingRef.current = true;
-            try {
-                const res = await axios.postForm(
-                    `/upload_file/${auth.user.id}`,
-                    { file },
-                    {
-                        signal: controller.signal,
-                        onUploadProgress: function (progressEvent) {
-                            const percentCompleted = Math.round(
-                                (progressEvent.loaded / progressEvent.total) *
-                                    100
-                            );
-                            setUploadProgress(percentCompleted);
-                            if (percentCompleted == 100) {
-                                console.log("Uploaded succuessfuly");
-                            }
-                        },
-                    }
-                );
-                const jsonRes = await res;
-                console.log(jsonRes);
-                serverResponseFileList.current = [
-                    ...serverResponseFileList.current,
-                    ...jsonRes.data,
-                ];
-                uploadingRef.current = false;
-            } catch (error) {
-                console.log("abort, continue", error);
-                uploadingRef.current = false;
-            }
-        }
+        setUploading(true);
+        const filesValuesLength = filesValues.length;
+        setUploadProgress(Array(filesValuesLength).fill(0));
+        await Promise.all(
+            filesValues.map((file, index) => {
+                const controller = new AbortController();
+                abortControllers.current.push(controller);
+                uploadingRef.current = true;
+                return axios
+                    .postForm(
+                        `/upload_file/${auth.user.id}`,
+                        { file },
+                        {
+                            signal: controller.signal,
+                            onUploadProgress: function (progressEvent) {
+                                const percentCompleted = Math.ceil(
+                                    (progressEvent.loaded /
+                                        progressEvent.total) *
+                                        100
+                                );
+                                setUploadProgress((pre) => {
+                                    const temp = [...pre];
+                                    temp[index] = percentCompleted;
+                                    return temp;
+                                });
+                            },
+                        }
+                    )
+                    .then((response) => {
+                        serverResponseFileList.current = [
+                            ...serverResponseFileList.current,
+                            ...response.data,
+                        ];
+                        uploadingRef.current = false;
+                    })
+                    .catch((error) => {
+                        console.log("abort, continue", error);
+                        uploadingRef.current = false;
+                    });
+            })
+        );
+
         inputFileRef.current.value = null;
     }
     const ShiftEnterCreateExtension = Extension.create({
@@ -415,7 +423,13 @@ export default function TipTapEditor({
     useEffect(() => {
         if (editor) editor.commands.focus();
     }, [focus, editor]);
-
+    const uploadAllProgress = useMemo(() => {
+        return uploadProgress.reduce(
+            (pre, progress) =>
+                pre + Math.ceil(progress / uploadProgress.length),
+            0
+        );
+    }, [uploadProgress]);
     return (
         <div className="w-full">
             {/* <progress id="progress-bar" value={uploadProgress} max="100"></progress> */}
@@ -433,7 +447,7 @@ export default function TipTapEditor({
                                 key={"file_" + file.name}
                                 removable={true}
                                 uploadable={true}
-                                percentage={uploadProgress}
+                                percentage={uploadProgress[index]}
                                 remove={() => handleRemoveFile(file)}
                             />
                         );
@@ -446,7 +460,7 @@ export default function TipTapEditor({
                                     removable
                                     remove={() => handleRemoveFile(file)}
                                     uploadable={true}
-                                    percentage={uploadProgress}
+                                    percentage={uploadProgress[index]}
                                 />
                             </div>
                         );
@@ -492,26 +506,28 @@ export default function TipTapEditor({
                                 <TiMicrophoneOutline className="text-xl opacity-75" />
                             )}
 
-                            {uploadProgress > 0 && uploadProgress < 100 && (
-                                <div className="flex gap-x-2 items-center">
-                                    |<div className="text-xs">Uploading</div>
-                                    <div className="w-64">
-                                        <div className="w-full bg-gray-200 rounded-full dark:bg-gray-700">
-                                            <div
-                                                className="bg-purple-500 text-xs font-medium text-blue-100 text-center p-0.5 leading-none rounded-full"
-                                                style={{
-                                                    width: `${uploadProgress}%`,
-                                                }}
-                                            >
-                                                {" "}
+                            {uploadAllProgress > 0 &&
+                                uploadAllProgress < 100 && (
+                                    <div className="flex gap-x-2 items-center">
+                                        |
+                                        <div className="text-xs">Uploading</div>
+                                        <div className="w-64">
+                                            <div className="w-full bg-gray-200 rounded-full dark:bg-gray-700">
+                                                <div
+                                                    className="bg-purple-500 text-xs font-medium text-blue-100 text-center p-0.5 leading-none rounded-full"
+                                                    style={{
+                                                        width: `${uploadAllProgress}%`,
+                                                    }}
+                                                >
+                                                    {" "}
+                                                </div>
                                             </div>
                                         </div>
+                                        <div className="text-xs">
+                                            {uploadAllProgress}%
+                                        </div>
                                     </div>
-                                    <div className="text-xs">
-                                        {uploadProgress}%
-                                    </div>
-                                </div>
-                            )}
+                                )}
                         </div>
 
                         <div className="p-1 px-2 bg-green-800 rounded flex justify-center items-center gap-x-2">

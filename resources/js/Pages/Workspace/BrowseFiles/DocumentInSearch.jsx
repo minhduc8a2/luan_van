@@ -3,7 +3,7 @@ import Overlay from "@/Components/Overlay/Overlay";
 import { IoMdCloudDownload } from "react-icons/io";
 import { usePage } from "@inertiajs/react";
 import { getDocumentType } from "@/helpers/fileHelpers";
-const DocumentInSearch = memo(({ file, Icon, className = "" }) => {
+const DocumentInSearch = memo(function ({ file, Icon, className = "" })  {
     const { publicAppUrl } = usePage().props;
     const [openOverlay, setOpenOverlay] = useState(false);
     console.log(file);

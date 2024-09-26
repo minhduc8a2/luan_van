@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { getDocumentType, isImage } from "@/helpers/fileHelpers";
 import { IoMdCloseCircle } from "react-icons/io";
 import { useState, useEffect } from "react";
@@ -6,7 +6,7 @@ import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
 import FileIcon from "./FileIcon";
 import { FaRegTrashAlt } from "react-icons/fa";
 
-export default function FileItem({
+const FileItem = memo(function ({
     file,
     maxWidth = "max-w-72",
     removable = false,
@@ -46,6 +46,7 @@ export default function FileItem({
                         <img
                             src={file.url}
                             alt="document"
+                            loading="lazy"
                             className="object-cover object-center "
                         />
                     ) : file.deleted_at ? (
@@ -71,4 +72,12 @@ export default function FileItem({
             </div>
         </div>
     );
+},
+arePropsEqual);
+function arePropsEqual(oldProps, newProps) {
+    return (
+        oldProps.file.id === newProps.file.id &&
+        oldProps.percentage === newProps.percentage
+    );
 }
+export default FileItem;

@@ -118,12 +118,14 @@ export default function Video({
     if (!fullscreen && fullScreenMode) return "";
     return (
         <div
-            className={`relative aspect-[4/5]   overflow-hidden group/video ${
+            className={`relative aspect-[4/5] ${
+                fullScreenMode ? "w-0 h-0" : ""
+            }  overflow-hidden group/video ${
                 !smallLoaded ? loadingClassname : ""
             } ${className}`}
         >
             {!playing && (
-                <button className="p-2 rounded gap-x-2 flex bg-black/75 justify-center items-center group-hover/video:hidden absolute bottom-2 left-2">
+                <button className="p-2 rounded gap-x-2 flex z-30 bg-black/75 justify-center items-center group-hover/video:hidden absolute bottom-2 left-2">
                     <FaPlay className="text-sm" />
                     <div className="font-bold ">
                         {formatToMinuteSecond(duration)}
@@ -286,13 +288,18 @@ export default function Video({
                 </div>
             )}
             {!smallLoaded && <OverlayLoadingSpinner />}
-            <button onClick={() => playVideo(smallVideoRef.current)} className="min-w-full min-h-full relative">
+            <button
+                onClick={() => playVideo(smallVideoRef.current)}
+                className="min-w-full min-h-full relative"
+            >
                 <video
                     ref={smallVideoRef}
                     controls={false}
                     onTimeUpdate={() => handleTimeUpdate(smallVideoRef.current)}
                     className={`  ${
-                        smallLoaded ? "absolute top-0 left-0 w-full h-full object-cover " : "hidden"
+                        smallLoaded
+                            ? "absolute top-0 left-0 w-full h-full object-cover "
+                            : "hidden"
                     } `}
                     src={src}
                     onLoadedMetadata={() => {

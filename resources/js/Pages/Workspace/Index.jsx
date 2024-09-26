@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import SideBar from "./SideBar/SideBar";
 import HeadBar from "./HeadBar";
 import Panel from "./Panel/Panel";
@@ -16,6 +16,9 @@ import BrowseChannels from "./BrowseChannels/BrowseChannels";
 import BrowseFiles from "./BrowseFiles/BrowseFiles";
 import OverlaySimpleNotification from "@/Components/Overlay/OverlaySimpleNotification";
 import { setNotificationPopup } from "@/Store/notificationPopupSlice";
+import { setMedia } from "@/Store/mediaSlice";
+import Image from "@/Components/Image";
+import Video from "@/Components/Video";
 export default function Index({
     newNoftificationsCount,
     channels,
@@ -67,6 +70,7 @@ export default function Index({
             </div>
             <Huddle />
             <NotificationPopup />
+            <MediaModal />
         </Provider>
     );
 }
@@ -109,3 +113,38 @@ function NotificationPopup() {
         </OverlaySimpleNotification>
     );
 }
+const MediaModal = memo(function MediaModal() {
+    const { url, type, name } = useSelector((state) => state.media);
+    const dispatch = useDispatch();
+    switch (type) {
+        case "image": {
+            return (
+                <div className="">
+                    {url && (
+                        <Image
+                            fullScreenMode
+                            url={url}
+                            name={name}
+                            onFullScreenClose={() => dispatch(setMedia({}))}
+                        />
+                    )}
+                </div>
+            );
+        }
+        case "video": {
+            return (
+                <div>
+                    {url && (
+                        <Video
+                            src={url}
+                            fullScreenMode
+                            onFullScreenClose={() => dispatch(setMedia({}))}
+                        />
+                    )}
+                </div>
+            );
+        }
+        default:
+            return "";
+    }
+});

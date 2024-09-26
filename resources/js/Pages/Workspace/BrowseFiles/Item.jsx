@@ -15,7 +15,7 @@ import VideoFile from "./VideoFile";
 import copy from "copy-to-clipboard";
 import { usePage } from "@inertiajs/react";
 
-const Item = memo(({ file }) => {
+const Item = memo(function ({ file }) {
     const { publicAppUrl } = usePage().props;
     const [openOverlay, setOpenOverlay] = useState(false);
     const [isHovered, setIsHovered] = useState(false);

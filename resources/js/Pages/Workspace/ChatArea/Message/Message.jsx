@@ -212,6 +212,7 @@ export default function Message({
 
     function goToMessage(channel) {
         const isThreadMessage = message.threaded_message_id;
+        dispatch(setThreadedMessageId(null));
         router.get(
             route("channel.show", channel.id),
             { message_id: message.id },

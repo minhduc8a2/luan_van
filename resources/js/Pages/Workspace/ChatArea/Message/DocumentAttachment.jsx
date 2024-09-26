@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { memo, useState } from "react";
 import Overlay from "@/Components/Overlay/Overlay";
 import FileItem from "@/Components/FileItem";
 import { IoMdCloudDownload } from "react-icons/io";
@@ -12,7 +12,7 @@ import {
 import { IoCloudDownloadOutline } from "react-icons/io5";
 import { MdMoreVert } from "react-icons/md";
 import copy from "copy-to-clipboard";
-export default function DocumentAttachment({
+const DocumentAttachment = memo(function ({
     attachment,
     openOverlay,
     setOpenOverlay,
@@ -120,4 +120,12 @@ export default function DocumentAttachment({
             </Overlay>
         </div>
     );
+},
+arePropsEqual);
+function arePropsEqual(oldProps, newProps) {
+    return (
+        oldProps.attachment.id === newProps.attachment.id &&
+        oldProps.openOverlay == newProps.openOverlay
+    );
 }
+export default DocumentAttachment;

@@ -34,7 +34,7 @@ export default function ForwardedMessage({
     resetNewMessageReactionReceive,
     noToolbar = false,
 }) {
-    const { auth, channel, channelUsers, permissions, users, channels } =
+    const { auth, channel, channelUsers, permissions, users, channels, directChannels } =
         usePage().props;
     const dispatch = useDispatch();
     const { messageId } = useSelector((state) => state.mention);
@@ -67,8 +67,10 @@ export default function ForwardedMessage({
     const forwardedMessageChannel = useMemo(() => {
         return channels.find(
             (cn) => cn.id == message.forwarded_message.channel_id
+        ) || directChannels.find(
+            (cn) => cn.id == message.forwarded_message.channel_id
         );
-    }, [channels, message]);
+    }, [channels,directChannels, message]);
     const groupedReactions = useMemo(() => {
         return groupReactions(reactions, channelUsers, auth.user);
     }, [reactions]);

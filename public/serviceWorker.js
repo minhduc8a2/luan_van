@@ -21,28 +21,53 @@ self.addEventListener("install", (event) => {
 //     );
 // });
 self.addEventListener("fetch", (event) => {
-    if (event.request.url.includes("/files/workspaces") ) {
+    if (event.request.url.includes("/files/workspaces")) {
         event.respondWith(
             caches.open("dynamic-cache").then((cache) => {
                 return cache.match(event.request).then((cachedResponse) => {
                     if (cachedResponse) {
                         console.log("Serving from cache:", event.request.url);
-                    } else {
-                        console.log(
-                            "Fetching from network:",
-                            event.request.url
+                        // Update the cache in the background
+                        event.waitUntil(
+                            fetch(event.request)
+                                .then((networkResponse) => {
+                                    console.log("Updating cache:", event.request.url);
+                                    cache.put(event.request, networkResponse.clone());
+                                })
+                                .catch((err) => {
+                                    console.error("Failed to fetch:", err);
+                                })
                         );
-                    }
-
-                    const fetchPromise = fetch(event.request).then(
-                        (networkResponse) => {
+                        return cachedResponse;
+                    } else {
+                        console.log("Fetching from network:", event.request.url);
+                        return fetch(event.request).then((networkResponse) => {
                             console.log("Caching new data:", event.request.url);
                             cache.put(event.request, networkResponse.clone());
                             return networkResponse;
-                        }
-                    );
-
-                    return cachedResponse || fetchPromise;
+                        }).catch((err) => {
+                            console.error("Network fetch failed:", err);
+                        });
+                    }
+                });
+            })
+        );
+    } else if (event.request.url.includes("/storage")) {
+        event.respondWith(
+            caches.open("static-cache").then((cache) => {
+                return cache.match(event.request).then((cachedResponse) => {
+                    if (cachedResponse) {
+                        console.log("Serving from cache:", event.request.url);
+                        return cachedResponse;
+                    } else {
+                        return fetch(event.request).then((networkResponse) => {
+                            console.log("Caching new data:", event.request.url);
+                            cache.put(event.request, networkResponse.clone());
+                            return networkResponse;
+                        }).catch((err) => {
+                            console.error("Network fetch failed:", err);
+                        });
+                    }
                 });
             })
         );

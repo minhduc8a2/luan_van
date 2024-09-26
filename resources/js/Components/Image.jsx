@@ -122,9 +122,9 @@ const Image = memo(function ({
     }
     return (
         <div
-            className={`h-64 aspect-[4/5] overflow-hidden relative group/image rounded-lg ${className} ${
-                loading ? "bg-background border border-white/15" : ""
-            }`}
+            className={` overflow-hidden relative group/image rounded-lg ${className} ${
+                fullScreenMode ? "h-0 w-0" : "h-64 aspect-[4/5]"
+            } ${loading ? "bg-background border border-white/15" : ""}`}
         >
             {loading && <OverlayLoadingSpinner />}
             {fullscreen && (
