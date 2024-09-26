@@ -129,6 +129,7 @@ input[type="radio"] {
 input[type="checkbox"] {
     @apply bg-white/15 h-[0.85rem] w-[0.85rem] rounded;
 }
+
 hr {
     @apply border-white/15;
 }

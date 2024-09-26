@@ -42,7 +42,7 @@ import { getChannelName } from "@/helpers/channelHelper";
 export default function Huddle() {
     const { auth, users: workspaceUsers, permissions } = usePage().props;
     const { channel, users } = useSelector((state) => state.huddle);
-    const { width } = useSelector((state) => state.sideBar);
+    const { sideBarWidth } = useSelector((state) => state.size);
     const [refresh, setRefresh] = useState(0);
     const [enableAudio, setEnableAudio] = useState(true);
     const joinObject = useRef(null);
@@ -327,7 +327,7 @@ export default function Huddle() {
     return (
         <div
             className="bg-primary-400 w-96  text-white/85  fixed bottom-12 rounded-xl"
-            style={{ left: width + 16 }}
+            style={{ left: sideBarWidth + 16 }}
         >
             <div className="flex justify-between p-4 items-center">
                 <div className="text-sm">

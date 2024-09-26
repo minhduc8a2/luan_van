@@ -140,10 +140,7 @@ class FileController extends Controller
             $file->type = "";
             $file->save();
             $file->delete();
-
-
             DB::commit();
-
             return back();
         } catch (\Throwable $th) {
             DB::rollBack();

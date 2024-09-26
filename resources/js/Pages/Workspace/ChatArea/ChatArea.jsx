@@ -756,7 +756,7 @@ export default function ChatArea() {
                     )}
                 </div>
             </div>
-            {threadMessageId && <Thread />}
+            
         </div>
     );
 }

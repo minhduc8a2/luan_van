@@ -12,10 +12,11 @@ import { usePage } from "@inertiajs/react";
 import copy from "copy-to-clipboard";
 import { MdDownload, MdMoreVert } from "react-icons/md";
 
-const Image = memo(function ({
+const Image = memo(function Image({
     url,
     name,
     className = "",
+    dimensions = "h-64 aspect-[4/5]",
     fullScreenMode = false,
     onFullScreenClose,
     deleteFn = () => {},
@@ -122,9 +123,11 @@ const Image = memo(function ({
     }
     return (
         <div
-            className={` overflow-hidden relative group/image rounded-lg ${className} ${
-                fullScreenMode ? "h-0 w-0" : "h-64 aspect-[4/5]"
-            } ${loading ? "bg-background border border-white/15" : ""}`}
+            className={` overflow-hidden relative group/image rounded-lg  ${
+                fullScreenMode ? "h-0 w-0" : dimensions
+            } ${
+                loading ? "bg-background border border-white/15" : ""
+            }  ${className}`}
         >
             {loading && <OverlayLoadingSpinner />}
             {fullscreen && (

@@ -1,6 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
 import huddleReducer from "@/Store/huddleSlice";
-import sideBarReducer from "@/Store/sideBarSlice";
+import sizeReducer from "@/Store/sizeSlice";
 import OnlineStatusReducer from "./OnlineStatusSlice";
 import panelReducer from "./panelSlice";
 import activityReducer from "./activitySlice";
@@ -11,11 +11,13 @@ import newMessageCountsMapReducer from "./newMessageCountsMapSlice";
 import pageReducer from "./pageSlice";
 import notificationPopupReducer from "./notificationPopupSlice";
 import mediaReducer from "./mediaSlice";
+import profileReducer from "./profileSlice";
+import windowTypeReducer from "./windowTypeSlice";
 export const makeStore = () => {
     return configureStore({
         reducer: {
             huddle: huddleReducer,
-            sideBar: sideBarReducer,
+            size: sizeReducer,
             onlineStatus: OnlineStatusReducer,
             panel: panelReducer,
             activity: activityReducer,
@@ -26,6 +28,8 @@ export const makeStore = () => {
             page: pageReducer,
             notificationPopup: notificationPopupReducer,
             media: mediaReducer,
+            profile: profileReducer,
+            windowType: windowTypeReducer,
         },
     });
 };

@@ -1,7 +1,8 @@
+import { usePage } from "@inertiajs/react";
 import React, { memo } from "react";
 
 const Avatar = memo(function ({
-    src = "/images/default_avatar.png",
+    src = "",
     className = "",
     isOnline,
     onlineClassName = "",
@@ -9,10 +10,11 @@ const Avatar = memo(function ({
     noStatus = false,
     roundedClassName = "rounded-lg ",
 }) {
+    const { default_avatar_url } = usePage().props;
     return (
         <div className={"relative  " + className}>
             <img
-                src={src}
+                src={src || default_avatar_url}
                 className={`${roundedClassName} w-full h-full object-cover absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 `}
             />
             {noStatus ? (

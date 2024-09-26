@@ -14,11 +14,13 @@ import { AddWorkspace } from "./AddWorkspace";
 import { useRef, useEffect } from "react";
 import { FaBell } from "react-icons/fa6";
 import { useDispatch, useSelector } from "react-redux";
-import { setSideBarWidth } from "@/Store/sideBarSlice";
+
 import { setPanelType } from "@/Store/panelSlice";
 import { usePage } from "@inertiajs/react";
 import More from "./More";
 import { setPageName } from "@/Store/pageSlice";
+import UserOptions from "./UserOptions";
+import { setSideBarWidth } from "@/Store/sizeSlice";
 export default function SideBar({}) {
     const { auth, url, workspace, workspaces } = usePage().props;
     const { type: panelType } = useSelector((state) => state.panel);
@@ -124,16 +126,8 @@ export default function SideBar({}) {
 
                 <More />
             </div>
-
-            <div className="flex flex-col items-center gap-y-2">
-                <div className="p-2 bg-white/25 rounded-full">
-                    <LuPlus className="text-xl opacity-75" />
-                </div>
-                <Avatar
-                    src={auth.user.avatar_url}
-                    className="mt-2 h-10 w-10"
-                    isOnline={true}
-                />
+            <div className="mx-auto">
+                <UserOptions />
             </div>
         </div>
     );

@@ -24,13 +24,11 @@ export default function Panel({}) {
         users,
         directChannels = [],
         selfChannel,
-        permissions,
+       
     } = usePage().props;
-    const { type, width } = useSelector((state) => state.panel);
+    const { type } = useSelector((state) => state.panel);
     const dispatch = useDispatch();
-    const panelRef = useRef(null);
-    const isDraggingRef = useRef(null);
-    const draggingBarRef = useRef(null);
+  
     const newMessageCountsMap = useSelector(
         (state) => state.newMessageCountsMap
     );
@@ -44,48 +42,10 @@ export default function Panel({}) {
         );
     }
 
-    useEffect(() => {
-        let x = 0;
-        let styles = window.getComputedStyle(panelRef.current);
-        let width = parseInt(styles.width);
-        const onMouseMoveRightResize = (e) => {
-            if (!isDraggingRef.current) return;
-            const dx = e.clientX - x;
-            x = e.clientX;
-            width += dx;
 
-            dispatch(setPanelWidth(width));
-        };
-        const onMouseUp = (e) => {
-            if (e.target != draggingBarRef.current) return;
-            isDraggingRef.current = false;
-        };
-        const onMouseDown = (e) => {
-            if (e.target != draggingBarRef.current) return;
-            x = e.clientX;
-            isDraggingRef.current = true;
-        };
-
-        //listeners
-        document.addEventListener("mousemove", onMouseMoveRightResize);
-
-        document.addEventListener("mouseup", onMouseUp);
-
-        document.addEventListener("mousedown", onMouseDown);
-        return () => {
-            document.removeEventListener("mousemove", onMouseMoveRightResize);
-
-            document.removeEventListener("mouseup", onMouseUp);
-
-            document.removeEventListener("mousedown", onMouseDown);
-        };
-    }, []);
     return (
-        <div ref={panelRef} style={{ width }} className="relative">
-            <div
-                ref={draggingBarRef}
-                className={`bg-transparent transition z-20 hover:bg-link w-1 cursor-col-resize h-full absolute top-0 right-0`}
-            ></div>
+        <>
+           
             {type == "activity" && <Activity />}
             {type == "home" && (
                 <div className="bg-secondary h-full  rounded-l-lg rounded-s-lg border-r border-r-white/15">
@@ -250,6 +210,6 @@ export default function Panel({}) {
                     </div>
                 </div>
             )}
-        </div>
+        </>
     );
 }

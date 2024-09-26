@@ -6,6 +6,8 @@ use Inertia\Inertia;
 use Illuminate\Http\Request;
 use App\Jobs\DeleteTemporaryFiles;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\FileController;
+use App\Http\Controllers\UserController;
 use Laravel\Socialite\Facades\Socialite;
 use App\Http\Controllers\HuddleController;
 use App\Http\Controllers\ThreadController;
@@ -17,7 +19,6 @@ use App\Http\Controllers\WorkspaceController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Auth\ProviderController;
-use App\Http\Controllers\FileController;
 
 Route::get('/auth/redirect', function () {
     return Socialite::driver('github')->redirect();
@@ -74,6 +75,8 @@ Route::middleware('auth')->group(function () {
     Route::post("/channels/{channel}/huddle_invitation", [HuddleController::class, 'invite'])->name("huddle.invitation");
     Route::post("/notifications/mark_read", [NotificationController::class, "markRead"])->name("notifications.mark_read");
     Route::post("/notifications/{notificationId}/mark_view", [NotificationController::class, "markView"])->name("notifications.mark_view");
+    Route::post('users/{user}/updateAvatar', [UserController::class, 'updateAvatar'])->name("users.updateAvatar");
+    Route::delete('users/{user}/deleteAvatar', [UserController::class, 'deleteAvatar'])->name("users.deleteAvatar");
     Route::post("/upload_file/{user}", function (Request $request, User $user) {
 
         $validated = $request->validate([

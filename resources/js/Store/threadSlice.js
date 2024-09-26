@@ -1,5 +1,14 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { setRightWindowType } from "./windowTypeSlice";
 
+export const setThreadedMessageId = (messageId) => (dispatch) => {
+    dispatch(threadSlice.actions.setMessageId(messageId));
+    if (messageId) {
+        dispatch(setRightWindowType("thread"));
+    } else {
+        dispatch(setRightWindowType(""));
+    }
+};
 export const threadSlice = createSlice({
     name: "thread",
     initialState: {
@@ -10,16 +19,11 @@ export const threadSlice = createSlice({
     },
     reducers: {
         setThreadedMessage(state, action) {
-           
             state.message = action.payload;
-          
-        
-
-
         },
-        setThreadedMessageId(state, action) {
+        setMessageId(state, action) {
             state.messageId = action.payload;
-            if(!state.messageId) state.message = null;
+            if (!state.messageId) state.message = null;
         },
         addThreadMessage(state, action) {
             state.messages.push(action.payload);
@@ -95,7 +99,7 @@ export const threadSlice = createSlice({
 // Action creators are generated for each case reducer function
 export const {
     setThreadedMessage,
-    setThreadedMessageId,
+    setMessageId,
     setThreadMessages,
     deleteThreadMessage,
     addThreadMessage,

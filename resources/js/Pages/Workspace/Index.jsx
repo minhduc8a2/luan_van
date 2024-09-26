@@ -19,6 +19,11 @@ import { setNotificationPopup } from "@/Store/notificationPopupSlice";
 import { setMedia } from "@/Store/mediaSlice";
 import Image from "@/Components/Image";
 import Video from "@/Components/Video";
+import Thread from "./ChatArea/Thread";
+import RightWindow from "./RightWindow";
+import { setLeftWindowWidth, setRightWindowWidth } from "@/Store/sizeSlice";
+import LeftWindow from "./LeftWindow";
+import Profile from "./Profile/Profile";
 export default function Index({
     newNoftificationsCount,
     channels,
@@ -31,18 +36,24 @@ export default function Index({
         storeRef.current = makeStore();
         //update panel width in localStorage
         try {
-            const panelWidth = parseInt(localStorage.getItem("panelWidth"));
-            console.log(typeof panelWidth);
-            if (Number.isInteger(panelWidth))
-                storeRef.current.dispatch(setPanelWidth(panelWidth));
-        } catch (error) {}
-        try {
-            const threadWidth = parseInt(localStorage.getItem("threadWidth"));
-            console.log(typeof threadWidth);
-            if (Number.isInteger(threadWidth))
-                storeRef.current.dispatch(setThreadWidth(threadWidth));
+            const leftWindowWidth = parseInt(
+                localStorage.getItem("leftWindowWidth")
+            );
+            console.log(typeof leftWindowWidth);
+            if (Number.isInteger(leftWindowWidth))
+                storeRef.current.dispatch(setLeftWindowWidth(leftWindowWidth));
         } catch (error) {}
 
+        try {
+            const rightWindowWidth = parseInt(
+                localStorage.getItem("rightWindowWidth")
+            );
+            console.log(typeof rightWindowWidth);
+            if (Number.isInteger(rightWindowWidth))
+                storeRef.current.dispatch(
+                    setRightWindowWidth(rightWindowWidth)
+                );
+        } catch (error) {}
         storeRef.current.dispatch(
             setNotificationsCount(newNoftificationsCount)
         );
@@ -77,12 +88,27 @@ export default function Index({
 
 function MainArea() {
     const { name: pageName } = useSelector((state) => state.page);
+    const { messageId: threadMessageId } = useSelector((state) => state.thread);
+    const { user: profile } = useSelector((state) => state.profile);
+    const { rightWindowType } = useSelector((state) => state.windowType);
     switch (pageName) {
         case "normal":
             return (
                 <>
-                    <Panel />
+                    <LeftWindow>
+                        <Panel />
+                    </LeftWindow>
                     <ChatArea />
+                    {rightWindowType && (
+                        <RightWindow>
+                            {threadMessageId && rightWindowType == "thread" && (
+                                <Thread />
+                            )}
+                            {profile && rightWindowType == "profile" && (
+                                <Profile />
+                            )}
+                        </RightWindow>
+                    )}
                 </>
             );
         case "browseChannels":

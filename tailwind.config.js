@@ -25,7 +25,7 @@ export default {
                 background: "#1a1d21",
                 foreground: "#222529",
                 link: "#1d9bd1",
-
+                "dark-green": "#00553d",
                 danger: {
                     400: "#DE678A",
                     500: "#b41541",

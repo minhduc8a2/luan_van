@@ -36,6 +36,7 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
 
             ],
+            'default_avatar_url' => env('DEFAULT_AVATAR_URL'),
             'publicAppUrl' => env('PUBLIC_APP_URL', ''),
             'flash' => [
                 'message' => fn() => $request->session()->get('message'),

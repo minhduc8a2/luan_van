@@ -12,7 +12,7 @@ export default function Button({
         <div
             {...props}
             className={
-                ` rounded-lg font-semibold  bg-foreground relative  transition text-white/85 py-2 px-3   ${
+                ` rounded-lg font-semibold border border-white/15 bg-foreground relative  transition text-white/85 py-2 px-3   ${
                     disabled
                         ? "cursor-default  opacity-50"
                         : "cursor-pointer hover:bg-white/10 hover:text-white"
