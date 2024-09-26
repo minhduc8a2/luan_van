@@ -15,3 +15,16 @@ export function getChannelName(channel, channelUsers, currentUser) {
 export function getDirectChannelUser(channel, channelUsers, currentUser) {
     return channelUsers.find((u) => u.id != currentUser.id);
 }
+
+export function getDirectChannelFromUserId(directChannels, userId) {
+    try {
+        return directChannels.find((channel) => {
+            const userIds = channel.name.split("_");
+            return userIds.find((id) => userId == id) != null;
+        });
+    } catch (error) {
+        console.error(error);
+    }
+
+    return null;
+}

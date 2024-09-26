@@ -18,7 +18,7 @@ export default function EditContactInformation({ user, triggerButton }) {
 
     const dispatch = useDispatch();
     const { data, setData, patch, processing, errors } = useForm({
-        email: user.email,
+        // email: user.email,
         phone: user.phone || "",
     });
 
@@ -57,9 +57,9 @@ export default function EditContactInformation({ user, triggerButton }) {
                         <TextInput
                             disabled
                             id="profile-email"
-                            value={data.email}
+                            value={user.email}
                             placeholder="Full name"
-                            onChange={(e) => setData("email", e.target.value)}
+                            // onChange={(e) => setData("email", e.target.value)}
                         />
                     </div>
                     <div className="mt-4">

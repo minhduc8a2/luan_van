@@ -24,6 +24,7 @@ import { setNotificationPopup } from "@/Store/notificationPopupSlice";
 import OverlayConfirm from "@/Components/Overlay/OverlayConfirm";
 import ForwardMessage from "./ForwardMessage/ForwardMessage";
 import { setMention } from "@/Store/mentionSlice";
+import { setProfile } from "@/Store/profileSlice";
 export default function Message({
     message,
     user,
@@ -295,13 +296,14 @@ export default function Message({
             <div className="mx-3 ">
                 {hasChanged || index == 0 ? (
                     <div className="flex gap-x-2 items-baseline">
-                        <div
-                            className={`text-base font-bold leading-tight ${
+                        <button
+                            className={`text-base hover:underline font-bold leading-tight ${
                                 user.notMember ? "line-through" : ""
                             }`}
+                            onClick={() => dispatch(setProfile(user))}
                         >
                             {user.name}
-                        </div>
+                        </button>
                         {user.notMember && (
                             <span className="text-xs leading-tight text-white/75 font-extralight">
                                 (Removed User)

@@ -39,6 +39,7 @@ import { usePage } from "@inertiajs/react";
 import OverlayPanel from "@/Components/Overlay/OverlayPanel";
 import HuddleInvitation from "./HuddleInvitation";
 import { getChannelName } from "@/helpers/channelHelper";
+import Tooltip from "@/Components/Tooltip";
 export default function Huddle() {
     const { auth, users: workspaceUsers, permissions } = usePage().props;
     const { channel, users } = useSelector((state) => state.huddle);
@@ -331,7 +332,7 @@ export default function Huddle() {
         >
             <div className="flex justify-between p-4 items-center">
                 <div className="text-sm">
-                    {getChannelName(channel, auth.user, workspaceUsers)}
+                    {getChannelName(channel, workspaceUsers, auth.user)}
                 </div>
                 <MdOutlineZoomOutMap />
             </div>
@@ -393,16 +394,20 @@ export default function Huddle() {
                         if (showUserVideo || showShareScreen) return "";
                         else
                             return (
-                                <SquareImage
-                                    key={user.id}
-                                    url={user.avatar_url}
-                                    removable={false}
-                                    size={
-                                        hasAnyVideoTrack
-                                            ? "w-36 h-36"
-                                            : "w-10 h-10"
-                                    }
-                                />
+                                <Tooltip content={<button className="text-nowrap">
+                                    {user.name}
+                                </button>}>
+                                    <SquareImage
+                                        key={user.id}
+                                        url={user.avatar_url}
+                                        removable={false}
+                                        size={
+                                            hasAnyVideoTrack
+                                                ? "w-36 h-36"
+                                                : "w-10 h-10"
+                                        }
+                                    />
+                                </Tooltip>
                             );
                     return (
                         !streamHasVideoTracks(
