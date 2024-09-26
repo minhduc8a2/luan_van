@@ -18,7 +18,7 @@ export default function EditProfile({ user, triggerButton }) {
     const [avatarFile, setAvatarFile] = useState(null);
     const [uploadingAvatarFile, setUploadingAvatarFile] = useState(false);
     const dispatch = useDispatch();
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, patch, processing, errors } = useForm({
         name: user.name,
         displayName: user.displayName || "",
     });
@@ -48,12 +48,30 @@ export default function EditProfile({ user, triggerButton }) {
         );
     }, [avatarFile]);
     function onSubmit(e) {
-        e.preventDeafault();
+        e.preventDefault();
+        patch(route("users.update", user.id), {
+            preserveState: true,
+            only: [],
+            onError: (errors) =>
+                dispatch(
+                    setNotificationPopup({
+                        type: "error",
+                        messages: Object.values(errors),
+                    })
+                ),
+            onSuccess: () => {
+                setIsOpen(false);
+            },
+        });
     }
     return (
         <>
             <div onClick={() => setIsOpen(true)}>{triggerButton}</div>
-            <CustomedDialog isOpen={isOpen} onClose={() => setIsOpen(false)}>
+            <CustomedDialog
+                isOpen={isOpen}
+                onClose={() => setIsOpen(false)}
+                className="w-[700px]"
+            >
                 <CustomedDialog.Title>Edit Profile</CustomedDialog.Title>
                 <div className="flex gap-x-8">
                     <div className="flex-1">
@@ -75,13 +93,13 @@ export default function EditProfile({ user, triggerButton }) {
                         </div>
                         <div className="mt-4">
                             <label
-                                htmlFor="profile-fullname"
+                                htmlFor="profile-display-name"
                                 className="font-bold block mb-4"
                             >
                                 Display name
                             </label>
                             <TextInput
-                                id="profile-fullname"
+                                id="profile-display-name"
                                 value={data.displayName}
                                 placeholder="Display name"
                                 onChange={(e) =>
@@ -93,7 +111,11 @@ export default function EditProfile({ user, triggerButton }) {
                             <Button onClick={() => setIsOpen(false)}>
                                 Cancel
                             </Button>
-                            <Button className="bg-dark-green">
+                            <Button
+                                className="!bg-dark-green"
+                                loading={processing}
+                                onClick={onSubmit}
+                            >
                                 Save Changes
                             </Button>
                         </div>
@@ -101,7 +123,10 @@ export default function EditProfile({ user, triggerButton }) {
                     <div className="w-48">
                         <h3 className="font-bold mb-4">Profile photo</h3>
 
-                        <Image url={user.avatar_url || default_avatar_url} dimensions="w-48 h-48"/>
+                        <Image
+                            url={user.avatar_url || default_avatar_url}
+                            dimensions="w-48 h-48"
+                        />
                         <label
                             className=" mt-4 text-center relative font-bold  block rounded-lg cursor-pointer border border-white/15 py-2 "
                             htmlFor="profile-choose-photo"

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ProfileUpdateRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -52,9 +53,28 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, User $user)
+    public function update(ProfileUpdateRequest $request, User $user)
     {
-        //
+        if ($request->user()->id !== $user->id) return abort(403);
+        $name = $request->validated('name');
+        $displayName = $request->validated('displayName');
+        $email = $request->validated('email');
+        $phone = $request->validated('phone');
+        try {
+            DB::beginTransaction();
+
+            if ($name) $user->name = $name;
+            if ($displayName) $user->display_name = $displayName;
+            if ($email) $user->email = $email;
+            if ($phone) $user->phone = $phone;
+
+            $user->save();
+            DB::commit();
+            return back();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return back()->withErrors(['server' => "Something went wrong! Please try later."]);
+        }
     }
     public function updateAvatar(Request $request, User $user)
     {

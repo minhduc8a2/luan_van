@@ -14,7 +14,7 @@ function CustomedDialog({ children,isOpen,onClose,  className = "" }) {
             >
                 <div className="fixed inset-0 flex w-screen items-center bg-black/50 justify-center p-4">
                     <DialogPanel
-                        className={`w-[45vw]   bg-background p-8 rounded-lg ${className}`}
+                        className={`w-[600px] max-w-full  bg-background p-8 rounded-lg ${className}`}
                     >
                         {children}
                     </DialogPanel>

@@ -2,7 +2,7 @@ import Avatar from "@/Components/Avatar";
 import AvatarAndName from "@/Components/AvatarAndName";
 import CustomedPopover from "@/Components/CustomedPopover";
 import { setProfile } from "@/Store/profileSlice";
-import { useClose } from "@headlessui/react";
+
 import { usePage } from "@inertiajs/react";
 import React from "react";
 import { useDispatch } from "react-redux";
@@ -10,7 +10,7 @@ import { useDispatch } from "react-redux";
 export default function UserOptions() {
     const { auth } = usePage().props;
     const dispatch = useDispatch();
-    const close = useClose();
+   
     return (
         <CustomedPopover
             anchor="top start"
@@ -38,7 +38,7 @@ export default function UserOptions() {
             <CustomedPopover.ListItem
                 onClick={() => {
                     dispatch(setProfile(auth.user));
-                    close();
+                    
                 }}
             >
                 Profile

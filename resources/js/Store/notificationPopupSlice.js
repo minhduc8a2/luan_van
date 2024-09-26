@@ -2,10 +2,14 @@ import { createSlice } from "@reduxjs/toolkit";
 
 export const notificationPopupSlice = createSlice({
     name: "notificationPopup",
-    initialState: null,
+    initialState: {
+        type: null,
+        messages: [],
+    },
     reducers: {
         setNotificationPopup(state, action) {
-            return action.payload;
+            state.type = action.payload?.type;
+            state.messages = action.payload?.messages || [];
         },
     },
 });

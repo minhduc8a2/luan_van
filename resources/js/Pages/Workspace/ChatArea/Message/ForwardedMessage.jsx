@@ -34,8 +34,15 @@ export default function ForwardedMessage({
     resetNewMessageReactionReceive,
     noToolbar = false,
 }) {
-    const { auth, channel, channelUsers, permissions, users, channels, directChannels } =
-        usePage().props;
+    const {
+        auth,
+        channel,
+        channelUsers,
+        permissions,
+        users,
+        channels,
+        directChannels,
+    } = usePage().props;
     const dispatch = useDispatch();
     const { messageId } = useSelector((state) => state.mention);
     const files = message.files || [];
@@ -65,18 +72,20 @@ export default function ForwardedMessage({
         return users.find((u) => u.id == message.forwarded_message.user_id);
     }, [users, message]);
     const forwardedMessageChannel = useMemo(() => {
-        return channels.find(
-            (cn) => cn.id == message.forwarded_message.channel_id
-        ) || directChannels.find(
-            (cn) => cn.id == message.forwarded_message.channel_id
+        return (
+            channels.find(
+                (cn) => cn.id == message.forwarded_message.channel_id
+            ) ||
+            directChannels.find(
+                (cn) => cn.id == message.forwarded_message.channel_id
+            )
         );
-    }, [channels,directChannels, message]);
+    }, [channels, directChannels, message]);
     const groupedReactions = useMemo(() => {
         return groupReactions(reactions, channelUsers, auth.user);
     }, [reactions]);
     useEffect(() => {
         setReactions(message.reactions ? [...message.reactions] : []);
-        
     }, [message]);
 
     useEffect(() => {
@@ -212,7 +221,7 @@ export default function ForwardedMessage({
                     dispatch(
                         setNotificationPopup({
                             type: "error",
-                            message: errors.server,
+                            messages: Object.values(errors),
                         })
                     );
                 },
@@ -320,10 +329,12 @@ export default function ForwardedMessage({
                     removeMessageReaction={removeMessageReaction}
                 />
 
-                {message.thread_messages_count>0 && !threadStyle && (
+                {message.thread_messages_count > 0 && !threadStyle && (
                     <button
                         className="border hover:bg-black/25 flex justify-between items-center border-white/15 w-96 rounded-lg mt-4 py-1 px-4"
-                        onClick={() => dispatch(setThreadedMessageId(message.id))}
+                        onClick={() =>
+                            dispatch(setThreadedMessageId(message.id))
+                        }
                     >
                         <div className="">
                             <span className="text-link text-sm">

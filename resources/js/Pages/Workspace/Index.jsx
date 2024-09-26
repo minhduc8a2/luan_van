@@ -120,22 +120,26 @@ function MainArea() {
     }
 }
 function NotificationPopup() {
-    const notificationPopup = useSelector((state) => state.notificationPopup);
+    const { type, messages } = useSelector((state) => state.notificationPopup);
     const dispatch = useDispatch();
 
     return (
         <OverlaySimpleNotification
-            show={notificationPopup}
+            show={type}
             onClose={() => dispatch(setNotificationPopup(null))}
         >
-            {notificationPopup?.type == "error" && (
-                <h5 className="text-danger-400 text-lg">
-                    {notificationPopup.message}
-                </h5>
-            )}
-            {notificationPopup?.type == "" && (
-                <h5 className=" text-lg">{notificationPopup.message}</h5>
-            )}
+            <ul className="gap-y-2 flex flex-col">
+                {messages.map((message) => (
+                    <li
+                        className={`${
+                            type == "error" ? "text-danger-400" : ""
+                        } text-lg`}
+                        key={message}
+                    >
+                        {message}
+                    </li>
+                ))}
+            </ul>
         </OverlaySimpleNotification>
     );
 }

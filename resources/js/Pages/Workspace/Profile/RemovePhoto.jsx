@@ -15,7 +15,7 @@ export default function RemovePhoto({ user }) {
                 dispatch(
                     setNotificationPopup({
                         type: "error",
-                        message: errors.server,
+                        messages: Object.values(errors),
                     })
                 ),
             onFinish: () => {

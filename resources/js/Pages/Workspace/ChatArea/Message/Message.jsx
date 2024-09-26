@@ -202,7 +202,7 @@ export default function Message({
                     dispatch(
                         setNotificationPopup({
                             type: "error",
-                            message: errors.server,
+                            messages: Object.values(errors),
                         })
                     );
                 },

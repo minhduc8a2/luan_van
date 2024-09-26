@@ -3,7 +3,8 @@ import {
     Popover,
     PopoverButton,
     PopoverPanel,
-  
+    CloseButton,
+    useClose,
 } from "@headlessui/react";
 function CustomedPopover({
     triggerNode,
@@ -11,7 +12,6 @@ function CustomedPopover({
 
     anchor = "",
 }) {
-   
     return (
         <Popover className="relative">
             <PopoverButton className="!outline-none">
@@ -28,12 +28,13 @@ function CustomedPopover({
 }
 
 function ListItem({ children, onClick }) {
+    const close = useClose();
     return (
         <div
             className="hover:bg-link text-white/85 px-4 py-1 cursor-pointer"
             onClick={() => {
                 onClick();
-                
+                close();
             }}
         >
             {children}
