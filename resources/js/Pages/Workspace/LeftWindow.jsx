@@ -21,7 +21,6 @@ export default function LeftWindow({ children }) {
             dispatch(setLeftWindowWidth(width));
         };
         const onMouseUp = (e) => {
-            if (e.target != draggingBarRef.current) return;
             isDraggingRef.current = false;
         };
         const onMouseDown = (e) => {

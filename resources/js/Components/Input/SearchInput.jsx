@@ -1,12 +1,14 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
-import { FaLock } from "react-icons/fa";
+
 import { IoIosSearch } from "react-icons/io";
+import { IoSearch } from "react-icons/io5";
 export default function SearchInput({
-    placeholder="",
+    placeholder = "",
     list,
     filterFunction,
     renderItemNode,
     onChange = () => {},
+    onSearch = () => {},
 }) {
     const [isOpen, setIsOpen] = useState(false);
     const [searchValue, setSearchValue] = useState("");
@@ -37,10 +39,15 @@ export default function SearchInput({
 
     return (
         <div className="relative mt-4">
-            <div
+            <form
                 className={`flex bg-background border-white/15 items-center px-2 border rounded-lg ${
                     focused ? " ring-link/15 ring-4  !border-link" : ""
                 }  `}
+                onSubmit={(e) => {
+                    e.preventDefault();
+                    onSearch(searchValue);
+                    setIsOpen(false);
+                }}
             >
                 <IoIosSearch className="text-2xl text-white/85" />
                 <input
@@ -55,13 +62,24 @@ export default function SearchInput({
                         setSearchValue(e.target.value?.toLowerCase());
                     }}
                 />
-            </div>
+            </form>
 
-            {resultList.length > 0 && searchValue && isOpen && (
+            {searchValue && isOpen && (
                 <ul
                     ref={panelRef}
                     className="absolute z-10 w-[104%] left-1/2 -translate-x-1/2 bg-foreground  border border-white/15 max-h-96 overflow-y-auto scrollbar text-white rounded-lg shadow-lg mt-1"
                 >
+                    <li>
+                        <button
+                            className="cursor-pointer p-4 flex gap-x-4 items-center hover:bg-white/15 w-full "
+                            onClick={() => {
+                                onSearch(searchValue);
+                                setIsOpen(false);
+                            }}
+                        >
+                            <IoSearch /> {searchValue}
+                        </button>
+                    </li>
                     {resultList.map((item, index) => (
                         <li
                             key={index}

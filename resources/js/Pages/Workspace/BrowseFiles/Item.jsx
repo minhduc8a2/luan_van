@@ -13,16 +13,58 @@ import { isDocument, isImage, isVideo } from "@/helpers/fileHelpers";
 
 import VideoFile from "./VideoFile";
 import copy from "copy-to-clipboard";
-import { usePage } from "@inertiajs/react";
+import { router, usePage } from "@inertiajs/react";
+import OverlayConfirm from "@/Components/Overlay/OverlayConfirm";
+import FileItem from "@/Components/FileItem";
 
 const Item = memo(function ({ file }) {
     const { publicAppUrl } = usePage().props;
     const [openOverlay, setOpenOverlay] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
+    const [showConfirm, setShowConfirm] = useState(null);
     const close = useClose();
-
+    function deleteFile() {
+        router.delete(
+            route("files.delete", {
+                file: file.id,
+            }),
+            {
+                headers: {
+                    "X-Socket-Id": Echo.socketId(),
+                },
+                preserveState: true,
+                only: [],
+                onError: (errors) => {
+                    dispatch(
+                        setNotificationPopup({
+                            type: "error",
+                            messages: Object.values(errors),
+                        })
+                    );
+                },
+            }
+        );
+    }
     return (
         <div className="mt-4 relative group/file_item" key={file.id}>
+            <OverlayConfirm
+                show={showConfirm}
+                onClose={() => setShowConfirm(false)}
+                onConfirm={() => {
+                    deleteFile();
+                    setShowConfirm(null);
+                }}
+                title="Delete file"
+                message={
+                    <div className="flex flex-col gap-y-4">
+                        <h5>
+                            Are you sure you want to delete this file
+                            permanently?
+                        </h5>
+                        {file && <FileItem file={file} maxWidth="max-w-full" />}
+                    </div>
+                }
+            />
             <div
                 className={` border border-white/15 group-hover/file_item:flex ${
                     isHovered ? "flex" : "hidden"
@@ -64,7 +106,10 @@ const Item = memo(function ({ file }) {
                             >
                                 Copy link to file
                             </button>
-                            <button className="text-danger-500 hover:bg-white/15 py-1 text-left px-4">
+                            <button
+                                className="text-danger-500 hover:bg-white/15 py-1 text-left px-4"
+                                onClick={() => setShowConfirm(true)}
+                            >
                                 Delete
                             </button>
                         </div>

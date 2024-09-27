@@ -1,11 +1,10 @@
-import Avatar from "@/Components/Avatar";
 import React, { useMemo } from "react";
-import { FaRegMessage } from "react-icons/fa6";
+
 import { PiHouseLineBold, PiHouseLineFill } from "react-icons/pi";
 import { FaRegBell } from "react-icons/fa6";
-import { IoIosMore } from "react-icons/io";
+
 import { Link } from "@inertiajs/react";
-import { LuPlus } from "react-icons/lu";
+
 import Dropdown from "@/Components/Dropdown";
 import WorkspaceAvatar from "@/Components/WorkspaceAvatar";
 import WorkspaceListItem from "@/Components/WorkspaceListItem";
@@ -15,15 +14,16 @@ import { useRef, useEffect } from "react";
 import { FaBell } from "react-icons/fa6";
 import { useDispatch, useSelector } from "react-redux";
 
-import { setPanelType } from "@/Store/panelSlice";
 import { usePage } from "@inertiajs/react";
 import More from "./More";
 import { setPageName } from "@/Store/pageSlice";
 import UserOptions from "./UserOptions";
 import { setSideBarWidth } from "@/Store/sizeSlice";
+import { setLeftWindowType } from "@/Store/windowTypeSlice";
 export default function SideBar({}) {
     const { auth, url, workspace, workspaces } = usePage().props;
-    const { type: panelType } = useSelector((state) => state.panel);
+    const { leftWindowType } = useSelector((state) => state.windowType);
+    const { name: pageName } = useSelector((state) => state.page);
     const { new_count } = useSelector((state) => state.activity);
 
     const dispatch = useDispatch();
@@ -70,12 +70,11 @@ export default function SideBar({}) {
 
                 <button
                     onClick={() => {
-                        dispatch(setPanelType("home"));
-                        dispatch(setPageName("normal"));
+                        dispatch(setLeftWindowType("panel"));
                     }}
                     className={itemStyle}
                 >
-                    {panelType == "home" ? (
+                    {leftWindowType == "panel"  ? (
                         <div className="p-2 rounded-lg bg-white/10 group-hover:bg-white/10 group-hover:scale-105 transition">
                             {" "}
                             <PiHouseLineFill className="text-lg " />{" "}
@@ -101,12 +100,11 @@ export default function SideBar({}) {
                 </button> */}
                 <button
                     onClick={() => {
-                        dispatch(setPanelType("activity"));
-                        dispatch(setPageName("normal"));
+                        dispatch(setLeftWindowType("activity"));
                     }}
                     className={itemStyle + " relative"}
                 >
-                    {panelType == "activity" ? (
+                    {leftWindowType == "activity"  ? (
                         <div className="p-2 rounded-lg bg-white/10 group-hover:bg-white/10 group-hover:scale-105 transition">
                             {" "}
                             <FaBell className="text-lg " />

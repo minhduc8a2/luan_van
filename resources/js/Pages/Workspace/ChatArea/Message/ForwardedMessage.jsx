@@ -205,29 +205,7 @@ export default function ForwardedMessage({
             }
         );
     }
-    function deleteFile(file) {
-        router.delete(
-            route("files.destroy", {
-                workspace: file.workspace_id,
-                file: file.id,
-            }),
-            {
-                headers: {
-                    "X-Socket-Id": Echo.socketId(),
-                },
-                preserveState: true,
-                only: [],
-                onError: (errors) => {
-                    dispatch(
-                        setNotificationPopup({
-                            type: "error",
-                            messages: Object.values(errors),
-                        })
-                    );
-                },
-            }
-        );
-    }
+    
 
     return (
         <div

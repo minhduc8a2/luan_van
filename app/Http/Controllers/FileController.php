@@ -30,11 +30,11 @@ class FileController extends Controller
         $hiddenUserIds = $user->hiddenUsers()->wherePivot('workspace_id', $workspace->id)->pluck('hidden_user_id')->toArray();
         return File::whereNotIn('user_id', $hiddenUserIds)->whereHas('messages', function ($query) use ($user, $workspace) {
             $query->whereIn('channel_id', $user->channels()->where('workspace_id', $workspace->id)->pluck('channels.id'));
-        })->where('name', 'like', "%" . $name . "%")->where('user_id', "<>", $user->id)->simplePaginate($perPage, ['*'], 'page', $page);
+        })->where('name', 'like', "%" . $name . "%")->where('user_id', "<>", $user->id)->latest()->simplePaginate($perPage, ['*'], 'page', $page);
     }
     function selfFiles($user, $name, $workspace, $perPage = 10, $page = 1)
     {
-        return $user->files()->where('name', 'like', "%" . $name . "%")->where('workspace_id', $workspace->id)->simplePaginate($perPage, ['*'], 'page', $page);
+        return $user->files()->where('name', 'like', "%" . $name . "%")->where('workspace_id', $workspace->id)->latest()->simplePaginate($perPage, ['*'], 'page', $page);
     }
 
     function all($user, $name, $workspace, $perPage = 10, $page = 1)
@@ -54,6 +54,7 @@ class FileController extends Controller
         })
 
             ->where('name', 'like', "%" . $name . "%")
+            ->latest()
 
             ->simplePaginate($perPage, ['*'], 'page', $page);
     }
@@ -71,15 +72,15 @@ class FileController extends Controller
             switch ($filter) {
                 case "shared":
                     $files = $this->getSharedFiles($user, $name, $workspace, $perPage, $page);
-                    return $files;
-                    // return back()->with('data', $files);
+
+                    return back()->with('data', $files);
 
                 case "self":
                     $files = $this->selfFiles($user, $name, $workspace, $perPage, $page);
-                    return  $files;
+                    return back()->with('data', $files);
                 default:
                     $files = $this->all($user, $name, $workspace, $perPage, $page);
-                    return $files;
+                    return back()->with('data', $files);
             }
         } catch (\Throwable $th) {
             dd($th);
@@ -129,7 +130,7 @@ class FileController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request, Workspace $workspace, File $file)
+    public function destroy(Request $request,  File $file)
     {
         // return back()->withErrors(['server' => "Something went wrong! Please try later."]);
         if ($request->user()->cannot('delete', [File::class, $file])) return abort(403);

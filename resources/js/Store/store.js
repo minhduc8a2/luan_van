@@ -2,7 +2,6 @@ import { configureStore } from "@reduxjs/toolkit";
 import huddleReducer from "@/Store/huddleSlice";
 import sizeReducer from "@/Store/sizeSlice";
 import OnlineStatusReducer from "./OnlineStatusSlice";
-import panelReducer from "./panelSlice";
 import activityReducer from "./activitySlice";
 import threadReducer from "./threadSlice";
 import mentionReducer from "./mentionSlice";
@@ -19,7 +18,6 @@ export const makeStore = () => {
             huddle: huddleReducer,
             size: sizeReducer,
             onlineStatus: OnlineStatusReducer,
-            panel: panelReducer,
             activity: activityReducer,
             thread: threadReducer,
             mention: mentionReducer,

@@ -189,8 +189,7 @@ export default function Message({
     }
     function deleteFile(file) {
         router.delete(
-            route("files.destroy", {
-                workspace: file.workspace_id,
+            route("files.delete", {
                 file: file.id,
             }),
             {

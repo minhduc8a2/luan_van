@@ -25,8 +25,7 @@ import { InView } from "react-intersection-observer";
 import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
 import { FaToggleOn } from "react-icons/fa";
 export default function Activity() {
-   
-    const { type: panelType } = useSelector((state) => state.panel);
+    const { leftWindowType } = useSelector((state) => state.windowType);
     const nextPageUrlRef = useRef(null);
     const dispatch = useDispatch();
     const [loading, setLoading] = useState(false);
@@ -64,7 +63,7 @@ export default function Activity() {
     }, []);
     useEffect(() => {
         return () => {
-            if (panelType == "activity") {
+            if (leftWindowType == "activity") {
                 dispatch(setNotificationsCount(0));
                 if (
                     notifications.some(
@@ -84,7 +83,7 @@ export default function Activity() {
                     );
             }
         };
-    }, [panelType]);
+    }, [leftWindowType]);
     const filteredNotifications = useMemo(() => {
         return notifications.filter((notification) => {
             if (onlyUnread) return !notification.view_at;
@@ -92,7 +91,7 @@ export default function Activity() {
         });
     }, [notifications, onlyUnread]);
     return (
-        <div className="bg-secondary flex flex-col h-full rounded-l-lg rounded-s-lg pb-4">
+        <div className="bg-black/35 flex flex-col h-full rounded-l-lg rounded-s-lg pb-4">
             <div className="flex justify-between items-end p-4">
                 <h3 className="text-xl font-semibold">Activity</h3>
 

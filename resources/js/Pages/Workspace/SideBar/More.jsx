@@ -11,10 +11,13 @@ import { IoSearch } from "react-icons/io5";
 import { TbStack2 } from "react-icons/tb";
 import { setPageName } from "@/Store/pageSlice";
 import { useDispatch } from "react-redux";
+import { setLeftWindowType, setRightWindowType } from "@/Store/windowTypeSlice";
 export default function More() {
     const dispatch = useDispatch();
     function switchPage(pageName) {
         dispatch(setPageName(pageName));
+        dispatch(setLeftWindowType(null));
+        dispatch(setRightWindowType(null));
     }
     return (
         <Popover className="relative group">
@@ -40,6 +43,7 @@ export default function More() {
                                 <MoreButton
                                     onClick={() => {
                                         switchPage("browseFiles");
+
                                         close();
                                     }}
                                     title="Files"
@@ -51,6 +55,7 @@ export default function More() {
                                 <MoreButton
                                     onClick={() => {
                                         switchPage("browseChannels");
+
                                         close();
                                     }}
                                     title="Channels"

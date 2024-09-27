@@ -31,11 +31,9 @@ import {
 
 import Item from "./Item";
 import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
-import Video from "@/Components/Video";
+
 import { InView, useInView } from "react-intersection-observer";
-import { PhotoProvider, PhotoView } from "react-photo-view";
-import { IoMdCloudDownload } from "react-icons/io";
-import { AiOutlineZoomIn, AiOutlineZoomOut } from "react-icons/ai";
+
 import DocumentInSearch from "./DocumentInSearch";
 import FileIcon from "@/Components/FileIcon";
 import { useDispatch } from "react-redux";
@@ -44,14 +42,12 @@ export default function BrowseFiles() {
     const { auth, flash, workspace, channels } = usePage().props;
     const dispatch = useDispatch();
     const [files, setFiles] = useState({});
-    const [searchFiles, setSearchFiles] = useState([]);
+    const [searchFilter, setSearchFilter] = useState("");
     const [sharedFiles, setSharedFiles] = useState({});
     const [loading, setLoading] = useState(false);
     const [filter, setFilter] = useState("shared");
-    const localFoundRef = useRef(false);
+
     const filterSwitchRef = useRef(false);
-    const [searchValue, setSearchValue] = useState("");
-    const [showVideo, setShowVideo] = useState(false);
 
     const nextPageUrlRef = useRef(null);
     const loadingRef = useRef(null);
@@ -63,12 +59,12 @@ export default function BrowseFiles() {
                     case "FileObserver_fileDeleted":
                         setSharedFiles((pre) => {
                             const temp = new Map(pre);
-                            temp.delete(e.data);
+                            delete temp[e.data];
                             return temp;
                         });
                         setFiles((pre) => {
                             const temp = new Map(pre);
-                            temp.delete(e.data);
+                            delete temp[e.data];
                             return temp;
                         });
                         break;
@@ -78,7 +74,7 @@ export default function BrowseFiles() {
                             setSharedFiles((pre) => {
                                 const temp = new Map(pre);
                                 e.data.files.forEach((f) => {
-                                    temp.set(f.id, f);
+                                    temp[f.id] = f;
                                 });
                                 return temp;
                             });
@@ -86,7 +82,7 @@ export default function BrowseFiles() {
                             setFiles((pre) => {
                                 const temp = new Map(pre);
                                 e.data.files.forEach((f) => {
-                                    temp.set(f.id, f);
+                                    temp[f.id] = f;
                                 });
                                 return temp;
                             });
@@ -105,38 +101,7 @@ export default function BrowseFiles() {
         list.forEach((file) => (temp[file.id] = file));
         return temp;
     }
-    // useEffect(() => {
-    //     router.get(
-    //         route("files.index", workspace.id),
-    //         { filter, name: searchValue, page: 1 },
-    //         {
-    //             preserveState: true,
-    //             only: [],
-    //         }
-    //     );
-    //     // const controller = new AbortController();
-    //     // setLoading(true);
-    //     // axios
-    //     //     .get(route("files.index"), {
-    //     //         signal: controller.signal,
-    //     //         params: { filter, name: searchValue, page: 1 },
-    //     //     })
-    //     //     .then((response) => {
-    //     //         console.log(response);
-    //     //         setFiles((pre) => mutateFiles(pre, response.data?.data));
-    //     //         setLoading(false);
-    //     //     })
-    //     //     .catch((err) => {
-    //     //         console.log(err);
-    //     //     });
 
-    //     // return () => {
-    //     //     controller.abort();
-    //     // };
-    // }, []);
-    // useEffect(() => {
-    //     console.log(flash);
-    // }, [flash]);
     const filesList = useMemo(() => {
         if (filter == "shared") return Object.values(sharedFiles);
         return Object.values(files);
@@ -146,107 +111,69 @@ export default function BrowseFiles() {
             filesList.filter((file) => {
                 switch (filter) {
                     case "shared":
-                        return file.user_id != auth.user.id;
+                        return (
+                            file.user_id != auth.user.id &&
+                            file.name
+                                .toLowerCase()
+                                .includes(searchFilter.toLowerCase())
+                        );
                     case "self":
-                        return file.user_id == auth.user.id;
+                        return (
+                            file.user_id == auth.user.id &&
+                            file.name
+                                .toLowerCase()
+                                .includes(searchFilter.toLowerCase())
+                        );
                     default:
-                        return true;
+                        return file.name
+                            .toLowerCase()
+                            .includes(searchFilter.toLowerCase());
                 }
             }),
-        [filesList, filter, searchValue]
+        [filesList, filter, searchFilter]
     );
-    useEffect(() => {
-        if (
-            filteredFilesList.some((file) => {
-                return file.name
-                    .toLowerCase()
-                    .includes(searchValue.toLowerCase());
-            })
-        )
-            localFoundRef.current = true;
-        if (localFoundRef.current) {
-            setSearchFiles(
-                filteredFilesList.filter((file) => {
-                    return file.name
-                        .toLowerCase()
-                        .includes(searchValue.toLowerCase());
-                })
-            );
-        }
-    }, [filesList, searchValue]);
-    const loadFiles = useCallback(
-        (controller) => {
-            setLoading(true);
 
-            axios
-                .get(route("files.index", workspace.id), {
-                    params: { filter, name: searchValue, page: 1 },
-                    headers: {
-                        "Cache-Control": "public",
-                    },
-                    signal: controller.signal,
-                })
-                .then((response) => {
-                    // console.log(response.data?.data);
-                    setSearchFiles(response.data.data);
-                    setLoading(false);
-                })
-                .catch((error) => {
-                    setLoading(false);
-                });
-        },
-        [filter, searchValue]
-    );
     useEffect(() => {
         // if (!searchValue) {
         //     return;
         // }
 
-        if (localFoundRef.current && !filterSwitchRef.current) return;
-        if (filterSwitchRef.current) filterSwitchRef.current = false;
-        const controller = new AbortController();
-        const delayDebounceFn = setTimeout(() => loadFiles(controller), 500);
+        let token = null;
 
-        return () => {
-            controller.abort();
-            clearTimeout(delayDebounceFn);
-        };
-    }, [searchValue, filter]);
-    useEffect(() => {
-        // if (!searchValue) {
-        //     return;
-        // }
-
-        const controller = new AbortController();
-
-        setLoading(true);
-
-        axios
-            .get(route("files.index", workspace.id), {
-                params: { filter, name: "", page: 1 },
+        router.get(
+            route("files.index", workspace.id),
+            { filter, name: "", page: 1 },
+            {
+                onCancelToken: (cancelToken) => (token = cancelToken),
+                preserveState: true,
+                only: [],
+                replace: false,
                 headers: {
                     "Cache-Control": "public",
                 },
-                signal: controller.signal,
-            })
-            .then((response) => {
-                if (filter === "shared") {
-                    setSharedFiles((prev) =>
-                        mutateFiles(prev, response.data?.data)
-                    );
-                }
-                nextPageUrlRef.current = response.data?.next_page_url;
-                setFiles((pre) => mutateFiles(pre, response.data?.data));
-                setLoading(false);
-            })
-            .catch((error) => {
-                setLoading(false);
-            });
+
+                onStart: () => {
+                    setLoading(true);
+                },
+                onFinish: () => {
+                    setLoading(false);
+                },
+            }
+        );
 
         return () => {
-            controller.abort();
+            token.cancel();
         };
     }, [filter]);
+    useEffect(() => {
+        if (flash.data != null) {
+            if (filter === "shared") {
+                setSharedFiles((prev) => mutateFiles(prev, flash.data.data));
+            }
+            nextPageUrlRef.current = flash.data.next_page_url;
+            setFiles((pre) => mutateFiles(pre, flash.data.data));
+        }
+    }, [flash.data, filter]);
     const groupedFiles = useMemo(() => {
         const gFiles = groupListByDate(filteredFilesList);
         const currentDate = formatDDMMYYY(new Date());
@@ -257,6 +184,7 @@ export default function BrowseFiles() {
             })
             .map((key) => {
                 const formatedDate = formatDDMMYYY(new Date(key));
+                gFiles[key].sort((a, b) => b.id - a.id);
                 return {
                     date: formatedDate == currentDate ? "Today" : formatedDate,
                     fis: gFiles[key],
@@ -266,30 +194,56 @@ export default function BrowseFiles() {
         return result;
     }, [filteredFilesList]);
     const loadMore = useCallback(() => {
-        if (nextPageUrlRef.current && !loadingRef.current) {
-            setLoading(true);
+        let token = null;
+        if (nextPageUrlRef.current) {
             loadingRef.current = true;
-            const localFilter = filter;
-            axios
-                .get(nextPageUrlRef.current)
-                .then((response) => {
-                    nextPageUrlRef.current = response.data?.next_page_url;
-                    if (localFilter === "shared") {
-                        setSharedFiles((prev) =>
-                            mutateFiles(prev, response.data?.data)
-                        );
-                    }
-                    setFiles((prev) => mutateFiles(prev, response.data?.data));
-                    setLoading(false);
-                    loadingRef.current = false;
-                })
-                .catch((error) => {
-                    console.error(error);
-                    setLoading(false);
-                    loadingRef.current = false;
-                });
+
+            router.get(
+                nextPageUrlRef.current,
+                {},
+                {
+                    onCancelToken: (cancelToken) => (token = cancelToken),
+                    preserveState: true,
+                    only: [],
+                    replace: false,
+                    headers: {
+                        "Cache-Control": "public",
+                    },
+                    onStart: () => {
+                        setLoading(true);
+                    },
+                    onFinish: () => {
+                        setLoading(false);
+                    },
+                }
+            );
         }
+        return () => {
+            if (token) token.cancel();
+        };
     }, [filter]);
+    function search(searchValue) {
+        setSearchFilter(searchValue);
+        router.get(
+            route("files.index", workspace.id),
+            { filter, name: searchValue, page: 1 },
+            {
+                preserveState: true,
+                only: [],
+                replace: false,
+                headers: {
+                    "Cache-Control": "public",
+                },
+
+                onStart: () => {
+                    setLoading(true);
+                },
+                onFinish: () => {
+                    setLoading(false);
+                },
+            }
+        );
+    }
     return (
         <div className=" w-full h-full grid grid-cols-5">
             <div className="h-full col-span-1 bg-black/35 px-2">
@@ -304,12 +258,8 @@ export default function BrowseFiles() {
                             nextPageUrlRef.current = false;
                             setFilter("shared");
                         }}
-                        
                     >
-                        <div
-                            className="flex gap-x-2 items-center"
-                           
-                        >
+                        <div className="flex gap-x-2 items-center">
                             <PiShareFat />
                             Share with you
                         </div>
@@ -368,14 +318,18 @@ export default function BrowseFiles() {
                         )}
                     </div>
                     <SearchInput
-                        list={searchFiles}
+                        onSearch={(searchValue) => search(searchValue)}
+                        list={filteredFilesList}
                         placeholder="Search files"
                         filterFunction={(searchValue, list) => {
-                            return [...list];
+                            return list.filter((file) => {
+                                return file.name
+                                    .toLowerCase()
+                                    .includes(searchValue.toLowerCase());
+                            });
                         }}
                         onChange={(e) => {
-                            setSearchValue(e.target.value);
-                            localFoundRef.current = false;
+                            if (!e.target.value) setSearchFilter("");
                         }}
                         renderItemNode={(item) => {
                             if (isImage(item.type)) {

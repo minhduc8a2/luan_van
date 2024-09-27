@@ -10,8 +10,7 @@ import { makeStore } from "@/Store/store";
 import { Provider, useDispatch, useSelector } from "react-redux";
 import { setNotificationsCount } from "@/Store/activitySlice";
 import { initMessageCountForChannel } from "@/Store/newMessageCountsMapSlice";
-import { setPanelWidth } from "@/Store/panelSlice";
-import { setThreadWidth } from "@/Store/threadSlice";
+
 import BrowseChannels from "./BrowseChannels/BrowseChannels";
 import BrowseFiles from "./BrowseFiles/BrowseFiles";
 import OverlaySimpleNotification from "@/Components/Overlay/OverlaySimpleNotification";
@@ -24,6 +23,7 @@ import RightWindow from "./RightWindow";
 import { setLeftWindowWidth, setRightWindowWidth } from "@/Store/sizeSlice";
 import LeftWindow from "./LeftWindow";
 import Profile from "./Profile/Profile";
+import Activity from "./Activity/Activity";
 export default function Index({
     newNoftificationsCount,
     channels,
@@ -90,34 +90,40 @@ function MainArea() {
     const { name: pageName } = useSelector((state) => state.page);
     const { messageId: threadMessageId } = useSelector((state) => state.thread);
     const { user: profile } = useSelector((state) => state.profile);
-    const { rightWindowType } = useSelector((state) => state.windowType);
+    const { rightWindowType, leftWindowType } = useSelector(
+        (state) => state.windowType
+    );
+    let mainWindow = "";
     switch (pageName) {
-        case "normal":
-            return (
-                <>
-                    <LeftWindow>
-                        <Panel />
-                    </LeftWindow>
-                    <ChatArea />
-                    {rightWindowType && (
-                        <RightWindow>
-                            {threadMessageId && rightWindowType == "thread" && (
-                                <Thread />
-                            )}
-                            {profile && rightWindowType == "profile" && (
-                                <Profile />
-                            )}
-                        </RightWindow>
-                    )}
-                </>
-            );
         case "browseChannels":
-            return <BrowseChannels />;
+            mainWindow = <BrowseChannels />;
+            break;
         case "browseFiles":
-            return <BrowseFiles />;
+            mainWindow = <BrowseFiles />;
+            break;
         default:
-            return "";
+            mainWindow = <ChatArea />;
+            break;
     }
+    return (
+        <>
+            {leftWindowType && (
+                <LeftWindow>
+                    {leftWindowType == "panel" && <Panel />}
+                    {leftWindowType == "activity" && <Activity />}
+                </LeftWindow>
+            )}
+            {mainWindow}
+            {rightWindowType && (
+                <RightWindow>
+                    {threadMessageId && rightWindowType == "thread" && (
+                        <Thread />
+                    )}
+                    {profile && rightWindowType == "profile" && <Profile />}
+                </RightWindow>
+            )}
+        </>
+    );
 }
 function NotificationPopup() {
     const { type, messages } = useSelector((state) => state.notificationPopup);
