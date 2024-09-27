@@ -302,7 +302,7 @@ export default function Message({
                             }`}
                             onClick={() => dispatch(setProfile(user))}
                         >
-                            {user.name}
+                            {user.display_name || user.name}
                         </button>
                         {user.notMember && (
                             <span className="text-xs leading-tight text-white/75 font-extralight">

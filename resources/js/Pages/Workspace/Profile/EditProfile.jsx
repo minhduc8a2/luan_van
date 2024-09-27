@@ -20,7 +20,7 @@ export default function EditProfile({ user, triggerButton }) {
     const dispatch = useDispatch();
     const { data, setData, patch, processing, errors } = useForm({
         name: user.name,
-        displayName: user.displayName || "",
+        display_name: user.display_name || "",
     });
     useEffect(() => {
         if (!avatarFile) return;
@@ -100,10 +100,10 @@ export default function EditProfile({ user, triggerButton }) {
                             </label>
                             <TextInput
                                 id="profile-display-name"
-                                value={data.displayName}
+                                value={data.display_name}
                                 placeholder="Display name"
                                 onChange={(e) =>
-                                    setData("displayName", e.target.value)
+                                    setData("display_name", e.target.value)
                                 }
                             />
                         </div>

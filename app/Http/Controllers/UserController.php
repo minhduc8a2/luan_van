@@ -57,14 +57,14 @@ class UserController extends Controller
     {
         if ($request->user()->id !== $user->id) return abort(403);
         $name = $request->validated('name');
-        $displayName = $request->validated('displayName');
+        $display_name = $request->validated('display_name');
         $email = $request->validated('email');
         $phone = $request->validated('phone');
         try {
             DB::beginTransaction();
-
+          
             if ($name) $user->name = $name;
-            if ($displayName) $user->display_name = $displayName;
+            if ($display_name) $user->display_name = $display_name;
             if ($email) $user->email = $email;
             if ($phone) $user->phone = $phone;
 

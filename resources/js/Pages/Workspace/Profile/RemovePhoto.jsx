@@ -44,7 +44,7 @@ export default function RemovePhoto({ user }) {
                     <div className="h-48 w-48 relative overflow-hidden mt-4 rounded-lg mx-auto">
                         <img
                             src={user.avatar_url || default_avatar_url}
-                            alt={user.name}
+                            alt={user.display_name || user.name}
                             className="object-cover object-center"
                         />
                     </div>

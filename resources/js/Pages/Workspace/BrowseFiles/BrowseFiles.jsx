@@ -304,6 +304,7 @@ export default function BrowseFiles() {
                             nextPageUrlRef.current = false;
                             setFilter("shared");
                         }}
+                        
                     >
                         <div
                             className="flex gap-x-2 items-center"

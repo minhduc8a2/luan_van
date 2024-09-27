@@ -57,14 +57,14 @@ export default function Managers() {
                                             className="text-link"
                                             key={"name_" + user.id}
                                         >
-                                            {user.name}
+                                            {user.display_name || user.name}
                                         </span>
                                     );
                                 else if (index == managers.length - 2)
                                     return (
                                         <span key={"name_" + user.id}>
                                             <span className="text-link">
-                                                {user.name}
+                                                {user.display_name || user.name}
                                             </span>{" "}
                                             and{" "}
                                         </span>
@@ -73,7 +73,7 @@ export default function Managers() {
                                     return (
                                         <span key={"name_" + user.id}>
                                             <span className="text-link">
-                                                {user.name}
+                                                {user.display_name || user.name}
                                             </span>
                                             ,{" "}
                                         </span>
@@ -134,11 +134,18 @@ export default function Managers() {
 
                     <ul className="overflow-hidden h-[30vh]">
                         {managers
-                            .filter((user) =>
-                                user.name
-                                    .toLowerCase()
-                                    .includes(searchValue.toLowerCase())
-                            )
+                            .filter((user) => {
+                                const lowerCaseValue =
+                                    searchValue.toLowerCase();
+                                return (
+                                    user.display_name
+                                        .toLowerCase()
+                                        .includes(lowerCaseValue) ||
+                                    user.name
+                                        .toLowerCase()
+                                        .includes(lowerCaseValue)
+                                );
+                            })
                             .map((user) => (
                                 <div
                                     className="px-6 py-4 flex justify-between items-center group hover:bg-white/15"
@@ -149,12 +156,14 @@ export default function Managers() {
                                         user={user}
                                         isOnline={onlineStatusMap[user.id]}
                                     />
-                                    {permissions.addManagers && <button
-                                        className="text-link text-sm hover:underline hidden group-hover:block"
-                                        onClick={() => removeManager(user)}
-                                    >
-                                        Remove
-                                    </button>}
+                                    {permissions.addManagers && (
+                                        <button
+                                            className="text-link text-sm hover:underline hidden group-hover:block"
+                                            onClick={() => removeManager(user)}
+                                        >
+                                            Remove
+                                        </button>
+                                    )}
                                 </div>
                             ))}
                     </ul>

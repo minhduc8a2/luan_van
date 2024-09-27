@@ -25,7 +25,7 @@ export default function AutocompleInput({
                             <AvatarAndName
                                 user={user}
                                 className="h-4 w-4"
-                                isOnline={ onlineStatusMap[user.id]}
+                                isOnline={onlineStatusMap[user.id]}
                             />
                             <button
                                 className=""
@@ -53,18 +53,25 @@ export default function AutocompleInput({
                     setInputValue(value);
                 }}
             />
-            {users.filter(
-                (user) =>
+            {users.filter((user) => {
+                const lowerCaseValue = inputValue.toLowerCase();
+                return (
                     inputValue != "" &&
-                    user.name.toLowerCase().includes(inputValue.toLowerCase())
-            ).length > 0 && (
+                    (user.display_name.toLowerCase().includes(lowerCaseValue) ||
+                        user.name.toLowerCase().includes(lowerCaseValue))
+                );
+            }).length > 0 && (
                 <ul className="flex flex-col gap-y-2 absolute w-[105%] p-2 border border-white/15 top-full mt-2 left-1/2 -translate-x-1/2 bg-background rounded-xl z-20">
                     {users
-                        .filter((user) =>
-                            user.name
-                                .toLowerCase()
-                                .includes(inputValue.toLowerCase())
-                        )
+                        .filter((user) => {
+                            const lowerCaseValue = inputValue.toLowerCase();
+                            return (
+                                user.display_name
+                                    .toLowerCase()
+                                    .includes(lowerCaseValue) ||
+                                user.name.toLowerCase().includes(lowerCaseValue)
+                            );
+                        })
                         .map((user) => (
                             <li key={user.id} className="p-1 w-full">
                                 <button
@@ -80,9 +87,7 @@ export default function AutocompleInput({
                                     <AvatarAndName
                                         user={user}
                                         className="h-6 w-6"
-                                        isOnline={
-                                            onlineStatusMap[user.id]
-                                        }
+                                        isOnline={onlineStatusMap[user.id]}
                                     />
                                 </button>
                             </li>

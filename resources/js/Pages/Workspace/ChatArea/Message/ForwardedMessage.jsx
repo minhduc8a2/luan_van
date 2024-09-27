@@ -269,7 +269,7 @@ export default function ForwardedMessage({
                                 user.notMember ? "line-through" : ""
                             }`}
                         >
-                            {user.name}
+                            {user.display_name || user.name}
                         </div>
                         {user.notMember && (
                             <span className="text-xs leading-tight text-white/75 font-extralight">

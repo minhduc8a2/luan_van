@@ -4,7 +4,7 @@ export function getChannelName(channel, channelUsers, currentUser) {
     if (isDirectChannel) {
         try {
             const user = channelUsers.find((user) => user.id != currentUser.id);
-            return user.name;
+            return user.display_name || user.name;
         } catch (error) {
             console.error(error);
         }

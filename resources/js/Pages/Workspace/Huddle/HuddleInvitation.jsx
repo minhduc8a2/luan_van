@@ -34,7 +34,7 @@ export default function HuddleInvitation({ close }) {
                     {invitedUsers.map((user, index) => {
                         return (
                             <span key={user.id} className="text-link">
-                                {`${user.name}${
+                                {`${user.display_name || user.name}${
                                     index != invitedUsers.length - 1 ? ", " : ""
                                 }`}
                             </span>

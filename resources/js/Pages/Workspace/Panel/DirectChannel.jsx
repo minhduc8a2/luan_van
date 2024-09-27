@@ -36,7 +36,7 @@ export function DirectChannel({ channel, user, isOnline = false }) {
                         isOnline={isOnline || onlineStatusMap[user.id]}
                     />
                     <div className="">
-                        {user.name}{" "}
+                        {user.display_name || user.name }{" "}
                         {user.id == auth.user.id ? (
                             <span className="opacity-75 ml-2">you</span>
                         ) : (

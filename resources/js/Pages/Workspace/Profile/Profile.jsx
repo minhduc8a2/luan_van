@@ -73,7 +73,7 @@ export default function Profile() {
             />
             <div className="flex justify-between mt-6">
                 <h3 className="text-2xl font-bold text-white/85">
-                    {user.name}
+                    {user.display_name || user.name}
                 </h3>
                 {hasOwnership && (
                     <EditProfile
@@ -112,7 +112,7 @@ export default function Profile() {
                             Huddle
                         </div>
                     </Button>
-                   <MoreOptions user={user}/>
+                    <MoreOptions user={user} />
                 </div>
             )}
             <hr className="my-4" />

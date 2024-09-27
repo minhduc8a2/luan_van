@@ -10,7 +10,7 @@ const AvatarAndName = memo(function ({ user, description, ...props }) {
             </div>
             <div className="flex flex-col justify-between">
                 <div className="">
-                    {user.name}{" "}
+                    {user.display_name || user.name}{" "}
                     {user.id == auth.user.id ? (
                         <span className="opacity-75 ml-2">you</span>
                     ) : (

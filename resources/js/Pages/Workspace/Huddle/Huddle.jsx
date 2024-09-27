@@ -395,7 +395,7 @@ export default function Huddle() {
                         else
                             return (
                                 <Tooltip content={<button className="text-nowrap">
-                                    {user.name}
+                                    {user.display_name || user.name}
                                 </button>}>
                                     <SquareImage
                                         key={user.id}

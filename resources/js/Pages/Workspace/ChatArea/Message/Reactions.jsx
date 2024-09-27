@@ -23,7 +23,7 @@ export default function Reactions({
                         <ul className="whitespace-nowrap p-1">
                             {reaction.users.map((user) => (
                                 <li key={user.id} className="text-xs">
-                                    {user.name}
+                                    {user.display_name || user.name}
                                 </li>
                             ))}
                         </ul>

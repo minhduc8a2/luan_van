@@ -99,11 +99,15 @@ export default function Members() {
 
             <ul className="overflow-hidden h-[30vh]">
                 {channelUsers
-                    .filter((user) =>
-                        user.name
-                            .toLowerCase()
-                            .includes(searchValue.toLowerCase())
-                    )
+                    .filter((user) => {
+                        const lowerCaseValue = searchValue.toLowerCase();
+                        return (
+                            user.display_name
+                                .toLowerCase()
+                                .includes(lowerCaseValue) ||
+                            user.name.toLowerCase().includes(lowerCaseValue)
+                        );
+                    })
                     .map((user) => (
                         <Member
                             key={"manager_" + user.id}

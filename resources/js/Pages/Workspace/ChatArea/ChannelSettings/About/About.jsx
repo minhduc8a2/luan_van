@@ -32,7 +32,7 @@ export default function About({ channelName, onClose }) {
             {channel.type != "DIRECT" && channel.type != "SELF" && (
                 <SettingsButton
                     title="Created by"
-                    description={`${channel.user.name} on ${UTCToDateTime(
+                    description={`${channel.user.display_name || channel.user.name} on ${UTCToDateTime(
                         channel.created_at
                     )}`}
                     className={`border-t-0 ${
