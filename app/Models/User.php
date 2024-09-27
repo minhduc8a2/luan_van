@@ -73,6 +73,22 @@ class User extends Authenticatable
         return $this->hasMany(Channel::class);
     }
 
+    public function hiddenUsers()
+    {
+        return $this->belongsToMany(User::class, 'hidden_users', 'user_id', 'hidden_user_id')
+            ->withPivot('channel_id')
+            ->withTimestamps();
+    }
+
+    
+    public function hiddenByUsers()
+    {
+        return $this->belongsToMany(User::class, 'hidden_users', 'hidden_user_id', 'user_id')
+            ->withPivot('channel_id')
+            ->withTimestamps();
+    }
+
+
     public function channels(): BelongsToMany
     {
         return $this->belongsToMany(Channel::class)->withPivot('role_id', 'last_read_at')->withTimestamps();

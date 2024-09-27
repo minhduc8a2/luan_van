@@ -15,6 +15,7 @@ import { FiHeadphones, FiMoreVertical } from "react-icons/fi";
 import { getDirectChannelFromUserId } from "@/helpers/channelHelper";
 import { setThreadedMessageId } from "@/Store/threadSlice";
 import { toggleHuddle } from "@/Store/huddleSlice";
+import MoreOptions from "./MoreOptions";
 
 export default function Profile() {
     const { default_avatar_url, auth, directChannels } = usePage().props;
@@ -111,11 +112,7 @@ export default function Profile() {
                             Huddle
                         </div>
                     </Button>
-                    <Button>
-                        <div className="flex items-center">
-                            <FiMoreVertical className="text-lg" />
-                        </div>
-                    </Button>
+                   <MoreOptions user={user}/>
                 </div>
             )}
             <hr className="my-4" />

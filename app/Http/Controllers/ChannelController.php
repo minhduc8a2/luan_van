@@ -177,6 +177,8 @@ class ChannelController extends Controller
         if ($request->user()->cannot('view', $channel)) {
             return  redirect(route('workspace.show', $channel->workspace->id));
         }
+        $user = $request->user();
+        $hiddenUserIds = $user->hiddenUsers()->wherePivot('channel_id', $channel->id)->pluck('hidden_user_id')->toArray();
 
         $messageId = $request->query('message_id');
         $pageNumber = null;
@@ -184,7 +186,7 @@ class ChannelController extends Controller
             $message = Message::find($messageId);
             if ($message) {
 
-                $messagePosition = $channel->messages()->withTrashed()
+                $messagePosition = $channel->messages()->whereNotIn('user_id', $hiddenUserIds)->withTrashed()
                     ->latest() // Order by latest first
                     ->where('created_at', '>=', $message->created_at) // Messages that are newer or equal to the mentioned one
                     ->count();
@@ -194,7 +196,7 @@ class ChannelController extends Controller
 
         if ($request->expectsJson()) {
             return [
-                'messages' => $channel->messages()->where('threaded_message_id', null)->withTrashed()->with([
+                'messages' => $channel->messages()->whereNotIn('user_id', $hiddenUserIds)->where('threaded_message_id', null)->withTrashed()->with([
                     'files' => function ($query) {
                         $query->withTrashed();
                     },
@@ -207,7 +209,7 @@ class ChannelController extends Controller
                 ])->withCount('threadMessages')->latest()->simplePaginate($perPage, ['*'], 'page', $pageNumber)
             ];
         }
-        $user = $request->user();
+
         /**
          * @var Workspace $workspace
          */
@@ -231,6 +233,9 @@ class ChannelController extends Controller
 
         $directChannels = fn() => $user->channels()
             ->where("type",  ChannelTypes::DIRECT->name)
+            ->whereHas('users', function ($query) use ($hiddenUserIds) {
+                $query->whereNotIn('user_id', $hiddenUserIds);
+            })
             ->where('is_archived', false)
             ->withCount([
                 'messages as unread_messages_count' => function (Builder $query) use ($user) {
@@ -246,7 +251,10 @@ class ChannelController extends Controller
         $selfChannel = fn() => $workspace->channels()->where("type", "=", "SELF")->where("user_id", "=", $request->user()->id)->first();
 
         $workspaces = fn() => $request->user()->workspaces;
-        $users = fn() => $workspace->users;
+        $users = fn() => $workspace->users->map(function ($user) use ($hiddenUserIds) {
+            $user->is_hidden = in_array($user->id, $hiddenUserIds);
+            return $user;
+        });
         $newNotificationsCount = fn() => $user->notifications()->where("read_at", null)->count();
 
         $permissions = fn() => [
@@ -281,20 +289,27 @@ class ChannelController extends Controller
         ];
 
         $mainChannelId = fn() => $workspace->mainChannel()->id;
-        return Inertia::render("Workspace/Index", [
-            'mainChannelId' => $mainChannelId,
-            'channelPermissions' => $channelPermissions,
-            'workspace' => $workspace,
-            'permissions' => $permissions,
+        $managers = fn() => $channel->users()->wherePivot('role_id', '=', Role::getRoleByName(BaseRoles::MANAGER->name)->id)->get()->map(function ($user) use ($hiddenUserIds) {
+            $user->is_hidden = in_array($user->id, $hiddenUserIds);
+            return $user;
+        });
+        $channelUsers = fn() => $channel->users->map(function ($user) use ($hiddenUserIds) {
+            $user->is_hidden = in_array($user->id, $hiddenUserIds);
+            return $user;
+        });
+        $messages = $messageId ? fn() => $channel->messages()->where('threaded_message_id', null)->withTrashed()->with([
+            'files' => function ($query) {
+                $query->withTrashed();
+            },
+            'reactions',
 
-            'channels' => $channels,
-            'users' => $users,
-            'channel' => $channel->load('user'),
-            'managers' => fn() => $channel->users()->wherePivot('role_id', '=', Role::getRoleByName(BaseRoles::MANAGER->name)->id)->get(),
-            'workspaces' => $workspaces,
-            "directChannels" => $directChannels,
-            'selfChannel' => $selfChannel,
-            'messages' => $messageId ? $channel->messages()->where('threaded_message_id', null)->withTrashed()->with([
+            'forwardedMessage.files' => function ($query) {
+
+                $query->withTrashed();
+            },
+        ])->withCount('threadMessages')->latest()->simplePaginate($perPage, ['*'], 'page', $pageNumber)
+            //OR
+            : fn() => $channel->messages()->where('threaded_message_id', null)->withTrashed()->with([
                 'files' => function ($query) {
                     $query->withTrashed();
                 },
@@ -304,20 +319,21 @@ class ChannelController extends Controller
 
                     $query->withTrashed();
                 },
-            ])->withCount('threadMessages')->latest()->simplePaginate($perPage, ['*'], 'page', $pageNumber)
-                //OR
-                : $channel->messages()->where('threaded_message_id', null)->withTrashed()->with([
-                    'files' => function ($query) {
-                        $query->withTrashed();
-                    },
-                    'reactions',
-
-                    'forwardedMessage.files' => function ($query) {
-
-                        $query->withTrashed();
-                    },
-                ])->withCount('threadMessages')->latest()->simplePaginate($perPage),
-            'channelUsers' => fn() => $channel->users,
+            ])->withCount('threadMessages')->latest()->simplePaginate($perPage);
+        return Inertia::render("Workspace/Index", [
+            'mainChannelId' => $mainChannelId,
+            'channelPermissions' => $channelPermissions,
+            'workspace' => $workspace,
+            'permissions' => $permissions,
+            'channels' => $channels,
+            'users' => $users,
+            'channel' => $channel->load('user'),
+            'managers' => $managers,
+            'workspaces' => $workspaces,
+            "directChannels" => $directChannels,
+            'selfChannel' => $selfChannel,
+            'messages' => $messages,
+            'channelUsers' => $channelUsers,
             'newNoftificationsCount' => $newNotificationsCount
         ]);
     }

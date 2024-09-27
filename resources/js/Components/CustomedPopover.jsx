@@ -9,8 +9,9 @@ import {
 function CustomedPopover({
     triggerNode,
     children,
-
+    width = "w-96",
     anchor = "",
+    className=""
 }) {
     return (
         <Popover className="relative">
@@ -19,7 +20,7 @@ function CustomedPopover({
             </PopoverButton>
             <PopoverPanel
                 anchor={anchor}
-                className="flex flex-col w-96 border border-white/15 rounded-lg bg-background py-3"
+                className={`flex flex-col ${width} border border-white/15 rounded-lg bg-background py-3 ${className}`}
             >
                 {children}
             </PopoverPanel>
@@ -27,11 +28,14 @@ function CustomedPopover({
     );
 }
 
-function ListItem({ children, onClick }) {
+function ListItem({ children, onClick, className }) {
     const close = useClose();
     return (
         <div
-            className="hover:bg-link text-white/85 px-4 py-1 cursor-pointer"
+            className={
+                "hover:bg-link text-white/85 px-4 py-1 cursor-pointer " +
+                className
+            }
             onClick={() => {
                 onClick();
                 close();
