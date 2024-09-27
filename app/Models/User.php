@@ -76,7 +76,7 @@ class User extends Authenticatable
     public function hiddenUsers()
     {
         return $this->belongsToMany(User::class, 'hidden_users', 'user_id', 'hidden_user_id')
-            ->withPivot('channel_id')
+            ->withPivot('workspace_id')
             ->withTimestamps();
     }
 
@@ -84,7 +84,7 @@ class User extends Authenticatable
     public function hiddenByUsers()
     {
         return $this->belongsToMany(User::class, 'hidden_users', 'hidden_user_id', 'user_id')
-            ->withPivot('channel_id')
+            ->withPivot('workspace_id')
             ->withTimestamps();
     }
 

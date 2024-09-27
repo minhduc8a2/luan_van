@@ -4,11 +4,11 @@ import { FaAngleDown, FaLock } from "react-icons/fa";
 import { useState } from "react";
 
 import { usePage } from "@inertiajs/react";
-import {useEffect} from 'react'
+import { useEffect } from "react";
 import About from "./About/About";
 import Settings from "./Settings/Settings";
 import Members from "./Members/Members";
-export default function ChannelSettings({ channelName , buttonNode}) {
+export default function ChannelSettings({ channelName, buttonNode }) {
     const { channel, workspace } = usePage().props;
     const [tabIndex, setTabIndex] = useState(0);
     const [show, setShow] = useState(false);
@@ -16,13 +16,7 @@ export default function ChannelSettings({ channelName , buttonNode}) {
         setShow(false);
     }, [channel.id]);
     return (
-        <OverlayPanel
-            success={!show}
-            buttonNode={
-               buttonNode
-            }
-            className="p-0"
-        >
+        <OverlayPanel success={!show} buttonNode={buttonNode} className="p-0">
             {({ close }) => (
                 <div className="w-[548px]  text-white/85">
                     <h2 className="text-2xl p-6 font-bold text-white/85">
@@ -71,6 +65,7 @@ export default function ChannelSettings({ channelName , buttonNode}) {
                                 <About
                                     channel={channel}
                                     channelName={channelName}
+                                    onClose={close}
                                 />
                             </div>
                         )}

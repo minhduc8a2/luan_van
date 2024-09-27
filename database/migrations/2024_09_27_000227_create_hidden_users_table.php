@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('hidden_user_id')->constrained('users')->cascadeOnDelete();
-            $table->foreignId('channel_id')->constrained()->cascadeOnDelete();
-
+            $table->foreignId('workspace_id')->constrained()->cascadeOnDelete();
+            $table->unique(['user_id', 'hidden_user_id', 'workspace_id']);
             $table->timestamps();
         });
     }

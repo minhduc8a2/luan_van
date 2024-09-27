@@ -45,6 +45,7 @@ import OverlayNotification from "@/Components/Overlay/OverlayNotification";
 import { FaLock } from "react-icons/fa";
 import Button from "@/Components/Button";
 import ForwardedMessage from "./Message/ForwardedMessage";
+import { isHiddenUser } from "@/helpers/userHelper";
 
 export default function ChatArea() {
     const {
@@ -54,6 +55,7 @@ export default function ChatArea() {
         channelUsers,
         directChannels,
         messages: initMessages,
+        users,
         permissions,
     } = usePage().props;
     const {
@@ -205,8 +207,11 @@ export default function ChatArea() {
             //     console.log("leaving", user);
             // })
             .listen("MessageEvent", (e) => {
-                console.log('messageEvent',e);
-                if (e.type == "newMessageCreated") {
+                console.log("messageEvent", e);
+                if (
+                    e.type == "newMessageCreated" &&
+                    !isHiddenUser(users, e.message?.user_id)
+                ) {
                     dispatch(addMessage(e.message));
                     setNewMessageReceived(true);
                 } else if (e.type == "messageEdited")
@@ -226,10 +231,12 @@ export default function ChatArea() {
             })
 
             .listen("ThreadMessageEvent", (e) => {
-                
-                if (e.type == "newMessageCreated")
+                if (
+                    e.type == "newMessageCreated" &&
+                    !isHiddenUser(users, e.message?.user_id)
+                )
                     dispatch(addThreadMessagesCount(e.threadedMessageId));
-                else if (e.type == "messageDeleted")
+                else if (e.type == "messageDeleted"&& !isHiddenUser(users,e.message?.user_id))
                     dispatch(subtractThreadMessagesCount(e.threadedMessageId));
                 // console.log(e);
             })
@@ -367,8 +374,6 @@ export default function ChatArea() {
             );
 
             if (targetMessage) {
-                
-
                 targetMessage.scrollIntoView({
                     behavior: "instant",
                     block: "start",
@@ -756,7 +761,6 @@ export default function ChatArea() {
                     )}
                 </div>
             </div>
-            
         </div>
     );
 }

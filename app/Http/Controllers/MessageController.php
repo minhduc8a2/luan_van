@@ -52,7 +52,7 @@ class MessageController extends Controller
         $perPage = 10;
         $channel = $message->channel;
         if ($request->user()->cannot('viewThread', [Message::class, $channel])) return abort(403);
-
+        $hiddenUserIds = $request->user()->hiddenUsers()->wherePivot('workspace_id', $channel->workspace->id)->pluck('hidden_user_id')->toArray();
         try {
             $messageId = $request->query('message_id');
 
@@ -61,7 +61,7 @@ class MessageController extends Controller
                 $threadMessage = Message::find($messageId);
                 if ($threadMessage) {
 
-                    $threadMessagePosition = $message->threadMessages()
+                    $threadMessagePosition = $message->threadMessages()->whereNotIn('user_id', $hiddenUserIds)
                         ->latest() // Order by latest first
                         ->where('created_at', '>=', $threadMessage->created_at) // Messages that are newer or equal to the mentioned one
                         ->count();
@@ -87,12 +87,14 @@ class MessageController extends Controller
             return [
                 'messages' => $messageId ?
                     $message->threadMessages()
+                    ->whereNotIn('user_id', $hiddenUserIds)
                     ->withTrashed()
                     ->with(['files', 'reactions'])
                     ->latest()
                     ->simplePaginate($perPage, ['*'], 'page', $pageNumber)
                     :
                     $message->threadMessages()
+                    ->whereNotIn('user_id', $hiddenUserIds)
                     ->withTrashed()
                     ->with(['files', 'reactions'])
                     ->latest()
@@ -169,9 +171,12 @@ class MessageController extends Controller
 
             //handle mentions list
             $mentionsList = $request->mentionsList;
-
+            $hiddenByUserIds = $request->user()->hiddenByUsers()->wherePivot('workspace_id', $channel->workspace->id)->pluck('user_id')->toArray();
             foreach ($mentionsList as $u) {
                 $mentionedUser = User::find($u['id']);
+                if (in_array($mentionedUser->id, $hiddenByUserIds)) {
+                    continue;
+                }
                 $mentionedUser->notify(new MentionNotification($forwardMode ? $forwardChannel : $channel, $channel->workspace, $request->user(), $mentionedUser, $message));
             }
             //notify others about new message
@@ -242,9 +247,12 @@ class MessageController extends Controller
 
                 //handle mentions list
                 $mentionsList = $validated['mentionsList'] ?? [];
-
+                $hiddenByUserIds = $request->user()->hiddenByUsers()->wherePivot('workspace_id', $channel->workspace->id)->pluck('user_id')->toArray();
                 foreach ($mentionsList as $u) {
                     $mentionedUser = User::find($u['id']);
+                    if (in_array($mentionedUser->id, $hiddenByUserIds)) {
+                        continue;
+                    }
                     $mentionedUser->notify(new MentionNotification($channel, $channel->workspace, $request->user(), $mentionedUser, $message->load(['files' => function ($query) {
                         $query->withTrashed();
                     }, 'reactions']), $newMessage));
@@ -296,9 +304,12 @@ class MessageController extends Controller
             $message->save();
             //mentions
             $mentionsList = $request->mentionsList;
-
+            $hiddenByUserIds = $request->user()->hiddenByUsers()->wherePivot('workspace_id', $channel->workspace->id)->pluck('user_id')->toArray();
             foreach ($mentionsList as $u) {
                 $mentionedUser = User::find($u['id']);
+                if (in_array($mentionedUser->id, $hiddenByUserIds)) {
+                    continue;
+                }
                 $mentionedUser->notify(new MentionNotification($channel, $channel->workspace, $request->user(), $mentionedUser, $message));
             }
             //notify others about new message

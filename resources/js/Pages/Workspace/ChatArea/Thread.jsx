@@ -21,9 +21,10 @@ import { useInView } from "react-intersection-observer";
 import { setMention } from "@/Store/mentionSlice";
 
 import ForwardedMessage from "./Message/ForwardedMessage";
+import { isHiddenUser } from "@/helpers/userHelper";
 export default function Thread() {
     const dispatch = useDispatch();
-    const { channel, permissions } = usePage().props;
+    const { channel, permissions, users } = usePage().props;
     const { threadMessage: mentionThreadMessage } = useSelector(
         (state) => state.mention
     );
@@ -133,11 +134,20 @@ export default function Thread() {
                 // console.log("leaving thread", user);
             })
             .listen("ThreadMessageEvent", (e) => {
-                if (e.type == "newMessageCreated")
+                if (
+                    e.type == "newMessageCreated" &&
+                    !isHiddenUser(users, e.message?.user_id)
+                )
                     dispatch(addThreadMessage(e.message));
-                else if (e.type == "messageEdited") {
+                else if (
+                    e.type == "messageEdited" &&
+                    !isHiddenUser(users, e.message?.user_id)
+                ) {
                     dispatch(editThreadMessage(e.message));
-                } else if (e.type == "messageDeleted") {
+                } else if (
+                    e.type == "messageDeleted" &&
+                    !isHiddenUser(users, e.message?.user_id)
+                ) {
                     dispatch(deleteThreadMessage(e.message.id));
                 }
             })
@@ -150,8 +160,8 @@ export default function Thread() {
 
         setLoadingMessages(true);
         // router.get(
-        //     route("messages.threadMessages", message.id),
-        //     threadMessage ? { message_id: threadMessage.id } : {}
+        //     route("messages.threadMessages", threadedMessageId),
+        //     mentionThreadMessage ? { message_id: mentionThreadMessage.id } : {}
         // );
         axios
             .get(

@@ -76,6 +76,7 @@ Route::middleware('auth')->group(function () {
     Route::post("/notifications/{notificationId}/mark_view", [NotificationController::class, "markView"])->name("notifications.mark_view");
 
 
+    Route::post('users/hide', [UserController::class, 'hide'])->name("users.hide");
     Route::patch('users/{user}', [UserController::class, 'update'])->name("users.update");
     Route::post('users/{user}/updateAvatar', [UserController::class, 'updateAvatar'])->name("users.updateAvatar");
     Route::delete('users/{user}/deleteAvatar', [UserController::class, 'deleteAvatar'])->name("users.deleteAvatar");

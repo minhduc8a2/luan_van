@@ -296,24 +296,25 @@ export default function BrowseFiles() {
                 <h3 className="text-xl font-semibold p-4">Files</h3>
                 <div className="">
                     <Button
-                        className={` bg-transparent ${
+                        className={` bg-transparent border-none !justify-start ${
                             filter == "shared" ? "bg-white/15" : ""
                         }`}
+                        onClick={() => {
+                            filterSwitchRef.current = true;
+                            nextPageUrlRef.current = false;
+                            setFilter("shared");
+                        }}
                     >
                         <div
                             className="flex gap-x-2 items-center"
-                            onClick={() => {
-                                filterSwitchRef.current = true;
-                                nextPageUrlRef.current = false;
-                                setFilter("shared");
-                            }}
+                           
                         >
                             <PiShareFat />
                             Share with you
                         </div>
                     </Button>
                     <Button
-                        className={` bg-transparent ${
+                        className={` bg-transparent border-none !justify-start ${
                             filter == "self" ? "bg-white/15" : ""
                         }`}
                         onClick={() => {
@@ -330,7 +331,7 @@ export default function BrowseFiles() {
                     <hr className="my-2" />
 
                     <Button
-                        className={` bg-transparent  ${
+                        className={` bg-transparent border-none !justify-start ${
                             filter == "all" ? "bg-white/15" : ""
                         }`}
                         onClick={() => {

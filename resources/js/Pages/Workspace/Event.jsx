@@ -9,12 +9,14 @@ import { addMessageCountForChannel } from "@/Store/newMessageCountsMapSlice";
 import { toggleHuddle } from "@/Store/huddleSlice";
 import { deleteFileInThread,  setThreadedMessageId } from "@/Store/threadSlice";
 import { deleteFile } from "@/Store/messagesSlice";
+import { isHiddenUser } from "@/helpers/userHelper";
 export default function Event() {
     const {
         workspace,
         channel,
         auth,
         channels,
+        users,
         directChannels,
         mainChannelId,
     } = usePage().props;
@@ -135,7 +137,7 @@ export default function Event() {
                 (e) => {
                     if (e.message?.user_id != auth.user.id)
                         if (cn.id != channel.id)
-                            if (e.type == "newMessageCreated")
+                            if (e.type == "newMessageCreated" && !isHiddenUser(users,e.message?.user_id))
                                 dispatch(addMessageCountForChannel(cn));
                 }
             );
@@ -159,7 +161,7 @@ export default function Event() {
                 Echo.leave(`private_channels.${cn.id}`);
             });
         };
-    }, [channels, channel, directChannels]);
+    }, [channels, channel, directChannels, users]);
 
     return <></>;
 }

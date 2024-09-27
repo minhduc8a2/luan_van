@@ -178,7 +178,12 @@ class ChannelController extends Controller
             return  redirect(route('workspace.show', $channel->workspace->id));
         }
         $user = $request->user();
-        $hiddenUserIds = $user->hiddenUsers()->wherePivot('channel_id', $channel->id)->pluck('hidden_user_id')->toArray();
+        /**
+         * @var Workspace $workspace
+         */
+        $workspace = $channel->workspace;
+        $hiddenUserIds = $user->hiddenUsers()->wherePivot('workspace_id', $workspace->id)->pluck('hidden_user_id')->toArray();
+
 
         $messageId = $request->query('message_id');
         $pageNumber = null;
@@ -206,22 +211,24 @@ class ChannelController extends Controller
 
                         $query->withTrashed();
                     },
-                ])->withCount('threadMessages')->latest()->simplePaginate($perPage, ['*'], 'page', $pageNumber)
+                ])->withCount([
+                    'threadMessages' => function ($query) use ($hiddenUserIds) {
+
+                        $query->whereNotIn('user_id', $hiddenUserIds);
+                    }
+                ])->latest()->simplePaginate($perPage, ['*'], 'page', $pageNumber)
             ];
         }
 
-        /**
-         * @var Workspace $workspace
-         */
-        $workspace = $channel->workspace;
+
 
 
         $channels = fn() => $user->channels()
             ->whereIn("type", [ChannelTypes::PUBLIC->name, ChannelTypes::PRIVATE->name])
             ->where('is_archived', false)
             ->withCount([
-                'messages as unread_messages_count' => function (Builder $query) use ($user) {
-                    $query->where("created_at", ">", function ($query) use ($user) {
+                'messages as unread_messages_count' => function (Builder $query) use ($user, $hiddenUserIds) {
+                    $query->whereNotIn('user_id', $hiddenUserIds)->where("created_at", ">", function ($query) use ($user) {
                         $query->select('last_read_at')
                             ->from('channel_user')
                             ->whereColumn('channel_user.channel_id', 'channels.id')
@@ -233,8 +240,8 @@ class ChannelController extends Controller
 
         $directChannels = fn() => $user->channels()
             ->where("type",  ChannelTypes::DIRECT->name)
-            ->whereHas('users', function ($query) use ($hiddenUserIds) {
-                $query->whereNotIn('user_id', $hiddenUserIds);
+            ->whereDoesntHave('users', function ($query) use ($hiddenUserIds) {
+                $query->whereIn('users.id', $hiddenUserIds);
             })
             ->where('is_archived', false)
             ->withCount([
@@ -297,7 +304,7 @@ class ChannelController extends Controller
             $user->is_hidden = in_array($user->id, $hiddenUserIds);
             return $user;
         });
-        $messages = $messageId ? fn() => $channel->messages()->where('threaded_message_id', null)->withTrashed()->with([
+        $messages = $messageId ? fn() => $channel->messages()->whereNotIn('user_id', $hiddenUserIds)->where('threaded_message_id', null)->withTrashed()->with([
             'files' => function ($query) {
                 $query->withTrashed();
             },
@@ -307,9 +314,14 @@ class ChannelController extends Controller
 
                 $query->withTrashed();
             },
-        ])->withCount('threadMessages')->latest()->simplePaginate($perPage, ['*'], 'page', $pageNumber)
+        ])->withCount([
+            'threadMessages' => function ($query) use ($hiddenUserIds) {
+
+                $query->whereNotIn('user_id', $hiddenUserIds);
+            }
+        ])->latest()->simplePaginate($perPage, ['*'], 'page', $pageNumber)
             //OR
-            : fn() => $channel->messages()->where('threaded_message_id', null)->withTrashed()->with([
+            : fn() => $channel->messages()->whereNotIn('user_id', $hiddenUserIds)->where('threaded_message_id', null)->withTrashed()->with([
                 'files' => function ($query) {
                     $query->withTrashed();
                 },
@@ -319,7 +331,12 @@ class ChannelController extends Controller
 
                     $query->withTrashed();
                 },
-            ])->withCount('threadMessages')->latest()->simplePaginate($perPage);
+            ])->withCount([
+                'threadMessages' => function ($query) use ($hiddenUserIds) {
+
+                    $query->whereNotIn('user_id', $hiddenUserIds);
+                }
+            ])->latest()->simplePaginate($perPage);
         return Inertia::render("Workspace/Index", [
             'mainChannelId' => $mainChannelId,
             'channelPermissions' => $channelPermissions,

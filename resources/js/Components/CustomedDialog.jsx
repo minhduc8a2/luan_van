@@ -32,5 +32,7 @@ function Title({ children }) {
     );
 }
 
+
+
 CustomedDialog.Title = Title;
 export default CustomedDialog;

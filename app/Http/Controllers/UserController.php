@@ -137,6 +137,27 @@ class UserController extends Controller
         }
         return back();
     }
+
+    public function hide(Request $request)
+    {
+        $validated = $request->validate([
+            "userId" => "required|integer",
+            "workspaceId" => "required|integer",
+        ]);
+        if ($request->user()->id == $validated["userId"]) return abort(403);
+
+
+        try {
+            DB::beginTransaction();
+            $request->user()->hiddenUsers()->attach($validated["userId"], ["workspace_id" => $validated["workspaceId"]]);
+
+            DB::commit();
+            return back();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return back()->withErrors(['server' => "Something went wrong! Please try later."]);
+        }
+    }
     /**
      * Remove the specified resource from storage.
      */

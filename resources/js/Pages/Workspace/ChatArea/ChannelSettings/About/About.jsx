@@ -10,8 +10,12 @@ import Managers from "./Managers";
 import { getDirectChannelUser } from "@/helpers/channelHelper";
 import { usePage } from "@inertiajs/react";
 import { MdOutlineEmail } from "react-icons/md";
-export default function About({ channelName }) {
+import { FaPhone } from "react-icons/fa";
+import { useDispatch } from "react-redux";
+import { setProfile } from "@/Store/profileSlice";
+export default function About({ channelName, onClose }) {
     const { auth, channel, channelUsers } = usePage().props;
+    const dispatch = useDispatch();
     const directChannelUser = useMemo(
         () =>
             channel.type == "DIRECT" &&
@@ -47,7 +51,7 @@ export default function About({ channelName }) {
                         Contact information
                     </h5>
                     <div className="flex mt-2 items-center gap-x-3">
-                        <div className="">
+                        <div className="w-6">
                             <MdOutlineEmail className="text-2xl" />
                         </div>
                         <div className="flex flex-col justify-between items-start">
@@ -59,6 +63,30 @@ export default function About({ channelName }) {
                             </div>
                         </div>
                     </div>
+                    {directChannelUser.phone && (
+                        <div className="flex mt-2 items-center gap-x-3">
+                            <div className="w-6">
+                                <FaPhone className="text-lg -scale-x-100 " />
+                            </div>
+                            <div className="flex flex-col justify-between items-start">
+                                <div className="text-sm font-semibold text-white/85">
+                                    Phone
+                                </div>
+                                <div className="text-sm text-link">
+                                    {directChannelUser.phone}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    <button
+                        className="text-link hover:underline font-bold mt-4"
+                        onClick={() => {
+                            onClose();
+                            dispatch(setProfile(directChannelUser));
+                        }}
+                    >
+                        View full profile
+                    </button>
                 </div>
             )}
         </>
