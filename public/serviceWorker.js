@@ -21,7 +21,7 @@ self.addEventListener("install", (event) => {
 //     );
 // });
 self.addEventListener("fetch", (event) => {
-    if (event.request.url.includes("/files/workspaces")) {
+    if (event.request.url.includes("/files")) {
         event.respondWith(
             caches.open("dynamic-cache").then((cache) => {
                 return cache.match(event.request).then((cachedResponse) => {
@@ -31,8 +31,14 @@ self.addEventListener("fetch", (event) => {
                         event.waitUntil(
                             fetch(event.request)
                                 .then((networkResponse) => {
-                                    console.log("Updating cache:", event.request.url);
-                                    cache.put(event.request, networkResponse.clone());
+                                    console.log(
+                                        "Updating cache:",
+                                        event.request.url
+                                    );
+                                    cache.put(
+                                        event.request,
+                                        networkResponse.clone()
+                                    );
                                 })
                                 .catch((err) => {
                                     console.error("Failed to fetch:", err);
@@ -40,14 +46,25 @@ self.addEventListener("fetch", (event) => {
                         );
                         return cachedResponse;
                     } else {
-                        console.log("Fetching from network:", event.request.url);
-                        return fetch(event.request).then((networkResponse) => {
-                            console.log("Caching new data:", event.request.url);
-                            cache.put(event.request, networkResponse.clone());
-                            return networkResponse;
-                        }).catch((err) => {
-                            console.error("Network fetch failed:", err);
-                        });
+                        console.log(
+                            "Fetching from network:",
+                            event.request.url
+                        );
+                        return fetch(event.request)
+                            .then((networkResponse) => {
+                                console.log(
+                                    "Caching new data:",
+                                    event.request.url
+                                );
+                                cache.put(
+                                    event.request,
+                                    networkResponse.clone()
+                                );
+                                return networkResponse;
+                            })
+                            .catch((err) => {
+                                console.error("Network fetch failed:", err);
+                            });
                     }
                 });
             })
@@ -60,13 +77,21 @@ self.addEventListener("fetch", (event) => {
                         console.log("Serving from cache:", event.request.url);
                         return cachedResponse;
                     } else {
-                        return fetch(event.request).then((networkResponse) => {
-                            console.log("Caching new data:", event.request.url);
-                            cache.put(event.request, networkResponse.clone());
-                            return networkResponse;
-                        }).catch((err) => {
-                            console.error("Network fetch failed:", err);
-                        });
+                        return fetch(event.request)
+                            .then((networkResponse) => {
+                                console.log(
+                                    "Caching new data:",
+                                    event.request.url
+                                );
+                                cache.put(
+                                    event.request,
+                                    networkResponse.clone()
+                                );
+                                return networkResponse;
+                            })
+                            .catch((err) => {
+                                console.error("Network fetch failed:", err);
+                            });
                     }
                 });
             })
