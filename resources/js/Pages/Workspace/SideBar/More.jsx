@@ -9,13 +9,14 @@ import { IoIosMore } from "react-icons/io";
 import { LuPlus } from "react-icons/lu";
 import { IoSearch } from "react-icons/io5";
 import { TbStack2 } from "react-icons/tb";
-import { setPageName } from "@/Store/pageSlice";
+
 import { useDispatch } from "react-redux";
 import { setLeftWindowType, setRightWindowType } from "@/Store/windowTypeSlice";
+import { router, usePage } from "@inertiajs/react";
 export default function More() {
+    const { workspace } = usePage().props;
     const dispatch = useDispatch();
-    function switchPage(pageName) {
-        dispatch(setPageName(pageName));
+    function switchPage() {
         dispatch(setLeftWindowType(null));
         dispatch(setRightWindowType(null));
     }
@@ -43,7 +44,14 @@ export default function More() {
                                 <MoreButton
                                     onClick={() => {
                                         switchPage("browseFiles");
-
+                                        router.get(
+                                            route("files.index", workspace.id),
+                                            { filter: "shared", page: 1 },
+                                            {
+                                                preserveState: true,
+                                                only:["workspaceFiles"]
+                                            }
+                                        );
                                         close();
                                     }}
                                     title="Files"

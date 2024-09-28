@@ -7,7 +7,7 @@ import SelectInput from "@/Components/Input/SelectInput";
 import { LuPlus } from "react-icons/lu";
 
 export function CreateChannelForm({ activateButtonNode }) {
-    const { workspace, permissions } = usePage().props;
+    const { workspace, workspacePermissions } = usePage().props;
     const channelTypes = [
         { type: "PUBLIC", label: "Public - Anyone in " + workspace.name },
         {
@@ -37,7 +37,7 @@ export function CreateChannelForm({ activateButtonNode }) {
     }
     return (
         <Form1
-            disabled={!permissions.createChannel}
+            disabled={!workspacePermissions?.createChannel}
             className="p-4"
             errors={errors}
             success={success}
@@ -51,12 +51,12 @@ export function CreateChannelForm({ activateButtonNode }) {
                         setSuccess(false);
                     }}
                 >
-                   { activateButtonNode}
+                    {activateButtonNode}
                 </div>
             }
             title="Add channel"
         >
-            {!permissions.createChannel && (
+            {!workspacePermissions?.createChannel && (
                 <h3 className="text-lg">
                     ⚠️You are not allowed to create channels, contact admins for
                     more information.
@@ -64,7 +64,7 @@ export function CreateChannelForm({ activateButtonNode }) {
             )}
             <div
                 className={`mt-4 ${
-                    !permissions.createChannel ? "opacity-50" : ""
+                    !workspacePermissions?.createChannel ? "opacity-50" : ""
                 }`}
             >
                 <TextArea
@@ -72,13 +72,13 @@ export function CreateChannelForm({ activateButtonNode }) {
                     label="Channel name:"
                     value={data.name}
                     onChange={(e) => setData("name", e.target.value)}
-                    disabled={!permissions.createChannel}
+                    disabled={!workspacePermissions?.createChannel}
                 />
                 <SelectInput
                     label="Channel type"
                     list={channelTypes}
                     onChange={(item) => setData("type", item.type)}
-                    disabled={!permissions.createChannel}
+                    disabled={!workspacePermissions?.createChannel}
                 />
             </div>
         </Form1>

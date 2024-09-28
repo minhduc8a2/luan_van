@@ -19,9 +19,8 @@ export default function MentionNotification({
     const {
         auth,
         users: workspaceUsers,
-     
+
         channel: currentChannel,
-       
     } = usePage().props;
     const { messages } = useSelector((state) => state.messages);
     const [errors, setErrors] = useState(null);
@@ -75,14 +74,18 @@ export default function MentionNotification({
                             dispatch(setMention(null));
                         }
                     }
-                    if (threadMessage) dispatch(setThreadedMessageId(message.id));
+                    if (threadMessage)
+                        dispatch(setThreadedMessageId(message.id));
                 } else
                     router.get(
-                        route("channel.show", channel.id),
+                        route("channel.show", {
+                            workspace: workspace.id,
+                            channel: channel.id,
+                        }),
                         { message_id: message.id },
                         {
                             preserveState: true,
-
+                           
                             onFinish: () => {
                                 dispatch(
                                     setMention({

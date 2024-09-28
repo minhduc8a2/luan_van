@@ -2,18 +2,23 @@ import { usePage, Link } from "@inertiajs/react";
 import Avatar from "@/Components/Avatar";
 import { router } from "@inertiajs/react";
 import { useSelector } from "react-redux";
+import { channelProps } from "@/helpers/channelHelper";
 export function DirectChannel({ channel, user, isOnline = false }) {
-    const { auth, channel: currentChannel } = usePage().props;
+    const { auth, channel: currentChannel, workspace } = usePage().props;
     const onlineStatusMap = useSelector((state) => state.onlineStatus);
     const newMessageCountsMap = useSelector(
         (state) => state.newMessageCountsMap
     );
     function changeChannel() {
         router.get(
-            route("channel.show", channel.id),
+            route("channel.show", {
+                workspace: workspace.id,
+                channel: channel.id,
+            }),
             {},
             {
                 preserveState: true,
+                only: channelProps,
             }
         );
     }
@@ -22,7 +27,7 @@ export function DirectChannel({ channel, user, isOnline = false }) {
             <button
                 onClick={changeChannel}
                 className={`flex mt-2 items-center justify-between gap-x-2 px-4 py-1 rounded-lg w-full ${
-                    channel.id == currentChannel.id
+                    channel.id == currentChannel?.id
                         ? "bg-primary-300"
                         : "hover:bg-white/10"
                 }`}
@@ -36,7 +41,7 @@ export function DirectChannel({ channel, user, isOnline = false }) {
                         isOnline={isOnline || onlineStatusMap[user.id]}
                     />
                     <div className="">
-                        {user.display_name || user.name }{" "}
+                        {user.display_name || user.name}{" "}
                         {user.id == auth.user.id ? (
                             <span className="opacity-75 ml-2">you</span>
                         ) : (

@@ -3,7 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 export const windowTypeSlice = createSlice({
     name: "windowType",
     initialState: {
-        leftWindowType: "panel",
+        leftWindowType: "",
         rightWindowType: "",
     },
     reducers: {

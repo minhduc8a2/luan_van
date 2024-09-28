@@ -3,7 +3,7 @@ import Button from "@/Components/Button";
 import AutocompleInput from "@/Components/Input/AutocompleInput";
 import Overlay from "@/Components/Overlay/Overlay";
 import TipTapEditor from "@/Components/TipTapEditor";
-import { getDirectChannelUser } from "@/helpers/channelHelper";
+import { channelProps, getDirectChannelUser } from "@/helpers/channelHelper";
 import { router, useForm, usePage } from "@inertiajs/react";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaLock } from "react-icons/fa";
@@ -24,9 +24,12 @@ export default function ForwardMessage({ message, show, onClose }) {
     function changeChannel(channel) {
         dispatch(setThreadedMessageId(null));
         router.get(
-            route("channel.show", channel.id),
+            route("channel.show", {
+                workspace: workspace.id,
+                channel: channel.id,
+            }),
             {},
-            { preserveState: true }
+            { preserveState: true , only:channelProps}
         );
     }
     function onSubmit(content, _, JSONContent) {

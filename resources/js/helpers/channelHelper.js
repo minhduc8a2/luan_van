@@ -28,3 +28,13 @@ export function getDirectChannelFromUserId(directChannels, userId) {
 
     return null;
 }
+
+const channelProps = [
+    "channelPermissions",
+    "permissions",
+    "channel",
+    "managers",
+    "messages",
+    "channelUsers",
+];
+export { channelProps };

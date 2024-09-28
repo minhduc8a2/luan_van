@@ -13,6 +13,7 @@ import { setPageName } from "@/Store/pageSlice";
 import SearchInput from "../../../Components/Input/SearchInput";
 import { InView } from "react-intersection-observer";
 import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
+import { channelProps } from "@/helpers/channelHelper";
 export default function BrowseChannels() {
     const { channels, auth, workspace } = usePage().props;
     const dispatch = useDispatch();
@@ -92,16 +93,20 @@ export default function BrowseChannels() {
                 tempChannels.sort((a, b) => a.users_count - b.users_count);
                 break;
         }
-        return tempChannels
+        return tempChannels;
     }, [filter, channelsList, searchValue]);
     function changeChannel(channel) {
         dispatch(setThreadedMessageId(null));
 
         router.get(
-            route("channel.show", channel.id),
+            route("channel.show", {
+                workspace: workspace.id,
+                channel: channel.id,
+            }),
             {},
             {
                 preserveState: true,
+                only: channelProps,
                 onSuccess: () => dispatch(setPageName("normal")),
             }
         );

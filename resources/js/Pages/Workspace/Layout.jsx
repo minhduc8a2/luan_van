@@ -2,7 +2,7 @@ import React, { memo } from "react";
 import SideBar from "./SideBar/SideBar";
 import HeadBar from "./HeadBar";
 import Panel from "./Panel/Panel";
-import ChatArea from "./ChatArea/ChatArea";
+
 import { useRef } from "react";
 import Huddle from "./Huddle/Huddle";
 import Event from "./Event";
@@ -10,9 +10,6 @@ import { makeStore } from "@/Store/store";
 import { Provider, useDispatch, useSelector } from "react-redux";
 import { setNotificationsCount } from "@/Store/activitySlice";
 import { initMessageCountForChannel } from "@/Store/newMessageCountsMapSlice";
-
-import BrowseChannels from "./BrowseChannels/BrowseChannels";
-import BrowseFiles from "./BrowseFiles/BrowseFiles";
 import OverlaySimpleNotification from "@/Components/Overlay/OverlaySimpleNotification";
 import { setNotificationPopup } from "@/Store/notificationPopupSlice";
 import { setMedia } from "@/Store/mediaSlice";
@@ -24,12 +21,11 @@ import { setLeftWindowWidth, setRightWindowWidth } from "@/Store/sizeSlice";
 import LeftWindow from "./LeftWindow";
 import Profile from "./Profile/Profile";
 import Activity from "./Activity/Activity";
-export default function Index({
-    newNoftificationsCount,
-    channels,
-    directChannels,
-    messages,
-}) {
+import { usePage } from "@inertiajs/react";
+import { setLeftWindowType } from "@/Store/windowTypeSlice";
+export default function Layout({ children }) {
+    const { newNoftificationsCount, channels, directChannels, channel } =
+        usePage().props;
     const storeRef = useRef();
     if (!storeRef.current) {
         // Create the store instance the first time this renders
@@ -57,6 +53,9 @@ export default function Index({
         storeRef.current.dispatch(
             setNotificationsCount(newNoftificationsCount)
         );
+        if (channel) {
+            storeRef.current.dispatch(setLeftWindowType("panel"));
+        }
         channels.forEach((channel) => {
             storeRef.current.dispatch(initMessageCountForChannel(channel));
         });
@@ -76,7 +75,7 @@ export default function Index({
                 </div>
 
                 <div className="client-workspace-container flex flex-nowrap   rounded-lg border border-white/5 border-b-2">
-                    <MainArea />
+                    <MainArea>{children}</MainArea>
                 </div>
             </div>
             <Huddle />
@@ -86,25 +85,24 @@ export default function Index({
     );
 }
 
-function MainArea() {
-    const { name: pageName } = useSelector((state) => state.page);
+function MainArea({ children }) {
     const { messageId: threadMessageId } = useSelector((state) => state.thread);
     const { user: profile } = useSelector((state) => state.profile);
     const { rightWindowType, leftWindowType } = useSelector(
         (state) => state.windowType
     );
     let mainWindow = "";
-    switch (pageName) {
-        case "browseChannels":
-            mainWindow = <BrowseChannels />;
-            break;
-        case "browseFiles":
-            mainWindow = <BrowseFiles />;
-            break;
-        default:
-            mainWindow = <ChatArea />;
-            break;
-    }
+    // switch (pageName) {
+    //     case "browseChannels":
+    //         mainWindow = <BrowseChannels />;
+    //         break;
+    //     case "browseFiles":
+    //         mainWindow = <BrowseFiles />;
+    //         break;
+    //     default:
+    //         mainWindow = <ChatArea />;
+    //         break;
+    // }
     return (
         <>
             {leftWindowType && (
@@ -113,7 +111,7 @@ function MainArea() {
                     {leftWindowType == "activity" && <Activity />}
                 </LeftWindow>
             )}
-            {mainWindow}
+            {children}
             {rightWindowType && (
                 <RightWindow>
                     {threadMessageId && rightWindowType == "thread" && (

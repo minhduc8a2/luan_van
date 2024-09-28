@@ -41,7 +41,7 @@ import HuddleInvitation from "./HuddleInvitation";
 import { getChannelName } from "@/helpers/channelHelper";
 import Tooltip from "@/Components/Tooltip";
 export default function Huddle() {
-    const { auth, users: workspaceUsers, permissions } = usePage().props;
+    const { auth, users: workspaceUsers } = usePage().props;
     const { channel, users } = useSelector((state) => state.huddle);
     const { sideBarWidth } = useSelector((state) => state.size);
     const [refresh, setRefresh] = useState(0);
@@ -394,11 +394,11 @@ export default function Huddle() {
                         if (showUserVideo || showShareScreen) return "";
                         else
                             return (
-                                <Tooltip content={<button className="text-nowrap">
+                                <Tooltip content={<button className="text-nowrap" key={user.id}>
                                     {user.display_name || user.name}
                                 </button>}>
                                     <SquareImage
-                                        key={user.id}
+                                        
                                         url={user.avatar_url}
                                         removable={false}
                                         size={

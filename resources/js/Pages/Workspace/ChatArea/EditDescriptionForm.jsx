@@ -22,7 +22,10 @@ export function EditDescriptionForm() {
             onSuccess: () => {
                 setSuccess(true);
                 router.get(
-                    route("channel.show", channel.id),
+                    route("channel.show", {
+                        workspace: workspace.id,
+                        channel: channel.id,
+                    }),
                     {},
                     {
                         preserveState: true,

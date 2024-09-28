@@ -12,7 +12,7 @@ import { FaPhoneAlt } from "react-icons/fa";
 import Button from "@/Components/Button";
 import { TbMessageCircle } from "react-icons/tb";
 import { FiHeadphones, FiMoreVertical } from "react-icons/fi";
-import { getDirectChannelFromUserId } from "@/helpers/channelHelper";
+import { channelProps, getDirectChannelFromUserId } from "@/helpers/channelHelper";
 import { setThreadedMessageId } from "@/Store/threadSlice";
 import { toggleHuddle } from "@/Store/huddleSlice";
 import MoreOptions from "./MoreOptions";
@@ -30,9 +30,12 @@ export default function Profile() {
         if (!channel) return;
         dispatch(setThreadedMessageId(null));
         router.get(
-            route("channel.show", channel.id),
+            route("channel.show", {
+                workspace: workspace.id,
+                channel: channel.id,
+            }),
             {},
-            { preserveState: true }
+            { preserveState: true,only:channelProps }
         );
     }
     function handleHuddleButtonClicked() {

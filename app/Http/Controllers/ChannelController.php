@@ -170,7 +170,7 @@ class ChannelController extends Controller
      * Display the specified resource.
      */
 
-    public function show(Request $request,  Channel $channel)
+    public function show(Request $request, Workspace $workspace,  Channel $channel)
     {
         $perPage = 10;
 
@@ -178,10 +178,8 @@ class ChannelController extends Controller
             return  redirect(route('workspace.show', $channel->workspace->id));
         }
         $user = $request->user();
-        /**
-         * @var Workspace $workspace
-         */
-        $workspace = $channel->workspace;
+
+
         $hiddenUserIds = $user->hiddenUsers()->wherePivot('workspace_id', $workspace->id)->pluck('hidden_user_id')->toArray();
 
 
@@ -220,50 +218,6 @@ class ChannelController extends Controller
             ];
         }
 
-
-
-
-        $channels = fn() => $user->channels()
-            ->whereIn("type", [ChannelTypes::PUBLIC->name, ChannelTypes::PRIVATE->name])
-            ->where('is_archived', false)
-            ->withCount([
-                'messages as unread_messages_count' => function (Builder $query) use ($user, $hiddenUserIds) {
-                    $query->whereNotIn('user_id', $hiddenUserIds)->where("created_at", ">", function ($query) use ($user) {
-                        $query->select('last_read_at')
-                            ->from('channel_user')
-                            ->whereColumn('channel_user.channel_id', 'channels.id')
-                            ->where('channel_user.user_id', $user->id)
-                            ->limit(1);
-                    })->orWhereNull('last_read_at');
-                }
-            ])->withCount('users')->get();
-
-        $directChannels = fn() => $user->channels()
-            ->where("type",  ChannelTypes::DIRECT->name)
-            ->whereDoesntHave('users', function ($query) use ($hiddenUserIds) {
-                $query->whereIn('users.id', $hiddenUserIds);
-            })
-            ->where('is_archived', false)
-            ->withCount([
-                'messages as unread_messages_count' => function (Builder $query) use ($user) {
-                    $query->where("created_at", ">", function ($query) use ($user) {
-                        $query->select('last_read_at')
-                            ->from('channel_user')
-                            ->whereColumn('channel_user.channel_id', 'channels.id')
-                            ->where('channel_user.user_id', $user->id)
-                            ->limit(1);
-                    })->orWhereNull('last_read_at');
-                }
-            ])->get();
-        $selfChannel = fn() => $workspace->channels()->where("type", "=", "SELF")->where("user_id", "=", $request->user()->id)->first();
-
-        $workspaces = fn() => $request->user()->workspaces;
-        $users = fn() => $workspace->users->map(function ($user) use ($hiddenUserIds) {
-            $user->is_hidden = in_array($user->id, $hiddenUserIds);
-            return $user;
-        });
-        $newNotificationsCount = fn() => $user->notifications()->where("read_at", null)->count();
-
         $permissions = fn() => [
             'join' => $user->can('join', [Channel::class, $channel]),
             'view' => $user->can('view', [Channel::class, $channel]),
@@ -272,7 +226,7 @@ class ChannelController extends Controller
             'thread' => $user->can('createThread', [Message::class, $channel]),
             'createReaction' => $user->can('create', [Reaction::class, $channel]),
             'deleteReaction' => $user->can('delete', [Reaction::class, $channel]),
-            'createChannel' => $user->can('create', [Channel::class, $workspace]),
+            
             'updateDescription' => $user->can('updateDescription', [Channel::class, $channel]),
             'updateName' => $user->can('updateName', [Channel::class, $channel]),
             'updatePermissions' => $user->can('updatePermissions', [Channel::class, $channel]),
@@ -295,7 +249,7 @@ class ChannelController extends Controller
             'allowThread' => $channel->allowThreadPermission(),
         ];
 
-        $mainChannelId = fn() => $workspace->mainChannel()->id;
+
         $managers = fn() => $channel->users()->wherePivot('role_id', '=', Role::getRoleByName(BaseRoles::MANAGER->name)->id)->get()->map(function ($user) use ($hiddenUserIds) {
             $user->is_hidden = in_array($user->id, $hiddenUserIds);
             return $user;
@@ -337,21 +291,15 @@ class ChannelController extends Controller
                     $query->whereNotIn('user_id', $hiddenUserIds);
                 }
             ])->latest()->simplePaginate($perPage);
-        return Inertia::render("Workspace/Index", [
-            'mainChannelId' => $mainChannelId,
+        return Inertia::render("Workspace/ChatArea/ChatArea", [
+
             'channelPermissions' => $channelPermissions,
-            'workspace' => $workspace,
             'permissions' => $permissions,
-            'channels' => $channels,
-            'users' => $users,
             'channel' => $channel->load('user'),
             'managers' => $managers,
-            'workspaces' => $workspaces,
-            "directChannels" => $directChannels,
-            'selfChannel' => $selfChannel,
             'messages' => $messages,
             'channelUsers' => $channelUsers,
-            'newNoftificationsCount' => $newNotificationsCount
+
         ]);
     }
 

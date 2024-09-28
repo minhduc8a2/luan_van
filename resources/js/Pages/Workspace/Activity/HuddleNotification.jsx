@@ -7,7 +7,7 @@ import { toggleHuddle } from "@/Store/huddleSlice";
 import { isHuddleInvitationNotificationBroadcast } from "@/helpers/notificationTypeHelper";
 import { useDispatch, useSelector } from "react-redux";
 import { getChannelName } from "@/helpers/channelHelper";
-import {useState} from 'react'
+import { useState } from "react";
 import OverlaySimpleNotification from "@/Components/Overlay/OverlaySimpleNotification";
 export default function HuddleNotification({
     notification,
@@ -50,10 +50,14 @@ export default function HuddleNotification({
                     ) {
                         if (workspace.id != currentWorkspace.id) {
                             router.get(
-                                route("channel.show", channel.id),
+                                route("channel.show", {
+                                    workspace: workspace.id,
+                                    channel: channel.id,
+                                }),
                                 {},
                                 {
                                     preserveState: true,
+
                                     onSuccess: () =>
                                         dispatch(
                                             toggleHuddle({
@@ -74,7 +78,10 @@ export default function HuddleNotification({
                 } else {
                     if (workspace.id != currentWorkspace.id) {
                         router.get(
-                            route("channel.show", channel.id),
+                            route("channel.show", {
+                                workspace: workspace.id,
+                                channel: channel.id,
+                            }),
                             {},
                             {
                                 preserveState: true,

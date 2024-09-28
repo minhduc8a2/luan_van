@@ -12,7 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { CreateChannelForm } from "./createChannelForm";
 import { FiArchive } from "react-icons/fi";
 import { setThreadedMessageId } from "@/Store/threadSlice";
-import { setPageName } from "@/Store/pageSlice";
+import { channelProps } from "@/helpers/channelHelper";
 
 export default function Panel({}) {
     const {
@@ -35,13 +35,14 @@ export default function Panel({}) {
         dispatch(setThreadedMessageId(null));
 
         router.get(
-            route("channel.show", channel.id),
+            route("channel.show", {
+                workspace: workspace.id,
+                channel: channel.id,
+            }),
             {},
             {
                 preserveState: true,
-                onSuccess: () => {
-                    dispatch(setPageName("normal"));
-                },
+                only: channelProps,
             }
         );
     }
@@ -78,7 +79,7 @@ export default function Panel({}) {
                                                 changeChannel(channel)
                                             }
                                             className={`flex items-center mt-2 w-full px-4 justify-between rounded-lg ${
-                                                channel.id == currentChannel.id
+                                                channel.id == currentChannel?.id
                                                     ? "bg-primary-300"
                                                     : "hover:bg-white/10"
                                             }`}

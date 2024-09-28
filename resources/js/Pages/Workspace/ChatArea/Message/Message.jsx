@@ -214,7 +214,10 @@ export default function Message({
         const isThreadMessage = message.threaded_message_id;
         dispatch(setThreadedMessageId(null));
         router.get(
-            route("channel.show", channel.id),
+            route("channel.show", {
+                workspace: workspace.id,
+                channel: channel.id,
+            }),
             { message_id: message.id },
             {
                 preserveState: true,

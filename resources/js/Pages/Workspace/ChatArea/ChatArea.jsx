@@ -46,8 +46,10 @@ import { FaLock } from "react-icons/fa";
 import Button from "@/Components/Button";
 import ForwardedMessage from "./Message/ForwardedMessage";
 import { isHiddenUser } from "@/helpers/userHelper";
+import Layout from "../Layout";
+import Events from "./Events";
 
-export default function ChatArea() {
+function ChatArea() {
     const {
         auth,
         channel,
@@ -58,21 +60,24 @@ export default function ChatArea() {
         users,
         permissions,
     } = usePage().props;
+    const messageContainerRef = useRef(null);
     const {
         ref: top_ref,
         inView: top_inView,
         entry: top_entry,
     } = useInView({
-        /* Optional options */
-        threshold: 0,
+        threshold: 0.1,
+        root: messageContainerRef.current,
+        rootMargin: "500px",
     });
     const {
         ref: bottom_ref,
         inView: bottom_inView,
         entry: bottom_entry,
     } = useInView({
-        /* Optional options */
-        threshold: 0,
+        threshold: 0.1,
+        root: messageContainerRef.current,
+        rootMargin: "500px",
     });
     const { messageId: threadMessageId } = useSelector((state) => state.thread);
     const { messageId, threadMessage: mentionThreadMessage } = useSelector(
@@ -82,8 +87,6 @@ export default function ChatArea() {
     const [focus, setFocus] = useState(1);
     const dispatch = useDispatch();
     const { channel: huddleChannel } = useSelector((state) => state.huddle);
-
-    const messageContainerRef = useRef(null);
 
     const nextPageUrlRef = useRef(initMessages.next_page_url);
     const previousPageUrlRef = useRef(initMessages.prev_page_url);
@@ -236,7 +239,10 @@ export default function ChatArea() {
                     !isHiddenUser(users, e.message?.user_id)
                 )
                     dispatch(addThreadMessagesCount(e.threadedMessageId));
-                else if (e.type == "messageDeleted"&& !isHiddenUser(users,e.message?.user_id))
+                else if (
+                    e.type == "messageDeleted" &&
+                    !isHiddenUser(users, e.message?.user_id)
+                )
                     dispatch(subtractThreadMessagesCount(e.threadedMessageId));
                 // console.log(e);
             })
@@ -487,6 +493,7 @@ export default function ChatArea() {
     );
     return (
         <div className="flex-1 flex min-h-0 max-h-full w-full">
+            <Events />
             <div className="bg-background  chat-area-container flex-1 ">
                 <div className="p-4 border-b border-b-white/10 z-10">
                     <div className="flex justify-between font-bold text-lg opacity-75">
@@ -494,10 +501,7 @@ export default function ChatArea() {
                             <ChannelSettings
                                 channelName={channelName}
                                 buttonNode={
-                                    <div
-                                        className="flex items-center gap-x-2"
-                                        onClick={() => setShow(true)}
-                                    >
+                                    <div className="flex items-center gap-x-2">
                                         <div className="flex items-baseline gap-x-1">
                                             {channel.type == "PUBLIC" ? (
                                                 <span className="text-xl">
@@ -513,16 +517,6 @@ export default function ChatArea() {
                                     </div>
                                 }
                             />
-                            {loadingMessages && (
-                                <div className="flex gap-x-2 items-center">
-                                    <div className="h-6 w-6 relative">
-                                        <OverlayLoadingSpinner />
-                                    </div>
-                                    <div className="text-xs">
-                                        Loading messages...
-                                    </div>
-                                </div>
-                            )}
                         </div>
                         <div className="">
                             {!channel.is_archived && (
@@ -611,7 +605,7 @@ export default function ChatArea() {
                     className="overflow-y-auto max-w-full scrollbar"
                     ref={messageContainerRef}
                 >
-                    <div className="p-8" ref={top_ref}>
+                    <div className="p-8">
                         <h1 className="text-3xl font-extrabold text-white/85">
                             {" "}
                             {welcomeMessage}
@@ -624,7 +618,18 @@ export default function ChatArea() {
                             </div>
                         </div>
                     </div>
-
+                    <div className="" ref={top_ref}>
+                        {loadingMessages && (
+                            <div className="flex gap-x-2 items-center">
+                                <div className="h-6 w-6 relative">
+                                    <OverlayLoadingSpinner />
+                                </div>
+                                <div className="text-xs">
+                                    Loading messages...
+                                </div>
+                            </div>
+                        )}
+                    </div>
                     {groupedMessages.map(({ date, mgs }, pIndex) => {
                         return (
                             <div className="relative pb-4" key={date}>
@@ -705,7 +710,7 @@ export default function ChatArea() {
                             </div>
                         );
                     })}
-                    <div ref={bottom_ref} className="h-4  "></div>
+                    <div ref={bottom_ref} className=""></div>
                 </div>
                 <div className="m-6 border border-white/15 pt-4 px-2 rounded-lg ">
                     {permissions.chat && <TipTapEditor onSubmit={onSubmit} />}
@@ -764,3 +769,6 @@ export default function ChatArea() {
         </div>
     );
 }
+ChatArea.layout = (page) => <Layout children={page} />;
+
+export default ChatArea;

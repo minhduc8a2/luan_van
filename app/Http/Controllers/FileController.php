@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\File;
+use Inertia\Inertia;
 use App\Models\Channel;
 use App\Models\Message;
 use App\Models\Workspace;
@@ -30,11 +31,11 @@ class FileController extends Controller
         $hiddenUserIds = $user->hiddenUsers()->wherePivot('workspace_id', $workspace->id)->pluck('hidden_user_id')->toArray();
         return File::whereNotIn('user_id', $hiddenUserIds)->whereHas('messages', function ($query) use ($user, $workspace) {
             $query->whereIn('channel_id', $user->channels()->where('workspace_id', $workspace->id)->pluck('channels.id'));
-        })->where('name', 'like', "%" . $name . "%")->where('user_id', "<>", $user->id)->latest()->simplePaginate($perPage, ['*'], 'page', $page);
+        })->where('name', 'like', "%" . $name . "%")->where('user_id', "<>", $user->id)->latest()->simplePaginate($perPage, ['*'], 'page', $page)->withQueryString();
     }
     function selfFiles($user, $name, $workspace, $perPage = 10, $page = 1)
     {
-        return $user->files()->where('name', 'like', "%" . $name . "%")->where('workspace_id', $workspace->id)->latest()->simplePaginate($perPage, ['*'], 'page', $page);
+        return $user->files()->where('name', 'like', "%" . $name . "%")->where('workspace_id', $workspace->id)->latest()->simplePaginate($perPage, ['*'], 'page', $page)->withQueryString();
     }
 
     function all($user, $name, $workspace, $perPage = 10, $page = 1)
@@ -56,11 +57,11 @@ class FileController extends Controller
             ->where('name', 'like', "%" . $name . "%")
             ->latest()
 
-            ->simplePaginate($perPage, ['*'], 'page', $page);
+            ->simplePaginate($perPage, ['*'], 'page', $page)->withQueryString();
     }
     public function index(Request $request, Workspace $workspace)
     {
-        $perPage = 10;
+        $perPage = 3;
         $filter = $request->query('filter');
         $name = $request->query('name') ?? "";
         $page = $request->query('page') ?? 1;
@@ -69,19 +70,29 @@ class FileController extends Controller
         $files = [];
 
         try {
-            switch ($filter) {
-                case "shared":
-                    $files = $this->getSharedFiles($user, $name, $workspace, $perPage, $page);
+            if ($request->expectsJson()) {
 
-                    return back()->with('data', $files);
+                switch ($filter) {
+                    case "shared":
+                        $files = $this->getSharedFiles($user, $name, $workspace, $perPage, $page);
 
-                case "self":
-                    $files = $this->selfFiles($user, $name, $workspace, $perPage, $page);
-                    return back()->with('data', $files);
-                default:
-                    $files = $this->all($user, $name, $workspace, $perPage, $page);
-                    return back()->with('data', $files);
+                        return $files;
+
+
+
+                    case "self":
+                        $files = $this->selfFiles($user, $name, $workspace, $perPage, $page);
+
+                        return $files;
+
+
+                    default:
+                        $files = $this->all($user, $name, $workspace, $perPage, $page);
+
+                        return $files;
+                }
             }
+            return Inertia::render("Workspace/BrowseFiles/BrowseFiles");
         } catch (\Throwable $th) {
             dd($th);
         }

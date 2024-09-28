@@ -6,24 +6,21 @@ import { useState } from "react";
 import TextInput from "@/Components/Input/TextInput";
 import { SettingsButton } from "./SettingsButton";
 import { FaLock } from "react-icons/fa";
-export default function ChangeChannelNameForm({ channelName }) {
+export default function ChangeChannelNameForm({}) {
     const { channel, permissions } = usePage().props;
     const { data, setData, post, processing, errors, reset } = useForm({
-        name: channelName,
+        name: channel.name,
     });
     const [success, setSuccess] = useState(false);
     function onSubmit(e) {
         e.preventDefault();
         post(route("channel.edit_name", channel.id), {
             preserveState: true,
-            only: ["channel"],
+            only: ["channel", "channels"],
             onSuccess: () => {
                 setSuccess(true);
             },
-            onFinish: () => {
-                console.log("errors");
-                reset();
-            },
+
             headers: {
                 "X-Socket-Id": Echo.socketId(),
             },
@@ -31,7 +28,7 @@ export default function ChangeChannelNameForm({ channelName }) {
     }
     return (
         <Form1
-            disabled={!permissions.updateName || channel.type=="DIRECT"}
+            disabled={!permissions.updateName || channel.type == "DIRECT"}
             className="p-4"
             errors={errors}
             success={success}
@@ -41,8 +38,12 @@ export default function ChangeChannelNameForm({ channelName }) {
             buttonName="Save changes"
             activateButtonNode={
                 <SettingsButton
-                    disabled={!permissions.updateName || channel.type=="DIRECT"}
-                    onClick={() => setSuccess(false)}
+                    disabled={
+                        !permissions.updateName || channel.type == "DIRECT"
+                    }
+                    onClick={() => {
+                        setSuccess(false);
+                    }}
                     title="Channel name"
                     description={
                         <div className="flex items-baseline gap-x-1">
@@ -51,7 +52,7 @@ export default function ChangeChannelNameForm({ channelName }) {
                             ) : (
                                 <FaLock className="text-sm inline" />
                             )}{" "}
-                            {channelName}
+                            {channel.name}
                         </div>
                     }
                     className="rounded-tl-lg rounded-tr-lg"

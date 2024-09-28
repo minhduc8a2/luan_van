@@ -5,20 +5,16 @@ import { setManyOnline, setOnlineStatus } from "@/Store/OnlineStatusSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { addActivity } from "@/Store/activitySlice";
 import { isChannelsNotificationBroadcast } from "@/helpers/notificationTypeHelper";
-import { addMessageCountForChannel } from "@/Store/newMessageCountsMapSlice";
+
 import { toggleHuddle } from "@/Store/huddleSlice";
-import { deleteFileInThread,  setThreadedMessageId } from "@/Store/threadSlice";
+import { deleteFileInThread, setThreadedMessageId } from "@/Store/threadSlice";
 import { deleteFile } from "@/Store/messagesSlice";
-import { isHiddenUser } from "@/helpers/userHelper";
+
 export default function Event() {
     const {
         workspace,
-        channel,
+
         auth,
-        channels,
-        users,
-        directChannels,
-        mainChannelId,
     } = usePage().props;
     const dispatch = useDispatch();
     const connectionRef = useRef(null);
@@ -75,34 +71,9 @@ export default function Event() {
                         if (huddleChannel && huddleChannel?.id == e?.data) {
                             dispatch(toggleHuddle());
                         }
-                        if (channel?.id == e?.data) {
-                            dispatch(setThreadedMessageId(null));
-                            router.visit(route("channel.show", mainChannelId), {
-                                preserveState: true,
-                            });
-                        } else {
-                            router.reload({
-                                only: ["channels"],
-                                preserveState: true,
-                            });
-                        }
+
                         break;
-                    case "newUserJoinWorkspace":
-                        if (channel.id == mainChannelId) {
-                            router.reload({
-                                only: [
-                                    "directChannels",
-                                    "users",
-                                    "channelUsers",
-                                ],
-                                preserveState: true,
-                            });
-                        } else
-                            router.reload({
-                                only: ["directChannels", "users"],
-                                preserveState: true,
-                            });
-                        break;
+
                     case "FileObserver_fileDeleted":
                         dispatch(deleteFile(e.data));
                         dispatch(deleteFileInThread(e.data));
@@ -118,7 +89,7 @@ export default function Event() {
             connectionRef.current = null;
             Echo.leave(`workspaces.${workspace.id}`);
         };
-    }, [workspace.id, huddleChannel, channel]);
+    }, [workspace.id, huddleChannel]);
     useEffect(() => {
         if (connectionRef.current)
             connectionRef.current
@@ -128,40 +99,7 @@ export default function Event() {
                 .leaving((user) => {
                     dispatch(setOnlineStatus({ user, onlineStatus: false }));
                 });
-    }, [workspace.id, channel.id]);
-
-    useEffect(() => {
-        channels.forEach((cn) => {
-            Echo.private(`private_channels.${cn.id}`).listen(
-                "MessageEvent",
-                (e) => {
-                    if (e.message?.user_id != auth.user.id)
-                        if (cn.id != channel.id)
-                            if (e.type == "newMessageCreated" && !isHiddenUser(users,e.message?.user_id))
-                                dispatch(addMessageCountForChannel(cn));
-                }
-            );
-        });
-        directChannels.forEach((cn) => {
-            Echo.private(`private_channels.${cn.id}`).listen(
-                "MessageEvent",
-                (e) => {
-                    if (e.message?.user_id != auth.user.id)
-                        if (cn.id != channel.id)
-                            if (e.type == "newMessageCreated")
-                                dispatch(addMessageCountForChannel(cn));
-                }
-            );
-        });
-        return () => {
-            channels.forEach((cn) => {
-                Echo.leave(`private_channels.${cn.id}`);
-            });
-            directChannels.forEach((cn) => {
-                Echo.leave(`private_channels.${cn.id}`);
-            });
-        };
-    }, [channels, channel, directChannels, users]);
+    }, [workspace.id]);
 
     return <></>;
 }

@@ -7,7 +7,7 @@ import React, {
     useRef,
     useState,
 } from "react";
-import { debounce } from "lodash";
+
 import { PiShareFat } from "react-icons/pi";
 import { FaRegUser } from "react-icons/fa6";
 import { TbStack2 } from "react-icons/tb";
@@ -20,8 +20,6 @@ import {
     isImage,
     isVideo,
 } from "@/helpers/fileHelpers";
-
-import { MdOutlineRotate90DegreesCcw } from "react-icons/md";
 
 import {
     compareDateTime,
@@ -38,19 +36,26 @@ import DocumentInSearch from "./DocumentInSearch";
 import FileIcon from "@/Components/FileIcon";
 import { useDispatch } from "react-redux";
 import { setMedia } from "@/Store/mediaSlice";
-export default function BrowseFiles() {
-    const { auth, flash, workspace, channels } = usePage().props;
+import Layout from "../Layout";
+import InfiniteScroll from "@/Components/InfiniteScroll";
+function BrowseFiles() {
+    const { auth, flash, workspace, channels, workspaceFiles } =
+        usePage().props;
+    const url = usePage().url;
+    const queryParams = new URLSearchParams(url.split("?")[1]);
+
     const dispatch = useDispatch();
-    const [files, setFiles] = useState({});
+    const [files, setFiles] = useState([]);
     const [searchFilter, setSearchFilter] = useState("");
-    const [sharedFiles, setSharedFiles] = useState({});
-    const [loading, setLoading] = useState(false);
+
     const [filter, setFilter] = useState("shared");
 
-    const filterSwitchRef = useRef(false);
+    const [loadedPages, setLoadedPages] = useState({});
+    const [topLoading, setTopLoading] = useState(false);
+    const [bottomLoading, setBottomLoading] = useState(false);
+    const [topHasMore, setTopHasMore] = useState();
+    const [bottomHasMore, setBottomHasMore] = useState();
 
-    const nextPageUrlRef = useRef(null);
-    const loadingRef = useRef(null);
     useEffect(() => {
         Echo.private(`private_workspaces.${workspace.id}`).listen(
             "WorkspaceEvent",
@@ -95,20 +100,9 @@ export default function BrowseFiles() {
         );
     }, []);
 
-    function mutateFiles(pre, list) {
-        const temp = { ...pre };
-        if (!list) return temp;
-        list.forEach((file) => (temp[file.id] = file));
-        return temp;
-    }
-
-    const filesList = useMemo(() => {
-        if (filter == "shared") return Object.values(sharedFiles);
-        return Object.values(files);
-    }, [files, sharedFiles, filter]);
     const filteredFilesList = useMemo(
         () =>
-            filesList.filter((file) => {
+            files.filter((file) => {
                 switch (filter) {
                     case "shared":
                         return (
@@ -130,50 +124,35 @@ export default function BrowseFiles() {
                             .includes(searchFilter.toLowerCase());
                 }
             }),
-        [filesList, filter, searchFilter]
+        [files, filter, searchFilter]
     );
 
     useEffect(() => {
-        // if (!searchValue) {
-        //     return;
-        // }
-
-        let token = null;
-
-        router.get(
-            route("files.index", workspace.id),
-            { filter, name: "", page: 1 },
-            {
-                onCancelToken: (cancelToken) => (token = cancelToken),
-                preserveState: true,
-                only: [],
-                replace: false,
-                headers: {
-                    "Cache-Control": "public",
+        const controller = new AbortController();
+        axios
+            .get(route("files.index", workspace.id), {
+                params: {
+                    filter,
+                    name: "",
+                    page: 1,
                 },
+                signal: controller.signal,
+            })
+            .then((response) => {
+                if (response.status == 200) {
+                    setLoadedPages({ [response.data.current_page]: true });
 
-                onStart: () => {
-                    setLoading(true);
-                },
-                onFinish: () => {
-                    setLoading(false);
-                },
-            }
-        );
+                    setTopHasMore(response.data.prev_page_url);
+                    setFiles([...response.data.data]);
 
+                    setBottomHasMore(response.data.next_page_url);
+                }
+            });
         return () => {
-            token.cancel();
+            controller.abort();
         };
     }, [filter]);
-    useEffect(() => {
-        if (flash.data != null) {
-            if (filter === "shared") {
-                setSharedFiles((prev) => mutateFiles(prev, flash.data.data));
-            }
-            nextPageUrlRef.current = flash.data.next_page_url;
-            setFiles((pre) => mutateFiles(pre, flash.data.data));
-        }
-    }, [flash.data, filter]);
+
     const groupedFiles = useMemo(() => {
         const gFiles = groupListByDate(filteredFilesList);
         const currentDate = formatDDMMYYY(new Date());
@@ -193,56 +172,70 @@ export default function BrowseFiles() {
 
         return result;
     }, [filteredFilesList]);
-    const loadMore = useCallback(() => {
-        let token = null;
-        if (nextPageUrlRef.current) {
-            loadingRef.current = true;
-
-            router.get(
-                nextPageUrlRef.current,
-                {},
-                {
-                    onCancelToken: (cancelToken) => (token = cancelToken),
-                    preserveState: true,
-                    only: [],
-                    replace: false,
-                    headers: {
-                        "Cache-Control": "public",
-                    },
-                    onStart: () => {
-                        setLoading(true);
-                    },
-                    onFinish: () => {
-                        setLoading(false);
-                    },
-                }
-            );
+    const loadMore = (position) => {
+        let url;
+        if (position == "top") {
+            url = topHasMore;
+        } else {
+            url = bottomHasMore;
         }
-        return () => {
-            if (token) token.cancel();
-        };
-    }, [filter]);
+        if (url) {
+            if (position == "top") {
+                setTopLoading(true);
+            } else {
+                setBottomLoading(true);
+            }
+            axios
+                .get(url)
+                .then((response) => {
+                    if (response.status == 200) {
+                        setLoadedPages((pre) => {
+                            const temp = { ...pre };
+                            temp[response.data.current_page] = true;
+                            return temp;
+                        });
+                        if (position == "top") {
+                            setTopHasMore(response.data.prev_page_url);
+                            setFiles((pre) => [...response.data.data, ...pre]);
+                        } else {
+                            setBottomHasMore(response.data.next_page_url);
+                            setFiles((pre) => [...pre, ...response.data.data]);
+                        }
+                    }
+                })
+                .finally(() => {
+                    if (position == "top") {
+                        setTopLoading(false);
+                    } else {
+                        setBottomLoading(false);
+                    }
+                });
+        }
+    };
+
     function search(searchValue) {
         setSearchFilter(searchValue);
-        router.get(
-            route("files.index", workspace.id),
-            { filter, name: searchValue, page: 1 },
-            {
-                preserveState: true,
-                only: [],
-                replace: false,
-                headers: {
-                    "Cache-Control": "public",
+        axios
+            .get(route("files.index", workspace.id), {
+                params: {
+                    name: searchValue,
+                    filter,
                 },
+            })
+            .then((response) => {
+                if (response.status == 200) {
+                    setLoadedPages({ 1: true });
 
-                onStart: () => {
-                    setLoading(true);
-                },
-                onFinish: () => {
-                    setLoading(false);
-                },
-            }
-        );
+                    setTopHasMore(response.data.prev_page_url);
+                    setFiles([...response.data.data]);
+
+                    setBottomHasMore(response.data.next_page_url);
+                }
+            })
+            .finally(() => {
+                setTopLoading(false);
+                setBottomLoading(false);
+            });
     }
     return (
         <div className=" w-full h-full grid grid-cols-5">
@@ -254,8 +247,6 @@ export default function BrowseFiles() {
                             filter == "shared" ? "bg-white/15" : ""
                         }`}
                         onClick={() => {
-                            filterSwitchRef.current = true;
-                            nextPageUrlRef.current = false;
                             setFilter("shared");
                         }}
                     >
@@ -269,8 +260,6 @@ export default function BrowseFiles() {
                             filter == "self" ? "bg-white/15" : ""
                         }`}
                         onClick={() => {
-                            filterSwitchRef.current = true;
-                            nextPageUrlRef.current = false;
                             setFilter("self");
                         }}
                     >
@@ -286,8 +275,6 @@ export default function BrowseFiles() {
                             filter == "all" ? "bg-white/15" : ""
                         }`}
                         onClick={() => {
-                            filterSwitchRef.current = true;
-                            nextPageUrlRef.current = false;
                             setFilter("all");
                         }}
                     >
@@ -308,14 +295,6 @@ export default function BrowseFiles() {
                                 ? "Created by you"
                                 : "All files"}
                         </h1>
-                        {loading && (
-                            <div className="flex gap-x-2 items-center">
-                                <div className="h-6 w-6 relative">
-                                    <OverlayLoadingSpinner />
-                                </div>
-                                <div className="text-xs">Loading files...</div>
-                            </div>
-                        )}
                     </div>
                     <SearchInput
                         onSearch={(searchValue) => search(searchValue)}
@@ -403,58 +382,37 @@ export default function BrowseFiles() {
                             );
                         }}
                     />
-                    <FilesList
-                        groupedFiles={groupedFiles}
-                        loadMore={loadMore}
-                    />
+                    <InfiniteScroll
+                        loadMoreOnTop={() => loadMore("top")}
+                        loadMoreOnBottom={() => loadMore("bottom")}
+                        topHasMore={topHasMore}
+                        bottomHasMore={bottomHasMore}
+                        topLoading={topLoading}
+                        bottomLoading={bottomLoading}
+                        className="flex flex-col  gap-y-4 mt-12  overflow-y-auto scrollbar flex-1"
+                    >
+                        {groupedFiles.map(({ date, fis }, pIndex) => {
+                            if (!fis) return "";
+                            return (
+                                <li key={date}>
+                                    <div className="font-bold text-white/75">
+                                        {date}
+                                    </div>
+                                    {fis.map((file, cIndex) => (
+                                        <div key={file.id} className="">
+                                            <Item file={file} />
+                                        </div>
+                                    ))}
+                                </li>
+                            );
+                        })}
+                    </InfiniteScroll>
                 </div>
             </div>
         </div>
     );
 }
 
-const FilesList = memo(function ({ groupedFiles, loadMore }) {
-    const containerRef = useRef(null);
-    const preScrollPositionRef = useRef(null);
-    const infiniteScrollRef = useRef(null);
-    const { ref: bottom_ref, inView: bottom_inView } = useInView({
-        /* Optional options */
-        threshold: 0,
-    });
-    useEffect(() => {
-        console.log("bottom_inView", bottom_inView);
-        if (!bottom_inView) return;
-        preScrollPositionRef.current = containerRef.current.scrollTop;
-        infiniteScrollRef.current = true;
-        loadMore();
-    }, [bottom_inView]); //hande scroll bottom
+BrowseFiles.layout = (page) => <Layout children={page} />;
 
-    useEffect(() => {
-        if (infiniteScrollRef.current) {
-            containerRef.current.scrollTop = preScrollPositionRef.current;
-            infiniteScrollRef.current = false;
-        }
-    }, [groupedFiles]);
-    return (
-        <ul
-            className="flex flex-col  gap-y-4 mt-12  overflow-y-auto scrollbar flex-1"
-            ref={containerRef}
-        >
-            {groupedFiles.map(({ date, fis }, pIndex) => {
-                if (!fis) return "";
-                return (
-                    <li key={date}>
-                        <div className="font-bold text-white/75">{date}</div>
-                        {fis.map((file, cIndex) => (
-                            <div key={file.id} className="">
-                                <Item file={file} />
-                                {/* {file.name} */}
-                            </div>
-                        ))}
-                    </li>
-                );
-            })}
-            <div ref={bottom_ref} className="h-4  "></div>
-        </ul>
-    );
-});
+export default BrowseFiles;
