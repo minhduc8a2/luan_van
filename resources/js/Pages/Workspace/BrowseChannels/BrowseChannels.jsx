@@ -17,7 +17,7 @@ import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
 function BrowseChannels() {
     const { auth, workspace } = usePage().props;
     const dispatch = useDispatch();
-    const [allChannels, setAllChannels] = useState({});
+    const [allChannels, setAllChannels] = useState([]);
 
     const [searchValue, setSearchValue] = useState("");
     const [filterLoading, setFilterLoading] = useState(false);
@@ -33,18 +33,27 @@ function BrowseChannels() {
                 switch (e.type) {
                     case "ChannelObserver_deleteChannel":
                         setAllChannels((pre) => {
-                            const temp = { ...pre };
-                            delete temp[e.data];
+                            let temp = [...pre];
+
+                            temp = temp.filter((f) => f.id != e.data);
+                            if (temp.length > 0) {
+                                setTopHasMore(temp[0].id);
+                                setBottomHasMore(temp[temp.length - 1].id);
+                            }
                             return temp;
                         });
                         break;
 
                     case "ChannelObserver_storeChannel":
                         setAllChannels((pre) => {
-                            const temp = { ...pre };
+                            const sorted = [...e.data.files];
+                            sorted.sort((a, b) => b.id - a.id);
 
-                            temp[e.data.id] = e.data;
-
+                            const temp = [...sorted, ...pre];
+                            if (temp.length > 0) {
+                                setTopHasMore(temp[0].id);
+                                setBottomHasMore(temp[temp.length - 1].id);
+                            }
                             return temp;
                         });
 
@@ -55,21 +64,21 @@ function BrowseChannels() {
             }
         );
     }, []);
-    function mutateFiles(pre, data) {
-        const temp = { ...pre };
-        data.forEach((d) => (temp[d.id] = d));
-        return temp;
+    function mutateFiles(pre, data, position) {
+        if (position == "top") {
+            return [...data, ...pre];
+        } else {
+            return [...pre, ...data];
+        }
     }
     const [filter, setFilter] = useState({
         ownType: "all_channels",
         privacyType: "any_channel_type",
         sort: "a_to_z",
     });
-    const allChannelsList = useMemo(() => {
-        return Object.values(allChannels);
-    }, [allChannels]);
+
     const filteredChannels = useMemo(() => {
-        let tempChannels = [...allChannelsList];
+        let tempChannels = [...allChannels];
         //owntype
         switch (filter.ownType) {
             case "all_channels":
@@ -127,7 +136,7 @@ function BrowseChannels() {
                 break;
         }
         return tempChannels;
-    }, [filter, allChannelsList, searchValue]);
+    }, [filter, allChannels, searchValue]);
     function changeChannel(channel) {
         router.get(
             route("channels.show", {
@@ -186,31 +195,51 @@ function BrowseChannels() {
     }
 
     function loadMore(position) {
-        let url;
+        let last_id;
         if (position == "top") {
-            url = topHasMore;
+            last_id = topHasMore;
         } else {
-            url = bottomHasMore;
+            last_id = bottomHasMore;
         }
-        if (url) {
+        if (last_id) {
             if (position == "top") {
                 setTopLoading(true);
             } else {
                 setBottomLoading(true);
             }
+
             return axios
-                .get(url)
+                .get(route("channels.index", workspace.id), {
+                    params: {
+                        ownType: filter.ownType,
+                        privacyType: filter.privacyType,
+                        name: searchValue,
+                        last_id,
+                        direction: position,
+                    },
+                    // signal: token.current.signal,
+                })
                 .then((response) => {
                     if (response.status == 200) {
                         if (position == "top") {
-                            setTopHasMore(response.data.prev_page_url);
+                            if (response.data.length > 0) {
+                                setTopHasMore(response.data[0].id);
+                            } else {
+                                setTopHasMore(null);
+                            }
                             setAllChannels((pre) =>
-                                mutateFiles(pre, response.data.data)
+                                mutateFiles(pre, response.data, "top")
                             );
                         } else {
-                            setBottomHasMore(response.data.next_page_url);
+                            if (response.data.length > 0) {
+                                setBottomHasMore(
+                                    response.data[response.data.length - 1].id
+                                );
+                            } else {
+                                setBottomHasMore(null);
+                            }
                             setAllChannels((pre) =>
-                                mutateFiles(pre, response.data.data)
+                                mutateFiles(pre, response.data, "bottom")
                             );
                         }
                     }
@@ -237,15 +266,24 @@ function BrowseChannels() {
                     ownType: filter.ownType,
                     privacyType: filter.privacyType,
                     name: searchValue,
-                    page: 1,
+                    last_id: "",
+                    direction: "bottom",
                 },
                 signal: token.current.signal,
             })
             .then((response) => {
                 if (response.status == 200) {
-                    setAllChannels(mutateFiles({}, response.data.data));
-                    setTopHasMore(response.data.prev_page_url);
-                    setBottomHasMore(response.data.next_page_url);
+                    console.log(response.data);
+                    if (response.data.length > 0) {
+                        setTopHasMore(response.data[0].id);
+                        setBottomHasMore(
+                            response.data[response.data.length - 1].id
+                        );
+                    } else {
+                        setTopHasMore(null);
+                        setBottomHasMore(null);
+                    }
+                    setAllChannels(mutateFiles([], response.data, "bottom"));
                 }
             })
             .finally(() => {
@@ -289,7 +327,7 @@ function BrowseChannels() {
                 <SearchInput
                     placeholder="Search for channels"
                     onSearch={(searchValue) => search(searchValue)}
-                    list={allChannelsList}
+                    list={allChannels}
                     onItemClick={changeChannel}
                     filterFunction={(searchValue, list) => {
                         return list.filter((cn) =>
@@ -333,7 +371,6 @@ function BrowseChannels() {
                     bottomHasMore={bottomHasMore}
                     topLoading={topLoading}
                     bottomLoading={bottomLoading}
-                    showLoadingMessage
                     className="mt-4 bg-background flex-1 max-h-full overflow-y-auto scrollbar rounded-lg border border-white/15"
                 >
                     {filteredChannels.length == 0 && (

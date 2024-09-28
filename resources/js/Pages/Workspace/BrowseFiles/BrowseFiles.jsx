@@ -175,7 +175,7 @@ function BrowseFiles() {
                         last_id,
                         direction: position,
                     },
-                    signal: token.current.signal,
+                    // signal: token.current.signal,
                 })
                 .then((response) => {
                     if (response.status == 200) {

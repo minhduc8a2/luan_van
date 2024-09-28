@@ -33,90 +33,119 @@ class ChannelController extends Controller
         $ownType = $request->query('ownType');
         $privacyType = $request->query('privacyType');
         $name = $request->query('name') ?? "";
-        $page = $request->query('page') ?? 1;
-
+        // $page = $request->query('page') ?? 1;
+        $last_id = $request->query('last_id');
+        $direction = $request->query('direction') ?? "bottom";
         $user = $request->user();
 
         if ($request->expectsJson()) {
             try {
+                $query = null;
                 switch ($ownType) {
 
                     case "my_channels": {
+                            $query = $user->ownChannels()->where('workspace_id', $workspace->id)->where('name', 'like', '%' . $name . '%')->withCount('users');
                             switch ($privacyType) {
-
                                 case "public":
-                                    return  $user->ownChannels()->where('workspace_id', $workspace->id)->where('type', ChannelTypes::PUBLIC->name)->where('name', 'like', '%' . $name . '%')->withCount('users')->simplePaginate($perPage, ['*'], 'page', $page);
+                                    $query =  $query->where('type', ChannelTypes::PUBLIC->name);
+                                    break;
                                 case "private":
-                                    return  $user->ownChannels()->where('workspace_id', $workspace->id)->where('type', ChannelTypes::PRIVATE->name)->where('name', 'like', '%' . $name . '%')->withCount('users')->simplePaginate($perPage, ['*'], 'page', $page);
+                                    $query =  $query->where('type', ChannelTypes::PRIVATE->name);
+                                    break;
+
                                 case "archived":
-                                    return  $user->ownChannels()->where('workspace_id', $workspace->id)->where('is_archived', true)->where('name', 'like', '%' . $name . '%')->withCount('users')->simplePaginate($perPage, ['*'], 'page', $page);
+                                    $query =  $query->where('is_archived', true);
+                                    break;
+
                                 default:
-                                    return  $user->ownChannels()->where('workspace_id', $workspace->id)->where('name', 'like', '%' . $name . '%')->whereIn('type', [ChannelTypes::PUBLIC->name, ChannelTypes::PRIVATE->name])->withCount('users')->simplePaginate($perPage, ['*'], 'page', $page);
+                                    $query =  $query->whereIn('type', [ChannelTypes::PUBLIC->name, ChannelTypes::PRIVATE->name]);
+                                    break;
                             }
+                            break;
                         }
                     case "other_channels": {
+                            $query = $workspace->channels()->where('user_id', '<>', $user->id)->where('name', 'like', '%' . $name . '%')->withCount('users');
                             switch ($privacyType) {
 
-
                                 case "public":
-                                    return  $workspace->channels()->where('user_id', '<>', $user->id)->where('name', 'like', '%' . $name . '%')
-                                        ->where('type', ChannelTypes::PUBLIC->name)->withCount('users')->simplePaginate($perPage, ['*'], 'page', $page);
+
+                                    $query = $query->where('type', ChannelTypes::PUBLIC->name);
+                                    break;
                                 case "private":
 
-                                    return  $workspace->channels()->where('user_id', '<>', $user->id)->where('name', 'like', '%' . $name . '%')
+                                    $query = $query
                                         ->where('type', ChannelTypes::PRIVATE->name)->whereHas('users', function ($query) use ($user) {
                                             $query->where('users.id', $user->id);
-                                        })->withCount('users')->simplePaginate($perPage, ['*'], 'page', $page);
+                                        });
+                                    break;
+
                                 case "archived":
-                                    return  $workspace->channels()->where('user_id', '<>', $user->id)->where('is_archived', true)->where('name', 'like', '%' . $name . '%')
-                                        ->where(function ($query) use ($user) {
-                                            $query->where('type', ChannelTypes::PRIVATE->name)->whereHas('users', function ($query) use ($user) {
-                                                $query->where('users.id', $user->id);
-                                            });
-                                            $query->orWhere('type', ChannelTypes::PUBLIC->name);
-                                        })->withCount('users')->simplePaginate($perPage, ['*'], 'page', $page);
+                                    $query = $query->where('is_archived', true)->where(function ($query) use ($user) {
+                                        $query->where('type', ChannelTypes::PRIVATE->name)->whereHas('users', function ($query) use ($user) {
+                                            $query->where('users.id', $user->id);
+                                        });
+                                        $query->orWhere('type', ChannelTypes::PUBLIC->name);
+                                    });
+
+                                    break;
                                 default:
-                                    return  $workspace->channels()->where('user_id', '<>', $user->id)->where('name', 'like', '%' . $name . '%')
-                                        ->where(function ($query) use ($user) {
-                                            $query->where('type', ChannelTypes::PRIVATE->name)->whereHas('users', function ($query) use ($user) {
-                                                $query->where('users.id', $user->id);
-                                            });
-                                            $query->orWhere('type', ChannelTypes::PUBLIC->name);
-                                        })->withCount('users')->simplePaginate($perPage, ['*'], 'page', $page);
+                                    $query = $query->where(function ($query) use ($user) {
+                                        $query->where('type', ChannelTypes::PRIVATE->name)->whereHas('users', function ($query) use ($user) {
+                                            $query->where('users.id', $user->id);
+                                        });
+                                        $query->orWhere('type', ChannelTypes::PUBLIC->name);
+                                    });
+                                    break;
                             }
                         }
                     default: {
+                            $query = $workspace->channels()->where('name', 'like', '%' . $name . '%')->withCount('users');
                             switch ($privacyType) {
 
 
                                 case "public":
-                                    return  $workspace->channels()->where('name', 'like', '%' . $name . '%')
-                                        ->where('type', ChannelTypes::PUBLIC->name)->withCount('users')->simplePaginate($perPage, ['*'], 'page', $page);
+                                    $query = $query
+                                        ->where('type', ChannelTypes::PUBLIC->name);
+                                    break;
                                 case "private":
 
-                                    return  $workspace->channels()->where('name', 'like', '%' . $name . '%')
+                                    $query = $query
                                         ->where('type', ChannelTypes::PRIVATE->name)->whereHas('users', function ($query) use ($user) {
                                             $query->where('users.id', $user->id);
-                                        })->withCount('users')->simplePaginate($perPage, ['*'], 'page', $page);
+                                        });
+                                    break;
                                 case "archived":
-                                    return  $workspace->channels()->where('is_archived', true)->where('name', 'like', '%' . $name . '%')
+                                    $query = $query->where('is_archived', true)
                                         ->where(function ($query) use ($user) {
                                             $query->where('type', ChannelTypes::PRIVATE->name)->whereHas('users', function ($query) use ($user) {
                                                 $query->where('users.id', $user->id);
                                             });
                                             $query->orWhere('type', ChannelTypes::PUBLIC->name);
-                                        })->withCount('users')->simplePaginate($perPage, ['*'], 'page', $page);
+                                        });
+                                    break;
+
                                 default:
-                                    return  $workspace->channels()->where('name', 'like', '%' . $name . '%')
-                                        ->where(function ($query) use ($user) {
-                                            $query->where('type', ChannelTypes::PRIVATE->name)->whereHas('users', function ($query) use ($user) {
-                                                $query->where('users.id', $user->id);
-                                            });
-                                            $query->orWhere('type', ChannelTypes::PUBLIC->name);
-                                        })->withCount('users')->simplePaginate($perPage, ['*'], 'page', $page);
+                                    $query = $query->where(function ($query) use ($user) {
+                                        $query->where('type', ChannelTypes::PRIVATE->name)->whereHas('users', function ($query) use ($user) {
+                                            $query->where('users.id', $user->id);
+                                        });
+                                        $query->orWhere('type', ChannelTypes::PUBLIC->name);
+                                    });
+                                    break;
                             }
                         }
+                } //end switch
+                if ($last_id) {
+                    if ($direction === 'bottom') {
+                        $query->where('id', '<', $last_id)->orderBy('id', 'desc');
+                    } else {
+                        $query->where('id', '>', $last_id)->orderBy('id', 'asc');
+                    }
+                } else {
+                    $query->orderBy('id', 'desc');
                 }
+
+                return $query->limit($perPage)->get();
             } catch (\Throwable $th) {
                 dd($th);
             }
@@ -464,7 +493,7 @@ class ChannelController extends Controller
             //archive messages
             Message::where('channel_id', $channel->id)
                 ->where('user_id', $user->id)
-                ->update('user_name', $user->name);
+                ->update(['user_name' => $user->name]);
 
 
 

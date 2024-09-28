@@ -45,9 +45,15 @@ export default function ChannelNotification({
                     return;
                 }
                 if (changesType != "deleteChannel") {
-                    router.visit(route("channels.show", channel.id), {
-                        preserveState: true,
-                    });
+                    router.visit(
+                        route("channels.show", {
+                            workspace: workspace.id,
+                            channel: channel.id,
+                        }),
+                        {
+                            preserveState: true,
+                        }
+                    );
                 }
             });
     }
