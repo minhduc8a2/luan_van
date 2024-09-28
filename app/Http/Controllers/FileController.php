@@ -61,7 +61,7 @@ class FileController extends Controller
     }
     public function index(Request $request, Workspace $workspace)
     {
-        $perPage = 3;
+        $perPage = 10;
         $filter = $request->query('filter');
         $name = $request->query('name') ?? "";
         $page = $request->query('page') ?? 1;

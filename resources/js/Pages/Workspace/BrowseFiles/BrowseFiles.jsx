@@ -134,7 +134,6 @@ function BrowseFiles() {
                 params: {
                     filter,
                     name: "",
-                    page: 1,
                 },
                 signal: controller.signal,
             })
@@ -185,7 +184,7 @@ function BrowseFiles() {
             } else {
                 setBottomLoading(true);
             }
-            axios
+            return axios
                 .get(url)
                 .then((response) => {
                     if (response.status == 200) {
@@ -308,7 +307,10 @@ function BrowseFiles() {
                             });
                         }}
                         onChange={(e) => {
-                            if (!e.target.value) setSearchFilter("");
+                            if (!e.target.value) {
+                                setSearchFilter("");
+                                search("");
+                            }
                         }}
                         renderItemNode={(item) => {
                             if (isImage(item.type)) {

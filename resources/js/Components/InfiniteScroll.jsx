@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { IoReloadOutline } from "react-icons/io5";
 import { useInView } from "react-intersection-observer";
 import OverlayLoadingSpinner from "./Overlay/OverlayLoadingSpinner";
@@ -26,14 +26,31 @@ export default function InfiniteScroll({
         root: containerRef.current,
         rootMargin: "500px",
     });
-
+    const [justTopLoaded, setJustTopLoaded] = useState(false);
+    const preScrollPositionRef = useRef(null);
     useEffect(() => {
-        console.log("top :", top_inView);
         if (topHasMore && !topLoading && top_inView) {
-            loadMoreOnTop();
-            console.log("load more on top");
+            console.log("Load more on top");
+            setJustTopLoaded(false);
+            preScrollPositionRef.current = {
+                oldScrollHeight: containerRef.current.scrollHeight,
+                oldScrollTop: containerRef.current.scrollTop,
+            };
+            loadMoreOnTop().then(() => {
+                setJustTopLoaded(true);
+            });
         }
     }, [top_inView, topHasMore, topLoading]);
+
+    useEffect(() => {
+        if (justTopLoaded) {
+            containerRef.current.scrollTop =
+                containerRef.current.scrollHeight -
+                preScrollPositionRef.current.oldScrollHeight +
+                preScrollPositionRef.current.oldScrollTop;
+            setJustTopLoaded(false);
+        }
+    }, [justTopLoaded]);
 
     useEffect(() => {
         if (bottomHasMore && !bottomLoading && bottom_inView) {
