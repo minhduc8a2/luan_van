@@ -8,35 +8,31 @@ import { FaLock } from "react-icons/fa";
 import { LuDot } from "react-icons/lu";
 import { compareDateTime } from "@/helpers/dateTimeHelper";
 import { useDispatch } from "react-redux";
-import { setThreadedMessageId } from "@/Store/threadSlice";
-import { setPageName } from "@/Store/pageSlice";
 import SearchInput from "../../../Components/Input/SearchInput";
-import { InView } from "react-intersection-observer";
-import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
 import { channelProps } from "@/helpers/channelHelper";
-export default function BrowseChannels() {
-    const { channels, auth, workspace } = usePage().props;
+import Layout from "../Layout";
+import InfiniteScroll from "@/Components/InfiniteScroll";
+import { setLeftWindowType } from "@/Store/windowTypeSlice";
+function BrowseChannels() {
+    const { auth, workspace } = usePage().props;
     const dispatch = useDispatch();
-    const [allChannels, setAllChannels] = useState(new Map());
-    const localFoundRef = useRef(false);
+    const [allChannels, setAllChannels] = useState([]);
+
     const [searchValue, setSearchValue] = useState("");
-    const [loading, setLoading] = useState(false);
-    const containerRef = useRef(null);
-    const prevScrollHeightRef = useRef(null);
-    const nextPageUrlRef = useRef(null);
-    const filterSwitchRef = useRef(false);
+
+    const [topLoading, setTopLoading] = useState(false);
+    const [bottomLoading, setBottomLoading] = useState(false);
+    const [topHasMore, setTopHasMore] = useState();
+    const [bottomHasMore, setBottomHasMore] = useState();
 
     const [filter, setFilter] = useState({
         ownType: "all_channels",
         privacyType: "any_channel_type",
         sort: "a_to_z",
     });
-    const channelsList = useMemo(
-        () => [...allChannels.values()],
-        [allChannels]
-    );
+
     const filteredChannels = useMemo(() => {
-        let tempChannels = [...channelsList];
+        let tempChannels = [...allChannels];
         //owntype
         switch (filter.ownType) {
             case "all_channels":
@@ -94,10 +90,8 @@ export default function BrowseChannels() {
                 break;
         }
         return tempChannels;
-    }, [filter, channelsList, searchValue]);
+    }, [filter, allChannels, searchValue]);
     function changeChannel(channel) {
-        dispatch(setThreadedMessageId(null));
-
         router.get(
             route("channel.show", {
                 workspace: workspace.id,
@@ -107,19 +101,27 @@ export default function BrowseChannels() {
             {
                 preserveState: true,
                 only: channelProps,
-                onSuccess: () => dispatch(setPageName("normal")),
+                onFinish: () => {
+                    dispatch(setLeftWindowType("panel"));
+                },
             }
         );
     }
     function joinChannel(channel, options) {
         router.post(
-            route("channel.join", channel.id),
+            route("channel.join", {
+                workspace: workspace.id,
+                channel: channel.id,
+            }),
             {},
             {
                 preserveState: true,
                 only: ["channels"],
                 headers: {
                     "X-Socket-Id": Echo.socketId(),
+                },
+                onFinish: () => {
+                    search(searchValue);
                 },
                 ...options,
             }
@@ -127,7 +129,10 @@ export default function BrowseChannels() {
     }
     function leaveChannel(channel, options) {
         router.post(
-            route("channel.leave", channel.id),
+            route("channel.leave", {
+                workspace: workspace.id,
+                channel: channel.id,
+            }),
             {},
             {
                 preserveState: true,
@@ -135,69 +140,88 @@ export default function BrowseChannels() {
                 headers: {
                     "X-Socket-Id": Echo.socketId(),
                 },
+                onFinish: () => {
+                    search(searchValue);
+                },
                 ...options,
             }
         );
     }
-    function mutateChannels(pre, list) {
-        const temp = new Map(pre);
-        if (!list) return temp;
-        list.forEach((cn) => temp.set(cn.id, cn));
-        return temp;
-    }
-    useEffect(() => {
-        if (
-            filteredChannels.some((channel) => {
-                return channel.name
-                    .toLowerCase()
-                    .includes(searchValue.toLowerCase());
-            })
-        )
-            localFoundRef.current = true;
-    }, [filteredChannels, searchValue]);
-    useEffect(() => {
-        // if (!searchValue) {
-        //     return;
-        // }
-        if (localFoundRef.current && !filterSwitchRef.current) return;
-        if (filterSwitchRef.current) filterSwitchRef.current = false;
 
-        const controller = new AbortController();
-        const delayDebounceFn = setTimeout(() => {
-            setLoading(true);
-
-            axios
-                .get(route("channels.index", workspace.id), {
-                    params: {
-                        ownType: filter.ownType,
-                        privacyType: filter.privacyType,
-                        name: searchValue,
-                        page: 1,
-                    },
-                    signal: controller.signal,
-                })
+    function loadMore(position) {
+        let url;
+        if (position == "top") {
+            url = topHasMore;
+        } else {
+            url = bottomHasMore;
+        }
+        if (url) {
+            if (position == "top") {
+                setTopLoading(true);
+            } else {
+                setBottomLoading(true);
+            }
+            return axios
+                .get(url)
                 .then((response) => {
-                    console.log(response.data?.data);
-                    nextPageUrlRef.current = response.data?.next_page_url;
-
-                    setAllChannels((pre) =>
-                        mutateChannels(pre, response.data?.data)
-                    );
-                    setLoading(false);
+                    if (response.status == 200) {
+                        if (position == "top") {
+                            setTopHasMore(response.data.prev_page_url);
+                            setAllChannels((pre) => [
+                                ...response.data.data,
+                                ...pre,
+                            ]);
+                        } else {
+                            setBottomHasMore(response.data.next_page_url);
+                            setAllChannels((pre) => [
+                                ...pre,
+                                ...response.data.data,
+                            ]);
+                        }
+                    }
                 })
-                .catch((error) => {
-                    console.log(error);
-
-                    setLoading(false);
+                .finally(() => {
+                    if (position == "top") {
+                        setTopLoading(false);
+                    } else {
+                        setBottomLoading(false);
+                    }
                 });
-        }, 500);
+        }
+    }
 
-        return () => {
-            controller.abort();
-            clearTimeout(delayDebounceFn);
-        };
-    }, [searchValue, filter]);
+    const token = useRef(null);
 
+    function search(searchValue) {
+        if (token.current != null) token.current.abort();
+
+        token.current = new AbortController();
+        axios
+            .get(route("channels.index", workspace.id), {
+                params: {
+                    ownType: filter.ownType,
+                    privacyType: filter.privacyType,
+                    name: searchValue,
+                    page: 1,
+                },
+                signal: token.current.signal,
+            })
+            .then((response) => {
+                if (response.status == 200) {
+                    setAllChannels((pre) => [...response.data.data]);
+                    setTopHasMore(response.data.prev_page_url);
+                    setBottomHasMore(response.data.next_page_url);
+                }
+            })
+            .finally(() => {
+                setTopLoading(false);
+                setBottomLoading(false);
+            });
+    }
+
+    useEffect(() => {
+        search("");
+    }, [filter]);
     return (
         <div className="bg-foreground w-full h-full border border-white/15 ">
             <div className="mx-auto w-1/2 py-4 flex flex-col max-h-full">
@@ -206,16 +230,9 @@ export default function BrowseChannels() {
                         <h3 className="text-xl font-bold text-white">
                             All Channels
                         </h3>
-                        {loading && (
-                            <div className="flex gap-x-2 items-center">
-                                <div className="h-6 w-6 relative">
-                                    <OverlayLoadingSpinner />
-                                </div>
-                                <div className="text-xs">Loading files...</div>
-                            </div>
-                        )}
                     </div>
                     <CreateChannelForm
+                        callback={() => search(searchValue)}
                         activateButtonNode={
                             <Button className="text-white/100 font-bold border border-white/15 !bg-background">
                                 Create Channel
@@ -225,7 +242,8 @@ export default function BrowseChannels() {
                 </div>
                 <SearchInput
                     placeholder="Search for channels"
-                    list={channelsList}
+                    onSearch={(searchValue) => search(searchValue)}
+                    list={allChannels}
                     onItemClick={changeChannel}
                     filterFunction={(searchValue, list) => {
                         return list.filter((cn) =>
@@ -234,7 +252,9 @@ export default function BrowseChannels() {
                     }}
                     onChange={(e) => {
                         setSearchValue(e.target.value);
-                        localFoundRef.current = false;
+                        if (!e.target.value) {
+                            search("");
+                        }
                     }}
                     renderItemNode={(item) => {
                         return (
@@ -256,74 +276,37 @@ export default function BrowseChannels() {
                 />
                 <Filter
                     setFilter={(a) => {
-                        filterSwitchRef.current = true;
-                        nextPageUrlRef.current = false;
                         setFilter(a);
                     }}
                     changeChannel={changeChannel}
                 />
-                {filteredChannels.length > 0 && (
-                    <ul
-                        className="mt-4 bg-background flex-1 max-h-full overflow-y-auto scrollbar rounded-lg border border-white/15"
-                        ref={containerRef}
-                    >
-                        {filteredChannels.map((cn, index) => {
-                            return (
-                                <li
-                                    className="border-t first:border-none border-t-white/15"
-                                    key={cn.id}
-                                >
-                                    <ChannelItem
-                                        channel={cn}
-                                        changeChannel={changeChannel}
-                                        joinChannel={joinChannel}
-                                        leaveChannel={leaveChannel}
-                                    />
-                                    {index == filteredChannels.length - 1 && (
-                                        <InView
-                                            onChange={(inView) => {
-                                                console.log(inView);
-                                                if (
-                                                    inView &&
-                                                    nextPageUrlRef.current
-                                                ) {
-                                                    prevScrollHeightRef.current =
-                                                        containerRef.current.scrollHeight;
-
-                                                    axios
-                                                        .get(
-                                                            nextPageUrlRef.current
-                                                        )
-                                                        .then((response) => {
-                                                            // console.log(response.data?.data);
-                                                            nextPageUrlRef.current =
-                                                                response.data?.next_page_url;
-
-                                                            setAllChannels(
-                                                                (pre) =>
-                                                                    mutateChannels(
-                                                                        pre,
-                                                                        response
-                                                                            .data
-                                                                            ?.data
-                                                                    )
-                                                            );
-                                                            setLoading(false);
-                                                        })
-                                                        .catch((error) => {
-                                                            console.log(error);
-
-                                                            setLoading(false);
-                                                        });
-                                                }
-                                            }}
-                                        ></InView>
-                                    )}
-                                </li>
-                            );
-                        })}
-                    </ul>
-                )}
+                <InfiniteScroll
+                    loadMoreOnTop={() => loadMore("top")}
+                    loadMoreOnBottom={() => loadMore("bottom")}
+                    topHasMore={topHasMore}
+                    bottomHasMore={bottomHasMore}
+                    topLoading={topLoading}
+                    bottomLoading={bottomLoading}
+                    showLoadingMessage
+                    className="mt-4 bg-background flex-1 max-h-full overflow-y-auto scrollbar rounded-lg border border-white/15"
+                >
+                    {filteredChannels.length == 0 && <p className="text-center p-4">No results found</p>}
+                    {filteredChannels.map((cn, index) => {
+                        return (
+                            <li
+                                className="border-t first:border-none border-t-white/15"
+                                key={cn.id}
+                            >
+                                <ChannelItem
+                                    channel={cn}
+                                    changeChannel={changeChannel}
+                                    joinChannel={joinChannel}
+                                    leaveChannel={leaveChannel}
+                                />
+                            </li>
+                        );
+                    })}
+                </InfiniteScroll>
             </div>
         </div>
     );
@@ -426,3 +409,6 @@ function ChannelItem({ channel, changeChannel, joinChannel, leaveChannel }) {
         </div>
     );
 }
+BrowseChannels.layout = (page) => <Layout children={page} />;
+
+export default BrowseChannels;

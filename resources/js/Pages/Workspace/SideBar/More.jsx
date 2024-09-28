@@ -46,10 +46,13 @@ export default function More() {
                                         switchPage("browseFiles");
                                         router.get(
                                             route("files.index", workspace.id),
-                                            { filter: "shared", page: 1 },
+                                            {},
                                             {
                                                 preserveState: true,
-                                                only:["workspaceFiles"]
+                                                only: [],
+                                                onFinish: () => {
+                                                    switchPage();
+                                                },
                                             }
                                         );
                                         close();
@@ -62,8 +65,20 @@ export default function More() {
                             <li>
                                 <MoreButton
                                     onClick={() => {
-                                        switchPage("browseChannels");
-
+                                        router.get(
+                                            route(
+                                                "channels.index",
+                                                workspace.id
+                                            ),
+                                            {},
+                                            {
+                                                preserveState: true,
+                                                only: [],
+                                                onFinish: () => {
+                                                    switchPage();
+                                                },
+                                            }
+                                        );
                                         close();
                                     }}
                                     title="Channels"

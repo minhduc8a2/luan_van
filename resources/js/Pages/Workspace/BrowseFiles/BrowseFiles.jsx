@@ -41,8 +41,6 @@ import InfiniteScroll from "@/Components/InfiniteScroll";
 function BrowseFiles() {
     const { auth, flash, workspace, channels, workspaceFiles } =
         usePage().props;
-    const url = usePage().url;
-    const queryParams = new URLSearchParams(url.split("?")[1]);
 
     const dispatch = useDispatch();
     const [files, setFiles] = useState([]);
@@ -212,14 +210,18 @@ function BrowseFiles() {
         }
     };
 
+    const token = useRef(null);
     function search(searchValue) {
+        if (token.current != null) token.current.abort();
         setSearchFilter(searchValue);
+        token.current = new AbortController();
         axios
             .get(route("files.index", workspace.id), {
                 params: {
                     name: searchValue,
                     filter,
                 },
+                signal: token.current.signal,
             })
             .then((response) => {
                 if (response.status == 200) {

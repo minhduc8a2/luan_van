@@ -640,9 +640,16 @@ function ChatArea() {
 
                                 <ul className="">
                                     {mgs.map((message, index) => {
-                                        let user = channelUsers.find(
+                                        let user = users.find(
                                             (mem) => mem.id === message.user_id
                                         );
+                                        if (
+                                            !channelUsers.find(
+                                                (u) => u.id == user.id
+                                            )
+                                        ) {
+                                            users.notMember = true;
+                                        }
                                         if (!user)
                                             user = {
                                                 id: message.user_id,

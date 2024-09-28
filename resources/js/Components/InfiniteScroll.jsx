@@ -12,8 +12,8 @@ export default function InfiniteScroll({
     loadMoreOnTop,
     loadMoreOnBottom,
     className = "",
-    manualLoadButtons = false,
-    loadingMessage = false,
+    showManualLoadButtons = false,
+    showLoadingMessage = false,
 }) {
     const containerRef = useRef(null);
     const { ref: top_ref, inView: top_inView } = useInView({
@@ -60,15 +60,15 @@ export default function InfiniteScroll({
     }, [bottom_inView, bottomHasMore, bottomLoading]);
     return (
         <ul className={className} ref={containerRef}>
-            {loadingMessage && topLoading && (
-                <div className="flex gap-x-2 items-center">
+            {showLoadingMessage && topLoading && (
+                <div className="flex gap-x-2 items-center px-4 py-2">
                     <div className="h-6 w-6 relative">
                         <OverlayLoadingSpinner />
                     </div>
                     <div className="text-xs">Loading ...</div>
                 </div>
             )}
-            {manualLoadButtons && topHasMore != null && !topLoading && (
+            {showManualLoadButtons && topHasMore != null && !topLoading && (
                 <button
                     className="flex items-center gap-x-2 mx-auto text-white/75 hover:text-white/100"
                     onClick={loadMoreOnTop}
@@ -80,17 +80,19 @@ export default function InfiniteScroll({
             <div ref={top_ref}></div>
             {children}
             <div ref={bottom_ref}></div>
-            {manualLoadButtons && bottomHasMore != null && !bottomLoading && (
-                <button
-                    className="flex items-center gap-x-2 mx-auto text-white/75 hover:text-white/100"
-                    onClick={loadMoreOnBottom}
-                >
-                    <IoReloadOutline />
-                    Load more
-                </button>
-            )}
-            {loadingMessage && bottomLoading && (
-                <div className="flex gap-x-2 items-center mx-auto">
+            {showManualLoadButtons &&
+                bottomHasMore != null &&
+                !bottomLoading && (
+                    <button
+                        className="flex items-center gap-x-2 mx-auto text-white/75 hover:text-white/100"
+                        onClick={loadMoreOnBottom}
+                    >
+                        <IoReloadOutline />
+                        Load more
+                    </button>
+                )}
+            {showLoadingMessage && bottomLoading && (
+                <div className="flex gap-x-2 items-center px-4 py-2 mx-auto">
                     <div className="h-6 w-6 relative">
                         <OverlayLoadingSpinner />
                     </div>

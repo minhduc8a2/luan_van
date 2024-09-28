@@ -32,8 +32,6 @@ export default function Panel({}) {
     );
     // const { messages } = useSelector((state) => state.messages);
     function changeChannel(channel) {
-        dispatch(setThreadedMessageId(null));
-
         router.get(
             route("channel.show", {
                 workspace: workspace.id,
@@ -121,7 +119,7 @@ export default function Panel({}) {
                                                 changeChannel(channel)
                                             }
                                             className={`flex items-center justify-between mt-2 px-4 w-full rounded-lg ${
-                                                channel.id == currentChannel.id
+                                                channel.id == currentChannel?.id
                                                     ? "bg-primary-300"
                                                     : "hover:bg-white/10"
                                             }`}
