@@ -28,7 +28,7 @@ export default function LeaveChannel({ channel }) {
         return (
             <div>
                 <Button
-                    className="!text-danger-500 !hover:text-danger-500 bg-transparent w-full rounded-tl-none rounded-tr-none rounded-bl-lg rounded-br-lg border border-t-0 border-white/15 py-4"
+                    className="!text-danger-500  !hover:text-danger-500 bg-transparent w-full rounded-tl-none rounded-tr-none rounded-bl-lg rounded-br-lg border border-t-0 border-white/15 py-4 !justify-start"
                     onClick={onSubmit}
                 >
                     Leave channel

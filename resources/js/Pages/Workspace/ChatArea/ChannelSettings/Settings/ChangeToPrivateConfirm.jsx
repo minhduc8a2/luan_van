@@ -54,7 +54,7 @@ export default function ChangeToPrivateConfirm({ channelName }) {
             } channel?`}
             buttonNode={
                 <Button
-                    className=" bg-transparent w-full !rounded-none    py-4"
+                    className=" bg-transparent w-full !rounded-none    py-4 border-none !justify-start"
                     onClick={() => {
                         setSuccess(false);
                         setErrors(null);

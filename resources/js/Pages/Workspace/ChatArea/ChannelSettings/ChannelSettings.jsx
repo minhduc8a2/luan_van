@@ -9,7 +9,7 @@ import About from "./About/About";
 import Settings from "./Settings/Settings";
 import Members from "./Members/Members";
 export default function ChannelSettings({ channelName, buttonNode }) {
-    const { channel, workspace } = usePage().props;
+    const { channel, workspace, permissions } = usePage().props;
     const [tabIndex, setTabIndex] = useState(0);
     const [show, setShow] = useState(false);
     useEffect(() => {
@@ -48,16 +48,23 @@ export default function ChannelSettings({ channelName, buttonNode }) {
                                 Members
                             </button>
                         )}
-                        {channel.type != "DIRECT" && channel.type != "SELF" && (
-                            <button
-                                onClick={() => setTabIndex(2)}
-                                className={`${
-                                    tabIndex == 2 ? " " : "border-b-transparent"
-                                } border-b-2`}
-                            >
-                                Settings
-                            </button>
-                        )}
+                        {channel.type != "DIRECT" &&
+                            channel.type != "SELF" &&
+                            (permissions.updatePermissions ||
+                                permissions.changeType ||
+                                permissions.archive ||
+                                permissions.deleteChannel) && (
+                                <button
+                                    onClick={() => setTabIndex(2)}
+                                    className={`${
+                                        tabIndex == 2
+                                            ? " "
+                                            : "border-b-transparent"
+                                    } border-b-2`}
+                                >
+                                    Settings
+                                </button>
+                            )}
                     </div>
                     <div className="pt-4  flex flex-col pb-8 h-[65vh] overflow-y-auto scrollbar">
                         {tabIndex == 0 && (

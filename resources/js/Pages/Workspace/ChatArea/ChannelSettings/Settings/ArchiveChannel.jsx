@@ -50,7 +50,7 @@ export default function ArchiveChannel() {
                     <ErrorsList errors={errors} />
                 </OverlaySimpleNotification>
                 <Button
-                    className=" !hover:text-danger-500  bg-transparent w-full py-4 !rounded-none"
+                    className=" !hover:text-danger-500  bg-transparent w-full py-4 !rounded-none "
                     loading={processing}
                     onClick={submit}
                 >
@@ -83,7 +83,7 @@ export default function ArchiveChannel() {
             }
             buttonNode={
                 <Button
-                    className=" !hover:text-danger-500  bg-transparent w-full py-4 !rounded-none"
+                    className=" !hover:text-danger-500  bg-transparent w-full py-4 !rounded-none border-none !justify-start"
                     onClick={() => {
                         setSuccess(false);
                         setErrors(null);

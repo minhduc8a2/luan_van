@@ -62,8 +62,8 @@ export default function DeleteChannel() {
                 </div>
             }
             buttonNode={
-                <Button className=" !hover:text-danger-500  bg-transparent w-full !rounded-none py-4 ">
-                    <div className="flex items-center gap-x-2 text-danger-500">
+                <Button className=" !hover:text-danger-500  bg-transparent w-full !rounded-none py-4 border-none !justify-start">
+                    <div className="flex items-center gap-x-2 text-danger-500 ">
                         <FaRegTrashCan className="" /> Delete this channel
                     </div>
                 </Button>
