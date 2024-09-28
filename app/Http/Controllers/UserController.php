@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ProfileUpdateRequest;
 use App\Models\User;
+use App\Models\Workspace;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\ProfileUpdateRequest;
+use Inertia\Inertia;
 
 class UserController extends Controller
 {
@@ -16,6 +18,32 @@ class UserController extends Controller
     public function index()
     {
         //
+    }
+    public function browseUsers(Request $request, Workspace $workspace)
+    {
+        $perPage = 10;
+
+        $name = $request->query('name') ?? "";
+        // $page = $request->query('page') ?? 1;
+        $last_id = $request->query('last_id');
+        $direction = $request->query('direction') ?? "bottom";
+        // $page = 2;
+        if ($request->expectsJson()) {
+
+            $query = $workspace->users();
+
+            if ($last_id) {
+                if ($direction === 'bottom') {
+                    $query->where('users.id', '<', $last_id)->orderBy('id', 'desc');
+                } else {
+                    $query->where('users.id', '>', $last_id)->orderBy('id', 'asc');
+                }
+            } else {
+                $query->orderBy('users.id', 'desc');
+            }
+            return $query->limit($perPage)->where('users.name', 'like', '%' . $name . '%')->get();
+        }
+        return Inertia::render("Workspace/BrowseUsers/BrowseUsers");
     }
 
     /**
@@ -62,7 +90,7 @@ class UserController extends Controller
         $phone = $request->validated('phone');
         try {
             DB::beginTransaction();
-          
+
             if ($name) $user->name = $name;
             if ($display_name) $user->display_name = $display_name;
             if ($email) $user->email = $email;

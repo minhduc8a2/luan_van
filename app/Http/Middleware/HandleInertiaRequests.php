@@ -7,6 +7,7 @@ use App\Models\Message;
 use Inertia\Middleware;
 use Illuminate\Http\Request;
 use App\Helpers\ChannelTypes;
+use App\Models\Workspace;
 use Illuminate\Database\Eloquent\Builder;
 
 class HandleInertiaRequests extends Middleware
@@ -33,7 +34,10 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        $user = $request->user() ;
+        $user = $request->user();
+        /**
+         * @var Workspace $workspace
+         */
         $workspace = $request->route('workspace');
         $hiddenUserIds = null;
         $channels = [];
@@ -43,6 +47,7 @@ class HandleInertiaRequests extends Middleware
         $users = [];
         $newNotificationsCount = 0;
         $workspacePermissions = null;
+
         if ($user && $workspace) {
             $hiddenUserIds =  $user->hiddenUsers()->wherePivot('workspace_id', $workspace->id)->pluck('hidden_user_id')->toArray();
 

@@ -15,6 +15,7 @@ import { MdDownload, MdMoreVert } from "react-icons/md";
 const Image = memo(function Image({
     url,
     name,
+    clickAble = true,
     className = "",
     dimensions = "h-64 aspect-[4/5]",
     fullScreenMode = false,
@@ -230,8 +231,12 @@ const Image = memo(function Image({
                 </div>
             )}
             <button
-                className="w-full h-full relative overflow-hidden"
-                onClick={() => setFullscreen(true)}
+                className={`w-full h-full relative overflow-hidden ${
+                    !clickAble ? "cursor-default" : ""
+                }`}
+                onClick={() => {
+                    if (clickAble) setFullscreen(true);
+                }}
             >
                 <img
                     src={url}

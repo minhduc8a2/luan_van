@@ -44,6 +44,8 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::post("/workspaces", [WorkspaceController::class, 'store'])->name('workspace.store');
+    Route::get('/workspaces/{workspace}/users', [UserController::class, 'browseUsers'])->name("users.browseUsers");
+
     Route::get("/workspaces/{workspace}", [WorkspaceController::class, 'show'])->name('workspace.show');
     Route::get("/workspaces/{workspace}/direct_channels", [WorkspaceController::class, 'getDirectChannels'])->name('workspace.direct_channels');
     Route::get("/workspaces/{workspace}/channels/{channel}", [ChannelController::class, 'show'])->name('channels.show');
@@ -76,9 +78,9 @@ Route::middleware('auth')->group(function () {
     Route::post("/notifications/{notificationId}/mark_view", [NotificationController::class, "markView"])->name("notifications.mark_view");
 
 
-    Route::post('users/hide', [UserController::class, 'hide'])->name("users.hide");
-    Route::patch('users/{user}', [UserController::class, 'update'])->name("users.update");
-    Route::post('users/{user}/updateAvatar', [UserController::class, 'updateAvatar'])->name("users.updateAvatar");
+    Route::post('/users/hide', [UserController::class, 'hide'])->name("users.hide");
+    Route::patch('/users/{user}', [UserController::class, 'update'])->name("users.update");
+    Route::post('/users/{user}/updateAvatar', [UserController::class, 'updateAvatar'])->name("users.updateAvatar");
     Route::delete('users/{user}/deleteAvatar', [UserController::class, 'deleteAvatar'])->name("users.deleteAvatar");
     Route::post("/upload_file/{user}", function (Request $request, User $user) {
 

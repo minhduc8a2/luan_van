@@ -13,6 +13,7 @@ import { TbStack2 } from "react-icons/tb";
 import { useDispatch } from "react-redux";
 import { setLeftWindowType, setRightWindowType } from "@/Store/windowTypeSlice";
 import { router, usePage } from "@inertiajs/react";
+import { RiContactsBook3Line } from "react-icons/ri";
 export default function More() {
     const { workspace } = usePage().props;
     const dispatch = useDispatch();
@@ -84,6 +85,30 @@ export default function More() {
                                     title="Channels"
                                     description="Browse your team's conversations"
                                     iconNode={<IoSearch />}
+                                />
+                            </li>
+                            <li>
+                                <MoreButton
+                                    onClick={() => {
+                                        router.get(
+                                            route(
+                                                "users.browseUsers",
+                                                workspace.id
+                                            ),
+                                            {},
+                                            {
+                                                preserveState: true,
+                                                only: [],
+                                                onFinish: () => {
+                                                    switchPage();
+                                                },
+                                            }
+                                        );
+                                        close();
+                                    }}
+                                    title="People"
+                                    description="Your team and user groups"
+                                    iconNode={<RiContactsBook3Line />}
                                 />
                             </li>
                         </ul>
