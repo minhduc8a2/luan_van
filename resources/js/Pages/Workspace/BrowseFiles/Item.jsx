@@ -13,37 +13,63 @@ import { isDocument, isImage, isVideo } from "@/helpers/fileHelpers";
 
 import VideoFile from "./VideoFile";
 import copy from "copy-to-clipboard";
-import { router, usePage } from "@inertiajs/react";
+
 import OverlayConfirm from "@/Components/Overlay/OverlayConfirm";
 import FileItem from "@/Components/FileItem";
+import { usePage } from "@inertiajs/react";
+import { useDispatch } from "react-redux";
+import { setNotificationPopup } from "@/Store/notificationPopupSlice";
 
 const Item = memo(function ({ file }) {
     const { publicAppUrl } = usePage().props;
     const [openOverlay, setOpenOverlay] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
     const [showConfirm, setShowConfirm] = useState(null);
+    const dispatch = useDispatch();
     const close = useClose();
     function deleteFile() {
-        router.delete(
-            route("files.delete", {
-                file: file.id,
-            }),
-            {
-                headers: {
-                    "X-Socket-Id": Echo.socketId(),
-                },
-                preserveState: true,
-                only: [],
-                onError: (errors) => {
+        return axios
+            .delete(
+                route("files.delete", {
+                    file: file.id,
+                }),
+                {
+                    headers: {
+                        "X-Socket-Id": Echo.socketId(),
+                    },
+                }
+            )
+            .catch((error) => {
+                if (error.response) {
+                    if (error.response.status === 403) {
+                        dispatch(
+                            setNotificationPopup({
+                                type: "error",
+                                messages: [
+                                    "You are not authorized to delete this file.",
+                                ],
+                            })
+                        );
+                    } else {
+                        dispatch(
+                            setNotificationPopup({
+                                type: "error",
+                                messages: [
+                                    error.response.data.message ||
+                                        "An error occurred.",
+                                ],
+                            })
+                        );
+                    }
+                } else {
                     dispatch(
                         setNotificationPopup({
                             type: "error",
-                            messages: Object.values(errors),
+                            messages: ["An unexpected error occurred."],
                         })
                     );
-                },
-            }
-        );
+                }
+            });
     }
     return (
         <div className="mt-4 relative group/file_item" key={file.id}>

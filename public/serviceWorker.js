@@ -20,8 +20,19 @@ self.addEventListener("install", (event) => {
 //         })
 //     );
 // });
+const publicAppUrl = "http://localhost:8000";
+const escapedUrl = publicAppUrl.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const urlPatterns = [
+    new RegExp(`^${escapedUrl}\\/workspaces\\/\\d+\\/channels(\\?.*)?$`),
+    // new RegExp(`^${escapedUrl}\\/workspaces\\/\\d+\\/channels\\/\\d+$`),
+    new RegExp(`^${escapedUrl}\\/workspaces\\/\\d+\\/files`),
+];
+
 self.addEventListener("fetch", (event) => {
-    if (event.request.url.includes("/files")) {
+    const matchesPattern = urlPatterns.some((pattern) =>
+        pattern.test(event.request.url)
+    );
+    if (matchesPattern) {
         event.respondWith(
             caches.open("dynamic-cache").then((cache) => {
                 return cache.match(event.request).then((cachedResponse) => {

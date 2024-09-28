@@ -30,8 +30,6 @@ import {
 import Item from "./Item";
 import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
 
-import { InView, useInView } from "react-intersection-observer";
-
 import DocumentInSearch from "./DocumentInSearch";
 import FileIcon from "@/Components/FileIcon";
 import { useDispatch } from "react-redux";
@@ -47,8 +45,8 @@ function BrowseFiles() {
     const [searchFilter, setSearchFilter] = useState("");
 
     const [filter, setFilter] = useState("shared");
+    const [filterLoading, setFilterLoading] = useState(false);
 
-    const [loadedPages, setLoadedPages] = useState({});
     const [topLoading, setTopLoading] = useState(false);
     const [bottomLoading, setBottomLoading] = useState(false);
     const [topHasMore, setTopHasMore] = useState();
@@ -60,36 +58,31 @@ function BrowseFiles() {
             (e) => {
                 switch (e.type) {
                     case "FileObserver_fileDeleted":
-                        setSharedFiles((pre) => {
-                            const temp = new Map(pre);
-                            delete temp[e.data];
-                            return temp;
-                        });
                         setFiles((pre) => {
-                            const temp = new Map(pre);
-                            delete temp[e.data];
+                            let temp = [...pre];
+
+                            temp = temp.filter((f) => f.id != e.data);
+                            if (temp.length > 0) {
+                                setTopHasMore(temp[0].id);
+                                setBottomHasMore(temp[temp.length - 1].id);
+                            }
                             return temp;
                         });
                         break;
                     case "ThreadMessage_fileCreated":
                     case "ChannelMessage_fileCreated":
-                        if (channels.find((cn) => cn.id === e.data.channelId)) {
-                            setSharedFiles((pre) => {
-                                const temp = new Map(pre);
-                                e.data.files.forEach((f) => {
-                                    temp[f.id] = f;
-                                });
-                                return temp;
-                            });
-                        } else {
-                            setFiles((pre) => {
-                                const temp = new Map(pre);
-                                e.data.files.forEach((f) => {
-                                    temp[f.id] = f;
-                                });
-                                return temp;
-                            });
-                        }
+                        setFiles((pre) => {
+                            const sorted = [...e.data.files];
+                            sorted.sort((a, b) => b.id - a.id);
+
+                            const temp = [...sorted, ...pre];
+                            if (temp.length > 0) {
+                                setTopHasMore(temp[0].id);
+                                setBottomHasMore(temp[temp.length - 1].id);
+                            }
+                            return temp;
+                        });
+
                         break;
                     default:
                         break;
@@ -126,28 +119,10 @@ function BrowseFiles() {
     );
 
     useEffect(() => {
-        const controller = new AbortController();
-        axios
-            .get(route("files.index", workspace.id), {
-                params: {
-                    filter,
-                    name: "",
-                },
-                signal: controller.signal,
-            })
-            .then((response) => {
-                if (response.status == 200) {
-                    setLoadedPages({ [response.data.current_page]: true });
-
-                    setTopHasMore(response.data.prev_page_url);
-                    setFiles([...response.data.data]);
-
-                    setBottomHasMore(response.data.next_page_url);
-                }
-            });
-        return () => {
-            controller.abort();
-        };
+        setFilterLoading(true);
+        search("").then(() => {
+            setFilterLoading(false);
+        });
     }, [filter]);
 
     const groupedFiles = useMemo(() => {
@@ -169,34 +144,62 @@ function BrowseFiles() {
 
         return result;
     }, [filteredFilesList]);
-    const loadMore = (position) => {
-        let url;
+
+    function mutateFiles(pre, data, position) {
         if (position == "top") {
-            url = topHasMore;
+            return [...data, ...pre];
         } else {
-            url = bottomHasMore;
+            return [...pre, ...data];
         }
-        if (url) {
+    }
+    const loadMore = (position) => {
+        // return new Promise((resolve, reject) => {});
+        let last_id;
+        if (position == "top") {
+            last_id = topHasMore;
+        } else {
+            last_id = bottomHasMore;
+        }
+        if (last_id) {
             if (position == "top") {
                 setTopLoading(true);
             } else {
                 setBottomLoading(true);
             }
+
             return axios
-                .get(url)
+                .get(route("files.index", workspace.id), {
+                    params: {
+                        name: searchFilter,
+                        filter,
+                        last_id,
+                        direction: position,
+                    },
+                    signal: token.current.signal,
+                })
                 .then((response) => {
                     if (response.status == 200) {
-                        setLoadedPages((pre) => {
-                            const temp = { ...pre };
-                            temp[response.data.current_page] = true;
-                            return temp;
-                        });
+                        console.log(position, response.data);
                         if (position == "top") {
-                            setTopHasMore(response.data.prev_page_url);
-                            setFiles((pre) => [...response.data.data, ...pre]);
+                            if (response.data.length > 0) {
+                                setTopHasMore(response.data[0].id);
+                            } else {
+                                setTopHasMore(null);
+                            }
+                            setFiles((pre) =>
+                                mutateFiles(pre, response.data, "top")
+                            );
                         } else {
-                            setBottomHasMore(response.data.next_page_url);
-                            setFiles((pre) => [...pre, ...response.data.data]);
+                            if (response.data.length > 0) {
+                                setBottomHasMore(
+                                    response.data[response.data.length - 1].id
+                                );
+                            } else {
+                                setBottomHasMore(null);
+                            }
+                            setFiles((pre) =>
+                                mutateFiles(pre, response.data, "bottom")
+                            );
                         }
                     }
                 })
@@ -215,22 +218,29 @@ function BrowseFiles() {
         if (token.current != null) token.current.abort();
         setSearchFilter(searchValue);
         token.current = new AbortController();
-        axios
+        return axios
             .get(route("files.index", workspace.id), {
                 params: {
                     name: searchValue,
                     filter,
+                    last_id: "",
+                    direction: "bottom",
                 },
                 signal: token.current.signal,
             })
             .then((response) => {
                 if (response.status == 200) {
-                    setLoadedPages({ 1: true });
-
-                    setTopHasMore(response.data.prev_page_url);
-                    setFiles([...response.data.data]);
-
-                    setBottomHasMore(response.data.next_page_url);
+                    console.log(response.data);
+                    if (response.data.length > 0) {
+                        setTopHasMore(response.data[0].id);
+                        setBottomHasMore(
+                            response.data[response.data.length - 1].id
+                        );
+                    } else {
+                        setTopHasMore(null);
+                        setBottomHasMore(null);
+                    }
+                    setFiles(mutateFiles([], response.data, "bottom"));
                 }
             })
             .finally(() => {
@@ -296,6 +306,14 @@ function BrowseFiles() {
                                 ? "Created by you"
                                 : "All files"}
                         </h1>
+                        {filterLoading && (
+                            <div className="flex gap-x-2 items-center  ">
+                                <div className="h-6 w-6 relative">
+                                    <OverlayLoadingSpinner />
+                                </div>
+                                <div className="text-xs">Loading ...</div>
+                            </div>
+                        )}
                     </div>
                     <SearchInput
                         onSearch={(searchValue) => search(searchValue)}

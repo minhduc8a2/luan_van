@@ -50,7 +50,7 @@ export default function HuddleNotification({
                     ) {
                         if (workspace.id != currentWorkspace.id) {
                             router.get(
-                                route("channel.show", {
+                                route("channels.show", {
                                     workspace: workspace.id,
                                     channel: channel.id,
                                 }),
@@ -78,7 +78,7 @@ export default function HuddleNotification({
                 } else {
                     if (workspace.id != currentWorkspace.id) {
                         router.get(
-                            route("channel.show", {
+                            route("channels.show", {
                                 workspace: workspace.id,
                                 channel: channel.id,
                             }),

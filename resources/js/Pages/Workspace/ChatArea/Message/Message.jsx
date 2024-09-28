@@ -214,7 +214,7 @@ export default function Message({
         const isThreadMessage = message.threaded_message_id;
         dispatch(setThreadedMessageId(null));
         router.get(
-            route("channel.show", {
+            route("channels.show", {
                 workspace: workspace.id,
                 channel: channel.id,
             }),
@@ -424,7 +424,7 @@ export default function Message({
                         Posted in{" "}
                         <Link
                             className="text-link hover:underline"
-                            href={route("channel.show", message.channel_id)}
+                            href={route("channels.show", message.channel_id)}
                         >
                             {forwardedMessageChannel.type != "DIRECT" ? (
                                 <div className="flex items-baseline gap-x-1  ">

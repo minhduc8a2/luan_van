@@ -78,7 +78,7 @@ export default function MentionNotification({
                         dispatch(setThreadedMessageId(message.id));
                 } else
                     router.get(
-                        route("channel.show", {
+                        route("channels.show", {
                             workspace: workspace.id,
                             channel: channel.id,
                         }),

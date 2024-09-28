@@ -11,7 +11,7 @@ export function DirectChannel({ channel, user, isOnline = false }) {
     );
     function changeChannel() {
         router.get(
-            route("channel.show", {
+            route("channels.show", {
                 workspace: workspace.id,
                 channel: channel.id,
             }),

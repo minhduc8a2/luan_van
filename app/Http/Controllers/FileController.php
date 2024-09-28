@@ -25,46 +25,89 @@ class FileController extends Controller
     /**
      * Display a listing of the resource.
      */
-    function getSharedFiles($user, $name, $workspace, $perPage = 10, $page = 1)
-    {
-
-        $hiddenUserIds = $user->hiddenUsers()->wherePivot('workspace_id', $workspace->id)->pluck('hidden_user_id')->toArray();
-        return File::whereNotIn('user_id', $hiddenUserIds)->whereHas('messages', function ($query) use ($user, $workspace) {
-            $query->whereIn('channel_id', $user->channels()->where('workspace_id', $workspace->id)->pluck('channels.id'));
-        })->where('name', 'like', "%" . $name . "%")->where('user_id', "<>", $user->id)->latest()->simplePaginate($perPage, ['*'], 'page', $page)->withQueryString();
-    }
-    function selfFiles($user, $name, $workspace, $perPage = 10, $page = 1)
-    {
-        return $user->files()->where('name', 'like', "%" . $name . "%")->where('workspace_id', $workspace->id)->latest()->simplePaginate($perPage, ['*'], 'page', $page)->withQueryString();
-    }
-
-    function all($user, $name, $workspace, $perPage = 10, $page = 1)
+    function getSharedFiles($user, $name, $workspace, $perPage = 10, $last_id = null, $direction = 'bottom')
     {
         $hiddenUserIds = $user->hiddenUsers()->wherePivot('workspace_id', $workspace->id)->pluck('hidden_user_id')->toArray();
-        return File::whereNotIn('user_id', $hiddenUserIds)->whereHas('messages', function ($query) use ($user, $workspace) {
-            $query->where(function ($query) use ($workspace) {
 
-                $query->whereIn('channel_id', $workspace->channels()->where('type', ChannelTypes::PUBLIC->name)->pluck('channels.id'));
+        $filesQuery = File::whereNotIn('user_id', $hiddenUserIds)
+            ->whereHas('messages', function ($query) use ($user, $workspace) {
+                $query->whereIn('channel_id', $user->channels()->where('workspace_id', $workspace->id)->pluck('channels.id'));
             })
-                ->orWhere(function ($query) use ($user, $workspace) {
+            ->where('name', 'like', '%' . $name . '%')
+            ->where('user_id', '<>', $user->id);
 
-                    $query->whereIn('channel_id', $user->channels()->where('type', ChannelTypes::PRIVATE->name)
-                        ->where('workspace_id', $workspace->id)
-                        ->pluck('channels.id'));
-                });
-        })
+        if ($last_id) {
+            if ($direction == 'bottom') {
+                $filesQuery->where('id', '<', $last_id)->orderBy('id', 'desc');
+            } else {
+                $filesQuery->where('id', '>', $last_id)->orderBy('id', 'asc');
+            }
+        } else {
+            $filesQuery->orderBy('id', 'desc');
+        }
 
-            ->where('name', 'like', "%" . $name . "%")
-            ->latest()
-
-            ->simplePaginate($perPage, ['*'], 'page', $page)->withQueryString();
+        return $filesQuery->limit($perPage)->get();
     }
+    function selfFiles($user, $name, $workspace, $perPage = 10,  $last_id, $direction)
+    {
+        $filesQuery = $user->files()
+            ->where('name', 'like', '%' . $name . '%')
+            ->where('workspace_id', $workspace->id);
+
+        if ($last_id) {
+            if ($direction === 'bottom') {
+                $filesQuery->where('id', '<', $last_id)->orderBy('id', 'desc');
+            } else {
+                $filesQuery->where('id', '>', $last_id)->orderBy('id', 'asc');
+            }
+        } else {
+            // Default ordering if no last_id is provided
+            $filesQuery->orderBy('id', 'desc');
+        }
+        $files = $filesQuery->limit($perPage)->get();
+
+        return $files;
+    }
+
+    function all($user, $name, $workspace, $perPage = 10, $last_id = null, $direction = 'bottom')
+    {
+        $hiddenUserIds = $user->hiddenUsers()->wherePivot('workspace_id', $workspace->id)->pluck('hidden_user_id')->toArray();
+
+        $filesQuery = File::whereNotIn('user_id', $hiddenUserIds)
+            ->whereHas('messages', function ($query) use ($user, $workspace) {
+                $query->where(function ($query) use ($workspace) {
+                    $query->whereIn('channel_id', $workspace->channels()->where('type', ChannelTypes::PUBLIC->name)->pluck('channels.id'));
+                })
+                    ->orWhere(function ($query) use ($user, $workspace) {
+                        $query->whereIn('channel_id', $user->channels()
+                            ->where('type', ChannelTypes::PRIVATE->name)
+                            ->where('workspace_id', $workspace->id)
+                            ->pluck('channels.id'));
+                    });
+            })
+            ->where('name', 'like', '%' . $name . '%');
+
+        if ($last_id) {
+            if ($direction === 'bottom') {
+                $filesQuery->where('id', '<', $last_id)->orderBy('id', 'desc');
+            } else {
+                $filesQuery->where('id', '>', $last_id)->orderBy('id', 'asc');
+            }
+        } else {
+            $filesQuery->orderBy('id', 'desc');
+        }
+
+        return $filesQuery->limit($perPage)->get();
+    }
+
     public function index(Request $request, Workspace $workspace)
     {
         $perPage = 10;
         $filter = $request->query('filter');
         $name = $request->query('name') ?? "";
-        $page = $request->query('page') ?? 1;
+        // $page = $request->query('page') ?? 1;
+        $last_id = $request->query('last_id');
+        $direction = $request->query('direction') ?? "bottom";
         // $page = 2;
         $user = $request->user();
         $files = [];
@@ -74,20 +117,16 @@ class FileController extends Controller
 
                 switch ($filter) {
                     case "shared":
-                        $files = $this->getSharedFiles($user, $name, $workspace, $perPage, $page);
+                        $files = $this->getSharedFiles($user, $name, $workspace, $perPage,  $last_id, $direction);
 
                         return $files;
-
-
 
                     case "self":
-                        $files = $this->selfFiles($user, $name, $workspace, $perPage, $page);
+                        $files = $this->selfFiles($user, $name, $workspace, $perPage, $last_id, $direction);
 
                         return $files;
-
-
                     default:
-                        $files = $this->all($user, $name, $workspace, $perPage, $page);
+                        $files = $this->all($user, $name, $workspace, $perPage,  $last_id, $direction);
 
                         return $files;
                 }
@@ -143,8 +182,9 @@ class FileController extends Controller
      */
     public function destroy(Request $request,  File $file)
     {
-        // return back()->withErrors(['server' => "Something went wrong! Please try later."]);
-        if ($request->user()->cannot('delete', [File::class, $file])) return abort(403);
+        // abort(500, "Something went wrong! Please try later.");
+
+        if ($request->user()->cannot('delete', [File::class, $file])) return abort(403, "Unauthorized request! Please try later.");
         try {
             DB::beginTransaction();
             Storage::delete($file->path);
@@ -155,11 +195,11 @@ class FileController extends Controller
             $file->save();
             $file->delete();
             DB::commit();
-            return back();
+            return response()->json([]);
         } catch (\Throwable $th) {
             DB::rollBack();
             dd($th);
-            return back()->withErrors(['server' => "Something went wrong! Please try later."]);
+            abort(500, "Something went wrong! Please try later.");
         }
     }
 }

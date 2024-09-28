@@ -29,6 +29,8 @@ export default function InfiniteScroll({
     const [justTopLoaded, setJustTopLoaded] = useState(false);
     const preScrollPositionRef = useRef(null);
     useEffect(() => {
+        console.log("top_inView", top_inView);
+
         if (topHasMore && !topLoading && top_inView) {
             console.log("Load more on top");
             setJustTopLoaded(false);
@@ -53,6 +55,7 @@ export default function InfiniteScroll({
     }, [justTopLoaded]);
 
     useEffect(() => {
+        console.log("bottom_inView", bottom_inView);
         if (bottomHasMore && !bottomLoading && bottom_inView) {
             loadMoreOnBottom();
             console.log("load more on bottom");

@@ -30,7 +30,7 @@ export default function Profile() {
         if (!channel) return;
         dispatch(setThreadedMessageId(null));
         router.get(
-            route("channel.show", {
+            route("channels.show", {
                 workspace: workspace.id,
                 channel: channel.id,
             }),

@@ -6,7 +6,7 @@ import TextArea from "@/Components/Input/TextArea";
 import SelectInput from "@/Components/Input/SelectInput";
 import { LuPlus } from "react-icons/lu";
 
-export function CreateChannelForm({ activateButtonNode, callback }) {
+export function CreateChannelForm({ activateButtonNode, callback = () => {} }) {
     const { workspace, workspacePermissions } = usePage().props;
     const channelTypes = [
         { type: "PUBLIC", label: "Public - Anyone in " + workspace.name },

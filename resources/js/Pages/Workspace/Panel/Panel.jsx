@@ -33,7 +33,7 @@ export default function Panel({}) {
     // const { messages } = useSelector((state) => state.messages);
     function changeChannel(channel) {
         router.get(
-            route("channel.show", {
+            route("channels.show", {
                 workspace: workspace.id,
                 channel: channel.id,
             }),

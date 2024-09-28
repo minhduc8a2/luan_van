@@ -43,7 +43,7 @@ class WorkspaceController extends Controller
 
         $user = $request->user();
         try {
-            DB::beginTransaction(); 
+            DB::beginTransaction();
 
             /**
              * @var Workspace $workspace
@@ -58,11 +58,10 @@ class WorkspaceController extends Controller
             $workspace->createAndAssignSelfChannelForUser($user);
 
             $mainChannel = $workspace->channels->where('is_main_channel', '=', true)->first();
-            return redirect()->route('channel.show', $mainChannel->id);
-            DB::commit(); 
-
+            return redirect()->route('channels.show', ['workspace' => $workspace->id, 'channel' => $mainChannel->id]);
+            DB::commit();
         } catch (\Throwable $th) {
-            DB::rollBack(); 
+            DB::rollBack();
 
             return back()->withErrors(['server' => 'Something went wrong! Please try later!']);
         }
@@ -75,10 +74,10 @@ class WorkspaceController extends Controller
      */
     public function show(Request $request, Workspace $workspace)
     {
-        
-        if ($request->user()->cannot('view', [Workspace::class,$workspace])) abort(403);
+
+        if ($request->user()->cannot('view', [Workspace::class, $workspace])) abort(403);
         $mainChannel = $workspace->channels->where('is_main_channel', '=', true)->first();
-        return redirect()->route('channel.show', $mainChannel->id);
+        return redirect()->route('channels.show', ['workspace' => $workspace->id, 'channel' => $mainChannel->id]);
     }
 
 

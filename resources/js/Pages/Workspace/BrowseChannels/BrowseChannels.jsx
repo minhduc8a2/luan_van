@@ -13,26 +13,63 @@ import { channelProps } from "@/helpers/channelHelper";
 import Layout from "../Layout";
 import InfiniteScroll from "@/Components/InfiniteScroll";
 import { setLeftWindowType } from "@/Store/windowTypeSlice";
+import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
 function BrowseChannels() {
     const { auth, workspace } = usePage().props;
     const dispatch = useDispatch();
-    const [allChannels, setAllChannels] = useState([]);
+    const [allChannels, setAllChannels] = useState({});
 
     const [searchValue, setSearchValue] = useState("");
-
+    const [filterLoading, setFilterLoading] = useState(false);
     const [topLoading, setTopLoading] = useState(false);
     const [bottomLoading, setBottomLoading] = useState(false);
     const [topHasMore, setTopHasMore] = useState();
     const [bottomHasMore, setBottomHasMore] = useState();
 
+    useEffect(() => {
+        Echo.private(`private_workspaces.${workspace.id}`).listen(
+            "WorkspaceEvent",
+            (e) => {
+                switch (e.type) {
+                    case "ChannelObserver_deleteChannel":
+                        setAllChannels((pre) => {
+                            const temp = { ...pre };
+                            delete temp[e.data];
+                            return temp;
+                        });
+                        break;
+
+                    case "ChannelObserver_storeChannel":
+                        setAllChannels((pre) => {
+                            const temp = { ...pre };
+
+                            temp[e.data.id] = e.data;
+
+                            return temp;
+                        });
+
+                        break;
+                    default:
+                        break;
+                }
+            }
+        );
+    }, []);
+    function mutateFiles(pre, data) {
+        const temp = { ...pre };
+        data.forEach((d) => (temp[d.id] = d));
+        return temp;
+    }
     const [filter, setFilter] = useState({
         ownType: "all_channels",
         privacyType: "any_channel_type",
         sort: "a_to_z",
     });
-
+    const allChannelsList = useMemo(() => {
+        return Object.values(allChannels);
+    }, [allChannels]);
     const filteredChannels = useMemo(() => {
-        let tempChannels = [...allChannels];
+        let tempChannels = [...allChannelsList];
         //owntype
         switch (filter.ownType) {
             case "all_channels":
@@ -90,10 +127,10 @@ function BrowseChannels() {
                 break;
         }
         return tempChannels;
-    }, [filter, allChannels, searchValue]);
+    }, [filter, allChannelsList, searchValue]);
     function changeChannel(channel) {
         router.get(
-            route("channel.show", {
+            route("channels.show", {
                 workspace: workspace.id,
                 channel: channel.id,
             }),
@@ -167,16 +204,14 @@ function BrowseChannels() {
                     if (response.status == 200) {
                         if (position == "top") {
                             setTopHasMore(response.data.prev_page_url);
-                            setAllChannels((pre) => [
-                                ...response.data.data,
-                                ...pre,
-                            ]);
+                            setAllChannels((pre) =>
+                                mutateFiles(pre, response.data.data)
+                            );
                         } else {
                             setBottomHasMore(response.data.next_page_url);
-                            setAllChannels((pre) => [
-                                ...pre,
-                                ...response.data.data,
-                            ]);
+                            setAllChannels((pre) =>
+                                mutateFiles(pre, response.data.data)
+                            );
                         }
                     }
                 })
@@ -196,7 +231,7 @@ function BrowseChannels() {
         if (token.current != null) token.current.abort();
 
         token.current = new AbortController();
-        axios
+        return axios
             .get(route("channels.index", workspace.id), {
                 params: {
                     ownType: filter.ownType,
@@ -208,7 +243,7 @@ function BrowseChannels() {
             })
             .then((response) => {
                 if (response.status == 200) {
-                    setAllChannels((pre) => [...response.data.data]);
+                    setAllChannels(mutateFiles({}, response.data.data));
                     setTopHasMore(response.data.prev_page_url);
                     setBottomHasMore(response.data.next_page_url);
                 }
@@ -220,8 +255,11 @@ function BrowseChannels() {
     }
 
     useEffect(() => {
-        search("");
-    }, [filter]);
+        setFilterLoading(true);
+        search("").then(() => {
+            setFilterLoading(false);
+        });
+    }, [filter.ownType, filter.privacyType]);
     return (
         <div className="bg-foreground w-full h-full border border-white/15 ">
             <div className="mx-auto w-1/2 py-4 flex flex-col max-h-full">
@@ -230,6 +268,14 @@ function BrowseChannels() {
                         <h3 className="text-xl font-bold text-white">
                             All Channels
                         </h3>
+                        {filterLoading && (
+                            <div className="flex gap-x-2 items-center  ">
+                                <div className="h-6 w-6 relative">
+                                    <OverlayLoadingSpinner />
+                                </div>
+                                <div className="text-xs">Loading ...</div>
+                            </div>
+                        )}
                     </div>
                     <CreateChannelForm
                         callback={() => search(searchValue)}
@@ -243,7 +289,7 @@ function BrowseChannels() {
                 <SearchInput
                     placeholder="Search for channels"
                     onSearch={(searchValue) => search(searchValue)}
-                    list={allChannels}
+                    list={allChannelsList}
                     onItemClick={changeChannel}
                     filterFunction={(searchValue, list) => {
                         return list.filter((cn) =>
@@ -290,7 +336,9 @@ function BrowseChannels() {
                     showLoadingMessage
                     className="mt-4 bg-background flex-1 max-h-full overflow-y-auto scrollbar rounded-lg border border-white/15"
                 >
-                    {filteredChannels.length == 0 && <p className="text-center p-4">No results found</p>}
+                    {filteredChannels.length == 0 && (
+                        <p className="text-center p-4">No results found</p>
+                    )}
                     {filteredChannels.map((cn, index) => {
                         return (
                             <li

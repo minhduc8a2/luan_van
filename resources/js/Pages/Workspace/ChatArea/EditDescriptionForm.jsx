@@ -22,7 +22,7 @@ export function EditDescriptionForm() {
             onSuccess: () => {
                 setSuccess(true);
                 router.get(
-                    route("channel.show", {
+                    route("channels.show", {
                         workspace: workspace.id,
                         channel: channel.id,
                     }),

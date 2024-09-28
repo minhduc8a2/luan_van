@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { addMessageCountForChannel } from "@/Store/newMessageCountsMapSlice";
 
 import { isHiddenUser } from "@/helpers/userHelper";
+import { setThreadedMessageId } from "@/Store/threadSlice";
 export default function Events() {
     const {
         workspace,
@@ -31,9 +32,15 @@ export default function Events() {
                     case "ChannelObserver_deleteChannel":
                         if (channel?.id == e?.data) {
                             dispatch(setThreadedMessageId(null));
-                            router.visit(route("channel.show", mainChannelId), {
-                                preserveState: true,
-                            });
+                            router.visit(
+                                route("channels.show", {
+                                    workspace: workspace.id,
+                                    channel: mainChannelId,
+                                }),
+                                {
+                                    preserveState: true,
+                                }
+                            );
                         } else {
                             router.reload({
                                 only: ["channels"],

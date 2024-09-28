@@ -29,7 +29,7 @@ class ChannelController extends Controller
      */
     public function index(Request $request, Workspace $workspace)
     {
-        $perPage = 3;
+        $perPage = 10;
         $ownType = $request->query('ownType');
         $privacyType = $request->query('privacyType');
         $name = $request->query('name') ?? "";
@@ -738,7 +738,7 @@ class ChannelController extends Controller
 
 
             DB::commit();
-            return redirect(route('channel.show', $workspace->mainChannel()->id));
+            return redirect(route('channels.show', $workspace->mainChannel()->id));
         } catch (\Throwable $th) {
             DB::rollBack();
 

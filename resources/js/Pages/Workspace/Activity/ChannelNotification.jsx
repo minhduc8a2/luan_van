@@ -45,7 +45,7 @@ export default function ChannelNotification({
                     return;
                 }
                 if (changesType != "deleteChannel") {
-                    router.visit(route("channel.show", channel.id), {
+                    router.visit(route("channels.show", channel.id), {
                         preserveState: true,
                     });
                 }

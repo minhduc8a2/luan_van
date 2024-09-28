@@ -24,7 +24,7 @@ export default function ForwardMessage({ message, show, onClose }) {
     function changeChannel(channel) {
         dispatch(setThreadedMessageId(null));
         router.get(
-            route("channel.show", {
+            route("channels.show", {
                 workspace: workspace.id,
                 channel: channel.id,
             }),
