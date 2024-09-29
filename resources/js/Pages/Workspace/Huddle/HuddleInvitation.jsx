@@ -1,5 +1,5 @@
 import { router, usePage } from "@inertiajs/react";
-import React from "react";
+import React, { useMemo } from "react";
 import AvatarAndName from "@/Components/AvatarAndName";
 import AutocompleInput from "./AutocompleInput";
 import Button from "@/Components/Button";
@@ -7,7 +7,14 @@ import { useState } from "react";
 import { useSelector } from "react-redux";
 export default function HuddleInvitation({ close }) {
     const { flash } = usePage().props;
-    const { channelUsers, auth, channel, data } = usePage().props;
+    const { channelUsers, auth,channelId } = usePage().props;
+    const { channels } = useSelector((state) => state.channels);
+    const { channelId: huddleChannelId, userIds } = useSelector(
+        (state) => state.huddle
+    );
+    const channel = useMemo(() => {
+        return channels.find((cn) => cn.id == huddleChannelId);
+    }, [channels, huddleChannelId]);
     const [choosenUsers, setChoosenUsers] = useState({});
     const onlineStatusMap = useSelector((state) => state.onlineStatus);
 

@@ -41,8 +41,8 @@ export default function HuddleNotification({
                     setErrors(true);
                     return;
                 }
-                if ( huddleChannelId == channel.id) return;
-                if ( huddleChannelId != channel.id) {
+                if (huddleChannelId == channel.id) return;
+                if (huddleChannelId && huddleChannelId != channel.id) {
                     if (
                         confirm(
                             "Are you sure you want to switch to other huddle"
@@ -61,7 +61,7 @@ export default function HuddleNotification({
                                     onSuccess: () =>
                                         dispatch(
                                             toggleHuddle({
-                                                channel,
+                                                channelId:channel.id,
                                                 user: auth.user,
                                             })
                                         ),
@@ -70,7 +70,7 @@ export default function HuddleNotification({
                         } else
                             dispatch(
                                 toggleHuddle({
-                                    channel,
+                                    channelId:channel.id,
                                     user: auth.user,
                                 })
                             );
@@ -88,7 +88,7 @@ export default function HuddleNotification({
                                 onSuccess: () =>
                                     dispatch(
                                         toggleHuddle({
-                                            channel,
+                                            channelId:channel.id,
                                             user: auth.user,
                                         })
                                     ),
@@ -97,7 +97,7 @@ export default function HuddleNotification({
                     } else
                         dispatch(
                             toggleHuddle({
-                                channel,
+                                channelId:channel.id,
                                 user: auth.user,
                             })
                         );
