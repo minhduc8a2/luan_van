@@ -1,14 +1,21 @@
+import { setNotificationsCount } from "@/Store/activitySlice";
 import { setChannels } from "@/Store/channelsSlice";
+import { setWorkspaceData } from "@/Store/workspaceSlice";
 import { setWorkspaceUsers } from "@/Store/workspaceUsersSlice";
 import { usePage } from "@inertiajs/react";
 import { useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 export default function InitData({ loaded, setLoaded }) {
     const { workspace } = usePage().props;
+    const { newNotificationsCount } = useSelector((state) => state.workspace);
     const dispatch = useDispatch();
     function loadWorkspaceRelatedData() {
-        return Promise.all([loadWorkspaceUsers(), loadChannels()]);
+        return Promise.all([
+            loadWorkspaceUsers(),
+            loadChannels(),
+            loadWorkspaceData(),
+        ]);
     }
 
     function loadWorkspaceUsers() {
@@ -29,12 +36,20 @@ export default function InitData({ loaded, setLoaded }) {
                 dispatch(setChannels(response.data));
             });
     }
-
+    function loadWorkspaceData() {
+        return axios
+            .get(route("workspaces.initWorkspaceData", workspace.id))
+            .then((response) => {
+                dispatch(setWorkspaceData(response.data));
+            });
+    }
 
     useEffect(() => {
         loadWorkspaceRelatedData()
             .then(() => {
                 setLoaded(true);
+
+                dispatch(setNotificationsCount(newNotificationsCount));
             })
             .catch((error) => {
                 console.log(error);

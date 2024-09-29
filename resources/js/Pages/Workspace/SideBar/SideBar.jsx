@@ -21,7 +21,8 @@ import UserOptions from "./UserOptions";
 import { setSideBarWidth } from "@/Store/sizeSlice";
 import { setLeftWindowType } from "@/Store/windowTypeSlice";
 export default function SideBar({}) {
-    const { auth, url, workspace, workspaces } = usePage().props;
+    const { auth, url, workspace } = usePage().props;
+    const { workspaces } = useSelector((state) => state.workspace);
     const { leftWindowType } = useSelector((state) => state.windowType);
     const { name: pageName } = useSelector((state) => state.page);
     const { new_count } = useSelector((state) => state.activity);
@@ -74,7 +75,7 @@ export default function SideBar({}) {
                     }}
                     className={itemStyle}
                 >
-                    {leftWindowType == "panel"  ? (
+                    {leftWindowType == "panel" ? (
                         <div className="p-2 rounded-lg bg-white/10 group-hover:bg-white/10 group-hover:scale-105 transition">
                             {" "}
                             <PiHouseLineFill className="text-lg " />{" "}
@@ -104,7 +105,7 @@ export default function SideBar({}) {
                     }}
                     className={itemStyle + " relative"}
                 >
-                    {leftWindowType == "activity"  ? (
+                    {leftWindowType == "activity" ? (
                         <div className="p-2 rounded-lg bg-white/10 group-hover:bg-white/10 group-hover:scale-105 transition">
                             {" "}
                             <FaBell className="text-lg " />

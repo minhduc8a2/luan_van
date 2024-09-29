@@ -19,7 +19,6 @@ import {
 
 import Message from "./Message/Message";
 
-
 import { useSelector, useDispatch } from "react-redux";
 import { EditDescriptionForm } from "./EditDescriptionForm";
 import axios from "axios";
@@ -38,7 +37,7 @@ import {
 } from "@/Store/messagesSlice";
 import { setMention } from "@/Store/mentionSlice";
 import ChannelSettings from "./ChannelSettings/ChannelSettings";
-import { resetMessageCountForChannel } from "@/Store/newMessageCountsMapSlice";
+
 import { setThreadedMessageId } from "@/Store/threadSlice";
 import OverlayNotification from "@/Components/Overlay/OverlayNotification";
 import { FaLock } from "react-icons/fa";
@@ -48,6 +47,8 @@ import { isHiddenUser } from "@/helpers/userHelper";
 import Layout from "../Layout";
 import Events from "./Events";
 import Header from "./Header";
+import { resetMessageCountForChannel } from "@/Store/channelsSlice";
+import { updateWorkspaceUserInformation } from "@/Store/workspaceUsersSlice";
 
 function ChatArea() {
     const {
@@ -163,24 +164,12 @@ function ChatArea() {
         nextPageUrlRef.current = initMessages?.next_page_url;
         previousPageUrlRef.current = initMessages?.prev_page_url;
         dispatch(resetMessageCountForChannel(channel));
-        router.post(
-            route("channel.last_read", channel.id),
-            {},
-            { preserveScroll: true, preserveState: true, only: ["channels"] }
-        );
+        axios.post(route("channel.last_read", channel.id), {});
         return () => {
             setNewMessageReceived(true);
             isInfiniteScrollRef.current = false;
             preScrollPositionRef.current = null;
-            router.post(
-                route("channel.last_read", channel.id),
-                {},
-                {
-                    preserveScroll: true,
-                    preserveState: true,
-                    only: ["channels"],
-                }
-            );
+            axios.post(route("channel.last_read", channel.id), {});
         };
     }, [channel.id]);
     useEffect(() => {
@@ -527,10 +516,14 @@ function ChatArea() {
 
                                 <ul className="">
                                     {mgs.map((message, index) => {
-                                        let user = workspaceUsers.find(
-                                            (mem) => mem.id === message.user_id
-                                        );
+                                        let user = {
+                                            ...workspaceUsers.find(
+                                                (mem) =>
+                                                    mem.id === message.user_id
+                                            ),
+                                        };
                                         if (
+                                            user &&
                                             !channelUsers.find(
                                                 (u) => u.id == user.id
                                             )

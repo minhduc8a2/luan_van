@@ -3,12 +3,17 @@ import Avatar from "@/Components/Avatar";
 import { router } from "@inertiajs/react";
 import { useSelector } from "react-redux";
 import { channelProps } from "@/helpers/channelHelper";
+import { useMemo } from "react";
 export function DirectChannel({ channel, user, isOnline = false }) {
-    const { auth, channel: currentChannel, workspace } = usePage().props;
-    const onlineStatusMap = useSelector((state) => state.onlineStatus);
-    const newMessageCountsMap = useSelector(
-        (state) => state.newMessageCountsMap
+    const { auth,channelId,  workspace } = usePage().props;
+    const { channels } = useSelector((state) => state.channels);
+
+    const currentChannel = useMemo(
+        () => channels.find((cn) => cn.id == channelId),
+        [channels, channelId]
     );
+    const onlineStatusMap = useSelector((state) => state.onlineStatus);
+  
     function changeChannel() {
         router.get(
             route("channels.show", {
@@ -50,8 +55,8 @@ export function DirectChannel({ channel, user, isOnline = false }) {
                     </div>
                 </div>
                 <div className="text-sm text-white">
-                    {newMessageCountsMap[channel.id]
-                        ? newMessageCountsMap[channel.id]
+                    {channel.unread_messages_count
+                        ? channel.unread_messages_count
                         : ""}
                 </div>
             </button>

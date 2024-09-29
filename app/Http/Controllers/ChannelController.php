@@ -68,7 +68,9 @@ class ChannelController extends Controller
                         })->orWhereNull('last_read_at');
                     }
                 ])->get();
-            return $regularchannels->concat($directChannels);
+            $selfChannel =  $workspace->channels()->where("type", "=", "SELF")->where("user_id", "=", $request->user()->id)->first();
+            $concatenated = $regularchannels->concat($directChannels)->concat([$selfChannel]);
+            return $concatenated->all();
         } catch (\Throwable $th) {
             abort(500, "Something went wrong! Please try later.");
         }
@@ -660,11 +662,11 @@ class ChannelController extends Controller
             ]);
             DB::commit();
 
-            return back();
+            return [];
         } catch (\Throwable $th) {
             DB::rollBack();
 
-            return back()->withErrors(['server' => "Something went wrong! Please try later."]);
+            abort(500, "Something went wrong! Please try later.");
         }
     }
 

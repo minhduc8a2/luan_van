@@ -6,7 +6,7 @@ import activityReducer from "./activitySlice";
 import threadReducer from "./threadSlice";
 import mentionReducer from "./mentionSlice";
 import messagesReducer from "./messagesSlice";
-import newMessageCountsMapReducer from "./newMessageCountsMapSlice";
+
 import pageReducer from "./pageSlice";
 import notificationPopupReducer from "./notificationPopupSlice";
 import mediaReducer from "./mediaSlice";
@@ -14,6 +14,7 @@ import profileReducer from "./profileSlice";
 import windowTypeReducer from "./windowTypeSlice";
 import workspaceUsersReducer from "./workspaceUsersSlice";
 import channelsReducer from "./channelsSlice";
+import workspaceReducer from "./workspaceSlice";
 export const makeStore = () => {
     return configureStore({
         reducer: {
@@ -24,7 +25,7 @@ export const makeStore = () => {
             thread: threadReducer,
             mention: mentionReducer,
             messages: messagesReducer,
-            newMessageCountsMap: newMessageCountsMapReducer,
+
             page: pageReducer,
             notificationPopup: notificationPopupReducer,
             media: mediaReducer,
@@ -32,6 +33,7 @@ export const makeStore = () => {
             windowType: windowTypeReducer,
             workspaceUsers: workspaceUsersReducer,
             channels: channelsReducer,
+            workspace: workspaceReducer,
         },
     });
 };

@@ -52,11 +52,8 @@ class HandleInertiaRequests extends Middleware
           
 
            
-            $selfChannel = fn() => $workspace->channels()->where("type", "=", "SELF")->where("user_id", "=", $request->user()->id)->first();
-            $workspaces = fn() => $request->user()->workspaces;
-
-            $newNotificationsCount = fn() => $user->notifications()->where("read_at", null)->count();
-            $workspacePermissions = fn() => ['createChannel' => $user->can('create', [Channel::class, $workspace]),];
+            
+           
         }
         return [
             ...parent::share($request),
@@ -75,9 +72,9 @@ class HandleInertiaRequests extends Middleware
             ],
             'workspace' => fn() => $request->route('workspace') ?? null,
             
-            'channels' => $channels,
-            'directChannels' => $directChannels,
-            'selfChannel' => $selfChannel,
+           
+            
+            
             'workspaces' => $workspaces,
 
             'newNotificationsCount' => $newNotificationsCount,

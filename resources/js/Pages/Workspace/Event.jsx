@@ -10,14 +10,14 @@ import { toggleHuddle } from "@/Store/huddleSlice";
 import { deleteFileInThread, setThreadedMessageId } from "@/Store/threadSlice";
 import { deleteFile } from "@/Store/messagesSlice";
 import { updateWorkspaceUserInformation } from "@/Store/workspaceUsersSlice";
+import { addMessageCountForChannel } from "@/Store/channelsSlice";
+import { isHiddenUser } from "@/helpers/userHelper";
 
 export default function Event() {
-    const {
-        workspace,
-
-        auth,
-    } = usePage().props;
+    const { workspace, channelId, auth } = usePage().props;
     const dispatch = useDispatch();
+    const { channels } = useSelector((state) => state.channels);
+    const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
     const connectionRef = useRef(null);
     const { channelId: huddleChannelId } = useSelector((state) => state.huddle);
     useEffect(() => {
@@ -71,7 +71,7 @@ export default function Event() {
                     case "ChannelObserver_storeChannel":
                         break;
                     case "ChannelObserver_deleteChannel":
-                        if (huddleChannelId== e?.data) {
+                        if (huddleChannelId == e?.data) {
                             dispatch(toggleHuddle());
                         }
 
@@ -96,6 +96,34 @@ export default function Event() {
                 console.error(error);
             });
     }
+    function listenChannels() {
+        channels.forEach((cn) => {
+            Echo.private(`private_channels.${cn.id}`).listen(
+                "MessageEvent",
+                (e) => {
+                    console.log(e);
+                    if (e.message?.user_id != auth.user.id)
+                        if (cn.id != channelId)
+                            if (
+                                e.type == "newMessageCreated" &&
+                                !isHiddenUser(
+                                    workspaceUsers,
+                                    e.message?.user_id
+                                )
+                            )
+                                dispatch(addMessageCountForChannel(cn));
+                }
+            );
+        });
+    }
+    useEffect(() => {
+        listenChannels();
+        return () => {
+            channels.forEach((cn) => {
+                Echo.leave(`private_channels.${cn.id}`);
+            });
+        };
+    }, [channels]);
     useEffect(() => {
         workspaceListener();
 

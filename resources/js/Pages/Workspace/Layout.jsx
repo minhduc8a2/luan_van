@@ -8,8 +8,7 @@ import Huddle from "./Huddle/Huddle";
 import Event from "./Event";
 import { makeStore } from "@/Store/store";
 import { Provider, useDispatch, useSelector } from "react-redux";
-import { setNotificationsCount } from "@/Store/activitySlice";
-import { initMessageCountForChannel } from "@/Store/newMessageCountsMapSlice";
+
 import OverlaySimpleNotification from "@/Components/Overlay/OverlaySimpleNotification";
 import { setNotificationPopup } from "@/Store/notificationPopupSlice";
 import { setMedia } from "@/Store/mediaSlice";
@@ -26,8 +25,7 @@ import { setLeftWindowType } from "@/Store/windowTypeSlice";
 import { setWorkspaceUsers } from "@/Store/workspaceUsersSlice";
 import InitData from "./InitData";
 export default function Layout({ children }) {
-    const { newNoftificationsCount,  channel } =
-        usePage().props;
+    const { channelId } = usePage().props;
 
     const storeRef = useRef();
     if (!storeRef.current) {
@@ -54,13 +52,10 @@ export default function Layout({ children }) {
                     setRightWindowWidth(rightWindowWidth)
                 );
         } catch (error) {}
-        storeRef.current.dispatch(
-            setNotificationsCount(newNoftificationsCount)
-        );
-        if (channel) {
+
+        if (channelId) {
             storeRef.current.dispatch(setLeftWindowType("panel"));
         }
-       
     }
     return (
         <Provider store={storeRef.current}>

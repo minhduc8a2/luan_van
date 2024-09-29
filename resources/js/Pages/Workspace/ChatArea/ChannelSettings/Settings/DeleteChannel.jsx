@@ -10,7 +10,6 @@ import { useSelector } from "react-redux";
 export default function DeleteChannel() {
     const { channelId } = usePage().props;
     const { channels } = useSelector((state) => state.channels);
-
     const channel = useMemo(
         () => channels.find((cn) => cn.id == channelId),
         [channels, channelId]

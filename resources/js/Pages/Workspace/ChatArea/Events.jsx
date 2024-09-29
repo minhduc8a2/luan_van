@@ -4,27 +4,26 @@ import { useEffect } from "react";
 
 import { useDispatch, useSelector } from "react-redux";
 
-import { addMessageCountForChannel } from "@/Store/newMessageCountsMapSlice";
+
 
 import { isHiddenUser } from "@/helpers/userHelper";
 import { setThreadedMessageId } from "@/Store/threadSlice";
+import { addMessageCountForChannel } from "@/Store/channelsSlice";
 export default function Events() {
-    const {
-        workspace,
-        channelId,
-        auth,
-        
-
-        directChannels,
-    } = usePage().props;
+    const { workspace, channelId, auth } = usePage().props;
     const dispatch = useDispatch();
     const connectionRef = useRef(null);
     const { channels } = useSelector((state) => state.channels);
+    const directChannels = useMemo(
+        () => channels.filter((cn) => cn.type == "DIRECT"),
+        [channels]
+    );
 
     const channel = useMemo(
         () => channels.find((cn) => cn.id == channelId),
         [channels, channelId]
     );
+
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
     useEffect(() => {
         connectionRef.current = Echo.private(
@@ -82,46 +81,9 @@ export default function Events() {
             connectionRef.current = null;
             Echo.leave(`private_workspaces.${workspace.id}`);
         };
-    }, [workspace.id,  channel]);
+    }, [workspace.id, channel]);
 
-    useEffect(() => {
-        channels.forEach((cn) => {
-            Echo.private(`private_channels.${cn.id}`).listen(
-                "MessageEvent",
-                (e) => {
-                    if (e.message?.user_id != auth.user.id)
-                        if (cn.id != channel.id)
-                            if (
-                                e.type == "newMessageCreated" &&
-                                !isHiddenUser(
-                                    workspaceUsers,
-                                    e.message?.user_id
-                                )
-                            )
-                                dispatch(addMessageCountForChannel(cn));
-                }
-            );
-        });
-        directChannels.forEach((cn) => {
-            Echo.private(`private_channels.${cn.id}`).listen(
-                "MessageEvent",
-                (e) => {
-                    if (e.message?.user_id != auth.user.id)
-                        if (cn.id != channel.id)
-                            if (e.type == "newMessageCreated")
-                                dispatch(addMessageCountForChannel(cn));
-                }
-            );
-        });
-        return () => {
-            channels.forEach((cn) => {
-                Echo.leave(`private_channels.${cn.id}`);
-            });
-            directChannels.forEach((cn) => {
-                Echo.leave(`private_channels.${cn.id}`);
-            });
-        };
-    }, [channels, channel, directChannels, workspaceUsers]);
+  
 
     return <></>;
 }

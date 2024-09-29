@@ -159,11 +159,14 @@ class MessageController extends Controller
                     $fileObject['path'] = $newPath;
                     array_push($fileObjects, $fileObject);
                 }
-                $files = $this->createFiles($fileObjects, $request->user(), $channel->workspace);
+                if (count($fileObjects) > 0) {
+                    $files = $this->createFiles($fileObjects, $request->user(), $channel->workspace);
 
-                $fileInstances = $message->files()->createMany($files);
+                    $fileInstances = $message->files()->createMany($files);
 
-                broadcast(new WorkspaceEvent(workspace: $channel->workspace, type: "ChannelMessage_fileCreated", fromUserId: "", data: ['channelId' => $channel->id, 'files' => $fileInstances]));
+
+                    broadcast(new WorkspaceEvent(workspace: $channel->workspace, type: "ChannelMessage_fileCreated", fromUserId: "", data: ['channelId' => $channel->id, 'files' => $fileInstances]));
+                }
             }
 
 
@@ -235,14 +238,17 @@ class MessageController extends Controller
                 $fileObject['path'] = $newPath;
                 array_push($fileObjects, $fileObject);
             }
+            if (count($fileObjects) > 0) {
+                $files = $this->createFiles($fileObjects, $request->user(), $channel->workspace);
 
-            $files = $this->createFiles($fileObjects, $request->user(), $channel->workspace);
+                $fileInstances = $newMessage->files()->createMany($files);
 
-            $fileInstances = $newMessage->files()->createMany($files);
+                broadcast(new WorkspaceEvent(workspace: $channel->workspace, type: "ThreadMessage_fileCreated", fromUserId: "", data: ['channelId' => $channel->id, 'files' => $fileInstances]));
+            }
             broadcast(new ThreadMessageEvent($message, $newMessage->load(['files' => function ($query) {
                 $query->withTrashed();
             }, 'reactions'])));
-            broadcast(new WorkspaceEvent(workspace: $channel->workspace, type: "ThreadMessage_fileCreated", fromUserId: "", data: ['channelId' => $channel->id, 'files' => $fileInstances]));
+
             if (isset($newMessage)) {
 
                 //handle mentions list

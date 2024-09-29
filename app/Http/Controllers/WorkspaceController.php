@@ -17,6 +17,20 @@ class WorkspaceController extends Controller
     /**
      * Display a listing of the resource.
      */
+    public function initWorkspaceData(Request $request, Workspace $workspace)
+    {
+        $user = $request->user();
+        $workspaces =  $user->workspaces;
+        $newNotificationsCount =  $user->notifications()->where("read_at", null)->count();
+        $workspacePermissions =  ['createChannel' => $user->can('create', [Channel::class, $workspace]),];
+
+        return [
+
+            'workspaces' => $workspaces,
+            'newNotificationsCount' => $newNotificationsCount,
+            'workspacePermissions' => $workspacePermissions,
+        ];
+    }
     public function index()
     {
         //

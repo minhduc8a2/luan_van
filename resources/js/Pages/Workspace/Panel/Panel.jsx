@@ -18,12 +18,11 @@ import { useMemo } from "react";
 export default function Panel({}) {
     const {
         auth,
-        
+
         workspace,
         channelId,
-        selfChannel,
     } = usePage().props;
-   
+
     const { channels } = useSelector((state) => state.channels);
 
     const currentChannel = useMemo(
@@ -32,9 +31,7 @@ export default function Panel({}) {
     );
     const dispatch = useDispatch();
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
-    const newMessageCountsMap = useSelector(
-        (state) => state.newMessageCountsMap
-    );
+
     // const { messages } = useSelector((state) => state.messages);
     function changeChannel(channel) {
         router.get(
@@ -51,6 +48,9 @@ export default function Panel({}) {
     }
     const directChannels = useMemo(() => {
         return channels.filter((cn) => cn.type == "DIRECT");
+    }, [channels]);
+    const selfChannel = useMemo(() => {
+        return channels.find((cn) => cn.type == "SELF");
     }, [channels]);
     return (
         <div className="bg-black/35 h-full  rounded-l-lg rounded-s-lg border-r border-r-white/15">
@@ -109,10 +109,8 @@ export default function Panel({}) {
                                                 </div>
                                             )}
                                             <div className="text-sm text-white">
-                                                {newMessageCountsMap[channel.id]
-                                                    ? newMessageCountsMap[
-                                                          channel.id
-                                                      ]
+                                                {channel.unread_messages_count
+                                                    ? channel.unread_messages_count
                                                     : ""}
                                             </div>
                                         </button>
@@ -144,10 +142,8 @@ export default function Panel({}) {
                                                 </div>
                                             </div>
                                             <div className="text-sm text-white">
-                                                {newMessageCountsMap[channel.id]
-                                                    ? newMessageCountsMap[
-                                                          channel.id
-                                                      ]
+                                                {channel.unread_messages_count
+                                                    ? channel.unread_messages_count
                                                     : ""}
                                             </div>
                                         </button>
@@ -185,6 +181,7 @@ export default function Panel({}) {
                                 user = workspaceUsers.find(
                                     (u) => u.id == userId
                                 );
+                            if (user.is_hidden) return "";
                             return (
                                 <DirectChannel
                                     key={user.id}

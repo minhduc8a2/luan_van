@@ -21,10 +21,27 @@ export const channelsSlice = createSlice({
                 });
             }
         },
+
+        addMessageCountForChannel(state, action) {
+            const channelIndex = state.channels.findIndex(
+                (channel) => channel.id === action.payload.id
+            );
+            if (channelIndex >= 0) {
+                state.channels[channelIndex].unread_messages_count += 1;
+            }
+        },
+        resetMessageCountForChannel(state, action) {
+            const channelIndex = state.channels.findIndex(
+                (channel) => channel.id === action.payload.id
+            );
+            if (channelIndex >= 0) {
+                state.channels[channelIndex].unread_messages_count = 0;
+            }
+        },
     },
 });
 
 // Action creators are generated for each case reducer function
-export const { setChannels, updateChannelInformation } = channelsSlice.actions;
+export const { setChannels, updateChannelInformation,addMessageCountForChannel,resetMessageCountForChannel } = channelsSlice.actions;
 
 export default channelsSlice.reducer;
