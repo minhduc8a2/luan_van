@@ -12,13 +12,17 @@ import { FaPhoneAlt } from "react-icons/fa";
 import Button from "@/Components/Button";
 import { TbMessageCircle } from "react-icons/tb";
 import { FiHeadphones, FiMoreVertical } from "react-icons/fi";
-import { channelProps, getDirectChannelFromUserId } from "@/helpers/channelHelper";
+import {
+    channelProps,
+    getDirectChannelFromUserId,
+} from "@/helpers/channelHelper";
 import { setThreadedMessageId } from "@/Store/threadSlice";
 import { toggleHuddle } from "@/Store/huddleSlice";
 import MoreOptions from "./MoreOptions";
-
+import { LiaUserMinusSolid } from "react-icons/lia";
 export default function Profile() {
-    const { default_avatar_url, auth, directChannels } = usePage().props;
+    const { default_avatar_url, auth, directChannels, workspace } =
+        usePage().props;
     const { user } = useSelector((state) => state.profile);
     const onlineStatusMap = useSelector((state) => state.onlineStatus);
     const { channel: huddleChannel } = useSelector((state) => state.huddle);
@@ -35,7 +39,7 @@ export default function Profile() {
                 channel: channel.id,
             }),
             {},
-            { preserveState: true,only:channelProps }
+            { preserveState: true, only: channelProps }
         );
     }
     function handleHuddleButtonClicked() {
@@ -69,14 +73,23 @@ export default function Profile() {
                     <IoClose />
                 </button>
             </div>
-            <Image
-                url={user.avatar_url || default_avatar_url}
-                dimensions="w-64 h-64"
-                className="mt-4 mx-auto"
-            />
+            {user.is_hidden ? (
+                <div className="w-64 h-64 bg-foreground rounded-lg flex items-center justify-center mx-auto">
+                    <LiaUserMinusSolid className="text-5xl" />
+                </div>
+            ) : (
+                <Image
+                    url={user.avatar_url || default_avatar_url}
+                    dimensions="w-64 h-64"
+                    className="mt-4 mx-auto"
+                />
+            )}
+
             <div className="flex justify-between mt-6">
                 <h3 className="text-2xl font-bold text-white/85">
-                    {user.display_name || user.name}
+                    {user.is_hidden
+                        ? "Name hidden"
+                        : user.display_name || user.name}
                 </h3>
                 {hasOwnership && (
                     <EditProfile

@@ -3,24 +3,20 @@ import { CreateChannelForm } from "../Panel/CreateChannelForm";
 import Button from "@/Components/Button";
 import { router, usePage } from "@inertiajs/react";
 
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import SearchInput from "../../../Components/Input/SearchInput";
 import Layout from "../Layout";
 import InfiniteScroll from "@/Components/InfiniteScroll";
 import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
 import FilterButton from "@/Components/FilterButton";
 import UserItem from "./UserItem";
+import { setProfile } from "@/Store/profileSlice";
 function BrowseUsers() {
-    const { auth, workspace } = usePage().props;
-    const dispatch = useDispatch();
-    const [allUsers, setAllUsers] = useState([]);
-
+    // const [allUsers, setAllUsers] = useState([]);
+    const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
     const [searchValue, setSearchValue] = useState("");
     const [filterLoading, setFilterLoading] = useState(false);
-    const [topLoading, setTopLoading] = useState(false);
-    const [bottomLoading, setBottomLoading] = useState(false);
-    const [topHasMore, setTopHasMore] = useState();
-    const [bottomHasMore, setBottomHasMore] = useState();
+    const dispatch = useDispatch();
     const sortList = [
         {
             inside: "A to Z",
@@ -42,17 +38,17 @@ function BrowseUsers() {
         {
             inside: "Admins",
             title: "Admins",
-            value: "admin",
+            value: "ADMIN",
         },
         {
             inside: "Regular members",
             title: "Regular members",
-            value: "member",
+            value: "MEMBER",
         },
         {
             inside: "Guests",
             title: "Guests",
-            value: "guest",
+            value: "GUEST",
         },
     ];
     useEffect(() => {
@@ -89,35 +85,42 @@ function BrowseUsers() {
         //     }
         // );
     }, []);
-    function mutateUsers(pre, data, position) {
-        if (position == "top") {
-            return [...data, ...pre];
-        } else {
-            return [...pre, ...data];
-        }
-    }
+    // function mutateUsers(pre, data, position) {
+    //     if (position == "top") {
+    //         return [...data, ...pre];
+    //     } else {
+    //         return [...pre, ...data];
+    //     }
+    // }
     const [filter, setFilter] = useState({
         accountType: "all",
         sort: "a_to_z",
     });
 
     const filteredUsers = useMemo(() => {
-        let tempUsers = [...allUsers];
+        let tempUsers = [...workspaceUsers];
         //owntype
         switch (filter.accountType) {
             case "all":
                 break;
-            case "admins":
-                // tempUsers = tempUsers.filter(
-                //     (cn) => cn.user_id == auth.user.id
-                // );
+            case "ADMIN":
+                tempUsers = tempUsers.filter(
+                    (u) => u.workspaceRole.name == "ADMIN"
+                );
 
                 break;
-            case "member":
-            case "guest":
-                // tempUsers = tempUsers.filter(
-                //     (cn) => cn.user_id != auth.user.id
-                // );
+            case "MEMBER":
+                tempUsers = tempUsers.filter(
+                    (u) =>
+                        u.workspaceRole.name == "ADMIN" ||
+                        u.workspaceRole.name == "MEMBER"
+                );
+
+                break;
+            case "GUEST":
+                tempUsers = tempUsers.filter(
+                    (u) => u.workspaceRole.name == "GUEST"
+                );
                 break;
         }
 
@@ -129,120 +132,123 @@ function BrowseUsers() {
                 tempUsers.sort((a, b) => b.name.localeCompare(a.name));
                 break;
         }
-        return tempUsers;
-    }, [filter, allUsers, searchValue]);
+        return tempUsers.filter((u) =>
+            u.name.toLowerCase().includes(searchValue.toLowerCase())
+        );
+    }, [filter, workspaceUsers, searchValue]);
 
-    function loadMore(position) {
-        let last_id;
-        if (position == "top") {
-            last_id = topHasMore;
-        } else {
-            last_id = bottomHasMore;
-        }
-        if (last_id) {
-            if (position == "top") {
-                setTopLoading(true);
-            } else {
-                setBottomLoading(true);
-            }
+    // function loadMore(position) {
+    //     let last_id;
+    //     if (position == "top") {
+    //         last_id = topHasMore;
+    //     } else {
+    //         last_id = bottomHasMore;
+    //     }
+    //     if (last_id) {
+    //         if (position == "top") {
+    //             setTopLoading(true);
+    //         } else {
+    //             setBottomLoading(true);
+    //         }
 
-            return axios
-                .get(route("users.browseUsers", workspace.id), {
-                    params: {
-                        accountType: filter.accountType,
+    //         return axios
+    //             .get(route("users.browseUsers", workspace.id), {
+    //                 params: {
+    //                     accountType: filter.accountType,
 
-                        name: searchValue,
-                        last_id,
-                        direction: position,
-                    },
-                    // signal: token.current.signal,
-                })
-                .then((response) => {
-                    if (response.status == 200) {
-                        if (position == "top") {
-                            if (response.data.length > 0) {
-                                setTopHasMore(response.data[0].id);
-                            } else {
-                                setTopHasMore(null);
-                            }
-                            setAllUsers((pre) =>
-                                mutateUsers(pre, response.data, "top")
-                            );
-                        } else {
-                            if (response.data.length > 0) {
-                                setBottomHasMore(
-                                    response.data[response.data.length - 1].id
-                                );
-                            } else {
-                                setBottomHasMore(null);
-                            }
-                            setAllUsers((pre) =>
-                                mutateUsers(pre, response.data, "bottom")
-                            );
-                        }
-                    }
-                })
-                .finally(() => {
-                    if (position == "top") {
-                        setTopLoading(false);
-                    } else {
-                        setBottomLoading(false);
-                    }
-                });
-        }
-    }
+    //                     name: searchValue,
+    //                     last_id,
+    //                     direction: position,
+    //                 },
+    //                 // signal: token.current.signal,
+    //             })
+    //             .then((response) => {
+    //                 if (response.status == 200) {
+    //                     if (position == "top") {
+    //                         if (response.data.length > 0) {
+    //                             setTopHasMore(response.data[0].id);
+    //                         } else {
+    //                             setTopHasMore(null);
+    //                         }
+    //                         setAllUsers((pre) =>
+    //                             mutateUsers(pre, response.data, "top")
+    //                         );
+    //                     } else {
+    //                         if (response.data.length > 0) {
+    //                             setBottomHasMore(
+    //                                 response.data[response.data.length - 1].id
+    //                             );
+    //                         } else {
+    //                             setBottomHasMore(null);
+    //                         }
+    //                         setAllUsers((pre) =>
+    //                             mutateUsers(pre, response.data, "bottom")
+    //                         );
+    //                     }
+    //                 }
+    //             })
+    //             .finally(() => {
+    //                 if (position == "top") {
+    //                     setTopLoading(false);
+    //                 } else {
+    //                     setBottomLoading(false);
+    //                 }
+    //             });
+    //     }
+    // }
 
-    const token = useRef(null);
+    // const token = useRef(null);
 
-    function search(searchValue) {
-        if (token.current != null) token.current.abort();
+    // function search(searchValue) {
+    //     if (token.current != null) token.current.abort();
 
-        token.current = new AbortController();
-        return axios
-            .get(route("users.browseUsers", workspace.id), {
-                params: {
-                    accountType: filter.ownType,
+    //     token.current = new AbortController();
+    //     return axios
+    //         .get(route("users.browseUsers", workspace.id), {
+    //             params: {
+    //                 accountType: filter.accountType,
 
-                    name: searchValue,
-                    last_id: "",
-                    direction: "bottom",
-                },
-                signal: token.current.signal,
-            })
-            .then((response) => {
-                if (response.status == 200) {
-                    console.log(response.data);
-                    if (response.data.length > 0) {
-                        setTopHasMore(response.data[0].id);
-                        setBottomHasMore(
-                            response.data[response.data.length - 1].id
-                        );
-                    } else {
-                        setTopHasMore(null);
-                        setBottomHasMore(null);
-                    }
-                    setAllUsers(mutateUsers([], response.data, "bottom"));
-                }
-            })
-            .finally(() => {
-                setTopLoading(false);
-                setBottomLoading(false);
-            });
-    }
+    //                 name: searchValue,
+    //                 last_id: "",
+    //                 direction: "bottom",
+    //             },
+    //             signal: token.current.signal,
+    //         })
+    //         .then((response) => {
+    //             if (response.status == 200) {
+    //                 console.log(response.data);
+    //                 if (response.data.length > 0) {
+    //                     setTopHasMore(response.data[0].id);
+    //                     setBottomHasMore(
+    //                         response.data[response.data.length - 1].id
+    //                     );
+    //                 } else {
+    //                     setTopHasMore(null);
+    //                     setBottomHasMore(null);
+    //                 }
+    //                 setAllUsers(mutateUsers([], response.data, "bottom"));
+    //             }
+    //         })
+    //         .finally(() => {
+    //             setTopLoading(false);
+    //             setBottomLoading(false);
+    //         });
+    // }
 
-    useEffect(() => {
-        setFilterLoading(true);
-        search("").then(() => {
-            setFilterLoading(false);
-        });
-    }, [filter.ownType, filter.privacyType]);
+    // useEffect(() => {
+    //     setFilterLoading(true);
+    //     console.log("filter changed");
+    //     search("").then(() => {
+    //         setFilterLoading(false);
+    //     });
+    // }, [filter.accountType]);
     return (
         <div className="bg-foreground w-full h-full border border-white/15 ">
             <div className="mx-auto w-1/2 py-4 flex flex-col max-h-full">
                 <div className="flex justify-between items-center">
                     <div className="flex gap-x-4 items-center">
                         <h3 className="text-xl font-bold text-white">
-                            All Channels
+                            All people
                         </h3>
                         {filterLoading && (
                             <div className="flex gap-x-2 items-center  ">
@@ -254,7 +260,6 @@ function BrowseUsers() {
                         )}
                     </div>
                     <CreateChannelForm
-                        callback={() => search(searchValue)}
                         activateButtonNode={
                             <Button className="text-white/100 font-bold border border-white/15 !bg-background">
                                 Create Channel
@@ -264,27 +269,27 @@ function BrowseUsers() {
                 </div>
                 <SearchInput
                     placeholder="Search for channels"
-                    onSearch={(searchValue) => search(searchValue)}
-                    list={allUsers}
+                    onSearch={(searchValue) => setSearchValue(searchValue)}
+                    list={filteredUsers}
                     // onItemClick={changeChannel}
                     filterFunction={(searchValue, list) => {
-                        return list.filter((cn) =>
-                            cn.name.toLowerCase().includes(searchValue)
+                        return list.filter((u) =>
+                            u.name.toLowerCase().includes(searchValue)
                         );
                     }}
-                    onChange={(e) => {
-                        setSearchValue(e.target.value);
-                        if (!e.target.value) {
-                            search("");
-                        }
+                    onChange={() => {
+                        if (searchValue) setSearchValue("");
                     }}
-                    renderItemNode={(item) => {
+                    renderItemNode={(item, closePanel, clearInput) => {
+                        // console.log(item);
                         return (
                             <button
                                 onClick={() => {
-                                    changeChannel(item);
+                                    dispatch(setProfile(item));
+                                    closePanel();
+                                    clearInput();
                                 }}
-                                className=""
+                                className="w-full h-full p-4 text-left"
                             >
                                 {item.displayName || item.name}
                             </button>
@@ -292,18 +297,26 @@ function BrowseUsers() {
                     }}
                 />
                 <div className="flex justify-between mt-6">
-                    <FilterButton list={accountTypeList} action={() => {}} />
-                    <FilterButton list={sortList} action={() => {}} />
+                    <FilterButton
+                        list={accountTypeList}
+                        action={(value) => {
+                            setFilter((pre) => ({
+                                ...pre,
+                                accountType: value,
+                            }));
+                        }}
+                    />
+                    <FilterButton
+                        list={sortList}
+                        action={(value) => {
+                            setFilter((pre) => ({
+                                ...pre,
+                                sort: value,
+                            }));
+                        }}
+                    />
                 </div>
-                <InfiniteScroll
-                    loadMoreOnTop={() => loadMore("top")}
-                    loadMoreOnBottom={() => loadMore("bottom")}
-                    topHasMore={topHasMore}
-                    bottomHasMore={bottomHasMore}
-                    topLoading={topLoading}
-                    bottomLoading={bottomLoading}
-                    className="mt-6 flex flex-row flex-wrap max-h-full overflow-y-auto scrollbar rounded-lg "
-                >
+                <ul className="mt-6 flex flex-row gap-y-4 flex-wrap max-h-full overflow-y-auto scrollbar rounded-lg ">
                     {filteredUsers.length == 0 && (
                         <p className="text-center p-4">No results found</p>
                     )}
@@ -315,7 +328,7 @@ function BrowseUsers() {
                             </li>
                         );
                     })}
-                </InfiniteScroll>
+                </ul>
             </div>
         </div>
     );

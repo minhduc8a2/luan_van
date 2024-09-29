@@ -1,11 +1,14 @@
 import Button from "@/Components/Button";
 import CustomedDialog from "@/Components/CustomedDialog";
+import { updateProfileInformation } from "@/Store/profileSlice";
 import { router, usePage } from "@inertiajs/react";
 import React, { useState } from "react";
+import { useDispatch } from "react-redux";
 
 export default function RemovePhoto({ user }) {
     const { default_avatar_url } = usePage().props;
     const [show, setShow] = useState(false);
+    const dispatch = useDispatch();
     function removePhoto() {
         router.delete(route("users.deleteAvatar", user.id), {
             only: [],
@@ -18,6 +21,10 @@ export default function RemovePhoto({ user }) {
                         messages: Object.values(errors),
                     })
                 ),
+
+            onSuccess: () => {
+                dispatch(updateProfileInformation({ avatar_url: "" }));
+            },
             onFinish: () => {
                 setShow(false);
             },

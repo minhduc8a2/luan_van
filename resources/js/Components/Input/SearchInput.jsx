@@ -14,7 +14,7 @@ export default function SearchInput({
     const [searchValue, setSearchValue] = useState("");
     const panelRef = useRef(null);
     const [focused, setFocused] = useState(false);
-
+    const inputRef = useRef(null);
     const closePanel = () => {
         setIsOpen(false);
     };
@@ -36,7 +36,9 @@ export default function SearchInput({
         () => filterFunction(searchValue, list),
         [searchValue, list]
     );
-
+    function clearInput() {
+        inputRef.current.value = "";
+    }
     return (
         <div className="relative mt-4">
             <form
@@ -45,12 +47,14 @@ export default function SearchInput({
                 }  `}
                 onSubmit={(e) => {
                     e.preventDefault();
+
                     onSearch(searchValue);
                     setIsOpen(false);
                 }}
             >
                 <IoIosSearch className="text-2xl text-white/85" />
                 <input
+                    ref={inputRef}
                     type="text"
                     placeholder={placeholder}
                     onFocus={() => setFocused(true)}
@@ -83,9 +87,9 @@ export default function SearchInput({
                     {resultList.map((item, index) => (
                         <li
                             key={index}
-                            className="cursor-pointer p-4 hover:bg-white/15 "
+                            className="cursor-pointer hover:bg-white/15 "
                         >
-                            {renderItemNode(item)}
+                            {renderItemNode(item, closePanel, clearInput)}
                         </li>
                     ))}
                 </ul>

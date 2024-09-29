@@ -78,6 +78,11 @@ export default function Event() {
                         dispatch(deleteFile(e.data));
                         dispatch(deleteFileInThread(e.data));
                         break;
+                    case "UserObserver_updated":
+                        router.reload({
+                            preserveState: true,
+                            only: ["channelUsers", "users"],
+                        });
                     default:
                         break;
                 }

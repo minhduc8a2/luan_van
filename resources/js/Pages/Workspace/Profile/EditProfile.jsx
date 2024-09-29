@@ -10,6 +10,7 @@ import { useDispatch } from "react-redux";
 import { setNotificationPopup } from "@/Store/notificationPopupSlice";
 import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
 import Image from "@/Components/Image";
+import { updateProfileInformation } from "@/Store/profileSlice";
 
 export default function EditProfile({ user, triggerButton }) {
     const { workspace, default_avatar_url } = usePage().props;
@@ -41,12 +42,13 @@ export default function EditProfile({ user, triggerButton }) {
                             message: errors.server,
                         })
                     ),
+
                 onFinish: () => {
                     setUploadingAvatarFile(false);
                 },
             }
         );
-    }, [avatarFile]);
+    }, [avatarFile, data]);
     function onSubmit(e) {
         e.preventDefault();
         patch(route("users.update", user.id), {
@@ -59,8 +61,10 @@ export default function EditProfile({ user, triggerButton }) {
                         messages: Object.values(errors),
                     })
                 ),
+
             onSuccess: () => {
                 setIsOpen(false);
+                dispatch(updateProfileInformation(data));
             },
         });
     }

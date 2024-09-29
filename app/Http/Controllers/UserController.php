@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\BaseRoles;
 use App\Models\User;
 use App\Models\Workspace;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\Role;
 use Inertia\Inertia;
 
 class UserController extends Controller
@@ -21,27 +23,53 @@ class UserController extends Controller
     }
     public function browseUsers(Request $request, Workspace $workspace)
     {
-        $perPage = 10;
+        // $perPage = 10;
+        // $mode = $request->query('mode');
+        // $name = $request->query('name') ?? "";
+        // $accountType = $request->query('accountType');
+        // // $page = $request->query('page') ?? 1;
+        // $last_id = $request->query('last_id');
+        // $direction = $request->query('direction') ?? "bottom";
 
-        $name = $request->query('name') ?? "";
-        // $page = $request->query('page') ?? 1;
-        $last_id = $request->query('last_id');
-        $direction = $request->query('direction') ?? "bottom";
+
         // $page = 2;
         if ($request->expectsJson()) {
 
-            $query = $workspace->users();
+            $hiddenUserIds =  $request->user()->hiddenUsers()->wherePivot('workspace_id', $workspace->id)->pluck('hidden_user_id')->toArray();
+            // $query = $workspace->users();
 
-            if ($last_id) {
-                if ($direction === 'bottom') {
-                    $query->where('users.id', '<', $last_id)->orderBy('id', 'desc');
-                } else {
-                    $query->where('users.id', '>', $last_id)->orderBy('id', 'asc');
-                }
-            } else {
-                $query->orderBy('users.id', 'desc');
-            }
-            return $query->limit($perPage)->where('users.name', 'like', '%' . $name . '%')->get();
+            // if ($accountType && in_array($accountType, [BaseRoles::ADMIN->name, BaseRoles::MEMBER->name, BaseRoles::GUEST->name])) {
+            //     if ($accountType == BaseRoles::ADMIN->name || $accountType == BaseRoles::GUEST->name) {
+            //         $query = $query->wherePivot('role_id', Role::getRoleIdByName($accountType));
+            //     }
+            //     if ($accountType == BaseRoles::MEMBER->name) {
+            //         $query = $query->wherePivotIn('role_id', [Role::getRoleIdByName(BaseRoles::ADMIN->name), Role::getRoleIdByName(BaseRoles::MEMBER->name)]);
+            //     }
+            // }
+
+            // if ($last_id) {
+            //     if ($direction === 'bottom') {
+            //         $query->where('users.id', '<', $last_id)->orderBy('id', 'desc');
+            //     } else {
+            //         $query->where('users.id', '>', $last_id)->orderBy('id', 'asc');
+            //     }
+            // } else {
+            //     $query->orderBy('users.id', 'desc');
+            // }
+
+            // if ($mode == "all") {
+            //     $workspaceUsers =  $query->where('users.name', 'like', '%' . $name . '%')->get();
+            // } else {
+            //     $workspaceUsers =  $query->limit($perPage)->where('users.name', 'like', '%' . $name . '%')->get();
+            // }
+
+            // return $workspaceUsers;
+            $workspaceUsers =  $workspace->users()->get();
+            return $workspaceUsers->map(function ($user) use ($hiddenUserIds) {
+                if (in_array($user->id, $hiddenUserIds)) $user->is_hidden = true;
+                $user->workspaceRole = Role::find($user->pivot->role_id)->setVisible(["name"]);
+                return $user;
+            });
         }
         return Inertia::render("Workspace/BrowseUsers/BrowseUsers");
     }
@@ -171,14 +199,26 @@ class UserController extends Controller
         $validated = $request->validate([
             "userId" => "required|integer",
             "workspaceId" => "required|integer",
+            "mode" => "required|in:hide,unhide",
         ]);
         if ($request->user()->id == $validated["userId"]) return abort(403);
 
 
         try {
             DB::beginTransaction();
-            $request->user()->hiddenUsers()->attach($validated["userId"], ["workspace_id" => $validated["workspaceId"]]);
-
+            if ($validated["mode"] == "hide") {
+                DB::table("hidden_users")->insert([
+                    'user_id' => $request->user()->id,
+                    'hidden_user_id' => $validated["userId"],
+                    "workspace_id" => $validated["workspaceId"]
+                ]);
+            } else {
+                DB::table("hidden_users")
+                    ->where('user_id', $request->user()->id)
+                    ->where('hidden_user_id', $validated["userId"])
+                    ->where('workspace_id', $validated["workspaceId"])
+                    ->delete();
+            }
             DB::commit();
             return back();
         } catch (\Throwable $th) {

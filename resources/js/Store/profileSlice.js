@@ -18,10 +18,15 @@ export const profileSlice = createSlice({
         setUser(state, action) {
             state.user = action.payload;
         },
+        updateProfileInformation(state, action) {
+            Object.keys(action.payload).forEach((key) => {
+                state.user[key] = action.payload[key];
+            });
+        },
     },
 });
 
 // Action creators are generated for each case reducer function
-export const { setProfileWidth, setUser } = profileSlice.actions;
+export const { updateProfileInformation, setUser } = profileSlice.actions;
 
 export default profileSlice.reducer;

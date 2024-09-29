@@ -11,6 +11,7 @@ import { setNotificationPopup } from "@/Store/notificationPopupSlice";
 import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
 import Image from "@/Components/Image";
 import { FaLock } from "react-icons/fa";
+import { updateProfileInformation } from "@/Store/profileSlice";
 
 export default function EditContactInformation({ user, triggerButton }) {
     const { workspace, default_avatar_url } = usePage().props;
@@ -36,6 +37,7 @@ export default function EditContactInformation({ user, triggerButton }) {
                 ),
             onSuccess: () => {
                 setIsOpen(false);
+                dispatch(updateProfileInformation(data))
             },
         });
     }

@@ -12,6 +12,7 @@ import notificationPopupReducer from "./notificationPopupSlice";
 import mediaReducer from "./mediaSlice";
 import profileReducer from "./profileSlice";
 import windowTypeReducer from "./windowTypeSlice";
+import workspaceUsersReducer from "./workspaceUsersSlice";
 export const makeStore = () => {
     return configureStore({
         reducer: {
@@ -28,6 +29,7 @@ export const makeStore = () => {
             media: mediaReducer,
             profile: profileReducer,
             windowType: windowTypeReducer,
+           workspaceUsers:workspaceUsersReducer,
         },
     });
 };

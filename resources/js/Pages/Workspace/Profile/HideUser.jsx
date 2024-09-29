@@ -2,6 +2,7 @@ import Button from "@/Components/Button";
 import CustomedDialog from "@/Components/CustomedDialog";
 import CustomedPopover from "@/Components/CustomedPopover";
 import { setNotificationPopup } from "@/Store/notificationPopupSlice";
+import { updateProfileInformation } from "@/Store/profileSlice";
 import { router, usePage } from "@inertiajs/react";
 import React, { useState } from "react";
 import { FiBellOff } from "react-icons/fi";
@@ -16,7 +17,7 @@ export default function HideUser({ user, isOpen, onClose }) {
     function hideUser() {
         router.post(
             route("users.hide"),
-            { userId: user.id, workspaceId: workspace.id },
+            { userId: user.id, workspaceId: workspace.id, mode: "hide" },
             {
                 preserveState: true,
                 onError: (errors) => {
@@ -26,6 +27,10 @@ export default function HideUser({ user, isOpen, onClose }) {
                             messages: Object.values(errors),
                         })
                     );
+                },
+                onSuccess: () => {
+                    onClose();
+                    dispatch(updateProfileInformation({ is_hidden: true }));
                 },
             }
         );

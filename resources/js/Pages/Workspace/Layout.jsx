@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import React, { memo, useEffect, useState } from "react";
 import SideBar from "./SideBar/SideBar";
 import HeadBar from "./HeadBar";
 import Panel from "./Panel/Panel";
@@ -23,11 +23,19 @@ import Profile from "./Profile/Profile";
 import Activity from "./Activity/Activity";
 import { usePage } from "@inertiajs/react";
 import { setLeftWindowType } from "@/Store/windowTypeSlice";
+import { setWorkspaceUsers } from "@/Store/workspaceUsersSlice";
 export default function Layout({ children }) {
-    const { newNoftificationsCount, channels, directChannels, channel } =
-        usePage().props;
+    const {
+        newNoftificationsCount,
+        channels,
+        directChannels,
+        channel,
+        workspace,
+    } = usePage().props;
+
     const storeRef = useRef();
     if (!storeRef.current) {
+        console.log("store created");
         // Create the store instance the first time this renders
         storeRef.current = makeStore();
         //update panel width in localStorage
@@ -65,24 +73,71 @@ export default function Layout({ children }) {
     }
     return (
         <Provider store={storeRef.current}>
-            <Event />
-            <div className="client-container bg-primary-500 text-white ">
-                <div className="client-headbar ">
-                    <HeadBar />
-                </div>
-                <div className="client-sidebar ">
-                    <SideBar />
-                </div>
-
-                <div className="client-workspace-container flex flex-nowrap   rounded-lg border border-white/5 border-b-2">
-                    <MainArea>{children}</MainArea>
-                </div>
-            </div>
-            <Huddle />
-            <NotificationPopup />
-            <MediaModal />
+            <Wrapper>{children}</Wrapper>
         </Provider>
     );
+}
+
+function Wrapper({ children }) {
+    const [loaded, setLoaded] = useState(false);
+    return (
+        <>
+            <InitData loaded={loaded} setLoaded={(value) => setLoaded(value)} />
+            {loaded && (
+                <>
+                    <Event />
+                    <div className="client-container bg-primary-500 text-white ">
+                        <div className="client-headbar ">
+                            <HeadBar />
+                        </div>
+                        <div className="client-sidebar ">
+                            <SideBar />
+                        </div>
+
+                        <div className="client-workspace-container flex flex-nowrap   rounded-lg border border-white/5 border-b-2">
+                            <MainArea>{children}</MainArea>
+                        </div>
+                    </div>
+                    <Huddle />
+                    <NotificationPopup />
+                    <MediaModal />
+                </>
+            )}
+        </>
+    );
+}
+function InitData({ loaded, setLoaded }) {
+    const { workspace } = usePage().props;
+    const dispatch = useDispatch();
+    function loadWorkspaceRelatedData() {
+        return Promise.all([loadWorkspaceUsers()]);
+    }
+
+    function loadWorkspaceUsers() {
+        return axios
+            .get(route("users.browseUsers", workspace.id), {
+                params: {
+                    mode: "all",
+                },
+            })
+            .then((response) => {
+                dispatch(setWorkspaceUsers(response.data));
+            });
+    }
+    useEffect(() => {
+        loadWorkspaceRelatedData()
+            .then(() => {
+                setLoaded(true);
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    }, [workspace.id]);
+    if (loaded) {
+        return <></>;
+    } else {
+        return <div className="">Loading workspace data</div>;
+    }
 }
 
 function MainArea({ children }) {
