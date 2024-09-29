@@ -1,17 +1,14 @@
 import Button from "@/Components/Button";
 import CustomedDialog from "@/Components/CustomedDialog";
 import TextInput from "@/Components/Input/TextInput";
-import OverlayConfirm from "@/Components/Overlay/OverlayConfirm";
 
-import { Link, router, useForm, usePage } from "@inertiajs/react";
-import { useEffect, useState } from "react";
-import RemovePhoto from "./RemovePhoto";
+import { useForm, usePage } from "@inertiajs/react";
+import { useState } from "react";
+
 import { useDispatch } from "react-redux";
 import { setNotificationPopup } from "@/Store/notificationPopupSlice";
-import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
-import Image from "@/Components/Image";
+
 import { FaLock } from "react-icons/fa";
-import { updateProfileInformation } from "@/Store/profileSlice";
 
 export default function EditContactInformation({ user, triggerButton }) {
     const { workspace, default_avatar_url } = usePage().props;
@@ -37,7 +34,6 @@ export default function EditContactInformation({ user, triggerButton }) {
                 ),
             onSuccess: () => {
                 setIsOpen(false);
-                dispatch(updateProfileInformation(data))
             },
         });
     }
@@ -54,7 +50,7 @@ export default function EditContactInformation({ user, triggerButton }) {
                             htmlFor="profile-email"
                             className="font-bold gap-x-1 mb-4 flex items-baseline"
                         >
-                            <FaLock className="text-xs"/> Email Address
+                            <FaLock className="text-xs" /> Email Address
                         </label>
                         <TextInput
                             disabled

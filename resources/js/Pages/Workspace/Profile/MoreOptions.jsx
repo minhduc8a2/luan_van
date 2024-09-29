@@ -5,7 +5,7 @@ import { FiMoreVertical } from "react-icons/fi";
 import HideUser from "./HideUser";
 import { router, usePage } from "@inertiajs/react";
 import { useDispatch } from "react-redux";
-import { updateProfileInformation } from "@/Store/profileSlice";
+import { updateWorkspaceUserInformation } from "@/Store/workspaceUsersSlice";
 
 export default function MoreOptions({ user }) {
     const [hideUserOpen, setHideUserOpen] = useState(false);
@@ -25,9 +25,7 @@ export default function MoreOptions({ user }) {
                         })
                     );
                 },
-                onSuccess: () => {
-                    dispatch(updateProfileInformation({ is_hidden: false }));
-                },
+               
             }
         );
     }

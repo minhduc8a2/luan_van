@@ -41,7 +41,8 @@ import HuddleInvitation from "./HuddleInvitation";
 import { getChannelName } from "@/helpers/channelHelper";
 import Tooltip from "@/Components/Tooltip";
 export default function Huddle() {
-    const { auth, users: workspaceUsers } = usePage().props;
+    const { auth,  } = usePage().props;
+    const {workspaceUsers} = useSelector(state=>state.workspaceUsers)
     const { channel, users } = useSelector((state) => state.huddle);
     const { sideBarWidth } = useSelector((state) => state.size);
     const [refresh, setRefresh] = useState(0);

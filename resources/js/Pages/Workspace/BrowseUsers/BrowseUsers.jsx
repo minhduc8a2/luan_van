@@ -285,7 +285,7 @@ function BrowseUsers() {
                         return (
                             <button
                                 onClick={() => {
-                                    dispatch(setProfile(item));
+                                    dispatch(setProfile(item.id));
                                     closePanel();
                                     clearInput();
                                 }}

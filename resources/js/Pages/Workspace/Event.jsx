@@ -9,6 +9,7 @@ import { isChannelsNotificationBroadcast } from "@/helpers/notificationTypeHelpe
 import { toggleHuddle } from "@/Store/huddleSlice";
 import { deleteFileInThread, setThreadedMessageId } from "@/Store/threadSlice";
 import { deleteFile } from "@/Store/messagesSlice";
+import { updateWorkspaceUserInformation } from "@/Store/workspaceUsersSlice";
 
 export default function Event() {
     const {
@@ -51,7 +52,8 @@ export default function Event() {
             Echo.leave("App.Models.User." + auth.user.id);
         };
     }, [workspace.id]);
-    useEffect(() => {
+    function workspaceListener() {
+        console.log("init worksapce listener");
         connectionRef.current = Echo.join(`workspaces.${workspace.id}`);
         connectionRef.current
             .here((users) => {
@@ -64,6 +66,7 @@ export default function Event() {
                 dispatch(setOnlineStatus({ user, onlineStatus: false }));
             })
             .listen("WorkspaceEvent", (e) => {
+                console.log(e);
                 switch (e.type) {
                     case "ChannelObserver_storeChannel":
                         break;
@@ -79,10 +82,12 @@ export default function Event() {
                         dispatch(deleteFileInThread(e.data));
                         break;
                     case "UserObserver_updated":
-                        router.reload({
-                            preserveState: true,
-                            only: ["channelUsers", "users"],
-                        });
+                        dispatch(
+                            updateWorkspaceUserInformation({
+                                id: e.data.id,
+                                data: e.data,
+                            })
+                        );
                     default:
                         break;
                 }
@@ -90,11 +95,15 @@ export default function Event() {
             .error((error) => {
                 console.error(error);
             });
+    }
+    useEffect(() => {
+        workspaceListener();
+
         return () => {
             connectionRef.current = null;
             Echo.leave(`workspaces.${workspace.id}`);
         };
-    }, [workspace.id, huddleChannel]);
+    }, [workspace.id]);
     useEffect(() => {
         if (connectionRef.current)
             connectionRef.current

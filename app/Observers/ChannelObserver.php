@@ -12,7 +12,7 @@ class ChannelObserver
      */
     public function created(Channel $channel): void
     {
-        broadcast(new WorkspaceEvent(workspace: $channel->workspace, type: "ChannelObserver_storeChannel", fromUserId: $channel->user_id, data:$channel->loadCount('users')));
+        broadcast(new WorkspaceEvent(workspace: $channel->workspace, type: "ChannelObserver_storeChannel", fromUserId: $channel->user_id, data: $channel->loadCount('users')));
     }
 
     /**
@@ -20,7 +20,7 @@ class ChannelObserver
      */
     public function updated(Channel $channel): void
     {
-        //
+        broadcast(new WorkspaceEvent(workspace: $channel->workspace, type: "ChannelObserver_updated", fromUserId: "", data: $channel));
     }
 
     /**

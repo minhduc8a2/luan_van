@@ -17,10 +17,11 @@ export default function ChannelNotification({
 }) {
     const {
         auth,
-        users: workspaceUsers,
+       
 
         channel: currentChannel,
     } = usePage().props;
+    const {workspaceUsers} = useSelector(state=>state.workspaceUsers)
     console.log(notification);
     const { messages } = useSelector((state) => state.messages);
     const { fromUser, channel, workspace, data, changesType } =

@@ -1,6 +1,6 @@
 import Button from "@/Components/Button";
 import CustomedDialog from "@/Components/CustomedDialog";
-import { updateProfileInformation } from "@/Store/profileSlice";
+
 import { router, usePage } from "@inertiajs/react";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
@@ -22,9 +22,6 @@ export default function RemovePhoto({ user }) {
                     })
                 ),
 
-            onSuccess: () => {
-                dispatch(updateProfileInformation({ avatar_url: "" }));
-            },
             onFinish: () => {
                 setShow(false);
             },

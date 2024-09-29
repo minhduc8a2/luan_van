@@ -15,7 +15,7 @@ export default function UserItem({ user }) {
         <div
             className="w-48 aspect-[2/3] bg-background rounded-lg border border-white/15 cursor-pointer"
             onClick={() => {
-                dispatch(setProfile(user));
+                dispatch(setProfile(user.id));
             }}
         >
             {user.is_hidden ? (

@@ -10,7 +10,6 @@ import { useDispatch } from "react-redux";
 import { setNotificationPopup } from "@/Store/notificationPopupSlice";
 import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
 import Image from "@/Components/Image";
-import { updateProfileInformation } from "@/Store/profileSlice";
 
 export default function EditProfile({ user, triggerButton }) {
     const { workspace, default_avatar_url } = usePage().props;
@@ -64,7 +63,7 @@ export default function EditProfile({ user, triggerButton }) {
 
             onSuccess: () => {
                 setIsOpen(false);
-                dispatch(updateProfileInformation(data));
+              
             },
         });
     }

@@ -20,13 +20,13 @@ export default function Panel({}) {
         channel: currentChannel,
         workspace,
         channels = [],
-        users,
+        
         directChannels = [],
         selfChannel,
     } = usePage().props;
 
     const dispatch = useDispatch();
-
+    const {workspaceUsers} = useSelector(state=>state.workspaceUsers)
     const newMessageCountsMap = useSelector(
         (state) => state.newMessageCountsMap
     );
@@ -175,7 +175,7 @@ export default function Panel({}) {
                             );
                             let user;
                             if (userId)
-                                user = users.find((u) => u.id == userId);
+                                user = workspaceUsers.find((u) => u.id == userId);
                             return (
                                 <DirectChannel
                                     key={user.id}

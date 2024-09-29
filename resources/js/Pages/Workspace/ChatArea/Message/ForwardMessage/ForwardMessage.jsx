@@ -8,15 +8,16 @@ import { router, useForm, usePage } from "@inertiajs/react";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaLock } from "react-icons/fa";
 import Message from "../Message";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setNotificationPopup } from "@/Store/notificationPopupSlice";
 import { getMentionsFromContent } from "@/helpers/tiptapHelper";
 import { setThreadedMessageId } from "@/Store/threadSlice";
 
 export default function ForwardMessage({ message, show, onClose }) {
     const dispatch = useDispatch();
-    const { users, channels, directChannels, auth, channelUsers, channel } =
+    const {  channels, directChannels, auth, channelUsers, channel } =
         usePage().props;
+        const {workspaceUsers} = useSelector(state=>state.workspaceUsers)
     const allChannels = useMemo(() => {
         return [...channels, ...directChannels];
     }, [channels, directChannels]);
@@ -94,7 +95,7 @@ export default function ForwardMessage({ message, show, onClose }) {
                                 const userId = userIds.find(
                                     (id) => id != auth.user.id
                                 );
-                                let user = users.find((u) => u.id == userId);
+                                let user = workspaceUsers.find((u) => u.id == userId);
                                 return (
                                     <AutocompleInput.InputItem
                                         onRemove={() =>
@@ -145,7 +146,7 @@ export default function ForwardMessage({ message, show, onClose }) {
                                     const userId = userIds.find(
                                         (id) => id != auth.user.id
                                     );
-                                    let user = users.find(
+                                    let user = workspaceUsers.find(
                                         (u) => u.id == userId
                                     );
                                     return (

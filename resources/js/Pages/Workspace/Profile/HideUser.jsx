@@ -2,7 +2,7 @@ import Button from "@/Components/Button";
 import CustomedDialog from "@/Components/CustomedDialog";
 import CustomedPopover from "@/Components/CustomedPopover";
 import { setNotificationPopup } from "@/Store/notificationPopupSlice";
-import { updateProfileInformation } from "@/Store/profileSlice";
+import { updateWorkspaceUserInformation } from "@/Store/workspaceUsersSlice";
 import { router, usePage } from "@inertiajs/react";
 import React, { useState } from "react";
 import { FiBellOff } from "react-icons/fi";
@@ -30,7 +30,12 @@ export default function HideUser({ user, isOpen, onClose }) {
                 },
                 onSuccess: () => {
                     onClose();
-                    dispatch(updateProfileInformation({ is_hidden: true }));
+                    dispatch(
+                        updateWorkspaceUserInformation({
+                            id: user.id,
+                            data: { is_hidden: true },
+                        })
+                    );
                 },
             }
         );

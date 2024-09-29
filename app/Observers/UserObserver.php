@@ -20,8 +20,14 @@ class UserObserver
      */
     public function updated(User $user): void
     {
-        $user->workspaces()->map(function ($workspace) use ($user) {
-            broadcast(new WorkspaceEvent(workspace: $workspace, type: "UserObserver_updated", fromUserId: "", data: $user));
+        $user->workspaces()->each(function ($workspace) use ($user) {
+
+            broadcast(new WorkspaceEvent(
+                workspace: $workspace,
+                type: "UserObserver_updated",
+                fromUserId: "",
+                data: $user
+            ));
         });
     }
 

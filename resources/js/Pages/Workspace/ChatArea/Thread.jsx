@@ -28,6 +28,7 @@ export default function Thread() {
     const { threadMessage: mentionThreadMessage } = useSelector(
         (state) => state.mention
     );
+    const {workspaceUsers} = useSelector(state=>state.workspaceUsers)
     const {
         message: threadedMessage,
         messageId: threadedMessageId,
@@ -136,17 +137,17 @@ export default function Thread() {
             .listen("ThreadMessageEvent", (e) => {
                 if (
                     e.type == "newMessageCreated" &&
-                    !isHiddenUser(users, e.message?.user_id)
+                    !isHiddenUser(workspaceUsers, e.message?.user_id)
                 )
                     dispatch(addThreadMessage(e.message));
                 else if (
                     e.type == "messageEdited" &&
-                    !isHiddenUser(users, e.message?.user_id)
+                    !isHiddenUser(workspaceUsers, e.message?.user_id)
                 ) {
                     dispatch(editThreadMessage(e.message));
                 } else if (
                     e.type == "messageDeleted" &&
-                    !isHiddenUser(users, e.message?.user_id)
+                    !isHiddenUser(workspaceUsers, e.message?.user_id)
                 ) {
                     dispatch(deleteThreadMessage(e.message.id));
                 }

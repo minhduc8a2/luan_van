@@ -4,12 +4,17 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Models\Workspace;
+use App\Observers\UserObserver;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+
+
+#[ObservedBy([UserObserver::class])]
 
 class User extends Authenticatable
 {
@@ -80,7 +85,7 @@ class User extends Authenticatable
             ->withTimestamps();
     }
 
-    
+
     public function hiddenByUsers()
     {
         return $this->belongsToMany(User::class, 'hidden_users', 'hidden_user_id', 'user_id')

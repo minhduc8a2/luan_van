@@ -111,6 +111,7 @@ class UserController extends Controller
      */
     public function update(ProfileUpdateRequest $request, User $user)
     {
+
         if ($request->user()->id !== $user->id) return abort(403);
         $name = $request->validated('name');
         $display_name = $request->validated('display_name');

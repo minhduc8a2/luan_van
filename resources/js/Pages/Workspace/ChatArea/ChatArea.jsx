@@ -57,9 +57,10 @@ function ChatArea() {
         channelUsers,
         directChannels,
         messages: initMessages,
-        users,
+        
         permissions,
     } = usePage().props;
+    const {workspaceUsers} = useSelector(state=>state.workspaceUsers)
     const messageContainerRef = useRef(null);
     const {
         ref: top_ref,
@@ -213,7 +214,7 @@ function ChatArea() {
                 console.log("messageEvent", e);
                 if (
                     e.type == "newMessageCreated" &&
-                    !isHiddenUser(users, e.message?.user_id)
+                    !isHiddenUser(workspaceUsers, e.message?.user_id)
                 ) {
                     dispatch(addMessage(e.message));
                     setNewMessageReceived(true);
@@ -236,12 +237,12 @@ function ChatArea() {
             .listen("ThreadMessageEvent", (e) => {
                 if (
                     e.type == "newMessageCreated" &&
-                    !isHiddenUser(users, e.message?.user_id)
+                    !isHiddenUser(workspaceUsers, e.message?.user_id)
                 )
                     dispatch(addThreadMessagesCount(e.threadedMessageId));
                 else if (
                     e.type == "messageDeleted" &&
-                    !isHiddenUser(users, e.message?.user_id)
+                    !isHiddenUser(workspaceUsers, e.message?.user_id)
                 )
                     dispatch(subtractThreadMessagesCount(e.threadedMessageId));
                 // console.log(e);
@@ -640,7 +641,7 @@ function ChatArea() {
 
                                 <ul className="">
                                     {mgs.map((message, index) => {
-                                        let user = users.find(
+                                        let user = workspaceUsers.find(
                                             (mem) => mem.id === message.user_id
                                         );
                                         if (
@@ -648,7 +649,7 @@ function ChatArea() {
                                                 (u) => u.id == user.id
                                             )
                                         ) {
-                                            users.notMember = true;
+                                            user.notMember = true;
                                         }
                                         if (!user)
                                             user = {

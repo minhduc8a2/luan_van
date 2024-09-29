@@ -142,7 +142,7 @@ function InitData({ loaded, setLoaded }) {
 
 function MainArea({ children }) {
     const { messageId: threadMessageId } = useSelector((state) => state.thread);
-    const { user: profile } = useSelector((state) => state.profile);
+    const { userId: profile } = useSelector((state) => state.profile);
     const { rightWindowType, leftWindowType } = useSelector(
         (state) => state.windowType
     );

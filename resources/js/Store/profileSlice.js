@@ -1,9 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { setRightWindowType } from "./windowTypeSlice";
 
-export const setProfile = (user) => (dispatch) => {
-    dispatch(profileSlice.actions.setUser(user));
-    if (user) {
+export const setProfile = (userId) => (dispatch) => {
+    dispatch(profileSlice.actions.setUserId(userId));
+    if (userId) {
         dispatch(setRightWindowType("profile"));
     } else {
         dispatch(setRightWindowType(""));
@@ -12,21 +12,17 @@ export const setProfile = (user) => (dispatch) => {
 export const profileSlice = createSlice({
     name: "profile",
     initialState: {
-        user: null,
+        userId: null,
     },
     reducers: {
-        setUser(state, action) {
-            state.user = action.payload;
+        setUserId(state, action) {
+            state.userId = action.payload;
         },
-        updateProfileInformation(state, action) {
-            Object.keys(action.payload).forEach((key) => {
-                state.user[key] = action.payload[key];
-            });
-        },
+        
     },
 });
 
 // Action creators are generated for each case reducer function
-export const { updateProfileInformation, setUser } = profileSlice.actions;
+export const { setUserId } = profileSlice.actions;
 
 export default profileSlice.reducer;

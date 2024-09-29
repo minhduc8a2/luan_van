@@ -37,7 +37,7 @@ export default function UserOptions() {
             </div>
             <CustomedPopover.ListItem
                 onClick={() => {
-                    dispatch(setProfile(auth.user));
+                    dispatch(setProfile(auth.user.id));
                     
                 }}
             >

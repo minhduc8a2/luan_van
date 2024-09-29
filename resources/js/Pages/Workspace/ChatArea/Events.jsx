@@ -14,14 +14,14 @@ export default function Events() {
         channel,
         auth,
         channels,
-        users,
+        
         directChannels,
         mainChannelId,
     } = usePage().props;
     const dispatch = useDispatch();
     const connectionRef = useRef(null);
     const { channel: huddleChannel } = useSelector((state) => state.huddle);
-
+    const {workspaceUsers} = useSelector(state=>state.workspaceUsers)
     useEffect(() => {
         connectionRef.current = Echo.private(
             `private_workspaces.${workspace.id}`
@@ -84,7 +84,7 @@ export default function Events() {
                         if (cn.id != channel.id)
                             if (
                                 e.type == "newMessageCreated" &&
-                                !isHiddenUser(users, e.message?.user_id)
+                                !isHiddenUser(workspaceUsers, e.message?.user_id)
                             )
                                 dispatch(addMessageCountForChannel(cn));
                 }

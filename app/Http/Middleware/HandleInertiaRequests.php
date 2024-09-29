@@ -85,10 +85,7 @@ class HandleInertiaRequests extends Middleware
                 ])->get();
             $selfChannel = fn() => $workspace->channels()->where("type", "=", "SELF")->where("user_id", "=", $request->user()->id)->first();
             $workspaces = fn() => $request->user()->workspaces;
-            $users = fn() => $workspace->users->map(function ($user) use ($hiddenUserIds) {
-                $user->is_hidden = in_array($user->id, $hiddenUserIds);
-                return $user;
-            });
+
             $newNotificationsCount = fn() => $user->notifications()->where("read_at", null)->count();
             $workspacePermissions = fn() => ['createChannel' => $user->can('create', [Channel::class, $workspace]),];
         }
@@ -113,7 +110,7 @@ class HandleInertiaRequests extends Middleware
             'directChannels' => $directChannels,
             'selfChannel' => $selfChannel,
             'workspaces' => $workspaces,
-            'users' => $users,
+
             'newNotificationsCount' => $newNotificationsCount,
             'workspacePermissions' => $workspacePermissions,
 

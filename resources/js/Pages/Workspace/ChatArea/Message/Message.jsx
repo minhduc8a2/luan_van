@@ -302,7 +302,7 @@ export default function Message({
                             className={`text-base hover:underline font-bold leading-tight ${
                                 user.notMember ? "line-through" : ""
                             }`}
-                            onClick={() => dispatch(setProfile(user))}
+                            onClick={() => dispatch(setProfile(user.id))}
                         >
                             {user.display_name || user.name}
                         </button>

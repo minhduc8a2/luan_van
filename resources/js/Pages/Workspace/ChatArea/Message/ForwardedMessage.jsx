@@ -39,11 +39,12 @@ export default function ForwardedMessage({
         channel,
         channelUsers,
         permissions,
-        users,
+       
         channels,
         directChannels,
     } = usePage().props;
     const dispatch = useDispatch();
+    const {workspaceUsers} = useSelector(state=>state.workspaceUsers)
     const { messageId } = useSelector((state) => state.mention);
     const files = message.files || [];
     const [reactions, setReactions] = useState(
@@ -69,8 +70,8 @@ export default function ForwardedMessage({
     const [forwardedMessage, setForwardedMessage] = useState(null);
 
     const forwardedMessageUser = useMemo(() => {
-        return users.find((u) => u.id == message.forwarded_message.user_id);
-    }, [users, message]);
+        return workspaceUsers.find((u) => u.id == message.forwarded_message.user_id);
+    }, [workspaceUsers, message]);
     const forwardedMessageChannel = useMemo(() => {
         return (
             channels.find(

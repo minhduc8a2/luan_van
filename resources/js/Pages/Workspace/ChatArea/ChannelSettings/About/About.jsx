@@ -82,7 +82,7 @@ export default function About({ channelName, onClose }) {
                         className="text-link hover:underline font-bold mt-4"
                         onClick={() => {
                             onClose();
-                            dispatch(setProfile(directChannelUser));
+                            dispatch(setProfile(directChannelUser.id));
                         }}
                     >
                         View full profile

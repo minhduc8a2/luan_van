@@ -1,6 +1,6 @@
 import Image from "@/Components/Image";
 import { router, usePage } from "@inertiajs/react";
-import React from "react";
+import React, { useMemo } from "react";
 import EditProfile from "./EditProfile";
 
 import { IoClose } from "react-icons/io5";
@@ -23,7 +23,9 @@ import { LiaUserMinusSolid } from "react-icons/lia";
 export default function Profile() {
     const { default_avatar_url, auth, directChannels, workspace } =
         usePage().props;
-    const { user } = useSelector((state) => state.profile);
+    const { userId } = useSelector((state) => state.profile);
+    const {workspaceUsers} = useSelector(state=>state.workspaceUsers)
+    const user = useMemo(()=>workspaceUsers.find(u=>u.id==userId),[workspaceUsers,userId]);
     const onlineStatusMap = useSelector((state) => state.onlineStatus);
     const { channel: huddleChannel } = useSelector((state) => state.huddle);
     const hasOwnership = auth.user.id == user.id;
