@@ -18,12 +18,18 @@ import { useMemo } from "react";
 export default function Panel({}) {
     const {
         auth,
-        channel: currentChannel,
+        
         workspace,
-
+        channelId,
         selfChannel,
     } = usePage().props;
+   
     const { channels } = useSelector((state) => state.channels);
+
+    const currentChannel = useMemo(
+        () => channels.find((cn) => cn.id == channelId),
+        [channels, channelId]
+    );
     const dispatch = useDispatch();
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
     const newMessageCountsMap = useSelector(

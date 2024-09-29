@@ -1,6 +1,6 @@
 import OverlayPanel from "@/Components/Overlay/OverlayPanel";
 import { router, useForm, usePage } from "@inertiajs/react";
-import React from "react";
+import React, { useMemo } from "react";
 import { SettingsButton } from "./SettingsButton";
 import { FaLock } from "react-icons/fa";
 import TextInput from "@/Components/Input/TextInput";
@@ -11,7 +11,12 @@ import AddManagers from "./AddManagers";
 import ErrorsList from "@/Components/ErrorsList";
 import { useSelector } from "react-redux";
 export default function Managers() {
-    const { managers, channel, permissions } = usePage().props;
+    const { managers, channelId, permissions } = usePage().props;
+    const { channels } = useSelector((state) => state.channels);
+    const channel = useMemo(
+        () => channels.find((cn) => cn.id == channelId),
+        [channels, channelId]
+    );
     const onlineStatusMap = useSelector((state) => state.onlineStatus);
 
     const [searchValue, setSearchValue] = useState("");

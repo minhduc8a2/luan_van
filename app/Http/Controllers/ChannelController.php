@@ -372,7 +372,7 @@ class ChannelController extends Controller
 
             'channelPermissions' => $channelPermissions,
             'permissions' => $permissions,
-            'channel' => $channel->load('user'),
+            'channelId' => $channel->id,
             'managers' => $managers,
             'messages' => $messages,
             'channelUsers' => $channelUsers,

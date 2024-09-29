@@ -3,13 +3,20 @@ import { router, usePage } from "@inertiajs/react";
 
 import TextInput from "@/Components/Input/TextInput";
 import { IoPersonAddOutline } from "react-icons/io5";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import ErrorsList from "@/Components/ErrorsList";
 import AddPeople from "./AddPeople";
 import Member from "./Member";
+import { useSelector } from "react-redux";
 export default function Members() {
     const [errors, setErrors] = useState(null);
-    const { managers, channel, channelUsers, permissions } = usePage().props;
+    const { managers, channelId, channelUsers, permissions } = usePage().props;
+    const { channels } = useSelector((state) => state.channels);
+
+    const channel = useMemo(
+        () => channels.find((cn) => cn.id == channelId),
+        [channels, channelId]
+    );
     const [searchValue, setSearchValue] = useState("");
     function removeChannelManager(user) {
         router.post(

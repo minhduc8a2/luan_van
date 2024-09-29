@@ -7,7 +7,13 @@ import { useState } from "react";
 import { FaLock } from "react-icons/fa";
 import ErrorsList from "@/Components/ErrorsList";
 export default function AddManagers({ close, setErrors }) {
-    const { channelUsers, auth, channel } = usePage().props;
+    const { channelUsers, auth, channelId } = usePage().props;
+    const { channels } = useSelector((state) => state.channels);
+
+    const channel = useMemo(
+        () => channels.find((cn) => cn.id == channelId),
+        [channels, channelId]
+    );
     const [choosenUsers, setChoosenUsers] = useState({});
 
     const [processing, setProcessing] = useState(false);

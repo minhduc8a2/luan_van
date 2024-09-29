@@ -1,13 +1,20 @@
-import React from "react";
+import React, { useMemo } from "react";
 import Button from "@/Components/Button";
 import { FaRegTrashCan } from "react-icons/fa6";
 import { useState } from "react";
 import { router, usePage } from "@inertiajs/react";
 import OverlayNotification from "@/Components/Overlay/OverlayNotification";
 import ErrorsList from "@/Components/ErrorsList";
+import { useSelector } from "react-redux";
 
 export default function DeleteChannel() {
-    const { channel } = usePage().props;
+    const { channelId } = usePage().props;
+    const { channels } = useSelector((state) => state.channels);
+
+    const channel = useMemo(
+        () => channels.find((cn) => cn.id == channelId),
+        [channels, channelId]
+    );
     const [confirm, setConfirm] = useState(false);
     const [errors, setErrors] = useState(null);
     const [success, setSuccess] = useState(false);

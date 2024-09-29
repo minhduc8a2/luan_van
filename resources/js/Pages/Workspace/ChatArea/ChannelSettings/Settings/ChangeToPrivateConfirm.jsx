@@ -6,8 +6,15 @@ import { router, useForm, usePage } from "@inertiajs/react";
 import React, { useMemo } from "react";
 import { useState } from "react";
 import { FaLock } from "react-icons/fa";
+import { useSelector } from "react-redux";
 export default function ChangeToPrivateConfirm({ channelName }) {
-    const { channel, workspace } = usePage().props;
+    const { channelId, workspace } = usePage().props;
+    const { channels } = useSelector((state) => state.channels);
+
+    const channel = useMemo(
+        () => channels.find((cn) => cn.id == channelId),
+        [channels, channelId]
+    );
     const channelType = useMemo(() => {
         return channel.type == "PUBLIC"
             ? "PRIVATE"

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import Button from "@/Components/Button";
 import { FaRegTrashCan } from "react-icons/fa6";
 import { useState } from "react";
@@ -9,9 +9,15 @@ import { FiArchive } from "react-icons/fi";
 import { RiInboxUnarchiveLine } from "react-icons/ri";
 import Overlay from "@/Components/Overlay/Overlay";
 import OverlaySimpleNotification from "@/Components/Overlay/OverlaySimpleNotification";
+import { useSelector } from "react-redux";
 export default function ArchiveChannel() {
-    const { channel } = usePage().props;
+    const { channelId } = usePage().props;
+    const { channels } = useSelector((state) => state.channels);
 
+    const channel = useMemo(
+        () => channels.find((cn) => cn.id == channelId),
+        [channels, channelId]
+    );
     const [errors, setErrors] = useState(null);
     const [success, setSuccess] = useState(false);
     const [processing, setProcessing] = useState(false);

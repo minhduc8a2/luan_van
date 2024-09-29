@@ -19,7 +19,6 @@ import {
 
 import Message from "./Message/Message";
 
-import { toggleHuddle } from "@/Store/huddleSlice";
 
 import { useSelector, useDispatch } from "react-redux";
 import { EditDescriptionForm } from "./EditDescriptionForm";
@@ -48,11 +47,12 @@ import ForwardedMessage from "./Message/ForwardedMessage";
 import { isHiddenUser } from "@/helpers/userHelper";
 import Layout from "../Layout";
 import Events from "./Events";
+import Header from "./Header";
 
 function ChatArea() {
     const {
         auth,
-        channel,
+        channelId,
 
         channelUsers,
 
@@ -60,8 +60,13 @@ function ChatArea() {
 
         permissions,
     } = usePage().props;
-    const { channels } = useSelector((state) => state.channels);
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
+    const { channels } = useSelector((state) => state.channels);
+
+    const channel = useMemo(
+        () => channels.find((cn) => cn.id == channelId),
+        [channels, channelId]
+    );
     const messageContainerRef = useRef(null);
     const {
         ref: top_ref,
@@ -328,26 +333,6 @@ function ChatArea() {
         };
     }, [channel.id, threadMessageId]);
 
-    function handleHuddleButtonClicked() {
-        if (huddleChannelId && huddleChannelId != channel.id) {
-            if (confirm("Are you sure you want to switch to other huddle"))
-                dispatch(
-                    toggleHuddle({
-                        channelId: channel.id,
-                        userId: auth.user.id,
-                    })
-                );
-        } else {
-            dispatch(
-                toggleHuddle({
-                    channelId: channel.id,
-
-                    userId: auth.user.id,
-                })
-            );
-        }
-    }
-
     const channelName = useMemo(
         () => getChannelName(channel, channelUsers, auth.user),
         [channel]
@@ -498,114 +483,11 @@ function ChatArea() {
         <div className="flex-1 flex min-h-0 max-h-full w-full">
             <Events />
             <div className="bg-background  chat-area-container flex-1 ">
-                <div className="p-4 border-b border-b-white/10 z-10">
-                    <div className="flex justify-between font-bold text-lg opacity-75">
-                        <div className="flex items-center gap-x-4">
-                            <ChannelSettings
-                                channelName={channelName}
-                                buttonNode={
-                                    <div className="flex items-center gap-x-2">
-                                        <div className="flex items-baseline gap-x-1">
-                                            {channel.type == "PUBLIC" ? (
-                                                <span className="text-xl">
-                                                    #
-                                                </span>
-                                            ) : (
-                                                <FaLock className="text-sm inline" />
-                                            )}{" "}
-                                            {channelName}
-                                        </div>
-
-                                        <FaAngleDown className="text-sm" />
-                                    </div>
-                                }
-                            />
-                        </div>
-                        <div className="">
-                            {!channel.is_archived && (
-                                <div className="flex items-center gap-x-4 ">
-                                    <div className="flex items-center p-1 border  border-white/15 rounded-lg px-2">
-                                        <ul className="flex">
-                                            {channelUsers.map((user) => (
-                                                <li
-                                                    key={user.id}
-                                                    className="-ml-2 first:ml-0  "
-                                                >
-                                                    <Avatar
-                                                        src={user.avatar_url}
-                                                        noStatus={true}
-                                                        className="w-6 h-6 border-2  border-background"
-                                                        roundedClassName="rounded-lg"
-                                                    />
-                                                </li>
-                                            ))}
-                                        </ul>
-
-                                        <div className="text-xs ml-2">
-                                            {channelUsers.length}
-                                        </div>
-                                    </div>
-                                    <div
-                                        className={`flex items-center p-1 border border-white/15 rounded-lg px-2 gap-x-3 font-normal  ${
-                                            huddleChannelId
-                                                ? "bg-green-700 "
-                                                : ""
-                                        }`}
-                                    >
-                                        {permissions.huddle ? (
-                                            <button
-                                                className={`flex items-center gap-x-1 `}
-                                                onClick={
-                                                    handleHuddleButtonClicked
-                                                }
-                                            >
-                                                <FiHeadphones className="text-xl" />
-                                                <div className={`text-sm `}>
-                                                    Huddle
-                                                </div>
-                                            </button>
-                                        ) : (
-                                            <OverlayNotification
-                                                buttonNode={
-                                                    <button
-                                                        className={`flex items-center gap-x-1 `}
-                                                    >
-                                                        <FiHeadphones className="text-xl" />
-                                                        <div
-                                                            className={`text-sm `}
-                                                        >
-                                                            Huddle
-                                                        </div>
-                                                    </button>
-                                                }
-                                                className="p-3"
-                                            >
-                                                <h5 className="mb-4  ">
-                                                    You're not allowed to huddle
-                                                    in channel. Contact Admins
-                                                    or Channel managers for more
-                                                    information!
-                                                </h5>
-                                            </OverlayNotification>
-                                        )}
-                                        {/* <div className="flex items-center gap-x-1">
-                              <span className="text-sm opacity-25 ">|</span>
-                              <FaAngleDown className="text-xs" />
-                          </div> */}
-                                    </div>
-
-                                    <div className="p-1 border border-white/15 rounded-lg ">
-                                        <CgFileDocument className="text-xl" />
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-x-2 opacity-75 mt-4">
-                        <FaPlus className="text-xs" />
-                        <div className="text-sm">Add bookmarks</div>
-                    </div>
-                </div>
+                <Header
+                    channel={channel}
+                    channelName={channelName}
+                    channelUsers={channelUsers}
+                />
                 <div
                     className="overflow-y-auto max-w-full scrollbar"
                     ref={messageContainerRef}

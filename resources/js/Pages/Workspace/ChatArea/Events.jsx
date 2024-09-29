@@ -1,5 +1,5 @@
 import { router, usePage } from "@inertiajs/react";
-import React, { useRef } from "react";
+import React, { useMemo, useRef } from "react";
 import { useEffect } from "react";
 
 import { useDispatch, useSelector } from "react-redux";
@@ -11,15 +11,20 @@ import { setThreadedMessageId } from "@/Store/threadSlice";
 export default function Events() {
     const {
         workspace,
-        channel,
+        channelId,
         auth,
-        channels,
+        
 
         directChannels,
     } = usePage().props;
     const dispatch = useDispatch();
     const connectionRef = useRef(null);
-   
+    const { channels } = useSelector((state) => state.channels);
+
+    const channel = useMemo(
+        () => channels.find((cn) => cn.id == channelId),
+        [channels, channelId]
+    );
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
     useEffect(() => {
         connectionRef.current = Echo.private(

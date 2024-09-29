@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import Form1 from "@/Components/Form1";
 
 import { useForm, usePage } from "@inertiajs/react";
@@ -6,8 +6,14 @@ import { useState } from "react";
 import TextInput from "@/Components/Input/TextInput";
 import { SettingsButton } from "./SettingsButton";
 import { FaLock } from "react-icons/fa";
+import { useSelector } from "react-redux";
 export default function ChangeChannelNameForm({ channelName }) {
-    const { channel, permissions } = usePage().props;
+    const { channelId, permissions } = usePage().props;
+    const { channels } = useSelector((state) => state.channels);
+    const channel = useMemo(
+        () => channels.find((cn) => cn.id == channelId),
+        [channels, channelId]
+    );
     const { data, setData, post, processing, errors, reset } = useForm({
         name: channel.name,
     });

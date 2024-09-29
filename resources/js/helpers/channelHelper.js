@@ -41,7 +41,7 @@ export function getDirectChannelFromUserId(channels, userId) {
 const channelProps = [
     "channelPermissions",
     "permissions",
-    "channel",
+    "channelId",
     "managers",
     "messages",
     "channelUsers",

@@ -1,15 +1,21 @@
 import { router, useForm, usePage } from "@inertiajs/react";
-import React from "react";
+import React, { useMemo } from "react";
 import AvatarAndName from "@/Components/AvatarAndName";
 import AutocompleInput from "./AutocompleInput";
 import Button from "@/Components/Button";
 import { useState } from "react";
 import { FaLock } from "react-icons/fa";
+import { useSelector } from "react-redux";
 
 export default function AddPeople({ close, setErrors }) {
-    const { channelUsers, auth, channel, users, workspace } = usePage().props;
+    const { channelUsers, auth, channelId, workspace } = usePage().props;
     const [choosenUsers, setChoosenUsers] = useState({});
-
+    const { channels } = useSelector((state) => state.channels);
+    const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
+    const channel = useMemo(
+        () => channels.find((cn) => cn.id == channelId),
+        [channels, channelId]
+    );
     const [processing, setProcessing] = useState(false);
 
     function submit() {
@@ -50,11 +56,12 @@ export default function AddPeople({ close, setErrors }) {
             </div>
 
             <p className="p-2">
-                You can only add other people from {workspace.name} to this channel.
+                You can only add other people from {workspace.name} to this
+                channel.
             </p>
             <div className="mt-4">
                 <AutocompleInput
-                    users={users}
+                    users={workspaceUsers}
                     choosenUsers={choosenUsers}
                     setChoosenUsers={(value) => setChoosenUsers(value)}
                 />

@@ -20,6 +20,7 @@ import { setThreadedMessageId } from "@/Store/threadSlice";
 import { toggleHuddle } from "@/Store/huddleSlice";
 import MoreOptions from "./MoreOptions";
 import { LiaUserMinusSolid } from "react-icons/lia";
+import { setLeftWindowType } from "@/Store/windowTypeSlice";
 export default function Profile() {
     const { default_avatar_url, auth, workspace } = usePage().props;
     const { userId } = useSelector((state) => state.profile);
@@ -44,7 +45,13 @@ export default function Profile() {
                 channel: channel.id,
             }),
             {},
-            { preserveState: true, only: channelProps }
+            {
+                preserveState: true,
+                only: channelProps,
+                onSuccess: () => {
+                    dispatch(setLeftWindowType("panel"));
+                },
+            }
         );
     }
     function handleHuddleButtonClicked() {

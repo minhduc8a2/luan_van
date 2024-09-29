@@ -5,9 +5,16 @@ import { FaLink } from "react-icons/fa6";
 import Form1 from "@/Components/Form1";
 import { router, usePage } from "@inertiajs/react";
 import OverlayNotification from "@/Components/Overlay/OverlayNotification";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { useSelector } from "react-redux";
 export function EditDescriptionForm() {
-    const { channel } = usePage().props;
+    const { channelId } = usePage().props;
+    const { channels } = useSelector((state) => state.channels);
+
+    const channel = useMemo(
+        () => channels.find((cn) => cn.id == channelId),
+        [channels, channelId]
+    );
     const [success, setSuccess] = useState(false);
     const { data, setData, post, processing, errors } = useForm({
         description: channel.description,

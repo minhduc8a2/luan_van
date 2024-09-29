@@ -4,10 +4,16 @@ import TextArea from "@/Components/Input/TextArea";
 import Form1 from "@/Components/Form1";
 import { router, usePage } from "@inertiajs/react";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { SettingsButton } from "./SettingsButton";
+import { useSelector } from "react-redux";
 export function EditDescriptionForm() {
-    const { channel, permissions } = usePage().props;
+    const { channelId, permissions } = usePage().props;
+    const { channels } = useSelector((state) => state.channels);
+    const channel = useMemo(
+        () => channels.find((cn) => cn.id == channelId),
+        [channels, channelId]
+    );
     const [success, setSuccess] = useState(false);
     const { data, setData, post, processing, errors } = useForm({
         description: channel.description,

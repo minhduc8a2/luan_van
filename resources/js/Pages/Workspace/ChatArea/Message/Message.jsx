@@ -37,7 +37,13 @@ export default function Message({
     forwardedMessageChannel = null,
     forwarded = false,
 }) {
-    const { auth, channel, channelUsers, permissions } = usePage().props;
+    const { auth, channelId, channelUsers, permissions } = usePage().props;
+    const { channels } = useSelector((state) => state.channels);
+
+    const channel = useMemo(
+        () => channels.find((cn) => cn.id == channelId),
+        [channels, channelId]
+    );
     const dispatch = useDispatch();
     const { messageId } = useSelector((state) => state.mention);
 

@@ -14,8 +14,17 @@ import { FaPhone } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { setProfile } from "@/Store/profileSlice";
 export default function About({ channelName, onClose }) {
-    const { auth, channel } = usePage().props;
-    const { workspaceUsers } = useSelector((state) => workspaceUsers);
+    const { auth, channelId } = usePage().props;
+    const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
+    const { channels } = useSelector((state) => state.channels);
+    const channel = useMemo(
+        () => channels.find((cn) => cn.id == channelId),
+        [channels, channelId]
+    );
+    const channelOwner = useMemo(
+        () => workspaceUsers.find((u) => u.id == channel.user_id),
+        [channel, workspaceUsers]
+    );
     const dispatch = useDispatch();
     const directChannelUser = useMemo(
         () =>
@@ -34,7 +43,7 @@ export default function About({ channelName, onClose }) {
                 <SettingsButton
                     title="Created by"
                     description={`${
-                        channel.user.display_name || channel.user.name
+                        channelOwner.display_name || channelOwner.name
                     } on ${UTCToDateTime(channel.created_at)}`}
                     className={`border-t-0 ${
                         channel.is_main_channel ? "  " : ""
