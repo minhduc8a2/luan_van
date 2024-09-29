@@ -19,7 +19,7 @@ export default function Event() {
     } = usePage().props;
     const dispatch = useDispatch();
     const connectionRef = useRef(null);
-    const { channel: huddleChannel } = useSelector((state) => state.huddle);
+    const { channelId: huddleChannelId } = useSelector((state) => state.huddle);
     useEffect(() => {
         Echo.private("App.Models.User." + auth.user.id).notification(
             (notification) => {
@@ -71,7 +71,7 @@ export default function Event() {
                     case "ChannelObserver_storeChannel":
                         break;
                     case "ChannelObserver_deleteChannel":
-                        if (huddleChannel && huddleChannel?.id == e?.data) {
+                        if (huddleChannelId== e?.data) {
                             dispatch(toggleHuddle());
                         }
 

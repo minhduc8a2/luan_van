@@ -49,40 +49,9 @@ class HandleInertiaRequests extends Middleware
         $workspacePermissions = null;
 
         if ($user && $workspace) {
-            $hiddenUserIds =  $user->hiddenUsers()->wherePivot('workspace_id', $workspace->id)->pluck('hidden_user_id')->toArray();
+          
 
-            $channels = fn() => $user->channels()
-                ->whereIn("type", [ChannelTypes::PUBLIC->name, ChannelTypes::PRIVATE->name])
-                ->where('is_archived', false)
-                ->withCount([
-                    'messages as unread_messages_count' => function (Builder $query) use ($user, $hiddenUserIds) {
-                        $query->whereNotIn('user_id', $hiddenUserIds)->where("created_at", ">", function ($query) use ($user) {
-                            $query->select('last_read_at')
-                                ->from('channel_user')
-                                ->whereColumn('channel_user.channel_id', 'channels.id')
-                                ->where('channel_user.user_id', $user->id)
-                                ->limit(1);
-                        })->orWhereNull('last_read_at');
-                    }
-                ])->withCount('users')->get();
-
-            $directChannels = fn() => $user->channels()
-                ->where("type",  ChannelTypes::DIRECT->name)
-                ->whereDoesntHave('users', function ($query) use ($hiddenUserIds) {
-                    $query->whereIn('users.id', $hiddenUserIds);
-                })
-                ->where('is_archived', false)
-                ->withCount([
-                    'messages as unread_messages_count' => function (Builder $query) use ($user) {
-                        $query->where("created_at", ">", function ($query) use ($user) {
-                            $query->select('last_read_at')
-                                ->from('channel_user')
-                                ->whereColumn('channel_user.channel_id', 'channels.id')
-                                ->where('channel_user.user_id', $user->id)
-                                ->limit(1);
-                        })->orWhereNull('last_read_at');
-                    }
-                ])->get();
+           
             $selfChannel = fn() => $workspace->channels()->where("type", "=", "SELF")->where("user_id", "=", $request->user()->id)->first();
             $workspaces = fn() => $request->user()->workspaces;
 
@@ -105,7 +74,7 @@ class HandleInertiaRequests extends Middleware
                 'data' => fn() => $request->session()->get('data'),
             ],
             'workspace' => fn() => $request->route('workspace') ?? null,
-            'mainChannelId' => fn() => $request->route('workspace')?->mainChannel()?->id ?? null,
+            
             'channels' => $channels,
             'directChannels' => $directChannels,
             'selfChannel' => $selfChannel,

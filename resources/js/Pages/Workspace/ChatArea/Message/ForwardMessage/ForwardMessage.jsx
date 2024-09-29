@@ -15,12 +15,10 @@ import { setThreadedMessageId } from "@/Store/threadSlice";
 
 export default function ForwardMessage({ message, show, onClose }) {
     const dispatch = useDispatch();
-    const {  channels, directChannels, auth, channelUsers, channel } =
-        usePage().props;
-        const {workspaceUsers} = useSelector(state=>state.workspaceUsers)
-    const allChannels = useMemo(() => {
-        return [...channels, ...directChannels];
-    }, [channels, directChannels]);
+    const { directChannels, auth, channelUsers, channel } = usePage().props;
+    const { channels } = useSelector((state) => state.channels);
+    const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
+
     const [choosenChannelsList, setChoosenChannelsList] = useState([]);
     function changeChannel(channel) {
         dispatch(setThreadedMessageId(null));
@@ -30,7 +28,7 @@ export default function ForwardMessage({ message, show, onClose }) {
                 channel: channel.id,
             }),
             {},
-            { preserveState: true , only:channelProps}
+            { preserveState: true, only: channelProps }
         );
     }
     function onSubmit(content, _, JSONContent) {
@@ -95,7 +93,9 @@ export default function ForwardMessage({ message, show, onClose }) {
                                 const userId = userIds.find(
                                     (id) => id != auth.user.id
                                 );
-                                let user = workspaceUsers.find((u) => u.id == userId);
+                                let user = workspaceUsers.find(
+                                    (u) => u.id == userId
+                                );
                                 return (
                                     <AutocompleInput.InputItem
                                         onRemove={() =>
@@ -134,7 +134,7 @@ export default function ForwardMessage({ message, show, onClose }) {
                     renderDropListFn={(inputValue) => {
                         if (!inputValue && choosenChannelsList.length > 0)
                             return "";
-                        return allChannels
+                        return channels
                             .filter((item) =>
                                 item.name
                                     .toLowerCase()

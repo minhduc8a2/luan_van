@@ -12,13 +12,22 @@ export function getChannelName(channel, channelUsers, currentUser) {
     return channel.name;
 }
 
-export function getDirectChannelUser(channel, channelUsers, currentUser) {
-    return channelUsers.find((u) => u.id != currentUser.id);
+export function getDirectChannelUser(channel, workspaceUsers, currentUser) {
+    if (!channel || workspaceUsers || currentUser) return null;
+    try {
+        const userIds = channel?.name.split("_");
+        const userId = userIds.find((id) => id != currentUser.id);
+        return workspaceUsers.find((user) => user.id == userId);
+    } catch (error) {
+        console.error(error);
+    }
+    return null;
 }
 
-export function getDirectChannelFromUserId(directChannels, userId) {
+export function getDirectChannelFromUserId(channels, userId) {
     try {
-        return directChannels.find((channel) => {
+        return channels.find((channel) => {
+            if (channel.type != "DIRECT") return false;
             const userIds = channel.name.split("_");
             return userIds.find((id) => userId == id) != null;
         });

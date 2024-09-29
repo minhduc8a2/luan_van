@@ -13,6 +13,7 @@ import mediaReducer from "./mediaSlice";
 import profileReducer from "./profileSlice";
 import windowTypeReducer from "./windowTypeSlice";
 import workspaceUsersReducer from "./workspaceUsersSlice";
+import channelsReducer from "./channelsSlice";
 export const makeStore = () => {
     return configureStore({
         reducer: {
@@ -29,7 +30,8 @@ export const makeStore = () => {
             media: mediaReducer,
             profile: profileReducer,
             windowType: windowTypeReducer,
-           workspaceUsers:workspaceUsersReducer,
+            workspaceUsers: workspaceUsersReducer,
+            channels: channelsReducer,
         },
     });
 };

@@ -21,18 +21,21 @@ import { toggleHuddle } from "@/Store/huddleSlice";
 import MoreOptions from "./MoreOptions";
 import { LiaUserMinusSolid } from "react-icons/lia";
 export default function Profile() {
-    const { default_avatar_url, auth, directChannels, workspace } =
-        usePage().props;
+    const { default_avatar_url, auth, workspace } = usePage().props;
     const { userId } = useSelector((state) => state.profile);
-    const {workspaceUsers} = useSelector(state=>state.workspaceUsers)
-    const user = useMemo(()=>workspaceUsers.find(u=>u.id==userId),[workspaceUsers,userId]);
+    const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
+    const { channels } = useSelector((state) => state.channels);
+    const user = useMemo(
+        () => workspaceUsers.find((u) => u.id == userId),
+        [workspaceUsers, userId]
+    );
     const onlineStatusMap = useSelector((state) => state.onlineStatus);
     const { channel: huddleChannel } = useSelector((state) => state.huddle);
     const hasOwnership = auth.user.id == user.id;
     const isOnline = onlineStatusMap[user.id];
     const dispatch = useDispatch();
     function message() {
-        const channel = getDirectChannelFromUserId(directChannels, user.id);
+        const channel = getDirectChannelFromUserId(channels, user.id);
         if (!channel) return;
         dispatch(setThreadedMessageId(null));
         router.get(
@@ -45,21 +48,21 @@ export default function Profile() {
         );
     }
     function handleHuddleButtonClicked() {
-        const channel = getDirectChannelFromUserId(directChannels, user.id);
+        const channel = getDirectChannelFromUserId(channels, user.id);
         if (!channel) return;
         if (huddleChannel && huddleChannel.id != channel.id) {
             if (confirm("Are you sure you want to switch to other huddle"))
                 dispatch(
                     toggleHuddle({
-                        channel,
-                        user: auth.user,
+                        channelId: channel.id,
+                        userId: auth.user.id,
                     })
                 );
         } else {
             dispatch(
                 toggleHuddle({
-                    channel,
-                    user: auth.user,
+                    channelId: channel.id,
+                    userId: auth.user.id,
                 })
             );
         }

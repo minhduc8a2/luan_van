@@ -6,7 +6,7 @@ import { useState } from "react";
 import TextInput from "@/Components/Input/TextInput";
 import { SettingsButton } from "./SettingsButton";
 import { FaLock } from "react-icons/fa";
-export default function ChangeChannelNameForm({}) {
+export default function ChangeChannelNameForm({ channelName }) {
     const { channel, permissions } = usePage().props;
     const { data, setData, post, processing, errors, reset } = useForm({
         name: channel.name,
@@ -52,7 +52,7 @@ export default function ChangeChannelNameForm({}) {
                             ) : (
                                 <FaLock className="text-sm inline" />
                             )}{" "}
-                            {channel.name}
+                            {channelName}
                         </div>
                     }
                     className="rounded-tl-lg rounded-tr-lg"

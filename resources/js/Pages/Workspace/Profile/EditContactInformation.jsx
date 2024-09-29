@@ -11,7 +11,6 @@ import { setNotificationPopup } from "@/Store/notificationPopupSlice";
 import { FaLock } from "react-icons/fa";
 
 export default function EditContactInformation({ user, triggerButton }) {
-    const { workspace, default_avatar_url } = usePage().props;
     let [isOpen, setIsOpen] = useState(false);
 
     const dispatch = useDispatch();

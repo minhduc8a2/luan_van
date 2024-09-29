@@ -11,16 +11,17 @@ import { getDirectChannelUser } from "@/helpers/channelHelper";
 import { usePage } from "@inertiajs/react";
 import { MdOutlineEmail } from "react-icons/md";
 import { FaPhone } from "react-icons/fa";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setProfile } from "@/Store/profileSlice";
 export default function About({ channelName, onClose }) {
-    const { auth, channel, channelUsers } = usePage().props;
+    const { auth, channel } = usePage().props;
+    const { workspaceUsers } = useSelector((state) => workspaceUsers);
     const dispatch = useDispatch();
     const directChannelUser = useMemo(
         () =>
             channel.type == "DIRECT" &&
-            getDirectChannelUser(channel, channelUsers, auth.user),
-        [channel, auth]
+            getDirectChannelUser(channel, workspaceUsers, auth.user),
+        [channel, auth, workspaceUsers]
     );
     return (
         <>
@@ -32,9 +33,9 @@ export default function About({ channelName, onClose }) {
             {channel.type != "DIRECT" && channel.type != "SELF" && (
                 <SettingsButton
                     title="Created by"
-                    description={`${channel.user.display_name || channel.user.name} on ${UTCToDateTime(
-                        channel.created_at
-                    )}`}
+                    description={`${
+                        channel.user.display_name || channel.user.name
+                    } on ${UTCToDateTime(channel.created_at)}`}
                     className={`border-t-0 ${
                         channel.is_main_channel ? "  " : ""
                     }`}

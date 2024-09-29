@@ -19,7 +19,7 @@ export default function HuddleNotification({
         users: workspaceUsers,
     } = usePage().props;
     const dispatch = useDispatch();
-    const { channel: huddleChannel } = useSelector((state) => state.huddle);
+    const { channelId: huddleChannelId } = useSelector((state) => state.huddle);
 
     const { fromUser, toUser, channel, workspace } =
         isHuddleInvitationNotificationBroadcast(notification.type)
@@ -41,8 +41,8 @@ export default function HuddleNotification({
                     setErrors(true);
                     return;
                 }
-                if (huddleChannel && huddleChannel.id == channel.id) return;
-                if (huddleChannel && huddleChannel.id != channel.id) {
+                if ( huddleChannelId == channel.id) return;
+                if ( huddleChannelId != channel.id) {
                     if (
                         confirm(
                             "Are you sure you want to switch to other huddle"

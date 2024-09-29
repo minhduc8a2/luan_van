@@ -37,7 +37,7 @@ import { setMedia } from "@/Store/mediaSlice";
 import Layout from "../Layout";
 import InfiniteScroll from "@/Components/InfiniteScroll";
 function BrowseFiles() {
-    const { auth, flash, workspace, channels, workspaceFiles } =
+    const { auth, flash, workspace,  workspaceFiles } =
         usePage().props;
 
     const dispatch = useDispatch();

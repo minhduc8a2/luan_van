@@ -13,20 +13,19 @@ import { CreateChannelForm } from "./createChannelForm";
 import { FiArchive } from "react-icons/fi";
 import { setThreadedMessageId } from "@/Store/threadSlice";
 import { channelProps } from "@/helpers/channelHelper";
+import { useMemo } from "react";
 
 export default function Panel({}) {
     const {
         auth,
         channel: currentChannel,
         workspace,
-        channels = [],
-        
-        directChannels = [],
+
         selfChannel,
     } = usePage().props;
-
+    const { channels } = useSelector((state) => state.channels);
     const dispatch = useDispatch();
-    const {workspaceUsers} = useSelector(state=>state.workspaceUsers)
+    const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
     const newMessageCountsMap = useSelector(
         (state) => state.newMessageCountsMap
     );
@@ -44,7 +43,9 @@ export default function Panel({}) {
             }
         );
     }
-
+    const directChannels = useMemo(() => {
+        return channels.filter((cn) => cn.type == "DIRECT");
+    }, [channels]);
     return (
         <div className="bg-black/35 h-full  rounded-l-lg rounded-s-lg border-r border-r-white/15">
             <div className="flex justify-between items-center p-4">
@@ -175,7 +176,9 @@ export default function Panel({}) {
                             );
                             let user;
                             if (userId)
-                                user = workspaceUsers.find((u) => u.id == userId);
+                                user = workspaceUsers.find(
+                                    (u) => u.id == userId
+                                );
                             return (
                                 <DirectChannel
                                     key={user.id}

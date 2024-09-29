@@ -47,6 +47,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/workspaces/{workspace}/users', [UserController::class, 'browseUsers'])->name("users.browseUsers");
 
     Route::get("/workspaces/{workspace}", [WorkspaceController::class, 'show'])->name('workspace.show');
+    Route::get("/workspaces/{workspace}/getChannels", [ChannelController::class, 'getWorkspaceChannels'])->name('workspaces.getChannels');
     Route::get("/workspaces/{workspace}/direct_channels", [WorkspaceController::class, 'getDirectChannels'])->name('workspace.direct_channels');
     Route::get("/workspaces/{workspace}/channels/{channel}", [ChannelController::class, 'show'])->name('channels.show');
     Route::get("workspaces/{workspace}/channels", [ChannelController::class, 'index'])->name('channels.index');

@@ -53,14 +53,15 @@ function ChatArea() {
     const {
         auth,
         channel,
-        channels,
+
         channelUsers,
-        directChannels,
+
         messages: initMessages,
-        
+
         permissions,
     } = usePage().props;
-    const {workspaceUsers} = useSelector(state=>state.workspaceUsers)
+    const { channels } = useSelector((state) => state.channels);
+    const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
     const messageContainerRef = useRef(null);
     const {
         ref: top_ref,
@@ -87,7 +88,7 @@ function ChatArea() {
     const { messages } = useSelector((state) => state.messages);
     const [focus, setFocus] = useState(1);
     const dispatch = useDispatch();
-    const { channel: huddleChannel } = useSelector((state) => state.huddle);
+    const { channelId: huddleChannelId } = useSelector((state) => state.huddle);
 
     const nextPageUrlRef = useRef(initMessages.next_page_url);
     const previousPageUrlRef = useRef(initMessages.prev_page_url);
@@ -325,22 +326,23 @@ function ChatArea() {
             channelConnectionRef.current = null;
             Echo.leave(`channels.${channel.id}`);
         };
-    }, [channel.id, huddleChannel, threadMessageId]);
+    }, [channel.id, threadMessageId]);
 
     function handleHuddleButtonClicked() {
-        if (huddleChannel && huddleChannel.id != channel.id) {
+        if (huddleChannelId && huddleChannelId != channel.id) {
             if (confirm("Are you sure you want to switch to other huddle"))
                 dispatch(
                     toggleHuddle({
-                        channel,
-                        user: auth.user,
+                        channelId: channel.id,
+                        userId: auth.user.id,
                     })
                 );
         } else {
             dispatch(
                 toggleHuddle({
-                    channel,
-                    user: auth.user,
+                    channelId: channel.id,
+
+                    userId: auth.user.id,
                 })
             );
         }
@@ -545,7 +547,9 @@ function ChatArea() {
                                     </div>
                                     <div
                                         className={`flex items-center p-1 border border-white/15 rounded-lg px-2 gap-x-3 font-normal  ${
-                                            huddleChannel ? "bg-green-700 " : ""
+                                            huddleChannelId
+                                                ? "bg-green-700 "
+                                                : ""
                                         }`}
                                     >
                                         {permissions.huddle ? (

@@ -24,14 +24,10 @@ import Activity from "./Activity/Activity";
 import { usePage } from "@inertiajs/react";
 import { setLeftWindowType } from "@/Store/windowTypeSlice";
 import { setWorkspaceUsers } from "@/Store/workspaceUsersSlice";
+import InitData from "./InitData";
 export default function Layout({ children }) {
-    const {
-        newNoftificationsCount,
-        channels,
-        directChannels,
-        channel,
-        workspace,
-    } = usePage().props;
+    const { newNoftificationsCount,  channel } =
+        usePage().props;
 
     const storeRef = useRef();
     if (!storeRef.current) {
@@ -64,12 +60,7 @@ export default function Layout({ children }) {
         if (channel) {
             storeRef.current.dispatch(setLeftWindowType("panel"));
         }
-        channels.forEach((channel) => {
-            storeRef.current.dispatch(initMessageCountForChannel(channel));
-        });
-        directChannels.forEach((channel) => {
-            storeRef.current.dispatch(initMessageCountForChannel(channel));
-        });
+       
     }
     return (
         <Provider store={storeRef.current}>
@@ -105,39 +96,6 @@ function Wrapper({ children }) {
             )}
         </>
     );
-}
-function InitData({ loaded, setLoaded }) {
-    const { workspace } = usePage().props;
-    const dispatch = useDispatch();
-    function loadWorkspaceRelatedData() {
-        return Promise.all([loadWorkspaceUsers()]);
-    }
-
-    function loadWorkspaceUsers() {
-        return axios
-            .get(route("users.browseUsers", workspace.id), {
-                params: {
-                    mode: "all",
-                },
-            })
-            .then((response) => {
-                dispatch(setWorkspaceUsers(response.data));
-            });
-    }
-    useEffect(() => {
-        loadWorkspaceRelatedData()
-            .then(() => {
-                setLoaded(true);
-            })
-            .catch((error) => {
-                console.log(error);
-            });
-    }, [workspace.id]);
-    if (loaded) {
-        return <></>;
-    } else {
-        return <div className="">Loading workspace data</div>;
-    }
 }
 
 function MainArea({ children }) {

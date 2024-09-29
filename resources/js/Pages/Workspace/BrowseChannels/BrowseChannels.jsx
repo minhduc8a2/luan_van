@@ -7,7 +7,7 @@ import { FaCheck } from "react-icons/fa6";
 import { FaLock } from "react-icons/fa";
 import { LuDot } from "react-icons/lu";
 import { compareDateTime } from "@/helpers/dateTimeHelper";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import SearchInput from "../../../Components/Input/SearchInput";
 import { channelProps } from "@/helpers/channelHelper";
 import Layout from "../Layout";
@@ -398,7 +398,7 @@ function BrowseChannels() {
 }
 
 function ChannelItem({ channel, changeChannel, joinChannel, leaveChannel }) {
-    const { channels } = usePage().props;
+    const {channels} = useSelector(state=>state.channels)
     const [joinProcessing, setJoinProcessing] = useState(false);
     const [leaveProcessing, setLeaveProcessing] = useState(false);
     const isChannelMember = useMemo(

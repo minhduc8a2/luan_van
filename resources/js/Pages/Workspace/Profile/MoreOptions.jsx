@@ -25,7 +25,14 @@ export default function MoreOptions({ user }) {
                         })
                     );
                 },
-               
+                onSuccess: () => {
+                    dispatch(
+                        updateWorkspaceUserInformation({
+                            id: user.id,
+                            data: { is_hidden: false },
+                        })
+                    );
+                },
             }
         );
     }

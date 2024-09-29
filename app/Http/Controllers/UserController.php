@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Helpers\BaseRoles;
+use App\Models\Role;
 use App\Models\User;
+use Inertia\Inertia;
 use App\Models\Workspace;
+use App\Helpers\BaseRoles;
 use Illuminate\Http\Request;
+use App\Events\WorkspaceEvent;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\ProfileUpdateRequest;
-use App\Models\Role;
-use Inertia\Inertia;
 
 class UserController extends Controller
 {
@@ -220,6 +221,8 @@ class UserController extends Controller
                     ->where('workspace_id', $validated["workspaceId"])
                     ->delete();
             }
+           
+
             DB::commit();
             return back();
         } catch (\Throwable $th) {

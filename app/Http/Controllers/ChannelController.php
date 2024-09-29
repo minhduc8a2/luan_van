@@ -27,6 +27,52 @@ class ChannelController extends Controller
     /**
      * Display a listing of the resource.
      */
+
+    public function getWorkspaceChannels(Request $request, Workspace $workspace)
+    {
+        if ($request->user()->cannot('view', [Workspace::class, $workspace])) {
+            abort(404);
+        }
+        try {
+            $user = $request->user();
+            $hiddenUserIds =  $user->hiddenUsers()->wherePivot('workspace_id', $workspace->id)->pluck('hidden_user_id')->toArray();
+            $regularchannels =  $user->channels()
+                ->whereIn("type", [ChannelTypes::PUBLIC->name, ChannelTypes::PRIVATE->name])
+                ->where('is_archived', false)
+                ->withCount([
+                    'messages as unread_messages_count' => function (Builder $query) use ($user, $hiddenUserIds) {
+                        $query->whereNotIn('user_id', $hiddenUserIds)->where("created_at", ">", function ($query) use ($user) {
+                            $query->select('last_read_at')
+                                ->from('channel_user')
+                                ->whereColumn('channel_user.channel_id', 'channels.id')
+                                ->where('channel_user.user_id', $user->id)
+                                ->limit(1);
+                        })->orWhereNull('last_read_at');
+                    }
+                ])->withCount('users')->get();
+
+            $directChannels = $user->channels()
+                ->where("type",  ChannelTypes::DIRECT->name)
+                ->whereDoesntHave('users', function ($query) use ($hiddenUserIds) {
+                    $query->whereIn('users.id', $hiddenUserIds);
+                })
+                ->where('is_archived', false)
+                ->withCount([
+                    'messages as unread_messages_count' => function (Builder $query) use ($user) {
+                        $query->where("created_at", ">", function ($query) use ($user) {
+                            $query->select('last_read_at')
+                                ->from('channel_user')
+                                ->whereColumn('channel_user.channel_id', 'channels.id')
+                                ->where('channel_user.user_id', $user->id)
+                                ->limit(1);
+                        })->orWhereNull('last_read_at');
+                    }
+                ])->get();
+            return $regularchannels->concat($directChannels);
+        } catch (\Throwable $th) {
+            abort(500, "Something went wrong! Please try later.");
+        }
+    }
     public function index(Request $request, Workspace $workspace)
     {
         $perPage = 10;

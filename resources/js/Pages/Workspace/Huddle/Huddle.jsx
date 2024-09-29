@@ -35,15 +35,28 @@ import {
 } from "@/helpers/mediaHelper";
 import SquareImage from "@/Components/SquareImage";
 import StreamVideo from "@/Components/StreamVideo";
-import { usePage } from "@inertiajs/react";
+import { router, usePage } from "@inertiajs/react";
 import OverlayPanel from "@/Components/Overlay/OverlayPanel";
 import HuddleInvitation from "./HuddleInvitation";
-import { getChannelName } from "@/helpers/channelHelper";
+import { getChannelName, getDirectChannelUser } from "@/helpers/channelHelper";
 import Tooltip from "@/Components/Tooltip";
 export default function Huddle() {
-    const { auth,  } = usePage().props;
-    const {workspaceUsers} = useSelector(state=>state.workspaceUsers)
-    const { channel, users } = useSelector((state) => state.huddle);
+    const { auth } = usePage().props;
+    const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
+    const { channelId: huddleChannelId, userIds } = useSelector(
+        (state) => state.huddle
+    );
+    const { channels } = useSelector((state) => state.channels);
+
+    const users = useMemo(() => {
+        return workspaceUsers.filter((u) => userIds.find((id) => id == u.id));
+    }, [workspaceUsers, userIds]);
+    const channel = useMemo(() => {
+        return channels.find((cn) => cn.id == huddleChannelId);
+    }, [channels, huddleChannelId]);
+    const otherUser = useMemo(() => {
+        return getDirectChannelUser(channel, workspaceUsers, auth.user);
+    }, [workspaceUsers, channel, auth.user]);
     const { sideBarWidth } = useSelector((state) => state.size);
     const [refresh, setRefresh] = useState(0);
     const [enableAudio, setEnableAudio] = useState(true);
@@ -197,8 +210,8 @@ export default function Huddle() {
         }
     }
     function leaveHuddle() {
-        if (channel) {
-            Echo.leave(`huddles.${channel.id}`);
+        if (huddleChannelId) {
+            Echo.leave(`huddles.${huddleChannelId}`);
             try {
                 removeTrackTFromStream("video");
                 removeTrackTFromStream("audio");
@@ -211,7 +224,7 @@ export default function Huddle() {
         }
     }
     useEffect(() => {
-        if (!channel) return;
+        if (!huddleChannelId) return;
         async function getMediaDevices() {
             const _cameraDevices = await getConnectedDevices("videoinput");
             const _audioDevices = await getConnectedDevices("audioinput");
@@ -222,7 +235,7 @@ export default function Huddle() {
         // navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
         //     userVideoRef.current.srcObject = stream;
         // });
-    }, [channel?.id]);
+    }, [huddleChannelId]);
     function addPeer(user, initiator) {
         var peer = new Peer({
             initiator,
@@ -284,11 +297,11 @@ export default function Huddle() {
         peersRef.current.set(user.id, peer);
     }
     useEffect(() => {
-        if (!channel) return;
+        if (!huddleChannelId) return;
         getAudioStream(currentAudioRef.current?.deviceId).then((stream) => {
             currentStreamRef.current = stream;
             //
-            joinObject.current = Echo.join(`huddles.${channel.id}`);
+            joinObject.current = Echo.join(`huddles.${huddleChannelId}`);
             joinObject.current.listenForWhisper(
                 "signal." + auth.user.id,
                 (e) => {
@@ -306,7 +319,7 @@ export default function Huddle() {
                         });
                 })
                 .joining((user) => {
-                    dispatch(addHuddleUser(user));
+                    dispatch(addHuddleUser(user.id));
                     addPeer(user, false);
                 })
                 .leaving((user) => {
@@ -323,8 +336,24 @@ export default function Huddle() {
         return () => {
             leaveHuddle();
         };
-    }, [channel?.id]);
-    if (!channel) return "";
+    }, [huddleChannelId]);
+
+    function autoInvitation() {
+        if (huddleChannelId && channel.type == "DIRECT") {
+            router.post(
+                route("huddle.invitation", channel.id),
+                { users: [otherUser] },
+                {
+                    preserveState: true,
+                }
+            );
+        }
+    }
+    useEffect(() => {
+        autoInvitation();
+    }, [huddleChannelId]);
+
+    if (!huddleChannelId) return "";
 
     return (
         <div
@@ -395,11 +424,15 @@ export default function Huddle() {
                         if (showUserVideo || showShareScreen) return "";
                         else
                             return (
-                                <Tooltip content={<button className="text-nowrap" key={user.id}>
-                                    {user.display_name || user.name}
-                                </button>}>
+                                <Tooltip
+                                    key={user.id}
+                                    content={
+                                        <button className="text-nowrap">
+                                            {user.display_name || user.name}
+                                        </button>
+                                    }
+                                >
                                     <SquareImage
-                                        
                                         url={user.avatar_url}
                                         removable={false}
                                         size={
