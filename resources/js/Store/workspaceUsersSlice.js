@@ -21,11 +21,19 @@ export const workspaceUsersSlice = createSlice({
                 });
             }
         },
+        addWorkspaceUser(state, action) {
+            if (state.workspaceUsers.some((u) => u.id == action.payload.id))
+                return;
+            state.workspaceUsers.push(action.payload);
+        },
     },
 });
 
 // Action creators are generated for each case reducer function
-export const { setWorkspaceUsers, updateWorkspaceUserInformation } =
-    workspaceUsersSlice.actions;
+export const {
+    setWorkspaceUsers,
+    updateWorkspaceUserInformation,
+    addWorkspaceUser,
+} = workspaceUsersSlice.actions;
 
 export default workspaceUsersSlice.reducer;

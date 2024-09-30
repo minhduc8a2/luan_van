@@ -4,10 +4,11 @@ import { useForm, usePage } from "@inertiajs/react";
 import Form1 from "@/Components/Form1";
 import TextArea from "@/Components/Input/TextArea";
 import SelectInput from "@/Components/Input/SelectInput";
-import { LuPlus } from "react-icons/lu";
+import { useSelector } from "react-redux";
 
 export function CreateChannelForm({ activateButtonNode, callback = () => {} }) {
-    const { workspace, workspacePermissions } = usePage().props;
+    const { workspace } = usePage().props;
+    const { workspacePermissions } = useSelector((state) => state.workspace);
     const channelTypes = [
         { type: "PUBLIC", label: "Public - Anyone in " + workspace.name },
         {

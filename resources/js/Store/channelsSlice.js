@@ -1,5 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { removeChannelData } from "./channelsDataSlice";
 
+export const removeChannel = (channelId) => (dispatch) => {
+    dispatch(removeChannelData({ id: channelId }));
+    removeChannelFromChannelsStore(channelId);
+};
 export const channelsSlice = createSlice({
     name: "channels",
     initialState: {
@@ -11,7 +16,7 @@ export const channelsSlice = createSlice({
             state.channels.sort((a, b) => a.id - b.id);
         },
         addNewChannelToChannelsStore(state, action) {
-            if (state.channels.find((cn) => cn.id == action.payload.id)) return;
+            if (state.channels.some((cn) => cn.id == action.payload.id)) return;
             state.channels.push(action.payload);
             state.channels.sort((a, b) => a.id - b.id);
         },
@@ -57,7 +62,7 @@ export const {
     addMessageCountForChannel,
     resetMessageCountForChannel,
     addNewChannelToChannelsStore,
-    removeChannelFromChannelsStore
+    removeChannelFromChannelsStore,
 } = channelsSlice.actions;
 
 export default channelsSlice.reducer;

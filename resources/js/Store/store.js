@@ -5,7 +5,6 @@ import OnlineStatusReducer from "./OnlineStatusSlice";
 import activityReducer from "./activitySlice";
 import threadReducer from "./threadSlice";
 import mentionReducer from "./mentionSlice";
-import messagesReducer from "./messagesSlice";
 
 import pageReducer from "./pageSlice";
 import notificationPopupReducer from "./notificationPopupSlice";
@@ -25,7 +24,7 @@ export const makeStore = () => {
             activity: activityReducer,
             thread: threadReducer,
             mention: mentionReducer,
-            messages: messagesReducer,
+
             page: pageReducer,
             notificationPopup: notificationPopupReducer,
             media: mediaReducer,

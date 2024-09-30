@@ -11,14 +11,14 @@ use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 
-class SettingsEvent implements ShouldBroadcastNow
+class ChannelEvent implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     /**
      * Create a new event instance.
      */
-    public function __construct(public Channel $channel, public string $type)
+    public function __construct(public Channel $channel, public string $type, public  $data = null)
     {
         //
     }
@@ -33,10 +33,11 @@ class SettingsEvent implements ShouldBroadcastNow
         return [
 
             new PresenceChannel('channels.' . $this->channel->id),
+            new PrivateChannel('private_channels.' . $this->channel->id),
         ];
     }
     public function broadcastWith(): array
     {
-        return ['type' => $this->type];
+        return ['type' => $this->type, 'data' => $this->data];
     }
 }

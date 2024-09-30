@@ -1,6 +1,6 @@
 import Form1 from "@/Components/Form1";
 import OverlayNotification from "@/Components/Overlay/OverlayNotification";
-import { deleteMessage } from "@/Store/messagesSlice";
+import { deleteMessage } from "@/Store/channelsDataSlice";
 import { deleteThreadMessage, setThreadedMessageId } from "@/Store/threadSlice";
 import { useForm } from "@inertiajs/react";
 import React, { useRef, useState, useEffect } from "react";
@@ -20,7 +20,12 @@ export default function DeleteMessage({ message, user }) {
                 onSuccess: () => {
                     setSuccess(true);
 
-                    dispatch(deleteMessage(message.id));
+                    dispatch(
+                        deleteMessage({
+                            id: message.channel_id,
+                            data: { message_id: message.id },
+                        })
+                    );
                     dispatch(deleteThreadMessage(message.id));
                     if (threadMessageId == message.id)
                         dispatch(setThreadedMessageId(null));

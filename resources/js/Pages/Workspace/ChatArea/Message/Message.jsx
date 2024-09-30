@@ -17,7 +17,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setThreadedMessageId } from "@/Store/threadSlice";
 
 import TipTapEditor from "@/Components/TipTapEditor";
-import { editMessage as editMessageInStore } from "@/Store/messagesSlice";
+import { editMessage as editMessageInStore } from "@/Store/channelsDataSlice";
 import { getMentionsFromContent } from "@/helpers/tiptapHelper";
 import Image from "@/Components/Image";
 import { setNotificationPopup } from "@/Store/notificationPopupSlice";
@@ -45,7 +45,6 @@ export default function Message({
         [channels, channelId]
     );
     const dispatch = useDispatch();
-    const { messageId } = useSelector((state) => state.mention);
 
     const files = message.files || [];
     const [reactions, setReactions] = useState(
@@ -112,7 +111,12 @@ export default function Message({
         let mentionsList = getMentionsFromContent(JSONContent);
 
         if (content == "<p></p>" && mentionsList.length == 0) return;
-        dispatch(editMessageInStore({ message_id: message.id, content }));
+        dispatch(
+            editMessageInStore({
+                id: message.channel_id,
+                data: { message_id: message.id, content },
+            })
+        );
         setIsEditing(false);
         router.post(
             route("message.update", message.id),

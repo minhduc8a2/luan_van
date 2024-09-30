@@ -13,10 +13,12 @@ import { MdOutlineEmail } from "react-icons/md";
 import { FaPhone } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { setProfile } from "@/Store/profileSlice";
+import { useChannelData } from "@/helpers/customHooks";
 export default function About({ channelName, onClose }) {
     const { auth, channelId } = usePage().props;
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
     const { channels } = useSelector((state) => state.channels);
+    const {permissions} = useChannelData(channelId);
     const channel = useMemo(
         () => channels.find((cn) => cn.id == channelId),
         [channels, channelId]
@@ -52,7 +54,7 @@ export default function About({ channelName, onClose }) {
                 />
             )}
             {channel.type != "DIRECT" && channel.type != "SELF" && <Managers />}
-            {channel.type != "DIRECT" && channel.type != "SELF" && (
+            {channel.type != "DIRECT" && channel.type != "SELF" && permissions.leave && (
                 <LeaveChannel channel={channel} />
             )}
             {channel.type == "DIRECT" && (

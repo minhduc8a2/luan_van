@@ -16,7 +16,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setThreadedMessageId } from "@/Store/threadSlice";
 
 import TipTapEditor from "@/Components/TipTapEditor";
-import { editMessage as editMessageInStore } from "@/Store/messagesSlice";
+import { editMessage as editMessageInStore } from "@/Store/channelsDataSlice";
 import { getMentionsFromContent } from "@/helpers/tiptapHelper";
 
 import { setNotificationPopup } from "@/Store/notificationPopupSlice";
@@ -34,17 +34,9 @@ export default function ForwardedMessage({
     resetNewMessageReactionReceive,
     noToolbar = false,
 }) {
-    const {
-        auth,
-        channel,
-        channelUsers,
-        permissions,
-       
-        channels,
-        directChannels,
-    } = usePage().props;
+    const { auth, channelId } = usePage().props;
     const dispatch = useDispatch();
-    const {workspaceUsers} = useSelector(state=>state.workspaceUsers)
+    const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
     const { messageId } = useSelector((state) => state.mention);
     const files = message.files || [];
     const [reactions, setReactions] = useState(
@@ -70,7 +62,9 @@ export default function ForwardedMessage({
     const [forwardedMessage, setForwardedMessage] = useState(null);
 
     const forwardedMessageUser = useMemo(() => {
-        return workspaceUsers.find((u) => u.id == message.forwarded_message.user_id);
+        return workspaceUsers.find(
+            (u) => u.id == message.forwarded_message.user_id
+        );
     }, [workspaceUsers, message]);
     const forwardedMessageChannel = useMemo(() => {
         return (
@@ -125,7 +119,12 @@ export default function ForwardedMessage({
         let mentionsList = getMentionsFromContent(JSONContent);
 
         if (content == "<p></p>" && mentionsList.length == 0) return;
-        dispatch(editMessageInStore({ message_id: message.id, content }));
+        dispatch(
+            editMessageInStore({
+                id: message.channel_id,
+                data: { message_id: message.id, content },
+            })
+        );
         setIsEditing(false);
         router.post(
             route("message.update", message.id),
@@ -206,7 +205,6 @@ export default function ForwardedMessage({
             }
         );
     }
-    
 
     return (
         <div

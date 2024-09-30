@@ -4,13 +4,18 @@ import React from "react";
 import { SettingsButton } from "../About/SettingsButton";
 import { useState } from "react";
 import { useForm, usePage } from "@inertiajs/react";
-import { useChannel, useChannelData } from "@/helpers/customHooks";
+import {
+    useChannel,
+    useChannelData,
+    useCustomedForm,
+} from "@/helpers/customHooks";
 
 export default function ChannelPermissions() {
     const { channelId } = usePage().props;
-    const {channel} = useChannel(channelId)
-    const { channelPermissions } = useChannelData(channelId);
-    const [success, setSuccess] = useState(false);
+    const { channel } = useChannel(channelId);
+    const { permissions } = useChannelData(channelId);
+
+    const [refresh, setRefresh] = useState(1);
     const whoes = [
         {
             value: "everyone",
@@ -25,29 +30,34 @@ export default function ChannelPermissions() {
             title: "Channel Managers only",
         },
     ];
-    const { data, setData, post, processing, errors } = useForm({
-        channelPostPermission: channelPermissions.channelPostPermission,
-        addChannelMembersPermission:
-            channelPermissions.addChannelMembersPermission,
-        allowHuddle: channelPermissions.allowHuddle,
-        allowThread: channelPermissions.allowThread,
-    });
+    const {
+        getValues,
+        setValues,
+        success,
+        loading: processing,
+        reset,
+        submit: onSubmit,
+    } = useCustomedForm(
+        {
+            channelPostPermission: permissions.channelPostPermission,
+            addChannelMembersPermission:
+                permissions.addChannelMembersPermission,
+            allowHuddle: permissions.allowHuddle,
+            allowThread: permissions.allowThread,
+        },
+        {
+            method: "post",
+            url: route("channel.update_permissions", channel.id),
+            hasEchoHeader: true,
+        }
+    );
 
     function submit(e) {
         e.preventDefault();
-        post(route("channel.update_permissions", channel.id), {
-            preserveState: true,
-            only: ["permissions", "channelPermissions"],
-            onSuccess: () => {
-                setSuccess(true);
-            },
-            headers: {
-                "X-Socket-Id": Echo.socketId(),
-            },
-        });
+        onSubmit();
     }
     function description() {
-        switch (channelPermissions.channelPostPermission) {
+        switch (permissions.channelPostPermission) {
             case "everyone":
                 return "Everyone can post";
             case "everyone_except_guests":
@@ -66,7 +76,7 @@ export default function ChannelPermissions() {
             buttonNode={
                 <SettingsButton
                     onClick={() => {
-                        setSuccess(false);
+                        reset();
                     }}
                     className="border-none"
                     title="Channel permissions"
@@ -100,10 +110,11 @@ export default function ChannelPermissions() {
                                         value={who.value}
                                         checked={
                                             who.value ==
-                                            data.channelPostPermission
+                                            getValues().channelPostPermission
                                         }
                                         onChange={(e) => {
-                                            setData(
+                                            setRefresh((pre) => pre + 1);
+                                            setValues(
                                                 "channelPostPermission",
                                                 e.target.value
                                             );
@@ -138,10 +149,13 @@ export default function ChannelPermissions() {
                                         value={who.value}
                                         checked={
                                             who.value ==
-                                            data.addChannelMembersPermission
+                                            getValues()
+                                                .addChannelMembersPermission
                                         }
                                         onChange={(e) => {
-                                            setData(
+                                            setRefresh((pre) => pre + 1);
+
+                                            setValues(
                                                 "addChannelMembersPermission",
                                                 e.target.value
                                             );
@@ -169,8 +183,12 @@ export default function ChannelPermissions() {
                                 type="radio"
                                 name="allow_huddles"
                                 id="allow_huddles"
-                                checked={data.allowHuddle}
-                                onChange={(e) => setData("allowHuddle", true)}
+                                checked={getValues().allowHuddle}
+                                onChange={(e) => {
+                                    setRefresh((pre) => pre + 1);
+
+                                    setValues("allowHuddle", true);
+                                }}
                             />
                             <label htmlFor="allow_huddles">
                                 Yes, members can start and join huddles
@@ -181,8 +199,12 @@ export default function ChannelPermissions() {
                                 type="radio"
                                 name="allow_huddles"
                                 id="not_allow_huddles"
-                                checked={!data.allowHuddle}
-                                onChange={(e) => setData("allowHuddle", false)}
+                                checked={!getValues().allowHuddle}
+                                onChange={(e) => {
+                                    setRefresh((pre) => pre + 1);
+
+                                    setValues("allowHuddle", false);
+                                }}
                             />
                             <label htmlFor="not_allow_huddles">
                                 No, members can’t start or join huddles
@@ -196,10 +218,12 @@ export default function ChannelPermissions() {
                             name=""
                             id="allow_thread"
                             className="mt-1"
-                            checked={data.allowThread}
-                            onChange={(e) =>
-                                setData("allowThread", e.target.checked)
-                            }
+                            checked={getValues().allowThread}
+                            onChange={(e) => {
+                                setRefresh((pre) => pre + 1);
+
+                                setValues("allowThread", e.target.checked);
+                            }}
                         />
                         <div className="">
                             <label htmlFor="allow_thread">Allow threads</label>

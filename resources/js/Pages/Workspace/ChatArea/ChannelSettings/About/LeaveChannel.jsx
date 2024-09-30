@@ -3,25 +3,26 @@ import Button from "@/Components/Button";
 import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
 
 import OverlayNotification from "@/Components/Overlay/OverlayNotification";
-import { useForm, usePage } from "@inertiajs/react";
 
-import { useState } from "react";
 import { FaLock } from "react-icons/fa";
+import { useCustomedForm } from "@/helpers/customHooks";
 
 export default function LeaveChannel({ channel }) {
-    const { post, processing, errors, reset } = useForm({});
-    const [success, setSuccess] = useState(false);
+    const {
+        success,
+        loading: processing,
+        errors,
+        submit,
+    } = useCustomedForm(
+        {},
+        {
+            url: route("channel.leave", channel.id),
+            method: "post",
+        }
+    );
     function onSubmit(e) {
         e.preventDefault();
-        post(route("channel.leave", channel.id), {
-            preserveState: false,
-            onSuccess: () => {
-                setSuccess(true);
-            },
-            headers: {
-                "X-Socket-Id": Echo.socketId(),
-            },
-        });
+        submit();
     }
     if (channel.is_main_channel) return "";
     if (channel.type === "PUBLIC")
@@ -38,6 +39,7 @@ export default function LeaveChannel({ channel }) {
     else
         return (
             <OverlayNotification
+                className="p-3"
                 success={success}
                 title={
                     <div className="flex items-baseline gap-x-2">
@@ -59,7 +61,10 @@ export default function LeaveChannel({ channel }) {
                     </Button>
                 }
                 submitButtonNode={
-                    <Button className="!bg-danger-500  relative" onClick={onSubmit}>
+                    <Button
+                        className="!bg-danger-500  relative"
+                        onClick={onSubmit}
+                    >
                         {processing ? <OverlayLoadingSpinner /> : ""}
                         <span className={processing ? "invisible" : ""}>
                             Leave channel
@@ -73,12 +78,6 @@ export default function LeaveChannel({ channel }) {
                         able to see any of its messages. To rejoin this channel
                         later, you’ll need to be invited.
                     </div>
-
-                    {errors?.length > 0 && (
-                        <div className="my-4 text-red-500 text-sm">
-                            Failed to change channel type, please try later!
-                        </div>
-                    )}
                 </div>
             </OverlayNotification>
         );

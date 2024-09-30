@@ -177,11 +177,12 @@ export default function Panel({}) {
                                 (id) => id != auth.user.id
                             );
                             let user;
-                            if (userId)
+                            if (userId) {
                                 user = workspaceUsers.find(
                                     (u) => u.id == userId
                                 );
-                            if (user.is_hidden) return "";
+                            }
+                            if (!user || user.is_hidden) return "";
                             return (
                                 <DirectChannel
                                     key={user.id}

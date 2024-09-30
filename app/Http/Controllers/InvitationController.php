@@ -43,7 +43,7 @@ class InvitationController extends Controller implements HasMiddleware
             $workspace = Workspace::find($invitation->workspace_id);
             $workspace->addUserToWorkspace($user);
 
-            broadcast(new WorkspaceEvent(workspace: $workspace, type: "newUserJoinWorkspace", fromUserId: $request->user()->id), $user)->toOthers();
+            broadcast(new WorkspaceEvent(workspace: $workspace, type: "newUserJoinWorkspace", fromUserId: $request->user()->id, data:$user));
             DB::commit();
             //
             return redirect(route('workspace.show', $workspace->id));

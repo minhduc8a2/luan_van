@@ -12,7 +12,13 @@ class ChannelObserver
      */
     public function created(Channel $channel): void
     {
-        broadcast(new WorkspaceEvent(workspace: $channel->workspace, type: "ChannelObserver_storeChannel", fromUserId: $channel->user_id, data: $channel->loadCount('users')));
+        if ($channel->type == "SELF") return;
+        try {
+            broadcast(new WorkspaceEvent(workspace: $channel->workspace, type: "ChannelObserver_storeChannel", fromUserId: $channel->user_id, data: $channel->loadCount('users')));
+            //code...
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
     }
 
     /**

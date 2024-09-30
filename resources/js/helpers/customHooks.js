@@ -1,5 +1,6 @@
 import { useSelector } from "react-redux";
-import { useMemo } from "react";
+import { useMemo, useRef, useState } from "react";
+import axios from "axios";
 const useChannelData = (channelId) => {
     const channelsData = useSelector((state) => state.channelsData);
 
@@ -56,4 +57,89 @@ const useChannel = (channelId) => {
     };
 };
 
-export { useChannelData, useManagers, useChannel, useChannelUsers };
+const useCustomedForm = (
+    initValues = {},
+    {
+        method = "POST",
+        url = "",
+        params = {},
+        headers = {},
+        hasEchoHeader = false,
+    }
+) => {
+    const [loading, setLoading] = useState(false);
+    const [success, setSuccess] = useState(false);
+    const [errors, setErrors] = useState(false);
+    const values = useRef(initValues);
+    const token = useRef(null);
+    function setValues(name, value) {
+        values.current[name] = value;
+    }
+
+    function getValues() {
+        return { ...values.current };
+    }
+    function cancel() {
+        if (token.current) {
+            token.current.abort();
+        }
+    }
+    function reset() {
+        setLoading(false);
+        setSuccess(false);
+        setErrors(null);
+        values.current = initValues;
+        token.current = null;
+    }
+    async function submit() {
+        token.current = new AbortController();
+        setLoading(true);
+        return axios({
+            method,
+            url,
+            headers: hasEchoHeader
+                ? {
+                      ...headers,
+                      "X-Socket-Id": Echo.socketId(),
+                  }
+                : headers,
+            data: getValues(),
+            signal: token.current.signal,
+            params,
+        })
+            .then((reponse) => {
+                setSuccess(true);
+                return reponse;
+            })
+
+            .finally(() => {
+                setLoading(false);
+            })
+            .catch((errors) => {
+                if (errors.response && errors.response.data.errors) {
+                    setErrors(errors.response.data.errors); // Assuming your API returns validation errors
+                } else {
+                    setErrors(["An unexpected error occurred"]);
+                }
+            });
+    }
+
+    return {
+        submit,
+        cancel,
+        getValues,
+        errors,
+        success,
+        loading,
+        setValues,
+        reset,
+    };
+};
+
+export {
+    useChannelData,
+    useManagers,
+    useChannel,
+    useChannelUsers,
+    useCustomedForm,
+};

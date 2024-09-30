@@ -1,15 +1,10 @@
-import Avatar from "@/Components/Avatar";
-
 import React, { useContext, useMemo } from "react";
-import { FaAngleDown } from "react-icons/fa6";
-import { FiHeadphones } from "react-icons/fi";
-import { CgFileDocument } from "react-icons/cg";
-import { FaPlus } from "react-icons/fa6";
+
 import TipTapEditor from "@/Components/TipTapEditor";
 import { router, usePage } from "@inertiajs/react";
 import { useEffect, useRef, useState } from "react";
 import { InView, useInView } from "react-intersection-observer";
-import { TfiReload } from "react-icons/tfi";
+
 import {
     compareDateTime,
     differenceInSeconds,
@@ -23,21 +18,12 @@ import { useSelector, useDispatch } from "react-redux";
 import { EditDescriptionForm } from "./EditDescriptionForm";
 import axios from "axios";
 import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
-import Thread from "./Thread";
+
 import { getMentionsFromContent } from "@/helpers/tiptapHelper";
 import { getChannelName } from "@/helpers/channelHelper";
-import {
-    addMessage,
-    addThreadMessagesCount,
-    deleteMessage,
-    editMessage,
-    setMessages,
-    subtractThreadMessagesCount,
-} from "@/Store/messagesSlice";
+
 import { setMention } from "@/Store/mentionSlice";
 import ChannelSettings from "./ChannelSettings/ChannelSettings";
-
-import { setThreadedMessageId } from "@/Store/threadSlice";
 
 import { FaLock } from "react-icons/fa";
 import Button from "@/Components/Button";
@@ -58,38 +44,19 @@ function ChatArea() {
     const { auth, channelId } = usePage().props;
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
 
-    const {
-        messages: initMessages,
-        permissions,
-    } = useChannelData(channelId);
+    const { permissions, messages } = useChannelData(channelId);
+
     const { channelUsers } = useChannelUsers(channelId);
     const { channels } = useSelector((state) => state.channels);
     const { channel } = useChannel(channelId);
 
     const messageContainerRef = useRef(null);
-    const {
-        ref: top_ref,
-        inView: top_inView,
-        entry: top_entry,
-    } = useInView({
-        threshold: 0.1,
-        root: messageContainerRef.current,
-        rootMargin: "500px",
-    });
-    const {
-        ref: bottom_ref,
-        inView: bottom_inView,
-        entry: bottom_entry,
-    } = useInView({
-        threshold: 0.1,
-        root: messageContainerRef.current,
-        rootMargin: "500px",
-    });
+
     const { messageId: threadMessageId } = useSelector((state) => state.thread);
     const { messageId, threadMessage: mentionThreadMessage } = useSelector(
         (state) => state.mention
     );
-    const { messages } = useSelector((state) => state.messages);
+
     const [focus, setFocus] = useState(1);
     const dispatch = useDispatch();
 
@@ -159,24 +126,17 @@ function ChatArea() {
 
     useEffect(() => {
         if (!channel) return;
-        dispatch(setMessages([...initMessages]));
 
         dispatch(resetMessageCountForChannel(channel));
-        axios.post(route("channel.last_read", channel.id), {});
+        // axios.post(route("channel.last_read", channel.id), {});
         return () => {
             setNewMessageReceived(true);
-            isInfiniteScrollRef.current = false;
-            preScrollPositionRef.current = null;
             axios.post(route("channel.last_read", channel.id), {});
         };
     }, [channel?.id]);
-    useEffect(() => {
-        if (!messageId) return;
-        console.log("set new messages on mentios?");
-        dispatch(setMessages([...initMessages]));
-    }, [messageId, initMessages]);
 
     const groupedMessages = useMemo(() => {
+        if (!messages) return [];
         const gMessages = groupListByDate(messages);
         const currentDate = formatDDMMYYY(new Date());
         return Object.keys(gMessages)
@@ -197,35 +157,6 @@ function ChatArea() {
         channelConnectionRef.current = Echo.join(`channels.${channel.id}`);
         channelConnectionRef.current
             .here((users) => {})
-            // .joining((user) => {
-            //     console.log("join", user, channel.name);
-            // })
-            // .leaving((user) => {
-            //     console.log("leaving", user);
-            // })
-            .listen("MessageEvent", (e) => {
-                console.log("messageEvent", e);
-                if (
-                    e.type == "newMessageCreated" &&
-                    !isHiddenUser(workspaceUsers, e.message?.user_id)
-                ) {
-                    dispatch(addMessage(e.message));
-                    setNewMessageReceived(true);
-                } else if (e.type == "messageEdited")
-                    dispatch(
-                        editMessage({
-                            message_id: e.message.id,
-                            content: e.message.content,
-                        })
-                    );
-                else if (e.type == "messageDeleted") {
-                    if (threadMessageId == e.message?.id)
-                        dispatch(setThreadedMessageId(null));
-                    dispatch(deleteMessage(e.message?.id));
-                }
-
-                // console.log(e);
-            })
 
             .listen("ThreadMessageEvent", (e) => {
                 if (
@@ -240,73 +171,7 @@ function ChatArea() {
                     dispatch(subtractThreadMessagesCount(e.threadedMessageId));
                 // console.log(e);
             })
-            .listen("SettingsEvent", (e) => {
-                switch (e.type) {
-                    case "addManagers":
-                    case "removeManager":
-                        router.reload({
-                            only: [
-                                "managers",
-                                "permissions",
-                                "channelPermissions",
-                            ],
-                        });
-                        break;
-                    case "editDescription":
-                    case "editName":
-                    case "changeType":
-                        router.reload({
-                            only: [
-                                "channel",
-                                "channels",
-                                "permissions",
-                                "channelPermissions",
-                            ],
-                        });
-                        break;
-                    case "leave":
-                        router.reload({
-                            only: ["channelUsers"],
-                        });
-                        break;
-                    case "removeUserFromChannel":
-                    case "addUsersToChannel":
-                        router.reload({
-                            only: [
-                                "channelUsers",
-                                "channels",
 
-                                "permissions",
-                                "channelPermissions",
-                            ],
-                        });
-                        break;
-                    case "updateChannelPermissions":
-                        router.reload({
-                            only: ["permissions", "channelPermissions"],
-                        });
-                        break;
-
-                    case "archiveChannel":
-                        router.reload({
-                            only: [
-                                "channel",
-                                "channels",
-
-                                "permissions",
-                                "channelPermissions",
-                            ],
-                        });
-                        break;
-                    case "join":
-                        router.reload({
-                            only: ["channelUsers"],
-                        });
-                        break;
-                    default:
-                        break;
-                }
-            })
             .listenForWhisper("messageReaction", (e) => {
                 setNewMessageReactionReceive(e);
             })
@@ -372,42 +237,12 @@ function ChatArea() {
                 }
             }
         }
-    }, [
-        messageId,
-        groupedMessages,
-    ]); /* groupedMessages changes based on messages, make rerender again, so
-        we know that groupedMessages is the last state changes, so it should trigger target message element again
-    */
-
-    //hande scroll top
-
-    useEffect(() => {
-        // console.log("isInfiniteScroll");
-        if (!isInfiniteScrollRef.current) return;
-        if (!messageContainerRef.current) return;
-        if (!preScrollPositionRef.current) return;
-        if (preScrollPositionRef.current.position == "top") {
-            console.log("scroll top persists");
-            messageContainerRef.current.scrollTop =
-                messageContainerRef.current.scrollHeight -
-                preScrollPositionRef.current.oldScrollHeight +
-                preScrollPositionRef.current.oldScrollTop;
-            isInfiniteScrollRef.current = false;
-        } else if (preScrollPositionRef.current.position == "bottom") {
-            console.log("scroll bottom persists");
-            messageContainerRef.current.scrollTop =
-                preScrollPositionRef.current.oldScrollTop;
-            isInfiniteScrollRef.current = false;
-        }
-    }, [groupedMessages]); //for infinite scrolling
+    }, [messageId, groupedMessages]);
 
     const isChannelMember = useMemo(() => {
         if (!channel) return false;
-        return (
-            channels.find((cn) => cn.id === channel.id) ||
-            directChannels.find((cn) => cn.id === channel.id)
-        );
-    }, [channels, channel]);
+        return channelUsers.some((u) => u.id === auth.user.id);
+    }, [channelUsers]);
     return (
         <div className="flex-1 flex min-h-0 max-h-full w-full">
             <InitData loaded={loaded} setLoaded={(value) => setLoaded(value)} />
@@ -438,18 +273,7 @@ function ChatArea() {
                                     </div>
                                 </div>
                             </div>
-                            <div className="" ref={top_ref}>
-                                {loadingMessages && (
-                                    <div className="flex gap-x-2 items-center">
-                                        <div className="h-6 w-6 relative">
-                                            <OverlayLoadingSpinner />
-                                        </div>
-                                        <div className="text-xs">
-                                            Loading messages...
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
+
                             {groupedMessages.map(({ date, mgs }, pIndex) => {
                                 return (
                                     <div className="relative pb-4" key={date}>
@@ -553,7 +377,6 @@ function ChatArea() {
                                     </div>
                                 );
                             })}
-                            <div ref={bottom_ref} className=""></div>
                         </div>
                         <div className="m-6 border border-white/15 pt-4 px-2 rounded-lg ">
                             {permissions.chat && (

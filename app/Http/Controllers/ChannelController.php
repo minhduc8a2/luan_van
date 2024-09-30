@@ -11,7 +11,7 @@ use App\Models\Message;
 use App\Models\Workspace;
 use App\Helpers\BaseRoles;
 use Illuminate\Http\Request;
-use App\Events\SettingsEvent;
+use App\Events\ChannelEvent;
 use App\Helpers\ChannelTypes;
 use App\Events\WorkspaceEvent;
 use Illuminate\Support\Carbon;
@@ -29,6 +29,9 @@ class ChannelController extends Controller
      */
     public function initChannelData(Request $request, Channel $channel)
     {
+        if ($request->user()->cannot('view', $channel)) {
+            return  abort(403, "You are not allowed to view this channel");
+        }
         $user = $request->user();
         $only = $request->query("only");
         $permissions = fn() => [
@@ -39,7 +42,6 @@ class ChannelController extends Controller
             'thread' => $user->can('createThread', [Message::class, $channel]),
             'createReaction' => $user->can('create', [Reaction::class, $channel]),
             'deleteReaction' => $user->can('delete', [Reaction::class, $channel]),
-
             'updateDescription' => $user->can('updateDescription', [Channel::class, $channel]),
             'updateName' => $user->can('updateName', [Channel::class, $channel]),
             'updatePermissions' => $user->can('updatePermissions', [Channel::class, $channel]),
@@ -52,10 +54,6 @@ class ChannelController extends Controller
             'deleteChannel' => $user->can('delete', [Channel::class, $channel]),
             'huddle' => $channel->allowHuddlePermission(),
             'deleteAnyMessage' => $user->can('deleteAnyMessageInChannel', [Message::class, $channel]),
-
-        ];
-
-        $channelPermissions = fn() => [
             'channelPostPermission' => $channel->chatPermission(),
             'addChannelMembersPermission' => $channel->addChannelMembersPermission(),
             'allowHuddle' => $channel->allowHuddlePermission(),
@@ -63,29 +61,32 @@ class ChannelController extends Controller
         ];
 
 
+
+
         $managerIds = fn() =>  $channel->users()->wherePivot('role_id', '=', Role::getRoleByName(BaseRoles::MANAGER->name)->id)->pluck('users.id');
         $channelUserIds = fn() => $channel->users->pluck('id');
 
         switch ($only) {
-            case 'channel_permissions':
-                return ['channelPermissions' => $channelPermissions];
-                break;
+
             case 'permissions':
-                return ['permissions' => $channelPermissions];
+                return ['permissions' => $permissions()];
                 break;
             case 'manager_ids':
-                return ['managerIds' => $managerIds];
+                return ['managerIds' => $managerIds()];
                 break;
             case 'channel_user_ids':
-                return ['channelUserIds' => $channelUserIds];
+                return ['channelUserIds' => $channelUserIds()];
                 break;
+            case 'channel':
+                return ['channel' => $channel];
         }
         return [
 
-            'channelPermissions' => $channelPermissions,
-            'permissions' => $permissions,
-            'managerIds' => $managerIds,
-            'channelUserIds' => $channelUserIds,
+
+            'permissions' => $permissions(),
+            'managerIds' => $managerIds(),
+            'channelUserIds' => $channelUserIds(),
+
 
         ];
     }
@@ -353,7 +354,7 @@ class ChannelController extends Controller
 
             $channel->description = $validated['description'] ?? "";
             $channel->save();
-            broadcast(new SettingsEvent($channel, "editDescription"))->toOthers();
+            broadcast(new ChannelEvent($channel, "editDescription"))->toOthers();
             DB::commit();
 
             return back();
@@ -373,7 +374,7 @@ class ChannelController extends Controller
 
             $channel->name = $validated['name'];
             $channel->save();
-            broadcast(new SettingsEvent($channel, "editName"))->toOthers();
+            broadcast(new ChannelEvent($channel, "editName"))->toOthers();
             DB::commit();
 
             return back();
@@ -396,7 +397,7 @@ class ChannelController extends Controller
             $channel->type = $validated['type'];
             $channel->save();
             Message::createStringMessageAndBroadcast($channel, $request->user(), $request->user()->name . " has changed channel privacy from " . $oldType . " to " . $channel->type . ".");
-            broadcast(new SettingsEvent($channel, "changeType"))->toOthers();
+            broadcast(new ChannelEvent($channel, "changeType"))->toOthers();
             $channelUsers = $channel->users;
             foreach ($channelUsers as $channelUser) {
                 $channelUser->notify(new ChannelsNotification(
@@ -432,14 +433,14 @@ class ChannelController extends Controller
             DB::beginTransaction();
 
             $request->user()->channels()->detach($channel->id);
-            broadcast(new SettingsEvent($channel, "leave"))->toOthers();
+            broadcast(new ChannelEvent($channel, "leave", $request->user()->id));
             DB::commit();
 
-            return redirect(route('workspace.show', $channel->workspace->id));
+            return [];
         } catch (\Throwable $th) {
             DB::rollBack();
 
-            return back()->withErrors(["server" => "Something went wrong! Please try later"]);
+            abort(500, "Something went wrong! Please try later");
         }
     }
     public function join(Request $request, Channel $channel)
@@ -455,7 +456,7 @@ class ChannelController extends Controller
 
                 $request->user()->channels()->attach($channel->id, ['role_id' => Role::getRoleIdByName(BaseRoles::MEMBER->name)]);
             }
-            broadcast(new SettingsEvent($channel, "join"))->toOthers();
+            broadcast(new ChannelEvent($channel, "join", $request->user()->id))->toOthers();
             DB::commit();
 
             return back();
@@ -488,7 +489,7 @@ class ChannelController extends Controller
 
 
             //notify
-            broadcast(new SettingsEvent($channel, "removeUserFromChannel"))->toOthers();
+            broadcast(new ChannelEvent($channel, "removeUserFromChannel", $user->id))->toOthers();
             $user->notify(new ChannelsNotification($request->user(), $user, $channel, $channel->workspace, "removedFromChannel"));
             Message::createStringMessageAndBroadcast($channel, $request->user(), $request->user()->name . " has removed " . $user->name . " from channel");
 
@@ -518,7 +519,7 @@ class ChannelController extends Controller
                 $user->notify(new ChannelsNotification($request->user(), $user, $channel, $channel->workspace, "addedToNewChannel"));
                 Message::createStringMessageAndBroadcast($channel, $request->user(), $request->user()->name . " has added " . $user->name . " to channel");
             }
-            broadcast(new SettingsEvent($channel, "addUsersToChannel"))->toOthers();
+            broadcast(new ChannelEvent($channel, "addUsersToChannel"))->toOthers();
             DB::commit();
 
             return back();
@@ -541,6 +542,7 @@ class ChannelController extends Controller
             DB::beginTransaction();
 
             $users = $validated['users'];
+
             foreach ($users as $u) {
                 $user = User::find($u['id']);
                 $user->channels()->updateExistingPivot($channel->id, [
@@ -548,7 +550,8 @@ class ChannelController extends Controller
                 ]);
                 $user->notify(new ChannelsNotification($request->user(), null, $channel, $channel->workspace, "addedAsManager"));
             }
-            broadcast(new SettingsEvent($channel, "addManagers"))->toOthers();
+            $managerIds = collect($validated['users'])->pluck('id')->toArray();
+            broadcast(new ChannelEvent($channel, "addManagers", $managerIds))->toOthers();
             DB::commit();
 
             return back();
@@ -573,7 +576,7 @@ class ChannelController extends Controller
             $user->channels()->updateExistingPivot($channel->id, [
                 'role_id' => Role::getRoleIdByName(BaseRoles::MEMBER->name),
             ]);
-            broadcast(new SettingsEvent($channel, "removeManager"))->toOthers();
+            broadcast(new ChannelEvent($channel, "removeManager", $user->id))->toOthers();
             $user->notify(new ChannelsNotification(
                 fromUser: $request->user(),
                 toUser: null,
@@ -673,13 +676,13 @@ class ChannelController extends Controller
                 $channel->deleteGuestPermission(PermissionTypes::CHANNEL_THREAD->name);
                 $channel->deleteMemberPermission(PermissionTypes::CHANNEL_THREAD->name);
             }
-            broadcast(new SettingsEvent($channel, "updateChannelPermissions"))->toOthers();
+            broadcast(new ChannelEvent($channel, "updateChannelPermissions"));
 
             DB::commit();
-            return back();
+            return [];
         } catch (\Throwable $th) {
             DB::rollBack();
-            return back()->withErrors(['server' => "Something went wrong! Please try later."]);
+            abort(500, "Something went wrong! Please try later.");
         }
     }
 
@@ -695,7 +698,7 @@ class ChannelController extends Controller
             $channel->is_archived = $validated['status'];
             $user = $request->user();
             $channel->save();
-            broadcast(new SettingsEvent($channel, "archiveChannel"))->toOthers();
+            broadcast(new ChannelEvent($channel, "archiveChannel"))->toOthers();
             $channelUsers = $channel->users;
             foreach ($channelUsers as $channelUser) {
                 $channelUser->notify(new ChannelsNotification(

@@ -8,7 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { isMentionNotificationBroadcast } from "@/helpers/notificationTypeHelper";
 import { getChannelName } from "@/helpers/channelHelper";
 import { setMention } from "@/Store/mentionSlice";
-import { setMessages } from "@/Store/messagesSlice";
+
 import { setThreadedMessageId } from "@/Store/threadSlice";
 import OverlaySimpleNotification from "@/Components/Overlay/OverlaySimpleNotification";
 import { useState } from "react";
@@ -91,7 +91,7 @@ export default function MentionNotification({
                         { message_id: message.id },
                         {
                             preserveState: true,
-                           
+
                             onFinish: () => {
                                 dispatch(
                                     setMention({
