@@ -7,10 +7,15 @@ import { addActivity } from "@/Store/activitySlice";
 import { isChannelsNotificationBroadcast } from "@/helpers/notificationTypeHelper";
 
 import { toggleHuddle } from "@/Store/huddleSlice";
-import { deleteFileInThread, setThreadedMessageId } from "@/Store/threadSlice";
+import { deleteFileInThread} from "@/Store/threadSlice";
 import { deleteFile } from "@/Store/messagesSlice";
 import { updateWorkspaceUserInformation } from "@/Store/workspaceUsersSlice";
-import { addMessageCountForChannel } from "@/Store/channelsSlice";
+import {
+    addMessageCountForChannel,
+    addNewChannelToChannelsStore,
+    removeChannelFromChannelsStore,
+    updateChannelInformation,
+} from "@/Store/channelsSlice";
 import { isHiddenUser } from "@/helpers/userHelper";
 
 export default function Event() {
@@ -69,14 +74,22 @@ export default function Event() {
                 console.log(e);
                 switch (e.type) {
                     case "ChannelObserver_storeChannel":
+                        dispatch(addNewChannelToChannelsStore(e.data));
                         break;
                     case "ChannelObserver_deleteChannel":
                         if (huddleChannelId == e?.data) {
                             dispatch(toggleHuddle());
                         }
-
+                        dispatch(removeChannelFromChannelsStore(e.data));
                         break;
-
+                    case "ChannelObserver_updated":
+                        dispatch(
+                            updateChannelInformation({
+                                id: e.data?.id,
+                                data: e.data,
+                            })
+                        );
+                        break;
                     case "FileObserver_fileDeleted":
                         dispatch(deleteFile(e.data));
                         dispatch(deleteFileInThread(e.data));

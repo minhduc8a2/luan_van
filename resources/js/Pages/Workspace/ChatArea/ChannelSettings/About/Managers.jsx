@@ -10,15 +10,13 @@ import { useState } from "react";
 import AddManagers from "./AddManagers";
 import ErrorsList from "@/Components/ErrorsList";
 import { useSelector } from "react-redux";
+import { useChannel, useChannelData, useManagers } from "@/helpers/customHooks";
 export default function Managers() {
-    const { managers, channelId, permissions } = usePage().props;
-    const { channels } = useSelector((state) => state.channels);
-    const channel = useMemo(
-        () => channels.find((cn) => cn.id == channelId),
-        [channels, channelId]
-    );
+    const { channelId } = usePage().props;
+    const { channel } = useChannel(channelId);
+    const { permissions } = useChannelData(channelId);
     const onlineStatusMap = useSelector((state) => state.onlineStatus);
-
+    const { managers } = useManagers(channelId);
     const [searchValue, setSearchValue] = useState("");
     const [errors, setErrors] = useState(null);
     function removeManager(user) {

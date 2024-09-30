@@ -22,7 +22,9 @@ import MoreOptions from "./MoreOptions";
 import { LiaUserMinusSolid } from "react-icons/lia";
 import { setLeftWindowType } from "@/Store/windowTypeSlice";
 export default function Profile() {
-    const { default_avatar_url, auth, workspace } = usePage().props;
+    const {  auth, workspace } = usePage().props;
+    const { default_avatar_url } = useSelector((state) => state.workspace);
+
     const { userId } = useSelector((state) => state.profile);
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
     const { channels } = useSelector((state) => state.channels);

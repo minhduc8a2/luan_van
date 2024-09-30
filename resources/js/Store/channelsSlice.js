@@ -8,6 +8,15 @@ export const channelsSlice = createSlice({
     reducers: {
         setChannels(state, action) {
             state.channels = action.payload;
+            state.channels.sort((a, b) => a.id - b.id);
+        },
+        addNewChannelToChannelsStore(state, action) {
+            if (state.channels.find((cn) => cn.id == action.payload.id)) return;
+            state.channels.push(action.payload);
+            state.channels.sort((a, b) => a.id - b.id);
+        },
+        removeChannelFromChannelsStore(state, action) {
+            return state.channels.filter((cn) => cn.id != action.payload);
         },
         updateChannelInformation(state, action) {
             const channelIndex = state.channels.findIndex(
@@ -42,6 +51,13 @@ export const channelsSlice = createSlice({
 });
 
 // Action creators are generated for each case reducer function
-export const { setChannels, updateChannelInformation,addMessageCountForChannel,resetMessageCountForChannel } = channelsSlice.actions;
+export const {
+    setChannels,
+    updateChannelInformation,
+    addMessageCountForChannel,
+    resetMessageCountForChannel,
+    addNewChannelToChannelsStore,
+    removeChannelFromChannelsStore
+} = channelsSlice.actions;
 
 export default channelsSlice.reducer;

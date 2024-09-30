@@ -27,6 +27,69 @@ class ChannelController extends Controller
     /**
      * Display a listing of the resource.
      */
+    public function initChannelData(Request $request, Channel $channel)
+    {
+        $user = $request->user();
+        $only = $request->query("only");
+        $permissions = fn() => [
+            'join' => $user->can('join', [Channel::class, $channel]),
+            'view' => $user->can('view', [Channel::class, $channel]),
+            'archive' => $user->can('archive', [Channel::class, $channel]),
+            'chat' => $user->can('create', [Message::class, $channel]),
+            'thread' => $user->can('createThread', [Message::class, $channel]),
+            'createReaction' => $user->can('create', [Reaction::class, $channel]),
+            'deleteReaction' => $user->can('delete', [Reaction::class, $channel]),
+
+            'updateDescription' => $user->can('updateDescription', [Channel::class, $channel]),
+            'updateName' => $user->can('updateName', [Channel::class, $channel]),
+            'updatePermissions' => $user->can('updatePermissions', [Channel::class, $channel]),
+            'changeType' => $user->can('changeType', [Channel::class, $channel]),
+            'leave' => $user->can('leave', [Channel::class, $channel]),
+            'addManagers' => $user->can('addManagers', [Channel::class, $channel]),
+            'removeManager' => $user->can('removeManager', [Channel::class, $channel]),
+            'removeUserFromChannel' => $user->can('removeUserFromChannel', [Channel::class, $channel]),
+            'addUsersToChannel' => $user->can('addUsersToChannel', [Channel::class, $channel]),
+            'deleteChannel' => $user->can('delete', [Channel::class, $channel]),
+            'huddle' => $channel->allowHuddlePermission(),
+            'deleteAnyMessage' => $user->can('deleteAnyMessageInChannel', [Message::class, $channel]),
+
+        ];
+
+        $channelPermissions = fn() => [
+            'channelPostPermission' => $channel->chatPermission(),
+            'addChannelMembersPermission' => $channel->addChannelMembersPermission(),
+            'allowHuddle' => $channel->allowHuddlePermission(),
+            'allowThread' => $channel->allowThreadPermission(),
+        ];
+
+
+        $managerIds = fn() =>  $channel->users()->wherePivot('role_id', '=', Role::getRoleByName(BaseRoles::MANAGER->name)->id)->pluck('users.id');
+        $channelUserIds = fn() => $channel->users->pluck('id');
+
+        switch ($only) {
+            case 'channel_permissions':
+                return ['channelPermissions' => $channelPermissions];
+                break;
+            case 'permissions':
+                return ['permissions' => $channelPermissions];
+                break;
+            case 'manager_ids':
+                return ['managerIds' => $managerIds];
+                break;
+            case 'channel_user_ids':
+                return ['channelUserIds' => $channelUserIds];
+                break;
+        }
+        return [
+
+            'channelPermissions' => $channelPermissions,
+            'permissions' => $permissions,
+            'managerIds' => $managerIds,
+            'channelUserIds' => $channelUserIds,
+
+        ];
+    }
+
 
     public function getWorkspaceChannels(Request $request, Workspace $workspace)
     {
@@ -251,134 +314,13 @@ class ChannelController extends Controller
 
     public function show(Request $request, Workspace $workspace,  Channel $channel)
     {
-        $perPage = 10;
+
 
         if ($request->user()->cannot('view', $channel)) {
             return  redirect(route('workspace.show', $channel->workspace->id));
         }
-        $user = $request->user();
-
-
-        $hiddenUserIds = $user->hiddenUsers()->wherePivot('workspace_id', $workspace->id)->pluck('hidden_user_id')->toArray();
-
-
-        $messageId = $request->query('message_id');
-        $pageNumber = null;
-        if ($messageId) {
-            $message = Message::find($messageId);
-            if ($message) {
-
-                $messagePosition = $channel->messages()->whereNotIn('user_id', $hiddenUserIds)->withTrashed()
-                    ->latest() // Order by latest first
-                    ->where('created_at', '>=', $message->created_at) // Messages that are newer or equal to the mentioned one
-                    ->count();
-                $pageNumber = ceil($messagePosition / $perPage);
-            }
-        }
-
-        if ($request->expectsJson()) {
-            return [
-                'messages' => $channel->messages()->whereNotIn('user_id', $hiddenUserIds)->where('threaded_message_id', null)->withTrashed()->with([
-                    'files' => function ($query) {
-                        $query->withTrashed();
-                    },
-                    'reactions',
-
-                    'forwardedMessage.files' => function ($query) {
-
-                        $query->withTrashed();
-                    },
-                ])->withCount([
-                    'threadMessages' => function ($query) use ($hiddenUserIds) {
-
-                        $query->whereNotIn('user_id', $hiddenUserIds);
-                    }
-                ])->latest()->simplePaginate($perPage, ['*'], 'page', $pageNumber)
-            ];
-        }
-
-        $permissions = fn() => [
-            'join' => $user->can('join', [Channel::class, $channel]),
-            'view' => $user->can('view', [Channel::class, $channel]),
-            'archive' => $user->can('archive', [Channel::class, $channel]),
-            'chat' => $user->can('create', [Message::class, $channel]),
-            'thread' => $user->can('createThread', [Message::class, $channel]),
-            'createReaction' => $user->can('create', [Reaction::class, $channel]),
-            'deleteReaction' => $user->can('delete', [Reaction::class, $channel]),
-
-            'updateDescription' => $user->can('updateDescription', [Channel::class, $channel]),
-            'updateName' => $user->can('updateName', [Channel::class, $channel]),
-            'updatePermissions' => $user->can('updatePermissions', [Channel::class, $channel]),
-            'changeType' => $user->can('changeType', [Channel::class, $channel]),
-            'leave' => $user->can('leave', [Channel::class, $channel]),
-            'addManagers' => $user->can('addManagers', [Channel::class, $channel]),
-            'removeManager' => $user->can('removeManager', [Channel::class, $channel]),
-            'removeUserFromChannel' => $user->can('removeUserFromChannel', [Channel::class, $channel]),
-            'addUsersToChannel' => $user->can('addUsersToChannel', [Channel::class, $channel]),
-            'deleteChannel' => $user->can('delete', [Channel::class, $channel]),
-            'huddle' => $channel->allowHuddlePermission(),
-            'deleteAnyMessage' => $user->can('deleteAnyMessageInChannel', [Message::class, $channel]),
-
-        ];
-
-        $channelPermissions = fn() => [
-            'channelPostPermission' => $channel->chatPermission(),
-            'addChannelMembersPermission' => $channel->addChannelMembersPermission(),
-            'allowHuddle' => $channel->allowHuddlePermission(),
-            'allowThread' => $channel->allowThreadPermission(),
-        ];
-
-
-        $managers = fn() => $channel->users()->wherePivot('role_id', '=', Role::getRoleByName(BaseRoles::MANAGER->name)->id)->get()->map(function ($user) use ($hiddenUserIds) {
-            $user->is_hidden = in_array($user->id, $hiddenUserIds);
-            return $user;
-        });
-        $channelUsers = fn() => $channel->users->map(function ($user) use ($hiddenUserIds) {
-            $user->is_hidden = in_array($user->id, $hiddenUserIds);
-            return $user;
-        });
-        $messages = $messageId ? fn() => $channel->messages()->whereNotIn('user_id', $hiddenUserIds)->where('threaded_message_id', null)->withTrashed()->with([
-            'files' => function ($query) {
-                $query->withTrashed();
-            },
-            'reactions',
-
-            'forwardedMessage.files' => function ($query) {
-
-                $query->withTrashed();
-            },
-        ])->withCount([
-            'threadMessages' => function ($query) use ($hiddenUserIds) {
-
-                $query->whereNotIn('user_id', $hiddenUserIds);
-            }
-        ])->latest()->simplePaginate($perPage, ['*'], 'page', $pageNumber)
-            //OR
-            : fn() => $channel->messages()->whereNotIn('user_id', $hiddenUserIds)->where('threaded_message_id', null)->withTrashed()->with([
-                'files' => function ($query) {
-                    $query->withTrashed();
-                },
-                'reactions',
-
-                'forwardedMessage.files' => function ($query) {
-
-                    $query->withTrashed();
-                },
-            ])->withCount([
-                'threadMessages' => function ($query) use ($hiddenUserIds) {
-
-                    $query->whereNotIn('user_id', $hiddenUserIds);
-                }
-            ])->latest()->simplePaginate($perPage);
         return Inertia::render("Workspace/ChatArea/ChatArea", [
-
-            'channelPermissions' => $channelPermissions,
-            'permissions' => $permissions,
             'channelId' => $channel->id,
-            'managers' => $managers,
-            'messages' => $messages,
-            'channelUsers' => $channelUsers,
-
         ]);
     }
 

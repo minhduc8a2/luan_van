@@ -17,6 +17,7 @@ import {
 } from "@headlessui/react";
 import copy from "copy-to-clipboard";
 import { usePage } from "@inertiajs/react";
+import { useSelector } from "react-redux";
 export default function Video({
     className = "",
     loadingClassname = " border border-white/15",
@@ -27,7 +28,7 @@ export default function Video({
     deleteFn,
     noToolbar = false,
 }) {
-    const { publicAppUrl } = usePage().props;
+    const { publicAppUrl } = useSelector((state) => state.workspace);
     const [smallLoaded, setSmallLoaded] = useState(false);
     const [largeLoaded, setLargeLoaded] = useState(false);
     const [playing, setPlaying] = useState(false);

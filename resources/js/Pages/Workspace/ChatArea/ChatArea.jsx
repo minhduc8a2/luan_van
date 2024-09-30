@@ -29,7 +29,6 @@ import { getChannelName } from "@/helpers/channelHelper";
 import {
     addMessage,
     addThreadMessagesCount,
-    addThreadToMessages,
     deleteMessage,
     editMessage,
     setMessages,
@@ -39,7 +38,7 @@ import { setMention } from "@/Store/mentionSlice";
 import ChannelSettings from "./ChannelSettings/ChannelSettings";
 
 import { setThreadedMessageId } from "@/Store/threadSlice";
-import OverlayNotification from "@/Components/Overlay/OverlayNotification";
+
 import { FaLock } from "react-icons/fa";
 import Button from "@/Components/Button";
 import ForwardedMessage from "./Message/ForwardedMessage";
@@ -48,26 +47,25 @@ import Layout from "../Layout";
 import Events from "./Events";
 import Header from "./Header";
 import { resetMessageCountForChannel } from "@/Store/channelsSlice";
-import { updateWorkspaceUserInformation } from "@/Store/workspaceUsersSlice";
+import InitData from "./InitData";
+import {
+    useChannel,
+    useChannelData,
+    useChannelUsers,
+} from "@/helpers/customHooks";
 
 function ChatArea() {
-    const {
-        auth,
-        channelId,
-
-        channelUsers,
-
-        messages: initMessages,
-
-        permissions,
-    } = usePage().props;
+    const { auth, channelId } = usePage().props;
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
-    const { channels } = useSelector((state) => state.channels);
 
-    const channel = useMemo(
-        () => channels.find((cn) => cn.id == channelId),
-        [channels, channelId]
-    );
+    const {
+        messages: initMessages,
+        permissions,
+    } = useChannelData(channelId);
+    const { channelUsers } = useChannelUsers(channelId);
+    const { channels } = useSelector((state) => state.channels);
+    const { channel } = useChannel(channelId);
+
     const messageContainerRef = useRef(null);
     const {
         ref: top_ref,
@@ -94,10 +92,9 @@ function ChatArea() {
     const { messages } = useSelector((state) => state.messages);
     const [focus, setFocus] = useState(1);
     const dispatch = useDispatch();
-    const { channelId: huddleChannelId } = useSelector((state) => state.huddle);
 
-    const nextPageUrlRef = useRef(initMessages.next_page_url);
-    const previousPageUrlRef = useRef(initMessages.prev_page_url);
+    const [loaded, setLoaded] = useState(false);
+
     const isInfiniteScrollRef = useRef(false);
     const preScrollPositionRef = useRef(null);
     const [newMessageReceived, setNewMessageReceived] = useState(true);
@@ -158,11 +155,12 @@ function ChatArea() {
     let hasChanged = false;
 
     //
-    //reset state on channel changes
+    // //reset state on channel changes
+
     useEffect(() => {
-        dispatch(setMessages([...initMessages?.data]));
-        nextPageUrlRef.current = initMessages?.next_page_url;
-        previousPageUrlRef.current = initMessages?.prev_page_url;
+        if (!channel) return;
+        dispatch(setMessages([...initMessages]));
+
         dispatch(resetMessageCountForChannel(channel));
         axios.post(route("channel.last_read", channel.id), {});
         return () => {
@@ -171,13 +169,11 @@ function ChatArea() {
             preScrollPositionRef.current = null;
             axios.post(route("channel.last_read", channel.id), {});
         };
-    }, [channel.id]);
+    }, [channel?.id]);
     useEffect(() => {
         if (!messageId) return;
         console.log("set new messages on mentios?");
-        dispatch(setMessages([...initMessages?.data]));
-        nextPageUrlRef.current = initMessages?.next_page_url;
-        previousPageUrlRef.current = initMessages?.prev_page_url;
+        dispatch(setMessages([...initMessages]));
     }, [messageId, initMessages]);
 
     const groupedMessages = useMemo(() => {
@@ -196,6 +192,8 @@ function ChatArea() {
             });
     }, [messages]);
     useEffect(() => {
+        if (!channel?.id) return;
+
         channelConnectionRef.current = Echo.join(`channels.${channel.id}`);
         channelConnectionRef.current
             .here((users) => {})
@@ -320,13 +318,14 @@ function ChatArea() {
             channelConnectionRef.current = null;
             Echo.leave(`channels.${channel.id}`);
         };
-    }, [channel.id, threadMessageId]);
+    }, [channel?.id, threadMessageId]);
 
-    const channelName = useMemo(
-        () => getChannelName(channel, channelUsers, auth.user),
-        [channel]
-    );
+    const channelName = useMemo(() => {
+        if (!channel) return "";
+        return getChannelName(channel, channelUsers, auth.user);
+    }, [channel]);
     const welcomeMessage = useMemo(() => {
+        if (!channel) return "";
         const welcomeMessages = [
             `📣You’re looking at the #${channelName} channel`,
             `👋 Welcome to the #${channelName} channel`,
@@ -335,7 +334,7 @@ function ChatArea() {
         if (channelName.includes("all-")) return welcomeMessages[0];
         if (channelName.includes("social")) return welcomeMessages[2];
         return welcomeMessages[1];
-    }, [channel.id]);
+    }, [channel?.id]);
 
     useEffect(() => {
         if (newMessageReceived && messageId) setNewMessageReceived(false);
@@ -380,67 +379,7 @@ function ChatArea() {
         we know that groupedMessages is the last state changes, so it should trigger target message element again
     */
 
-    useEffect(() => {
-        // console.log("top_inView", top_inView);
-        if (!top_inView) return;
-        if (!nextPageUrlRef.current) return;
-        setLoadingMessages(true);
-        axios
-            .get(nextPageUrlRef.current)
-            .then((response) => {
-                if (response.status == 200) {
-                    nextPageUrlRef.current =
-                        response.data.messages.next_page_url;
-                    dispatch(
-                        setMessages([
-                            ...response.data.messages.data,
-                            ...messages,
-                        ])
-                    );
-                    isInfiniteScrollRef.current = true;
-                    preScrollPositionRef.current = {
-                        oldScrollHeight:
-                            messageContainerRef.current.scrollHeight,
-                        oldScrollTop: messageContainerRef.current.scrollTop,
-                        position: "top",
-                    };
-                }
-            })
-            .finally(() => {
-                setLoadingMessages(false);
-            });
-    }, [top_inView]); //hande scroll top
-
-    useEffect(() => {
-        // console.log("bottom_inView", bottom_inView);
-        if (!bottom_inView) return;
-        if (!previousPageUrlRef.current) return;
-        setLoadingMessages(true);
-        axios
-            .get(previousPageUrlRef.current)
-            .then((response) => {
-                if (response.status == 200) {
-                    previousPageUrlRef.current =
-                        response.data.messages.prev_page_url;
-                    dispatch(
-                        setMessages([
-                            ...response.data.messages.data,
-                            ...messages,
-                        ])
-                    );
-                    isInfiniteScrollRef.current = true;
-                    preScrollPositionRef.current = {
-                        oldScrollHeight:
-                            messageContainerRef.current.scrollHeight,
-                        oldScrollTop: messageContainerRef.current.scrollTop,
-                        position: "bottom",
-                    };
-                }
-            })
-            .finally(() => {
-                setLoadingMessages(false);
-            });
-    }, [bottom_inView]); //hande scroll bottom
+    //hande scroll top
 
     useEffect(() => {
         // console.log("isInfiniteScroll");
@@ -462,197 +401,219 @@ function ChatArea() {
         }
     }, [groupedMessages]); //for infinite scrolling
 
-    const isChannelMember = useMemo(
-        () =>
+    const isChannelMember = useMemo(() => {
+        if (!channel) return false;
+        return (
             channels.find((cn) => cn.id === channel.id) ||
-            directChannels.find((cn) => cn.id === channel.id),
-        [channels, channel]
-    );
+            directChannels.find((cn) => cn.id === channel.id)
+        );
+    }, [channels, channel]);
     return (
         <div className="flex-1 flex min-h-0 max-h-full w-full">
-            <Events />
-            <div className="bg-background  chat-area-container flex-1 ">
-                <Header
-                    channel={channel}
-                    channelName={channelName}
-                    channelUsers={channelUsers}
-                />
-                <div
-                    className="overflow-y-auto max-w-full scrollbar"
-                    ref={messageContainerRef}
-                >
-                    <div className="p-8">
-                        <h1 className="text-3xl font-extrabold text-white/85">
-                            {" "}
-                            {welcomeMessage}
-                        </h1>
+            <InitData loaded={loaded} setLoaded={(value) => setLoaded(value)} />
+            {loaded && (
+                <>
+                    <Events />
 
-                        <div className="text-white/85 mt-2">
-                            {channel.description}{" "}
-                            <div className="inline-block">
-                                <EditDescriptionForm />
-                            </div>
-                        </div>
-                    </div>
-                    <div className="" ref={top_ref}>
-                        {loadingMessages && (
-                            <div className="flex gap-x-2 items-center">
-                                <div className="h-6 w-6 relative">
-                                    <OverlayLoadingSpinner />
-                                </div>
-                                <div className="text-xs">
-                                    Loading messages...
+                    <div className="bg-background  chat-area-container flex-1 ">
+                        <Header
+                            channel={channel}
+                            channelName={channelName}
+                            channelUsers={channelUsers}
+                        />
+                        <div
+                            className="overflow-y-auto max-w-full scrollbar"
+                            ref={messageContainerRef}
+                        >
+                            <div className="p-8">
+                                <h1 className="text-3xl font-extrabold text-white/85">
+                                    {" "}
+                                    {welcomeMessage}
+                                </h1>
+
+                                <div className="text-white/85 mt-2">
+                                    {channel.description}{" "}
+                                    <div className="inline-block">
+                                        <EditDescriptionForm />
+                                    </div>
                                 </div>
                             </div>
-                        )}
-                    </div>
-                    {groupedMessages.map(({ date, mgs }, pIndex) => {
-                        return (
-                            <div className="relative pb-4" key={date}>
-                                <div className="border-t border-white/15 translate-y-3"></div>
-                                <div className="text-xs border border-white/15 rounded-full h-6 flex items-center px-4 sticky top-0 left-1/2 -translate-x-1/2  w-fit bg-background z-20">
-                                    {date}
-                                </div>
+                            <div className="" ref={top_ref}>
+                                {loadingMessages && (
+                                    <div className="flex gap-x-2 items-center">
+                                        <div className="h-6 w-6 relative">
+                                            <OverlayLoadingSpinner />
+                                        </div>
+                                        <div className="text-xs">
+                                            Loading messages...
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                            {groupedMessages.map(({ date, mgs }, pIndex) => {
+                                return (
+                                    <div className="relative pb-4" key={date}>
+                                        <div className="border-t border-white/15 translate-y-3"></div>
+                                        <div className="text-xs border border-white/15 rounded-full h-6 flex items-center px-4 sticky top-0 left-1/2 -translate-x-1/2  w-fit bg-background z-20">
+                                            {date}
+                                        </div>
 
-                                <ul className="">
-                                    {mgs.map((message, index) => {
-                                        let user = {
-                                            ...workspaceUsers.find(
-                                                (mem) =>
-                                                    mem.id === message.user_id
-                                            ),
-                                        };
-                                        if (
-                                            user &&
-                                            !channelUsers.find(
-                                                (u) => u.id == user.id
-                                            )
-                                        ) {
-                                            user.notMember = true;
-                                        }
-                                        if (!user)
-                                            user = {
-                                                id: message.user_id,
-                                                name: message.user_name,
-                                                notMember: true,
-                                            };
-                                        // if (!user) return "";
-                                        hasChanged = false;
-                                        if (preValue) {
-                                            if (
-                                                preValue.user.id != user.id ||
-                                                differenceInSeconds(
-                                                    preValue.message.created_at,
-                                                    message.created_at
-                                                ) > 10
-                                            ) {
-                                                hasChanged = true;
-                                                preValue = { user, message };
-                                            }
-                                        } else preValue = { user, message };
-                                        if (message.forwarded_message) {
-                                            return (
-                                                <ForwardedMessage
-                                                    key={message.id}
-                                                    message={message}
-                                                    user={user}
-                                                    hasChanged={hasChanged}
-                                                    index={index}
-                                                    messagableConnectionRef={
-                                                        channelConnectionRef
-                                                    }
-                                                    newMessageReactionReceive={
-                                                        newMessageReactionReceive
-                                                    }
-                                                    resetNewMessageReactionReceive={() =>
-                                                        setNewMessageReactionReceive(
-                                                            null
-                                                        )
-                                                    }
-                                                />
-                                            );
-                                        }
-                                        return (
-                                            <Message
-                                                key={message.id}
-                                                message={message}
-                                                user={user}
-                                                hasChanged={hasChanged}
-                                                index={index}
-                                                messagableConnectionRef={
-                                                    channelConnectionRef
-                                                }
-                                                newMessageReactionReceive={
-                                                    newMessageReactionReceive
-                                                }
-                                                resetNewMessageReactionReceive={() =>
-                                                    setNewMessageReactionReceive(
-                                                        null
+                                        <ul className="">
+                                            {mgs.map((message, index) => {
+                                                let user = {
+                                                    ...workspaceUsers.find(
+                                                        (mem) =>
+                                                            mem.id ===
+                                                            message.user_id
+                                                    ),
+                                                };
+                                                if (
+                                                    user &&
+                                                    !channelUsers.find(
+                                                        (u) => u.id == user.id
                                                     )
+                                                ) {
+                                                    user.notMember = true;
                                                 }
-                                            />
-                                        );
-                                    })}
-                                </ul>
-                            </div>
-                        );
-                    })}
-                    <div ref={bottom_ref} className=""></div>
-                </div>
-                <div className="m-6 border border-white/15 pt-4 px-2 rounded-lg ">
-                    {permissions.chat && <TipTapEditor onSubmit={onSubmit} />}
-                    {!permissions.chat &&
-                        !channel.is_archived &&
-                        isChannelMember && (
-                            <h5 className="mb-4 text-center ml-4">
-                                You're not allowed to post in channel. Contact
-                                Admins or Channel managers for more information!
-                            </h5>
-                        )}
-                    {!isChannelMember && permissions.join && (
-                        <div className="">
-                            <div className="flex items-baseline gap-x-1 font-bold justify-center text-lg">
-                                {channel.type == "PUBLIC" ? (
-                                    <span className="text-xl">#</span>
-                                ) : (
-                                    <FaLock className="text-sm inline" />
-                                )}{" "}
-                                {channelName}
-                            </div>
-                            <div className="flex gap-x-4 justify-center my-4 ">
-                                <ChannelSettings
-                                    channelName={channelName}
-                                    buttonNode={
-                                        <Button className="bg-black/15 border border-white/15">
-                                            Detail
+                                                if (!user)
+                                                    user = {
+                                                        id: message.user_id,
+                                                        name: message.user_name,
+                                                        notMember: true,
+                                                    };
+                                                // if (!user) return "";
+                                                hasChanged = false;
+                                                if (preValue) {
+                                                    if (
+                                                        preValue.user.id !=
+                                                            user.id ||
+                                                        differenceInSeconds(
+                                                            preValue.message
+                                                                .created_at,
+                                                            message.created_at
+                                                        ) > 10
+                                                    ) {
+                                                        hasChanged = true;
+                                                        preValue = {
+                                                            user,
+                                                            message,
+                                                        };
+                                                    }
+                                                } else
+                                                    preValue = {
+                                                        user,
+                                                        message,
+                                                    };
+                                                if (message.forwarded_message) {
+                                                    return (
+                                                        <ForwardedMessage
+                                                            key={message.id}
+                                                            message={message}
+                                                            user={user}
+                                                            hasChanged={
+                                                                hasChanged
+                                                            }
+                                                            index={index}
+                                                            messagableConnectionRef={
+                                                                channelConnectionRef
+                                                            }
+                                                            newMessageReactionReceive={
+                                                                newMessageReactionReceive
+                                                            }
+                                                            resetNewMessageReactionReceive={() =>
+                                                                setNewMessageReactionReceive(
+                                                                    null
+                                                                )
+                                                            }
+                                                        />
+                                                    );
+                                                }
+                                                return (
+                                                    <Message
+                                                        key={message.id}
+                                                        message={message}
+                                                        user={user}
+                                                        hasChanged={hasChanged}
+                                                        index={index}
+                                                        messagableConnectionRef={
+                                                            channelConnectionRef
+                                                        }
+                                                        newMessageReactionReceive={
+                                                            newMessageReactionReceive
+                                                        }
+                                                        resetNewMessageReactionReceive={() =>
+                                                            setNewMessageReactionReceive(
+                                                                null
+                                                            )
+                                                        }
+                                                    />
+                                                );
+                                            })}
+                                        </ul>
+                                    </div>
+                                );
+                            })}
+                            <div ref={bottom_ref} className=""></div>
+                        </div>
+                        <div className="m-6 border border-white/15 pt-4 px-2 rounded-lg ">
+                            {permissions.chat && (
+                                <TipTapEditor onSubmit={onSubmit} />
+                            )}
+                            {!permissions.chat &&
+                                !channel.is_archived &&
+                                isChannelMember && (
+                                    <h5 className="mb-4 text-center ml-4">
+                                        You're not allowed to post in channel.
+                                        Contact Admins or Channel managers for
+                                        more information!
+                                    </h5>
+                                )}
+                            {!isChannelMember && permissions.join && (
+                                <div className="">
+                                    <div className="flex items-baseline gap-x-1 font-bold justify-center text-lg">
+                                        {channel.type == "PUBLIC" ? (
+                                            <span className="text-xl">#</span>
+                                        ) : (
+                                            <FaLock className="text-sm inline" />
+                                        )}{" "}
+                                        {channelName}
+                                    </div>
+                                    <div className="flex gap-x-4 justify-center my-4 ">
+                                        <ChannelSettings
+                                            channelName={channelName}
+                                            buttonNode={
+                                                <Button className="bg-black/15 border border-white/15">
+                                                    Detail
+                                                </Button>
+                                            }
+                                        />
+                                        <Button
+                                            className="bg-green-900"
+                                            onClick={joinChannel}
+                                        >
+                                            Join Channel
                                         </Button>
-                                    }
-                                />
-                                <Button
-                                    className="bg-green-900"
-                                    onClick={joinChannel}
-                                >
-                                    Join Channel
-                                </Button>
-                            </div>
+                                    </div>
+                                </div>
+                            )}
+                            {channel.is_archived == true && (
+                                <div className="mb-4 justify-center flex ml-4 items-baseline gap-x-1 text-white/75">
+                                    You are viewing{" "}
+                                    <div className="flex items-baseline gap-x-1">
+                                        {channel.type == "PUBLIC" ? (
+                                            <span className="text-xl">#</span>
+                                        ) : (
+                                            <FaLock className="text-sm inline" />
+                                        )}{" "}
+                                        {channelName}
+                                    </div>
+                                    , an archived channel
+                                </div>
+                            )}
                         </div>
-                    )}
-                    {channel.is_archived == true && (
-                        <div className="mb-4 justify-center flex ml-4 items-baseline gap-x-1 text-white/75">
-                            You are viewing{" "}
-                            <div className="flex items-baseline gap-x-1">
-                                {channel.type == "PUBLIC" ? (
-                                    <span className="text-xl">#</span>
-                                ) : (
-                                    <FaLock className="text-sm inline" />
-                                )}{" "}
-                                {channelName}
-                            </div>
-                            , an archived channel
-                        </div>
-                    )}
-                </div>
-            </div>
+                    </div>
+                </>
+            )}
         </div>
     );
 }

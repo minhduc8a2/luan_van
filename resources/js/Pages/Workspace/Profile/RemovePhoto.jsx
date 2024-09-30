@@ -3,10 +3,11 @@ import CustomedDialog from "@/Components/CustomedDialog";
 
 import { router, usePage } from "@inertiajs/react";
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 export default function RemovePhoto({ user }) {
-    const { default_avatar_url } = usePage().props;
+    const { default_avatar_url } = useSelector((state) => state.workspace);
+
     const [show, setShow] = useState(false);
     const dispatch = useDispatch();
     function removePhoto() {

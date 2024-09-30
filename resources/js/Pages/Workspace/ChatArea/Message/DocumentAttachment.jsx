@@ -12,6 +12,7 @@ import {
 import { IoCloudDownloadOutline } from "react-icons/io5";
 import { MdMoreVert } from "react-icons/md";
 import copy from "copy-to-clipboard";
+import { useSelector } from "react-redux";
 const DocumentAttachment = memo(function ({
     attachment,
     openOverlay,
@@ -20,7 +21,7 @@ const DocumentAttachment = memo(function ({
     className = "",
     noToolbar = false,
 }) {
-    const { publicAppUrl } = usePage().props;
+    const { publicAppUrl } = useSelector((state) => state.workspace);
     const [isHovered, setIsHovered] = useState(false);
     const close = useClose();
 

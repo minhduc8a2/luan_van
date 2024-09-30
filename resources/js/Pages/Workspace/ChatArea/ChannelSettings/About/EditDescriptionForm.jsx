@@ -7,13 +7,11 @@ import { router, usePage } from "@inertiajs/react";
 import { useState, useEffect, useMemo } from "react";
 import { SettingsButton } from "./SettingsButton";
 import { useSelector } from "react-redux";
+import { useChannel, useChannelData } from "@/helpers/customHooks";
 export function EditDescriptionForm() {
-    const { channelId, permissions } = usePage().props;
-    const { channels } = useSelector((state) => state.channels);
-    const channel = useMemo(
-        () => channels.find((cn) => cn.id == channelId),
-        [channels, channelId]
-    );
+    const { channelId } = usePage().props;
+    const { channel } = useChannel(channelId);
+    const { permissions } = useChannelData(channelId);
     const [success, setSuccess] = useState(false);
     const { data, setData, post, processing, errors } = useForm({
         description: channel.description,
@@ -57,8 +55,8 @@ export function EditDescriptionForm() {
             >
                 {!permissions.updateDescription && (
                     <h3 className="text-lg my-4">
-                        ⚠️You are not allowed to edit channel description, contact admins or channel managers
-                        for more information.
+                        ⚠️You are not allowed to edit channel description,
+                        contact admins or channel managers for more information.
                     </h3>
                 )}
                 <TextArea

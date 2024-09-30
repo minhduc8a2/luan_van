@@ -9,23 +9,19 @@ import { usePage } from "@inertiajs/react";
 import { useDispatch, useSelector } from "react-redux";
 
 import { toggleHuddle } from "@/Store/huddleSlice";
+import {
+    useChannel,
+    useChannelData,
+    useChannelUsers,
+} from "@/helpers/customHooks";
 export default function Header({ channelName }) {
-    const {
-        auth,
-        channelId,
+    const { auth, channelId } = usePage().props;
 
-        channelUsers,
-
-        permissions,
-    } = usePage().props;
     const { channelId: huddleChannelId } = useSelector((state) => state.huddle);
-    const { channels } = useSelector((state) => state.channels);
+    const { channel } = useChannel(channelId);
 
-    const channel = useMemo(
-        () => channels.find((cn) => cn.id == channelId),
-        [channels, channelId]
-    );
-    const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
+    const { permissions } = useChannelData(channelId);
+    const { channelUsers } = useChannelUsers(channelId);
 
     const dispatch = useDispatch();
     function handleHuddleButtonClicked() {

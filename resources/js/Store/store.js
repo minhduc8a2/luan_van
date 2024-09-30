@@ -15,6 +15,7 @@ import windowTypeReducer from "./windowTypeSlice";
 import workspaceUsersReducer from "./workspaceUsersSlice";
 import channelsReducer from "./channelsSlice";
 import workspaceReducer from "./workspaceSlice";
+import channelsDataReducer from "./channelsDataSlice";
 export const makeStore = () => {
     return configureStore({
         reducer: {
@@ -25,7 +26,6 @@ export const makeStore = () => {
             thread: threadReducer,
             mention: mentionReducer,
             messages: messagesReducer,
-
             page: pageReducer,
             notificationPopup: notificationPopupReducer,
             media: mediaReducer,
@@ -34,6 +34,7 @@ export const makeStore = () => {
             workspaceUsers: workspaceUsersReducer,
             channels: channelsReducer,
             workspace: workspaceReducer,
+            channelsData: channelsDataReducer,
         },
     });
 };

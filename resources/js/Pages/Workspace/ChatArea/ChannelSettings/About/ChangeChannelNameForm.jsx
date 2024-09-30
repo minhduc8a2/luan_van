@@ -7,13 +7,12 @@ import TextInput from "@/Components/Input/TextInput";
 import { SettingsButton } from "./SettingsButton";
 import { FaLock } from "react-icons/fa";
 import { useSelector } from "react-redux";
+import { useChannel, useChannelData } from "@/helpers/customHooks";
 export default function ChangeChannelNameForm({ channelName }) {
-    const { channelId, permissions } = usePage().props;
-    const { channels } = useSelector((state) => state.channels);
-    const channel = useMemo(
-        () => channels.find((cn) => cn.id == channelId),
-        [channels, channelId]
-    );
+    const { channelId } = usePage().props;
+    const { channel } = useChannel(channelId);
+    const {  permissions } =
+        useChannelData(channelId);
     const { data, setData, post, processing, errors, reset } = useForm({
         name: channel.name,
     });

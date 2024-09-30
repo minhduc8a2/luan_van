@@ -4,21 +4,21 @@ export const workspaceSlice = createSlice({
     name: "workspace",
     initialState: {
         workspaces: [],
-        newNotificationsCount:0,
-        workspacePermissions:[]
+        newNotificationsCount: 0,
+        workspacePermissions: [],
+        default_avatar_url: "",
+        publicAppUrl: "",
     },
     reducers: {
         setWorkspaceData(state, action) {
-            state.workspaces = action.payload.workspaces;
-            state.newNotificationsCount = action.payload.newNotificationsCount;
-            state.workspacePermissions = action.payload.workspacePermissions;
+            Object.keys(action.payload).forEach((key) => {
+                state[key] = action.payload[key];
+            });
         },
-        
     },
 });
 
 // Action creators are generated for each case reducer function
-export const { setWorkspaceData } =
-    workspaceSlice.actions;
+export const { setWorkspaceData } = workspaceSlice.actions;
 
 export default workspaceSlice.reducer;

@@ -3,8 +3,9 @@ import Overlay from "@/Components/Overlay/Overlay";
 import { IoMdCloudDownload } from "react-icons/io";
 import { usePage } from "@inertiajs/react";
 import { getDocumentType } from "@/helpers/fileHelpers";
+import { useSelector } from "react-redux";
 const DocumentInSearch = memo(function ({ file, Icon, className = "" })  {
-    const { publicAppUrl } = usePage().props;
+    const { publicAppUrl } = useSelector((state) => state.workspace);
     const [openOverlay, setOpenOverlay] = useState(false);
     console.log(file);
     return (

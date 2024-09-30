@@ -13,7 +13,7 @@ export default function SquareImage({
     percentage = 0,
 }) {
     const [uploaded, setUploaded] = useState(false);
-    const { default_avatar_url } = usePage().props;
+    const { default_avatar_url } = useSelector(state=>state.workspace);
     useEffect(() => {
         if (percentage == 100) setUploaded(true);
     }, [percentage]);

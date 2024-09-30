@@ -6,14 +6,11 @@ import Button from "@/Components/Button";
 import { useState } from "react";
 import { FaLock } from "react-icons/fa";
 import ErrorsList from "@/Components/ErrorsList";
+import { useChannel, useChannelUsers } from "@/helpers/customHooks";
 export default function AddManagers({ close, setErrors }) {
-    const { channelUsers, auth, channelId } = usePage().props;
-    const { channels } = useSelector((state) => state.channels);
-
-    const channel = useMemo(
-        () => channels.find((cn) => cn.id == channelId),
-        [channels, channelId]
-    );
+    const { channelId } = usePage().props;
+    const { channelUsers } = useChannelUsers(channelId);
+    const { channel } = useChannel(channelId);
     const [choosenUsers, setChoosenUsers] = useState({});
 
     const [processing, setProcessing] = useState(false);

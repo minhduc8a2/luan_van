@@ -17,11 +17,11 @@ import copy from "copy-to-clipboard";
 import OverlayConfirm from "@/Components/Overlay/OverlayConfirm";
 import FileItem from "@/Components/FileItem";
 import { usePage } from "@inertiajs/react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setNotificationPopup } from "@/Store/notificationPopupSlice";
 
 const Item = memo(function ({ file }) {
-    const { publicAppUrl } = usePage().props;
+    const { publicAppUrl } = useSelector((state) => state.workspace);
     const [openOverlay, setOpenOverlay] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
     const [showConfirm, setShowConfirm] = useState(null);

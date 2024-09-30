@@ -9,7 +9,7 @@ import {
 } from "@/helpers/notificationTypeHelper";
 import { useDispatch, useSelector } from "react-redux";
 import {
-    pushActivity,
+   
     pushManyActivity,
     setActivity,
     setAsRead,

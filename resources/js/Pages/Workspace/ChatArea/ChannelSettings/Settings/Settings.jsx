@@ -9,8 +9,10 @@ import OverlayNotification from "@/Components/Overlay/OverlayNotification";
 import DeleteChannel from "./DeleteChannel";
 import ChannelPermissions from "./ChannelPermissions";
 import ArchiveChannel from "./ArchiveChannel";
+import { useChannelData } from "@/helpers/customHooks";
 export default function Settings({ channel, channelName, workspace }) {
-    const { permissions } = usePage().props;
+    const { channelId } = usePage().props;
+    const { permissions } = useChannelData(channelId);
 
     return (
         <div className="p-6 ">

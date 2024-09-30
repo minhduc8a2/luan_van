@@ -5,12 +5,14 @@ import AvatarAndName from "@/Components/AvatarAndName";
 import { IoMdClose } from "react-icons/io";
 import { usePage } from "@inertiajs/react";
 import { useSelector } from "react-redux";
+import { useManagers } from "@/helpers/customHooks";
 export default function AutocompleInput({
     users,
     choosenUsers,
     setChoosenUsers,
 }) {
-    const { managers } = usePage().props;
+    const { channelId } = usePage().props;
+    const { managers } = useManagers(channelId);
     const [showSuggested, setShowSuggested] = useState(false);
     const [inputValue, setInputValue] = useState("");
     const onlineStatusMap = useSelector((state) => state.onlineStatus);

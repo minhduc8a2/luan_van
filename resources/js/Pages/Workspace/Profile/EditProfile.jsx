@@ -6,13 +6,14 @@ import OverlayConfirm from "@/Components/Overlay/OverlayConfirm";
 import { Link, router, useForm, usePage } from "@inertiajs/react";
 import { useEffect, useState } from "react";
 import RemovePhoto from "./RemovePhoto";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setNotificationPopup } from "@/Store/notificationPopupSlice";
 import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
 import Image from "@/Components/Image";
 
 export default function EditProfile({ user, triggerButton }) {
-    const { workspace, default_avatar_url } = usePage().props;
+    const { workspace } = usePage().props;
+    const { default_avatar_url } = useSelector((state) => state.workspace);
     let [isOpen, setIsOpen] = useState(false);
 
     const [avatarFile, setAvatarFile] = useState(null);
@@ -63,7 +64,6 @@ export default function EditProfile({ user, triggerButton }) {
 
             onSuccess: () => {
                 setIsOpen(false);
-              
             },
         });
     }

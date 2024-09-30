@@ -11,6 +11,7 @@ import {
 import { usePage } from "@inertiajs/react";
 import copy from "copy-to-clipboard";
 import { MdDownload, MdMoreVert } from "react-icons/md";
+import { useSelector } from "react-redux";
 
 const Image = memo(function Image({
     url,
@@ -23,7 +24,7 @@ const Image = memo(function Image({
     deleteFn = () => {},
     noToolbar = false,
 }) {
-    const { publicAppUrl } = usePage().props;
+    const { publicAppUrl } = useSelector((state) => state.workspace);
     const [loading, setLoading] = useState(true);
     const [largeLoading, setLargeLoading] = useState(true);
     const [isHovered, setIsHovered] = useState(false);

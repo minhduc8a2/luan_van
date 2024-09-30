@@ -4,9 +4,12 @@ import React from "react";
 import { SettingsButton } from "../About/SettingsButton";
 import { useState } from "react";
 import { useForm, usePage } from "@inertiajs/react";
+import { useChannel, useChannelData } from "@/helpers/customHooks";
 
 export default function ChannelPermissions() {
-    const { channel, channelPermissions } = usePage().props;
+    const { channelId } = usePage().props;
+    const {channel} = useChannel(channelId)
+    const { channelPermissions } = useChannelData(channelId);
     const [success, setSuccess] = useState(false);
     const whoes = [
         {

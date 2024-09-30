@@ -12,6 +12,7 @@ import {
     PopoverPanel,
     CloseButton,
 } from "@headlessui/react";
+import { useChannel, useChannelData, useManagers } from "@/helpers/customHooks";
 
 export default function Member({
     user,
@@ -19,13 +20,10 @@ export default function Member({
     removeFromChannel,
     removeChannelManager,
 }) {
-    const { managers, channelId, permissions } = usePage().props;
-    const { channels } = useSelector((state) => state.channels);
-
-    const channel = useMemo(
-        () => channels.find((cn) => cn.id == channelId),
-        [channels, channelId]
-    );
+    const { channelId } = usePage().props;
+    const { managers } = useManagers(channelId);
+    const { permissions } = useChannelData(channelId);
+    const { channel } = useChannel(channelId);
     const [showOptions, setShowOptions] = useState(false);
     const onlineStatusMap = useSelector((state) => state.onlineStatus);
     const isManager = useMemo(() => {

@@ -7,16 +7,18 @@ import { useMemo, useState } from "react";
 import ErrorsList from "@/Components/ErrorsList";
 import AddPeople from "./AddPeople";
 import Member from "./Member";
-import { useSelector } from "react-redux";
+
+import {
+    useChannel,
+    useChannelData,
+    useChannelUsers,
+} from "@/helpers/customHooks";
 export default function Members() {
     const [errors, setErrors] = useState(null);
-    const { managers, channelId, channelUsers, permissions } = usePage().props;
-    const { channels } = useSelector((state) => state.channels);
-
-    const channel = useMemo(
-        () => channels.find((cn) => cn.id == channelId),
-        [channels, channelId]
-    );
+    const { channelId } = usePage().props;
+    const { permissions } = useChannelData(channelId);
+    const { channelUsers } = useChannelUsers(channelId);
+    const channel = useChannel(channelId);
     const [searchValue, setSearchValue] = useState("");
     function removeChannelManager(user) {
         router.post(

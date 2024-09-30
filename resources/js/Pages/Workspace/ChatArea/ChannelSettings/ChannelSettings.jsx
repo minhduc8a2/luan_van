@@ -9,14 +9,11 @@ import About from "./About/About";
 import Settings from "./Settings/Settings";
 import Members from "./Members/Members";
 import { useSelector } from "react-redux";
+import { useChannel, useChannelData } from "@/helpers/customHooks";
 export default function ChannelSettings({ channelName, buttonNode }) {
-    const { channelId, workspace, permissions } = usePage().props;
-    const { channels } = useSelector((state) => state.channels);
-
-    const channel = useMemo(
-        () => channels.find((cn) => cn.id == channelId),
-        [channels, channelId]
-    );
+    const { channelId, workspace } = usePage().props;
+    const { channel } = useChannel(channelId);
+    const { permissions } = useChannelData(channelId);
     const [tabIndex, setTabIndex] = useState(0);
     const [show, setShow] = useState(false);
     useEffect(() => {

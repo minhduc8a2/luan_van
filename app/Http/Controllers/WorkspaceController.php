@@ -25,7 +25,8 @@ class WorkspaceController extends Controller
         $workspacePermissions =  ['createChannel' => $user->can('create', [Channel::class, $workspace]),];
 
         return [
-
+            'default_avatar_url' => env('DEFAULT_AVATAR_URL'),
+            'publicAppUrl' => env('PUBLIC_APP_URL', ''),
             'workspaces' => $workspaces,
             'newNotificationsCount' => $newNotificationsCount,
             'workspacePermissions' => $workspacePermissions,

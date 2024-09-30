@@ -9,11 +9,12 @@ use App\Helpers\Helper;
 use App\Models\Channel;
 use App\Models\Message;
 
+use App\Models\Workspace;
 use App\Events\MessageEvent;
+
 use Illuminate\Http\Request;
 
 use App\Events\WorkspaceEvent;
-
 use App\Events\ThreadMessageEvent;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -25,9 +26,47 @@ class MessageController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function infiniteMessages(Request $request,  Channel $channel)
     {
-        //
+        $perPage = 10;
+
+        $content = $request->query('content') ?? "";
+        // $page = $request->query('page') ?? 1;
+        $last_id = $request->query('last_id');
+        $direction = $request->query('direction') ?? "bottom";
+        // $page = 2;
+        $user = $request->user();
+        $hiddenUserIds =  $user->hiddenUsers()->wherePivot('workspace_id', $channel->workspace->id)->pluck('hidden_user_id')->toArray();
+        $messagesQuery = $channel->messages()->whereNotIn('user_id', $hiddenUserIds)->where('threaded_message_id', null)->withTrashed()->with([
+            'files' => function ($query) {
+                $query->withTrashed();
+            },
+            'reactions',
+
+            'forwardedMessage.files' => function ($query) {
+
+                $query->withTrashed();
+            },
+        ])->withCount([
+            'threadMessages' => function ($query) use ($hiddenUserIds) {
+
+                $query->whereNotIn('user_id', $hiddenUserIds);
+            }
+        ])->where('content', 'like', '%' . $content . '%');
+
+
+
+        if ($last_id) {
+            if ($direction === 'bottom') {
+                $messagesQuery->where('id', '<', $last_id)->orderBy('id', 'desc');
+            } else {
+                $messagesQuery->where('id', '>', $last_id)->orderBy('id', 'asc');
+            }
+        } else {
+            $messagesQuery->orderBy('id', 'desc');
+        }
+
+        return $messagesQuery->limit($perPage)->get();
     }
     public function getMessage(Request $request)
     {

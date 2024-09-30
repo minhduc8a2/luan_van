@@ -1,5 +1,6 @@
-import { usePage } from "@inertiajs/react";
+
 import React, { memo } from "react";
+import { useSelector } from "react-redux";
 
 const Avatar = memo(function ({
     src = "",
@@ -10,7 +11,7 @@ const Avatar = memo(function ({
     noStatus = false,
     roundedClassName = "rounded-lg ",
 }) {
-    const { default_avatar_url } = usePage().props;
+    const { default_avatar_url } = useSelector(state=>state.workspace);
     return (
         <div className={"relative  " + className}>
             <img
