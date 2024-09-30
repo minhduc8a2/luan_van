@@ -62,8 +62,8 @@ Route::middleware('auth')->group(function () {
     Route::post("/channels/{channel}/change_type", [ChannelController::class, 'changeType'])->name("channel.change_type");
     Route::post("/channels/{channel}/leave", [ChannelController::class, 'leave'])->name("channel.leave");
     Route::post("/channels/{channel}/join", [ChannelController::class, 'join'])->name("channel.join");
-    Route::post("/channels/{channel}/add_managers", [ChannelController::class, 'addManagers'])->name("channel.add_managers");
-    Route::post("/channels/{channel}/remove_manager", [ChannelController::class, 'removeManager'])->name("channel.remove_manager");
+    Route::post("/channels/{channel}/add_managers", [ChannelController::class, 'addManagers'])->name("channels.addManagers");
+    Route::post("/channels/{channel}/remove_manager", [ChannelController::class, 'removeManager'])->name("channels.removeManager");
     Route::post("/channels/{channel}/last_read", [ChannelController::class, 'lastRead'])->name("channel.last_read");
     Route::post("/channels/{channel}/remove_user_from_channel", [ChannelController::class, 'removeUserFromChannel'])->name("channel.remove_user_from_channel");
     Route::post("/channels/{channel}/add_users_to_channel", [ChannelController::class, 'addUsersToChannel'])->name("channel.add_users_to_channel");

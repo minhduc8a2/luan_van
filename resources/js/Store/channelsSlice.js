@@ -3,7 +3,7 @@ import { removeChannelData } from "./channelsDataSlice";
 
 export const removeChannel = (channelId) => (dispatch) => {
     dispatch(removeChannelData({ id: channelId }));
-    removeChannelFromChannelsStore(channelId);
+    dispatch(removeChannelFromChannelsStore(channelId));
 };
 export const channelsSlice = createSlice({
     name: "channels",
@@ -21,7 +21,10 @@ export const channelsSlice = createSlice({
             state.channels.sort((a, b) => a.id - b.id);
         },
         removeChannelFromChannelsStore(state, action) {
-            return state.channels.filter((cn) => cn.id != action.payload);
+            console.log("removeChannelFromChannelsStore");
+            state.channels = state.channels.filter(
+                (cn) => cn.id != action.payload
+            );
         },
         updateChannelInformation(state, action) {
             const channelIndex = state.channels.findIndex(

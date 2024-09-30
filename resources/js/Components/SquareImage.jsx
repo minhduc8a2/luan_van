@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from "react";
 import { IoMdCloseCircle } from "react-icons/io";
 import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
 import { usePage } from "@inertiajs/react";
+import { useSelector } from "react-redux";
 
 export default function SquareImage({
     size = "h-20 w-20",

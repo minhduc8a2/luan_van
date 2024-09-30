@@ -1,5 +1,5 @@
 import { router, usePage } from "@inertiajs/react";
-import React, { useRef } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 import { useEffect } from "react";
 import { setManyOnline, setOnlineStatus } from "@/Store/OnlineStatusSlice";
 import { useDispatch, useSelector } from "react-redux";
@@ -36,13 +36,19 @@ export default function Event() {
     const { workspace, channelId, auth } = usePage().props;
     const dispatch = useDispatch();
     const { channels } = useSelector((state) => state.channels);
+    const channelsData = useSelector((state) => state.channelsData);
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
     const { threadMessageId } = useSelector((state) => state.thread);
     const connectionRef = useRef(null);
     const { channelId: huddleChannelId } = useSelector((state) => state.huddle);
-
+    const mainChannel = useMemo(() => {
+        return channels.find((cn) => cn.is_main_channel);
+    }, [channels]);
     const loadChannelDataTokens = useRef([]);
     function loadChannelRelatedData(types) {
+        if (loadChannelDataTokens.current.length > 0) {
+            loadChannelDataTokens.current.forEach((token) => token.abort());
+        }
         return Promise.all(
             types.map((type, index) => loadChannelData(type, index))
         );
@@ -68,17 +74,66 @@ export default function Event() {
                 );
             });
     }
-    useEffect(() => {
+
+    const userListener = useCallback(() => {
         Echo.private("App.Models.User." + auth.user.id).notification(
             (notification) => {
                 console.log("new", notification);
                 dispatch(addActivity(notification));
+                if (isChannelsNotificationBroadcast(notification.type)) {
+                    const { channel, changesType } = notification;
+                    switch (changesType) {
+                        case "addedToNewChannel":
+                            dispatch(addNewChannelToChannelsStore(channel));
+                            console.log(channelId);
+                            if (channelsData.hasOwnProperty(channelId)) {
+                                console.log(
+                                    "Added to new channel and has channel data already, need to update"
+                                );
+                                loadChannelRelatedData([
+                                    "permissions",
+                                    "channelPermissions",
+                                ]);
+                            }
+                            break;
+                        case "removedFromChannel":
+                            if (channel.id != channelId) {
+                                dispatch(removeChannel(channel.id));
+                            } else {
+                                if (channel.type == "PRIVATE") {
+                                    dispatch(removeChannel(channel.id));
+                                    if (channel.id == channelId) {
+                                        router.get(
+                                            route("channels.show", {
+                                                workspace: workspace.id,
+                                                channel: mainChannel.id,
+                                            }),
+                                            {},
+                                            {
+                                                preserveState: true,
+                                            }
+                                        );
+                                    }
+                                } else {
+                                    loadChannelRelatedData([
+                                        "permissions",
+                                        "channelPermissions",
+                                    ]);
+                                }
+                            }
+                            break;
+                    }
+                }
             }
         );
+    }, [channelId, workspace.id, mainChannel.id, auth.user.id, channelsData]);
+    useEffect(() => {
+        userListener();
         return () => {
             Echo.leave("App.Models.User." + auth.user.id);
         };
-    }, []);
+    }, [userListener, auth.user.id]);
+
     function workspaceListener() {
         console.log("init worksapce listener");
         connectionRef.current = Echo.join(`workspaces.${workspace.id}`);
@@ -138,9 +193,6 @@ export default function Event() {
                         break;
                     case "newUserJoinWorkspace":
                         dispatch(addWorkspaceUser(e.data));
-                        const mainChannel = channels.find(
-                            (cn) => cn.is_main_channel
-                        );
                         dispatch(
                             addUsersToChannel({
                                 id: mainChannel.id,
@@ -252,22 +304,19 @@ export default function Event() {
                             ]);
                             break;
                         case "leave":
-                            if (e.data == auth.user.id) {
-                                dispatch(removeChannel(cn.id));
-                            } else {
-                                dispatch(
-                                    removeManagerFromChannel({
-                                        id: cn.id,
-                                        userId: e.data,
-                                    })
-                                );
-                                dispatch(
-                                    removeUserFromChannel({
-                                        id: cn.id,
-                                        userId: e.data,
-                                    })
-                                );
-                            }
+                            dispatch(
+                                removeManagerFromChannel({
+                                    id: cn.id,
+                                    userId: e.data,
+                                })
+                            );
+                            dispatch(
+                                removeUserFromChannel({
+                                    id: cn.id,
+                                    userId: e.data,
+                                })
+                            );
+
                             break;
                         case "removeUserFromChannel":
                             dispatch(
@@ -282,12 +331,7 @@ export default function Event() {
                                     userId: e.data,
                                 })
                             );
-                            if (e.data == auth.user.id) {
-                                loadChannelRelatedData([
-                                    "permissions",
-                                    "channelPermissions",
-                                ]);
-                            }
+
                             break;
                         case "addUsersToChannel":
                             dispatch(
@@ -296,12 +340,7 @@ export default function Event() {
                                     userIds: e.data,
                                 })
                             );
-                            if (e.data?.find((id) => id == auth.user.id)) {
-                                loadChannelRelatedData([
-                                    "permissions",
-                                    "channelPermissions",
-                                ]);
-                            }
+
                             break;
                         case "updateChannelPermissions":
                             loadChannelRelatedData([

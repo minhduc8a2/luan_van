@@ -2,6 +2,7 @@ import Button from "@/Components/Button";
 import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
 
 import OverlayNotification from "@/Components/Overlay/OverlayNotification";
+import useErrorHandler from "@/helpers/useErrorHandler";
 import { router, useForm, usePage } from "@inertiajs/react";
 import React, { useMemo } from "react";
 import { useState } from "react";
@@ -24,33 +25,22 @@ export default function ChangeToPrivateConfirm({ channelName }) {
     }, [channel]);
 
     const [success, setSuccess] = useState(false);
-    const [errors, setErrors] = useState(null);
+
     const [processing, setProcessing] = useState(false);
+    const handleError = useErrorHandler();
+
     function onSubmit(e) {
         e.preventDefault();
         setProcessing(true);
-
-        router.post(
-            route("channel.change_type", channel.id),
-            {
+        axios
+            .post(route("channel.change_type", channel.id), {
                 type: channelType,
-            },
-            {
-                preserveState: true,
-                onSuccess: () => {
-                    setSuccess(true);
-                },
-                onError: (err) => {
-                    setErrors(err);
-                },
-                onFinish: () => {
-                    setProcessing(false);
-                },
-                headers: {
-                    "X-Socket-Id": Echo.socketId(),
-                },
-            }
-        );
+            })
+            .catch(handleError)
+            .finally(() => {
+                setSuccess(true);
+                setProcessing(false);
+            });
     }
     return (
         <OverlayNotification
@@ -113,11 +103,6 @@ export default function ChangeToPrivateConfirm({ channelName }) {
                             : "If you make the channel private again, it’ll be visible to anyone who’s joined the channel up until that point."}
                     </li>
                 </ul>
-                {errors?.length > 0 && (
-                    <div className="my-4 text-red-500 text-sm">
-                        Failed to change channel type, please try later!
-                    </div>
-                )}
             </div>
         </OverlayNotification>
     );

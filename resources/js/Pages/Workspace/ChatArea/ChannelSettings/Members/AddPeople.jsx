@@ -6,9 +6,10 @@ import Button from "@/Components/Button";
 import { useState } from "react";
 import { FaLock } from "react-icons/fa";
 import { useSelector } from "react-redux";
+import useErrorHandler from "@/helpers/useErrorHandler";
 
 export default function AddPeople({ close, setErrors }) {
-    const { channelUsers, auth, channelId, workspace } = usePage().props;
+    const { channelId, workspace } = usePage().props;
     const [choosenUsers, setChoosenUsers] = useState({});
     const { channels } = useSelector((state) => state.channels);
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
@@ -17,29 +18,20 @@ export default function AddPeople({ close, setErrors }) {
         [channels, channelId]
     );
     const [processing, setProcessing] = useState(false);
+    const handleError = useErrorHandler();
 
     function submit() {
         setProcessing(true);
-        router.post(
-            route("channel.add_users_to_channel", channel.id),
-            {
+        axios
+            .post(route("channel.add_users_to_channel", channel.id), {
                 users: [...Object.values(choosenUsers)],
-            },
-            {
-                preserveState: true,
-                only: ["channelUsers"],
-                onError: (errors) => {
-                    setErrors(errors);
-                },
-                onFinish: () => {
-                    setProcessing(false);
-                    close();
-                },
-                headers: {
-                    "X-Socket-Id": Echo.socketId(),
-                },
-            }
-        );
+            })
+
+            .catch(handleError)
+            .finally(() => {
+                setProcessing(false);
+                close();
+            });
     }
     return (
         <div className="min-w-96 p-4 text-white/85 max-w-lg">

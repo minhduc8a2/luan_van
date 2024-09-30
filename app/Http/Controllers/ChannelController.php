@@ -70,13 +70,13 @@ class ChannelController extends Controller
 
             case 'permissions':
                 return ['permissions' => $permissions()];
-                break;
+
             case 'manager_ids':
                 return ['managerIds' => $managerIds()];
-                break;
+
             case 'channel_user_ids':
                 return ['channelUserIds' => $channelUserIds()];
-                break;
+
             case 'channel':
                 return ['channel' => $channel];
         }
@@ -302,10 +302,11 @@ class ChannelController extends Controller
 
 
             DB::commit();
-            return back();
+            return ['message' => 'successfull'];
         } catch (\Throwable $th) {
             DB::rollBack();
-            return back()->withErrors(['server' => "Something went wrong, please try later!"]);
+
+            abort(500, "Something went wrong! Please try later.");
         }
     }
 
@@ -357,10 +358,11 @@ class ChannelController extends Controller
             broadcast(new ChannelEvent($channel, "editDescription"))->toOthers();
             DB::commit();
 
-            return back();
+            return ['message' => 'successfull'];
         } catch (\Throwable $th) {
             DB::rollBack();
-            return back()->withErrors(["server" => "Something went wrong! Please try later"]);
+
+            abort(500, "Something went wrong! Please try later.");
         }
     }
     public function editName(Request $request, Channel $channel)
@@ -377,10 +379,11 @@ class ChannelController extends Controller
             broadcast(new ChannelEvent($channel, "editName"))->toOthers();
             DB::commit();
 
-            return back();
+            return ['message' => 'successfull'];
         } catch (\Throwable $th) {
             DB::rollBack();
-            return back()->withErrors(["server" => "Something went wrong! Please try later"]);
+
+            abort(500, "Something went wrong! Please try later.");
         }
     }
 
@@ -412,11 +415,11 @@ class ChannelController extends Controller
 
             DB::commit();
 
-            return back();
+            return ['message' => 'successfull'];
         } catch (\Throwable $th) {
             DB::rollBack();
-            dd($th);
-            return back()->withErrors(["server" => "Something went wrong! Please try later"]);
+
+            abort(500, "Something went wrong! Please try later.");
         }
     }
 
@@ -436,11 +439,11 @@ class ChannelController extends Controller
             broadcast(new ChannelEvent($channel, "leave", $request->user()->id));
             DB::commit();
 
-            return [];
+            return ['message' => 'successfull'];
         } catch (\Throwable $th) {
             DB::rollBack();
 
-            abort(500, "Something went wrong! Please try later");
+            abort(500, "Something went wrong! Please try later.");
         }
     }
     public function join(Request $request, Channel $channel)
@@ -459,11 +462,11 @@ class ChannelController extends Controller
             broadcast(new ChannelEvent($channel, "join", $request->user()->id))->toOthers();
             DB::commit();
 
-            return back();
+            return ['message' => 'successfull'];
         } catch (\Throwable $th) {
             DB::rollBack();
-            dd($th);
-            return back()->withErrors(["server" => "Something went wrong! Please try later"]);
+
+            abort(500, "Something went wrong! Please try later.");
         }
     }
     public function removeUserFromChannel(Request $request, Channel $channel)
@@ -494,15 +497,16 @@ class ChannelController extends Controller
             Message::createStringMessageAndBroadcast($channel, $request->user(), $request->user()->name . " has removed " . $user->name . " from channel");
 
             DB::commit();
-            return back();
+            return ['message' => 'successfull'];
         } catch (\Throwable $th) {
             DB::rollBack();
-            dd($th);
-            return back()->withErrors(["server" => "Something went wrong! Please try later"]);
+
+            abort(500, "Something went wrong! Please try later.");
         }
     }
     public function addUsersToChannel(Request $request, Channel $channel)
     {
+
         if ($request->user()->cannot('addUsersToChannel', $channel)) {
             return  abort(403);
         }
@@ -516,18 +520,19 @@ class ChannelController extends Controller
                 $user = User::find($u['id']);
                 if ($user->channels()->where('channels.id', '=', $channel->id)->exists()) continue;
                 $user->channels()->attach($channel->id, ['role_id' => Role::getRoleIdByName(BaseRoles::MEMBER->name)]);
-                $user->notify(new ChannelsNotification($request->user(), $user, $channel, $channel->workspace, "addedToNewChannel"));
+
+                $user->notify(new ChannelsNotification($request->user(), $user, $channel->loadCount('messages as unread_messages_count')->loadCount('users'), $channel->workspace, "addedToNewChannel"));
                 Message::createStringMessageAndBroadcast($channel, $request->user(), $request->user()->name . " has added " . $user->name . " to channel");
             }
-            broadcast(new ChannelEvent($channel, "addUsersToChannel"))->toOthers();
+            $userIds = collect($validated['users'])->pluck('id')->toArray();
+            broadcast(new ChannelEvent($channel, "addUsersToChannel", $userIds));
             DB::commit();
 
-            return back();
+            return ['message' => 'successfull'];
         } catch (\Throwable $th) {
             DB::rollBack();
-
-            // dd($th);
-            return back()->withErrors(["server" => "Something went wrong! Please try later"]);
+            dd($th);
+            abort(500, "Something went wrong! Please try later.");
         }
     }
 
@@ -551,18 +556,19 @@ class ChannelController extends Controller
                 $user->notify(new ChannelsNotification($request->user(), null, $channel, $channel->workspace, "addedAsManager"));
             }
             $managerIds = collect($validated['users'])->pluck('id')->toArray();
-            broadcast(new ChannelEvent($channel, "addManagers", $managerIds))->toOthers();
+            broadcast(new ChannelEvent($channel, "addManagers", $managerIds));
             DB::commit();
 
-            return back();
+            return ['message' => 'successfull'];
         } catch (\Throwable $th) {
             DB::rollBack();
 
-            return back()->withErrors(['server' => "Something went wrong! Please try later."]);
+            abort(500, "Something went wrong! Please try later.");
         }
     }
     public function removeManager(Request $request, Channel $channel)
     {
+
 
 
         if ($request->user()->cannot('removeManager', $channel)) abort(403);
@@ -576,7 +582,7 @@ class ChannelController extends Controller
             $user->channels()->updateExistingPivot($channel->id, [
                 'role_id' => Role::getRoleIdByName(BaseRoles::MEMBER->name),
             ]);
-            broadcast(new ChannelEvent($channel, "removeManager", $user->id))->toOthers();
+            broadcast(new ChannelEvent($channel, "removeManager", $user->id));
             $user->notify(new ChannelsNotification(
                 fromUser: $request->user(),
                 toUser: null,
@@ -587,11 +593,11 @@ class ChannelController extends Controller
             ));
             DB::commit();
 
-            return back();
+            return ['message' => 'successfull'];
         } catch (\Throwable $th) {
             DB::rollBack();
 
-            return back()->withErrors(['server' => "Something went wrong! Please try later."]);
+            abort(500, "Something went wrong! Please try later.");
         }
     }
     public function lastRead(Request $request, Channel $channel)
@@ -722,12 +728,33 @@ class ChannelController extends Controller
     function checkChannelExists(Request $request)
     {
         $channelId = $request->query("channelId");
-
+        $user = $request->user();
         if (!$channelId) return [
             'result' => false,
         ];
-        return  [
-            'result' => $request->user()->channels()->where('channels.id',  $channelId)->exists()
+        try {
+            $channel = Channel::where('id',  $channelId)->whereHas('workspace', function ($workspaceQuery) use ($user) {
+                $workspaceQuery->whereHas('users', function ($userQuery) use ($user) {
+                    $userQuery->where('users.id', $user->id);
+                });
+            })->first();
+
+            if (!$channel) return ['result' => false];
+            if ($channel->type == ChannelTypes::PUBLIC->name) {
+                return [
+                    'result' => true
+                ];
+            } else if ($channel->type == ChannelTypes::PRIVATE->name || $channel->type == ChannelTypes::DIRECT->name) {
+                return [
+                    'result' => $channel->users()->where('users.id', $user->id)->exists()
+                ];
+            }
+        } catch (\Throwable $th) {
+            dd($th);
+        }
+
+        return [
+            'result' => false
         ];
     }
     /**
@@ -760,11 +787,11 @@ class ChannelController extends Controller
 
 
             DB::commit();
-            return redirect(route('channels.show', $workspace->mainChannel()->id));
+            return ['message' => 'successfull'];
         } catch (\Throwable $th) {
             DB::rollBack();
 
-            return back()->withErrors(['server' => "Something went wrong! Please try later."]);
+            abort(500, "Something went wrong! Please try later.");
         }
     }
 }

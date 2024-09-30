@@ -11,19 +11,20 @@ import { setMention } from "@/Store/mentionSlice";
 import { FaLock } from "react-icons/fa";
 import OverlaySimpleNotification from "@/Components/Overlay/OverlaySimpleNotification";
 import { useState } from "react";
+import { useChannelData } from "@/helpers/customHooks";
 export default function ChannelNotification({
     notification,
     handleNotificationClick,
 }) {
     const {
         auth,
-       
+       channelId
 
         
     } = usePage().props;
     const {workspaceUsers} = useSelector(state=>state.workspaceUsers)
     console.log(notification);
-    const { messages } = useSelector((state) => state.messages);
+    
     const { fromUser, channel, workspace, data, changesType } =
         isChannelsNotificationBroadcast(notification.type)
             ? notification

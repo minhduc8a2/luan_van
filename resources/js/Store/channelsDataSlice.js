@@ -5,6 +5,7 @@ export const channelsDataSlice = createSlice({
     initialState: {},
     reducers: {
         removeChannelData(state,action){
+            console.log("remove channel data",action.payload.id);
             if(state[action.payload.id]){
                 delete state[action.payload.id];
             }

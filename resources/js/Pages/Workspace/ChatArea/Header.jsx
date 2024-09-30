@@ -52,7 +52,7 @@ export default function Header({ channelName }) {
                         buttonNode={
                             <div className="flex items-center gap-x-2">
                                 <div className="flex items-baseline gap-x-1">
-                                    {channel.type == "PUBLIC" ? (
+                                    {channel?.type == "PUBLIC" ? (
                                         <span className="text-xl">#</span>
                                     ) : (
                                         <FaLock className="text-sm inline" />
@@ -66,7 +66,7 @@ export default function Header({ channelName }) {
                     />
                 </div>
                 <div className="">
-                    {!channel.is_archived && (
+                    {!channel?.is_archived && (
                         <div className="flex items-center gap-x-4 ">
                             <div className="flex items-center p-1 border  border-white/15 rounded-lg px-2">
                                 <ul className="flex">

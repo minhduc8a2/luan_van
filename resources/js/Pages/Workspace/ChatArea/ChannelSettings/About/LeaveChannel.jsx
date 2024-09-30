@@ -6,12 +6,14 @@ import OverlayNotification from "@/Components/Overlay/OverlayNotification";
 
 import { FaLock } from "react-icons/fa";
 import { useCustomedForm } from "@/helpers/customHooks";
+import { router } from "@inertiajs/react";
+import { removeChannel } from "@/Store/channelsSlice";
 
 export default function LeaveChannel({ channel }) {
     const {
         success,
         loading: processing,
-        errors,
+
         submit,
     } = useCustomedForm(
         {},
@@ -22,8 +24,30 @@ export default function LeaveChannel({ channel }) {
     );
     function onSubmit(e) {
         e.preventDefault();
-        submit();
+        submit().then((response) => {
+            if (response.data) {
+                if (channel.type == "PRIVATE") {
+                    dispatch(removeChannel(cn.id));
+                    router.get(
+                        route("channels.show", {
+                            workspace: workspace.id,
+                            channel: mainChannel.id,
+                        }),
+                        {},
+                        {
+                            preserveState: true,
+                        }
+                    );
+                } else {
+                    loadChannelRelatedData([
+                        "permissions",
+                        "channelPermissions",
+                    ]);
+                }
+            }
+        });
     }
+
     if (channel.is_main_channel) return "";
     if (channel.type === "PUBLIC")
         return (

@@ -78,7 +78,8 @@ export default function InitData({ loaded, setLoaded }) {
                 );
             });
     }
-    useEffect(() => {
+
+    function init() {
         setLoaded(false);
         if (channelsData[channelId]) {
             setLoaded(true);
@@ -102,7 +103,11 @@ export default function InitData({ loaded, setLoaded }) {
                 loadChannelIfNotExistsToken.current.abort();
             }
         };
+    }
+    useEffect(() => {
+        init();
     }, [channelId]);
+
     if (loaded) {
         return <></>;
     } else {

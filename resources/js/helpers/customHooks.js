@@ -36,7 +36,7 @@ const useChannelUsers = (channelId) => {
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
 
     const channelUsers = useMemo(() => {
-        if (!channelUserIds.length || !workspaceUsers.length) {
+        if (!channelUserIds?.length || !workspaceUsers?.length) {
             return [];
         }
         return workspaceUsers.filter((user) =>

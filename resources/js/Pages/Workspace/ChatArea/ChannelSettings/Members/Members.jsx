@@ -1,78 +1,45 @@
 import OverlayPanel from "@/Components/Overlay/OverlayPanel";
-import { router, usePage } from "@inertiajs/react";
+import { usePage } from "@inertiajs/react";
 
 import TextInput from "@/Components/Input/TextInput";
 import { IoPersonAddOutline } from "react-icons/io5";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import ErrorsList from "@/Components/ErrorsList";
 import AddPeople from "./AddPeople";
 import Member from "./Member";
 
-import {
-    useChannel,
-    useChannelData,
-    useChannelUsers,
-} from "@/helpers/customHooks";
+import { useChannelData, useChannelUsers } from "@/helpers/customHooks";
+
+import useErrorHandler from "@/helpers/useErrorHandler";
+
 export default function Members() {
     const [errors, setErrors] = useState(null);
     const { channelId } = usePage().props;
     const { permissions } = useChannelData(channelId);
     const { channelUsers } = useChannelUsers(channelId);
-    const channel = useChannel(channelId);
+
     const [searchValue, setSearchValue] = useState("");
+    const handleError = useErrorHandler();
     function removeChannelManager(user) {
-        router.post(
-            route("channel.remove_manager", channel.id),
-            {
+        axios
+            .post(route("channels.removeManager", channelId), {
                 user,
-            },
-            {
-                preserveState: true,
-                only: ["managers", "permissions"],
-                onError: (errors) => {
-                    setErrors(errors);
-                },
-                headers: {
-                    "X-Socket-Id": Echo.socketId(),
-                },
-            }
-        );
+            })
+            .catch(handleError);
     }
     function makeChannelManager(user) {
-        router.post(
-            route("channel.add_managers", channel.id),
-            {
+        axios
+            .post(route("channels.addManagers", channelId), {
                 users: [user],
-            },
-            {
-                preserveState: true,
-                only: ["managers"],
-                onError: (errors) => {
-                    setErrors(errors);
-                },
-                headers: {
-                    "X-Socket-Id": Echo.socketId(),
-                },
-            }
-        );
+            })
+            .catch(handleError);
     }
     function removeFromChannel(user) {
-        router.post(
-            route("channel.remove_user_from_channel", channel.id),
-            {
+        axios
+            .post(route("channel.remove_user_from_channel", channelId), {
                 user,
-            },
-            {
-                preserveState: true,
-                only: ["channelUsers", "permissions", "messages"],
-                onError: (errors) => {
-                    setErrors(errors);
-                },
-                headers: {
-                    "X-Socket-Id": Echo.socketId(),
-                },
-            }
-        );
+            })
+            .catch(handleError);
     }
 
     return (

@@ -246,7 +246,7 @@ function ChatArea() {
     return (
         <div className="flex-1 flex min-h-0 max-h-full w-full">
             <InitData loaded={loaded} setLoaded={(value) => setLoaded(value)} />
-            {loaded && (
+            {loaded && channel && (
                 <>
                     <Events />
 
@@ -267,7 +267,7 @@ function ChatArea() {
                                 </h1>
 
                                 <div className="text-white/85 mt-2">
-                                    {channel.description}{" "}
+                                    {channel?.description}{" "}
                                     <div className="inline-block">
                                         <EditDescriptionForm />
                                     </div>
@@ -383,7 +383,7 @@ function ChatArea() {
                                 <TipTapEditor onSubmit={onSubmit} />
                             )}
                             {!permissions.chat &&
-                                !channel.is_archived &&
+                                !channel?.is_archived &&
                                 isChannelMember && (
                                     <h5 className="mb-4 text-center ml-4">
                                         You're not allowed to post in channel.
@@ -419,7 +419,7 @@ function ChatArea() {
                                     </div>
                                 </div>
                             )}
-                            {channel.is_archived == true && (
+                            {channel?.is_archived == true && (
                                 <div className="mb-4 justify-center flex ml-4 items-baseline gap-x-1 text-white/75">
                                     You are viewing{" "}
                                     <div className="flex items-baseline gap-x-1">

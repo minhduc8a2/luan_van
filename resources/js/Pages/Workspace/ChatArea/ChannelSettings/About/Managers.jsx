@@ -21,7 +21,7 @@ export default function Managers() {
     const [errors, setErrors] = useState(null);
     function removeManager(user) {
         router.post(
-            route("channel.remove_manager", channel.id),
+            route("channels.removeManager", channel.id),
             {
                 user,
             },
