@@ -22,19 +22,26 @@ import { setMention } from "@/Store/mentionSlice";
 
 import ForwardedMessage from "./Message/ForwardedMessage";
 import { isHiddenUser } from "@/helpers/userHelper";
+import {
+    useChannel,
+    useChannelData,
+    useChannelUsers,
+} from "@/helpers/customHooks";
 export default function Thread() {
     const dispatch = useDispatch();
-    const { channel, permissions, users } = usePage().props;
+    const { channelId } = usePage().props;
+    const { permissions } = useChannelData(channelId);
+    const { channel } = useChannel(channelId);
     const { threadMessage: mentionThreadMessage } = useSelector(
         (state) => state.mention
     );
-    const {workspaceUsers} = useSelector(state=>state.workspaceUsers)
+    const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
     const {
         message: threadedMessage,
         messageId: threadedMessageId,
         messages,
     } = useSelector((state) => state.thread);
-    const { channelUsers } = usePage().props;
+    const { channelUsers } = useChannelUsers(channelId);
 
     const nextPageUrlRef = useRef(null);
     const previousPageUrlRef = useRef(null);

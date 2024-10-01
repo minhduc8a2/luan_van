@@ -19,7 +19,7 @@ export default function EditProfile({ user, triggerButton }) {
     const [avatarFile, setAvatarFile] = useState(null);
     const [uploadingAvatarFile, setUploadingAvatarFile] = useState(false);
     const dispatch = useDispatch();
-    const { data, setData, patch, processing, errors } = useForm({
+    const { data, setData, patch, processing, reset } = useForm({
         name: user.name,
         display_name: user.display_name || "",
     });
@@ -69,7 +69,10 @@ export default function EditProfile({ user, triggerButton }) {
     }
     return (
         <>
-            <div onClick={() => setIsOpen(true)}>{triggerButton}</div>
+            <div onClick={() => {
+                setIsOpen(true)
+                reset()
+            }}>{triggerButton}</div>
             <CustomedDialog
                 isOpen={isOpen}
                 onClose={() => setIsOpen(false)}

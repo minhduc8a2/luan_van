@@ -25,6 +25,7 @@ import OverlayConfirm from "@/Components/Overlay/OverlayConfirm";
 import ForwardMessage from "./ForwardMessage/ForwardMessage";
 import { setMention } from "@/Store/mentionSlice";
 import { setProfile } from "@/Store/profileSlice";
+import { useChannel } from "@/helpers/customHooks";
 export default function Message({
     message,
     user,
@@ -37,13 +38,10 @@ export default function Message({
     forwardedMessageChannel = null,
     forwarded = false,
 }) {
-    const { auth, channelId, channelUsers, permissions } = usePage().props;
-    const { channels } = useSelector((state) => state.channels);
+    const { auth, channelId } = usePage().props;
 
-    const channel = useMemo(
-        () => channels.find((cn) => cn.id == channelId),
-        [channels, channelId]
-    );
+    const { channel } = useChannel(channelId);
+    const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
     const dispatch = useDispatch();
 
     const files = message.files || [];
@@ -69,7 +67,7 @@ export default function Message({
     const [showConfirm, setShowConfirm] = useState(null);
     const [forwardedMessage, setForwardedMessage] = useState(null);
     const groupedReactions = useMemo(() => {
-        return groupReactions(reactions, channelUsers, auth.user);
+        return groupReactions(reactions, workspaceUsers, auth.user);
     }, [reactions]);
     useEffect(() => {
         setReactions(message.reactions ? [...message.reactions] : []);
@@ -250,6 +248,7 @@ export default function Message({
             }
         );
     }
+    // if (!channel) return "";
     return (
         <div
             className={`message-container transition-all pl-8 pt-1 pr-4 pb-2 relative break-all group hover:bg-white/10 ${

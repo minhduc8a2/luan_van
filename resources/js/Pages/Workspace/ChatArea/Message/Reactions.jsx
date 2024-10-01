@@ -6,12 +6,14 @@ import EmojiPicker from "@emoji-mart/react";
 import data from "@emoji-mart/data";
 import { useState } from "react";
 import { usePage } from "@inertiajs/react";
+import { useChannelData } from "@/helpers/customHooks";
 export default function Reactions({
     groupedReactions,
     reactToMessage,
     removeMessageReaction,
 }) {
-    const { permissions } = usePage().props;
+    const { channelId } = usePage().props;
+    const { permissions } = useChannelData(channelId);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     if (groupedReactions.length == 0) return "";
     return (
