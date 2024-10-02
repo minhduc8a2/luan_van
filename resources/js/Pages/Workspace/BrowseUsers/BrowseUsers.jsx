@@ -11,7 +11,7 @@ import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
 import FilterButton from "@/Components/FilterButton";
 import UserItem from "./UserItem";
 import { setProfile } from "@/Store/profileSlice";
-function BrowseUsers() {
+export default function BrowseUsers() {
     // const [allUsers, setAllUsers] = useState([]);
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
     const [searchValue, setSearchValue] = useState("");
@@ -334,6 +334,3 @@ function BrowseUsers() {
     );
 }
 
-BrowseUsers.layout = (page) => <Layout children={page} />;
-
-export default BrowseUsers;

@@ -3,9 +3,10 @@ import { addNewChannelToChannelsStore } from "@/Store/channelsSlice";
 import { usePage } from "@inertiajs/react";
 import { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useParams } from "react-router-dom";
 
 export default function InitData({ loaded, setLoaded }) {
-    const { channelId } = usePage().props;
+    const { channelId } = useParams();
     const { channels } = useSelector((state) => state.channels);
     const channelsData = useSelector((state) => state.channelsData);
     const loadChannelDataToken = useRef(null);

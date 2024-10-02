@@ -36,7 +36,7 @@ import { useDispatch } from "react-redux";
 import { setMedia } from "@/Store/mediaSlice";
 import Layout from "../Layout";
 import InfiniteScroll from "@/Components/InfiniteScroll";
-function BrowseFiles() {
+export default function BrowseFiles() {
     const { auth, flash, workspace,  workspaceFiles } =
         usePage().props;
 
@@ -435,6 +435,3 @@ function BrowseFiles() {
     );
 }
 
-BrowseFiles.layout = (page) => <Layout children={page} />;
-
-export default BrowseFiles;

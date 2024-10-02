@@ -14,12 +14,15 @@ import { useDispatch } from "react-redux";
 import { setLeftWindowType, setRightWindowType } from "@/Store/windowTypeSlice";
 import { router, usePage } from "@inertiajs/react";
 import { RiContactsBook3Line } from "react-icons/ri";
+import { useNavigate } from "react-router-dom";
 export default function More() {
     const { workspace } = usePage().props;
     const dispatch = useDispatch();
-    function switchPage() {
+    const navigate = useNavigate()
+    function switchPage(url) {
         dispatch(setLeftWindowType(null));
         dispatch(setRightWindowType(null));
+        navigate(url)
     }
     return (
         <Popover className="relative group">
@@ -44,18 +47,8 @@ export default function More() {
                             <li>
                                 <MoreButton
                                     onClick={() => {
-                                        switchPage("browseFiles");
-                                        router.get(
-                                            route("files.index", workspace.id),
-                                            {},
-                                            {
-                                                preserveState: true,
-                                                only: [],
-                                                onFinish: () => {
-                                                    switchPage();
-                                                },
-                                            }
-                                        );
+                                        switchPage("browse_files");
+                                        
                                         close();
                                     }}
                                     title="Files"
@@ -66,20 +59,7 @@ export default function More() {
                             <li>
                                 <MoreButton
                                     onClick={() => {
-                                        router.get(
-                                            route(
-                                                "channels.index",
-                                                workspace.id
-                                            ),
-                                            {},
-                                            {
-                                                preserveState: true,
-                                                only: [],
-                                                onFinish: () => {
-                                                    switchPage();
-                                                },
-                                            }
-                                        );
+                                        switchPage("browse_channels");
                                         close();
                                     }}
                                     title="Channels"
@@ -90,20 +70,8 @@ export default function More() {
                             <li>
                                 <MoreButton
                                     onClick={() => {
-                                        router.get(
-                                            route(
-                                                "users.browseUsers",
-                                                workspace.id
-                                            ),
-                                            {},
-                                            {
-                                                preserveState: true,
-                                                only: [],
-                                                onFinish: () => {
-                                                    switchPage();
-                                                },
-                                            }
-                                        );
+                                        switchPage("browse_users");
+                                        
                                         close();
                                     }}
                                     title="People"

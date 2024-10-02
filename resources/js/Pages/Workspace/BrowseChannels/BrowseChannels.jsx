@@ -14,7 +14,7 @@ import Layout from "../Layout";
 import InfiniteScroll from "@/Components/InfiniteScroll";
 import { setLeftWindowType } from "@/Store/windowTypeSlice";
 import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
-function BrowseChannels() {
+export default function BrowseChannels() {
     const { auth, workspace } = usePage().props;
     const dispatch = useDispatch();
     const [allChannels, setAllChannels] = useState([]);
@@ -398,7 +398,7 @@ function BrowseChannels() {
 }
 
 function ChannelItem({ channel, changeChannel, joinChannel, leaveChannel }) {
-    const {channels} = useSelector(state=>state.channels)
+    const { channels } = useSelector((state) => state.channels);
     const [joinProcessing, setJoinProcessing] = useState(false);
     const [leaveProcessing, setLeaveProcessing] = useState(false);
     const isChannelMember = useMemo(
@@ -494,6 +494,3 @@ function ChannelItem({ channel, changeChannel, joinChannel, leaveChannel }) {
         </div>
     );
 }
-BrowseChannels.layout = (page) => <Layout children={page} />;
-
-export default BrowseChannels;

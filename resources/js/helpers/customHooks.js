@@ -47,9 +47,9 @@ const useChannelUsers = (channelId) => {
 };
 const useChannel = (channelId) => {
     const { channels } = useSelector((state) => state.channels);
-
+   
     const channel = useMemo(() => {
-        return channels.find((cn) => cn.id === channelId) || null; // Return null if not found
+        return channels.find((cn) => cn.id == channelId) || null; // Return null if not found
     }, [channels, channelId]);
 
     return {

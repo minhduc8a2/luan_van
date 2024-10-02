@@ -10,8 +10,10 @@ import Settings from "./Settings/Settings";
 import Members from "./Members/Members";
 import { useSelector } from "react-redux";
 import { useChannel, useChannelData } from "@/helpers/customHooks";
+import { useParams } from "react-router-dom";
 export default function ChannelSettings({ channelName, buttonNode }) {
-    const { channelId, workspace } = usePage().props;
+    const { workspace } = useSelector((state) => state.workspace);
+    const { channelId } = useParams();
     const { channel } = useChannel(channelId);
     const { permissions } = useChannelData(channelId);
     const [tabIndex, setTabIndex] = useState(0);

@@ -26,6 +26,7 @@ import ForwardMessage from "./ForwardMessage/ForwardMessage";
 import { setMention } from "@/Store/mentionSlice";
 import { setProfile } from "@/Store/profileSlice";
 import { useChannel } from "@/helpers/customHooks";
+import { useParams } from "react-router-dom";
 export default function Message({
     message,
     user,
@@ -38,8 +39,8 @@ export default function Message({
     forwardedMessageChannel = null,
     forwarded = false,
 }) {
-    const { auth, channelId } = usePage().props;
-
+    const { auth } = usePage().props;
+    const { channelId } = useParams();
     const { channel } = useChannel(channelId);
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
     const dispatch = useDispatch();

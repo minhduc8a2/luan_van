@@ -31,9 +31,12 @@ import {
     removeUserFromChannel,
     setChannelData,
 } from "@/Store/channelsDataSlice";
+import { useParams } from "react-router-dom";
 
 export default function Event() {
-    const { workspace, channelId, auth } = usePage().props;
+    const { auth } = usePage().props;
+    const { channelId } = useParams();
+    const { workspace } = useSelector((state) => state.workspace);
     const dispatch = useDispatch();
     const { channels } = useSelector((state) => state.channels);
     const channelsData = useSelector((state) => state.channelsData);
@@ -44,7 +47,6 @@ export default function Event() {
     const mainChannel = useMemo(() => {
         return channels.find((cn) => cn.is_main_channel);
     }, [channels]);
-    
 
     const userListener = useCallback(() => {
         Echo.private("App.Models.User." + auth.user.id).notification(
@@ -61,10 +63,12 @@ export default function Event() {
                                 console.log(
                                     "Added to new channel and has channel data already, need to update"
                                 );
-                                loadChannelRelatedData([
-                                    "permissions",
-                                    "channelPermissions",
-                                ],channelId, dispatch, setChannelData);
+                                loadChannelRelatedData(
+                                    ["permissions", "channelPermissions"],
+                                    channelId,
+                                    dispatch,
+                                    setChannelData
+                                );
                             }
                             break;
                         case "removedFromChannel":
@@ -86,10 +90,12 @@ export default function Event() {
                                         );
                                     }
                                 } else {
-                                    loadChannelRelatedData([
-                                        "permissions",
-                                        "channelPermissions",
-                                    ],channelId, dispatch, setChannelData);
+                                    loadChannelRelatedData(
+                                        ["permissions", "channelPermissions"],
+                                        channelId,
+                                        dispatch,
+                                        setChannelData
+                                    );
                                 }
                             }
                             break;
@@ -179,7 +185,7 @@ export default function Event() {
                 console.error(error);
             });
     }
-    
+
     function listenChannels() {
         channels.forEach((cn) => {
             console.log("Listen for channel: " + cn.name);
@@ -248,10 +254,12 @@ export default function Event() {
                                 })
                             );
                             if (e.data?.find((id) => id == auth.user.id)) {
-                                loadChannelRelatedData([
-                                    "permissions",
-                                    "channelPermissions",
-                                ],channelId, dispatch, setChannelData);
+                                loadChannelRelatedData(
+                                    ["permissions", "channelPermissions"],
+                                    channelId,
+                                    dispatch,
+                                    setChannelData
+                                );
                             }
                             break;
                         case "removeManager":
@@ -262,18 +270,22 @@ export default function Event() {
                                 })
                             );
                             if (e.data == auth.user.id) {
-                                loadChannelRelatedData([
-                                    "permissions",
-                                    "channelPermissions",
-                                ],channelId, dispatch, setChannelData);
+                                loadChannelRelatedData(
+                                    ["permissions", "channelPermissions"],
+                                    channelId,
+                                    dispatch,
+                                    setChannelData
+                                );
                             }
                             break;
 
                         case "changeType":
-                            loadChannelRelatedData([
-                                "permissions",
-                                "channelPermissions",
-                            ],channelId, dispatch, setChannelData);
+                            loadChannelRelatedData(
+                                ["permissions", "channelPermissions"],
+                                channelId,
+                                dispatch,
+                                setChannelData
+                            );
                             break;
                         case "leave":
                             dispatch(
@@ -315,17 +327,21 @@ export default function Event() {
 
                             break;
                         case "updateChannelPermissions":
-                            loadChannelRelatedData([
-                                "permissions",
-                                "channelPermissions",
-                            ],channelId, dispatch, setChannelData);
+                            loadChannelRelatedData(
+                                ["permissions", "channelPermissions"],
+                                channelId,
+                                dispatch,
+                                setChannelData
+                            );
                             break;
 
                         case "archiveChannel":
-                            loadChannelRelatedData([
-                                "permissions",
-                                "channelPermissions",
-                            ],channelId, dispatch, setChannelData);
+                            loadChannelRelatedData(
+                                ["permissions", "channelPermissions"],
+                                channelId,
+                                dispatch,
+                                setChannelData
+                            );
                             break;
                         case "join":
                             dispatch(

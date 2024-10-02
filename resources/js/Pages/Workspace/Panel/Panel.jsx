@@ -11,40 +11,27 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { CreateChannelForm } from "./createChannelForm";
 import { FiArchive } from "react-icons/fi";
-import { setThreadedMessageId } from "@/Store/threadSlice";
-import { channelProps } from "@/helpers/channelHelper";
+
 import { useMemo } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
 export default function Panel({}) {
-    const {
-        auth,
-
-        workspace,
-        channelId,
-    } = usePage().props;
-
+    const { auth } = usePage().props;
+    const { workspace } = useSelector((state) => state.workspace);
+    const { channelId, workspaceId } = useParams();
+    const navigate = useNavigate();
     const { channels } = useSelector((state) => state.channels);
 
     const currentChannel = useMemo(
         () => channels.find((cn) => cn.id == channelId),
         [channels, channelId]
     );
-    const dispatch = useDispatch();
+
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
 
     // const { messages } = useSelector((state) => state.messages);
     function changeChannel(channel) {
-        router.get(
-            route("channels.show", {
-                workspace: workspace.id,
-                channel: channel.id,
-            }),
-            {},
-            {
-                preserveState: true,
-                only: channelProps,
-            }
-        );
+        navigate(`channels/${channel.id}`);
     }
     const directChannels = useMemo(() => {
         return channels.filter((cn) => cn.type == "DIRECT");

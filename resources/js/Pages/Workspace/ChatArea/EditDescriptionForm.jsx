@@ -7,14 +7,13 @@ import { router, usePage } from "@inertiajs/react";
 import OverlayNotification from "@/Components/Overlay/OverlayNotification";
 import { useState, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
+import { useParams } from "react-router-dom";
+import { useChannel } from "@/helpers/customHooks";
 export function EditDescriptionForm() {
-    const { channelId } = usePage().props;
-    const { channels } = useSelector((state) => state.channels);
+    const { channelId } = useParams();
+    
 
-    const channel = useMemo(
-        () => channels.find((cn) => cn.id == channelId),
-        [channels, channelId]
-    );
+    const channel = useChannel(channelId);
     const [success, setSuccess] = useState(false);
     const { data, setData, post, processing, errors } = useForm({
         description: channel.description,

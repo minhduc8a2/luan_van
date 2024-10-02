@@ -31,12 +31,16 @@ import {
     subtractThreadMessagesCount,
 } from "@/Store/channelsDataSlice";
 import Editor from "./Editor";
-function ChatArea() {
-    const { auth, channelId } = usePage().props;
+import { useParams } from "react-router-dom";
+export default function ChatArea() {
+    const { auth } = usePage().props;
+    const { channelId } = useParams();
+    console.log(channelId);
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
     const { permissions, messages } = useChannelData(channelId);
     const { channelUsers } = useChannelUsers(channelId);
     const { channel } = useChannel(channelId);
+   console.log(channel);
     const { messageId: threadMessageId } = useSelector((state) => state.thread);
     const { messageId, threadMessage: mentionThreadMessage } = useSelector(
         (state) => state.mention
@@ -283,12 +287,8 @@ function ChatArea() {
     }, [channelUsers]);
     return (
         <div className="flex-1 flex min-h-0 max-h-full w-full">
-            {!messageId && (
-                <InitData
-                    loaded={loaded}
-                    setLoaded={(value) => setLoaded(value)}
-                />
-            )}
+            <InitData loaded={loaded} setLoaded={(value) => setLoaded(value)} />
+
             {loaded && channel && (
                 <div className="bg-background  chat-area-container flex-1 ">
                     <Header
@@ -453,6 +453,3 @@ function ChatArea() {
         </div>
     );
 }
-ChatArea.layout = (page) => <Layout children={page} />;
-
-export default ChatArea;

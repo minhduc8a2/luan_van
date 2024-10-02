@@ -16,12 +16,12 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { usePage } from "@inertiajs/react";
 import More from "./More";
-import { setPageName } from "@/Store/pageSlice";
+
 import UserOptions from "./UserOptions";
 import { setSideBarWidth } from "@/Store/sizeSlice";
 import { setLeftWindowType } from "@/Store/windowTypeSlice";
 export default function SideBar({}) {
-    const { auth, url, workspace } = usePage().props;
+    const { workspace } = useSelector((state) => state.workspace);
     const { workspaces } = useSelector((state) => state.workspace);
     const { leftWindowType } = useSelector((state) => state.windowType);
     const { name: pageName } = useSelector((state) => state.page);

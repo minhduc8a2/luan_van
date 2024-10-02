@@ -5,9 +5,11 @@ import { setWorkspaceUsers } from "@/Store/workspaceUsersSlice";
 import { usePage } from "@inertiajs/react";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useParams } from "react-router-dom";
 
 export default function InitData({ loaded, setLoaded }) {
-    const { workspace } = usePage().props;
+    const { workspaceId } = useParams();
+    console.log(workspaceId);
     const { newNotificationsCount } = useSelector((state) => state.workspace);
     const dispatch = useDispatch();
     function loadWorkspaceRelatedData() {
@@ -20,7 +22,7 @@ export default function InitData({ loaded, setLoaded }) {
 
     function loadWorkspaceUsers() {
         return axios
-            .get(route("users.browseUsers", workspace.id), {
+            .get(route("users.browseUsers", workspaceId), {
                 params: {
                     mode: "all",
                 },
@@ -31,14 +33,14 @@ export default function InitData({ loaded, setLoaded }) {
     }
     function loadChannels() {
         return axios
-            .get(route("workspaces.getChannels", workspace.id))
+            .get(route("workspaces.getChannels", workspaceId))
             .then((response) => {
                 dispatch(setChannels(response.data));
             });
     }
     function loadWorkspaceData() {
         return axios
-            .get(route("workspaces.initWorkspaceData", workspace.id))
+            .get(route("workspaces.initWorkspaceData", workspaceId))
             .then((response) => {
                 dispatch(setWorkspaceData(response.data));
             });
@@ -54,7 +56,7 @@ export default function InitData({ loaded, setLoaded }) {
             .catch((error) => {
                 console.log(error);
             });
-    }, [workspace.id]);
+    }, [workspaceId]);
     if (loaded) {
         return <></>;
     } else {

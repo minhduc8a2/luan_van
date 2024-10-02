@@ -30,6 +30,7 @@ class WorkspaceController extends Controller
             'workspaces' => $workspaces,
             'newNotificationsCount' => $newNotificationsCount,
             'workspacePermissions' => $workspacePermissions,
+            'workspace' => $workspace
         ];
     }
     public function index()
@@ -91,8 +92,8 @@ class WorkspaceController extends Controller
     {
 
         if ($request->user()->cannot('view', [Workspace::class, $workspace])) abort(403);
-        $mainChannel = $workspace->channels->where('is_main_channel', '=', true)->first();
-        return redirect()->route('channels.show', ['workspace' => $workspace->id, 'channel' => $mainChannel->id]);
+
+        return Inertia::render("Workspace/Index", ['workspace' => $workspace->id]);
     }
 
 

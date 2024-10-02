@@ -23,8 +23,9 @@ import Activity from "./Activity/Activity";
 import { usePage } from "@inertiajs/react";
 import { setLeftWindowType } from "@/Store/windowTypeSlice";
 import InitData from "./InitData";
-export default function Layout({ children }) {
-    const { channelId } = usePage().props;
+import { Outlet, useParams } from "react-router-dom";
+export default function Layout() {
+    const { channelId } = useParams();
 
     const storeRef = useRef();
     if (!storeRef.current) {
@@ -58,7 +59,9 @@ export default function Layout({ children }) {
     }
     return (
         <Provider store={storeRef.current}>
-            <Wrapper>{children}</Wrapper>
+            <Wrapper>
+                <Outlet />
+            </Wrapper>
         </Provider>
     );
 }
