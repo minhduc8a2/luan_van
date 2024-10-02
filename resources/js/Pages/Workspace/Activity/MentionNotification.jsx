@@ -37,36 +37,7 @@ export default function MentionNotification({
     const created_at = notification.created_at;
     const view_at = notification.view_at;
     const dispatch = useDispatch();
-    const loadChannelMessagesToken = useRef(null);
 
-    function loadChannelMessages(messageId) {
-        loadChannelMessagesToken.current = new AbortController();
-        return axios
-            .get(
-                route("messages.getSpecificMessagesById", {
-                    channel: channelId,
-                    messageId: messageId,
-                }),
-                {
-                    signal: loadChannelMessagesToken.current.signal,
-                }
-            )
-            .then((response) => {
-                response.data.sort((a, b) => b.id - a.id);
-                console.log(response.data);
-                dispatch(
-                    setChannelData({
-                        id: channelId,
-                        data: { messages: response.data },
-                    })
-                );
-                const { minId, maxId } = findMinMaxId(response.data);
-                console.log(minId, maxId);
-                setTopHasMore(maxId);
-                setBottomHasMore(minId);
-            })
-            .finally(() => {});
-    }
     function handleNotificationClickedPart() {
         //check channel is available
         axios
@@ -110,46 +81,20 @@ export default function MentionNotification({
                     }
                     // if (threadMessage)
                     //     dispatch(setThreadedMessageId(message.id));
-                } 
-                // else
-                //     router.get(
-                //         route("channels.show", {
-                //             workspace: workspace.id,
-                //             channel: channel.id,
-                //         }),
-                //         {},
-                //         {
-                //             preserveState: true,
-
-                //             onFinish: () => {
-                //                 loadChannelMessages(message.id).then(() => {
-                //                     setTimeout(() => {
-                //                         const targetMessage =
-                //                             document.getElementById(
-                //                                 `message-${message.id}`
-                //                             );
-
-                //                         if (targetMessage) {
-                //                             targetMessage.classList.add(
-                //                                 "bg-link/15"
-                //                             );
-
-                //                             setTimeout(() => {
-                //                                 targetMessage.classList.remove(
-                //                                     "bg-link/15"
-                //                                 );
-                //                             }, 1000);
-                //                             targetMessage.scrollIntoView({
-                //                                 behavior: "instant",
-                //                                 block: "center",
-                //                             });
-                //                             dispatch(setMention(null));
-                //                         }
-                //                     }, 500);
-                //                 });
-                //             },
-                //         }
-                //     );
+                } else
+                    router.get(
+                        route("channels.show", {
+                            workspace: workspace.id,
+                            channel: channel.id,
+                        }),
+                        {},
+                        {
+                            preserveState: true,
+                            onSuccess: () => {
+                                dispatch(setMention({ messageId: message.id }));
+                            },
+                        }
+                    );
             });
 
         //

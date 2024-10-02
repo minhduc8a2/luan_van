@@ -10,6 +10,9 @@ export const activitySlice = createSlice({
         setNotificationsCount(state, action) {
             state.new_count = action.payload;
         },
+        addNotificationCount(state, action) {
+            state.new_count += 1;
+        },
         addActivity(state, action) {
             state.notifications.unshift(action.payload);
             state.new_count += 1;
@@ -55,6 +58,7 @@ export const {
     pushActivity,
     pushManyActivity,
     setNotificationsCount,
+    addNotificationCount
 } = activitySlice.actions;
 
 export default activitySlice.reducer;

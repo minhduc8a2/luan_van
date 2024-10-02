@@ -54,7 +54,6 @@ export default function ChangeToPrivateConfirm({ channelName }) {
                     className=" bg-transparent w-full !rounded-none    py-4 border-none !justify-start"
                     onClick={() => {
                         setSuccess(false);
-                        setErrors(null);
                     }}
                 >
                     <div className="flex items-center gap-x-2">

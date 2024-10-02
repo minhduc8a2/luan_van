@@ -1,30 +1,17 @@
-import React, { useContext, useMemo } from "react";
-
-import TipTapEditor from "@/Components/TipTapEditor";
-import { router, usePage } from "@inertiajs/react";
+import React, { useMemo } from "react";
+import { usePage } from "@inertiajs/react";
 import { useEffect, useRef, useState } from "react";
-
 import {
     compareDateTime,
     differenceInSeconds,
     formatDDMMYYY,
     groupListByDate,
 } from "@/helpers/dateTimeHelper";
-
 import Message from "./Message/Message";
-
 import { useSelector, useDispatch } from "react-redux";
 import { EditDescriptionForm } from "./EditDescriptionForm";
 import axios from "axios";
-
-import { getMentionsFromContent } from "@/helpers/tiptapHelper";
 import { findMinMaxId, getChannelName } from "@/helpers/channelHelper";
-
-import { setMention } from "@/Store/mentionSlice";
-import ChannelSettings from "./ChannelSettings/ChannelSettings";
-
-import { FaLock } from "react-icons/fa";
-import Button from "@/Components/Button";
 import ForwardedMessage from "./Message/ForwardedMessage";
 import { isHiddenUser } from "@/helpers/userHelper";
 import Layout from "../Layout";
@@ -37,42 +24,37 @@ import {
     useChannelUsers,
 } from "@/helpers/customHooks";
 import InfiniteScroll from "@/Components/InfiniteScroll";
-import { addMessages, setChannelData } from "@/Store/channelsDataSlice";
-
+import {
+    addMessages,
+    addThreadMessagesCount,
+    setChannelData,
+    subtractThreadMessagesCount,
+} from "@/Store/channelsDataSlice";
+import Editor from "./Editor";
 function ChatArea() {
     const { auth, channelId } = usePage().props;
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
-
     const { permissions, messages } = useChannelData(channelId);
-
     const { channelUsers } = useChannelUsers(channelId);
-
     const { channel } = useChannel(channelId);
-
-    const messageContainerRef = useRef(null);
-
     const { messageId: threadMessageId } = useSelector((state) => state.thread);
     const { messageId, threadMessage: mentionThreadMessage } = useSelector(
         (state) => state.mention
     );
-
     const [focus, setFocus] = useState(1);
     const dispatch = useDispatch();
-
     const [loaded, setLoaded] = useState(false);
-
     const [newMessageReceived, setNewMessageReceived] = useState(true);
-
     const [newMessageReactionReceive, setNewMessageReactionReceive] =
         useState(null);
     const channelConnectionRef = useRef(null);
-
     //infinite scrolling
     const [topLoading, setTopLoading] = useState(false);
     const [bottomLoading, setBottomLoading] = useState(false);
     const [topHasMore, setTopHasMore] = useState();
     const [bottomHasMore, setBottomHasMore] = useState();
-
+    const [loadingMessageIdMessages, setLoadingMessageIdMessages] =
+        useState(false);
     useEffect(() => {
         if (loaded) {
             const { minId, maxId } = findMinMaxId(messages);
@@ -82,8 +64,12 @@ function ChatArea() {
         }
     }, [channel?.id, loaded]);
 
-    const loadMore = (position, successCallBack) => {
-        // return new Promise((resolve, reject) => {});
+    const loadMoreTopToken = useRef(null);
+    const loadMoreBottomToken = useRef(null);
+
+    const loadMore = (position, token, successCallBack) => {
+        if (token != null) token.abort();
+        token = new AbortController();
         let last_id;
         if (position == "top") {
             last_id = topHasMore;
@@ -103,7 +89,7 @@ function ChatArea() {
                         last_id,
                         direction: position,
                     },
-                    // signal: token.current.signal,
+                    signal: token.signal,
                 })
                 .then((response) => {
                     if (response.status == 200) {
@@ -143,6 +129,46 @@ function ChatArea() {
         }
     };
 
+    const loadChannelMessagesToken = useRef(null);
+    function loadChannelMessages(messageId) {
+        setLoadingMessageIdMessages(true);
+        if (loadChannelMessagesToken.current)
+            loadChannelMessagesToken.current.abort();
+        loadChannelMessagesToken.current = new AbortController();
+        return axios
+            .get(
+                route("messages.getSpecificMessagesById", {
+                    channel: channelId,
+                    messageId: messageId,
+                }),
+                {
+                    signal: loadChannelMessagesToken.current.signal,
+                }
+            )
+            .then((response) => {
+                response.data.sort((a, b) => b.id - a.id);
+                console.log(response.data);
+                dispatch(
+                    setChannelData({
+                        id: channelId,
+                        data: { messages: response.data },
+                    })
+                );
+                const { minId, maxId } = findMinMaxId(response.data);
+                console.log(minId, maxId);
+                setTopHasMore(maxId);
+                setBottomHasMore(minId);
+            })
+            .finally(() => {
+                setLoadingMessageIdMessages(false);
+            });
+    }
+
+    useEffect(() => {
+        if (messageId) {
+            loadChannelMessages(messageId);
+        }
+    }, [messageId, channelId]);
     useEffect(() => {
         Echo.private(`private_channels.${channelId}`).listen(
             "MessageEvent",
@@ -156,54 +182,6 @@ function ChatArea() {
             }
         );
     }, [channelId]);
-    function joinChannel() {
-        router.post(
-            route("channel.join", channel.id),
-            {},
-            {
-                preserveState: true,
-                only: [
-                    "channels",
-
-                    "channel",
-                    "permissions",
-                    "channelPermissions",
-                    "channelUsers",
-                ],
-                headers: {
-                    "X-Socket-Id": Echo.socketId(),
-                },
-            }
-        );
-    }
-    function onSubmit(content, fileObjects, JSONContent) {
-        let mentionsList = getMentionsFromContent(JSONContent);
-        if (
-            content == "<p></p>" &&
-            fileObjects.length == 0 &&
-            mentionsList.length == 0
-        )
-            return;
-        router.post(
-            route("message.store", { channel: channel.id }),
-            {
-                content,
-                fileObjects,
-                mentionsList,
-            },
-            {
-                only: [],
-                preserveState: true,
-                preserveScroll: true,
-                headers: {
-                    "X-Socket-Id": Echo.socketId(),
-                },
-                onFinish: () => {
-                    setFocus((pre) => pre + 1);
-                },
-            }
-        );
-    }
 
     let preValue = null;
     let hasChanged = false;
@@ -215,7 +193,7 @@ function ChatArea() {
         if (!channel) return;
 
         dispatch(resetMessageCountForChannel(channel));
-        // axios.post(route("channel.last_read", channel.id), {});
+        axios.post(route("channel.last_read", channel.id), {});
         return () => {
             setNewMessageReceived(true);
             axios.post(route("channel.last_read", channel.id), {});
@@ -251,12 +229,22 @@ function ChatArea() {
                     e.type == "newMessageCreated" &&
                     !isHiddenUser(workspaceUsers, e.message?.user_id)
                 )
-                    dispatch(addThreadMessagesCount(e.threadedMessageId));
+                    dispatch(
+                        addThreadMessagesCount({
+                            id: channelId,
+                            data: { message_id: e.threadedMessageId },
+                        })
+                    );
                 else if (
                     e.type == "messageDeleted" &&
                     !isHiddenUser(workspaceUsers, e.message?.user_id)
                 )
-                    dispatch(subtractThreadMessagesCount(e.threadedMessageId));
+                    dispatch(
+                        subtractThreadMessagesCount({
+                            id: channelId,
+                            data: { message_id: e.threadedMessageId },
+                        })
+                    );
                 // console.log(e);
             })
 
@@ -289,16 +277,18 @@ function ChatArea() {
         return welcomeMessages[1];
     }, [channel?.id]);
 
-
-
-   
     const isChannelMember = useMemo(() => {
         if (!channel) return false;
         return channelUsers.some((u) => u.id === auth.user.id);
     }, [channelUsers]);
     return (
         <div className="flex-1 flex min-h-0 max-h-full w-full">
-            <InitData loaded={loaded} setLoaded={(value) => setLoaded(value)} />
+            {!messageId && (
+                <InitData
+                    loaded={loaded}
+                    setLoaded={(value) => setLoaded(value)}
+                />
+            )}
             {loaded && channel && (
                 <div className="bg-background  chat-area-container flex-1 ">
                     <Header
@@ -308,13 +298,23 @@ function ChatArea() {
                     />
                     <InfiniteScroll
                         loadMoreOnTop={(successCallBack) =>
-                            loadMore("top", successCallBack)
+                            loadMore(
+                                "top",
+                                loadMoreTopToken.current,
+                                successCallBack
+                            )
                         }
                         loadMoreOnBottom={(successCallBack) =>
-                            loadMore("bottom", successCallBack)
+                            loadMore(
+                                "bottom",
+                                loadMoreBottomToken.current,
+                                successCallBack
+                            )
                         }
-                        topHasMore={topHasMore}
-                        bottomHasMore={bottomHasMore}
+                        topHasMore={!loadingMessageIdMessages && topHasMore}
+                        bottomHasMore={
+                            !loadingMessageIdMessages && bottomHasMore
+                        }
                         topLoading={topLoading}
                         bottomLoading={bottomLoading}
                         triggerScrollBottom={newMessageReceived}
@@ -322,8 +322,7 @@ function ChatArea() {
                             setNewMessageReceived(false)
                         }
                         reverse
-                        scrollToItem={null}
-                        rootMargin="500px"
+                        scrollToItem={mentionThreadMessage ? null : messageId}
                         className="overflow-y-auto max-w-full scrollbar"
                     >
                         <div className="p-8">
@@ -442,62 +441,13 @@ function ChatArea() {
                         })}
                     </InfiniteScroll>
 
-                    <div className="m-6 border border-white/15 pt-4 px-2 rounded-lg ">
-                        {permissions.chat && (
-                            <TipTapEditor onSubmit={onSubmit} />
-                        )}
-                        {!permissions.chat &&
-                            !channel?.is_archived &&
-                            isChannelMember && (
-                                <h5 className="mb-4 text-center ml-4">
-                                    You're not allowed to post in channel.
-                                    Contact Admins or Channel managers for more
-                                    information!
-                                </h5>
-                            )}
-                        {!isChannelMember && permissions.join && (
-                            <div className="">
-                                <div className="flex items-baseline gap-x-1 font-bold justify-center text-lg">
-                                    {channel.type == "PUBLIC" ? (
-                                        <span className="text-xl">#</span>
-                                    ) : (
-                                        <FaLock className="text-sm inline" />
-                                    )}{" "}
-                                    {channelName}
-                                </div>
-                                <div className="flex gap-x-4 justify-center my-4 ">
-                                    <ChannelSettings
-                                        channelName={channelName}
-                                        buttonNode={
-                                            <Button className="bg-black/15 border border-white/15">
-                                                Detail
-                                            </Button>
-                                        }
-                                    />
-                                    <Button
-                                        className="bg-green-900"
-                                        onClick={joinChannel}
-                                    >
-                                        Join Channel
-                                    </Button>
-                                </div>
-                            </div>
-                        )}
-                        {channel?.is_archived == true && (
-                            <div className="mb-4 justify-center flex ml-4 items-baseline gap-x-1 text-white/75">
-                                You are viewing{" "}
-                                <div className="flex items-baseline gap-x-1">
-                                    {channel.type == "PUBLIC" ? (
-                                        <span className="text-xl">#</span>
-                                    ) : (
-                                        <FaLock className="text-sm inline" />
-                                    )}{" "}
-                                    {channelName}
-                                </div>
-                                , an archived channel
-                            </div>
-                        )}
-                    </div>
+                    <Editor
+                        channel={channel}
+                        permissions={permissions}
+                        isChannelMember={isChannelMember}
+                        channelName={channelName}
+                        setFocus={setFocus}
+                    />
                 </div>
             )}
         </div>

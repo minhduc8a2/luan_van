@@ -22,7 +22,6 @@ import Profile from "./Profile/Profile";
 import Activity from "./Activity/Activity";
 import { usePage } from "@inertiajs/react";
 import { setLeftWindowType } from "@/Store/windowTypeSlice";
-import { setWorkspaceUsers } from "@/Store/workspaceUsersSlice";
 import InitData from "./InitData";
 export default function Layout({ children }) {
     const { channelId } = usePage().props;

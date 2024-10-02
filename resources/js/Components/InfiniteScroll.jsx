@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { IoReloadOutline } from "react-icons/io5";
 import { useInView } from "react-intersection-observer";
 import OverlayLoadingSpinner from "./Overlay/OverlayLoadingSpinner";
+import { useDispatch } from "react-redux";
+import { setMention } from "@/Store/mentionSlice";
 
 export default function InfiniteScroll({
     children,
@@ -18,8 +20,10 @@ export default function InfiniteScroll({
     triggerScrollBottom,
     clearTriggerScrollBottom,
     rootMargin = "500px",
+    scrollToItem=null,
 }) {
     const containerRef = useRef(null);
+    const lockScrollPositionRef = useRef(null);
     const { ref: top_ref, inView: top_inView } = useInView({
         threshold: 0.1,
         root: containerRef.current,
@@ -32,7 +36,7 @@ export default function InfiniteScroll({
     });
     const [justTopLoaded, setJustTopLoaded] = useState(false);
     const preScrollPositionRef = useRef(null);
-
+    const dispatch = useDispatch()
     useEffect(() => {
         if (triggerScrollBottom) {
             containerRef.current.scrollTop =
@@ -42,6 +46,7 @@ export default function InfiniteScroll({
         }
     }, [triggerScrollBottom]);
 
+  
     useEffect(() => {
         console.log("top_inView", top_inView);
 
@@ -63,6 +68,7 @@ export default function InfiniteScroll({
     }, [top_inView, topHasMore, topLoading]);
 
     useEffect(() => {
+        if(scrollToItem) {setJustTopLoaded(false);}
         if (justTopLoaded) {
             containerRef.current.scrollTop =
                 containerRef.current.scrollHeight -
@@ -71,6 +77,9 @@ export default function InfiniteScroll({
             setJustTopLoaded(false);
         }
     }, [justTopLoaded]);
+
+
+   
 
     useEffect(() => {
         console.log("bottom_inView", bottom_inView);
@@ -90,6 +99,29 @@ export default function InfiniteScroll({
             });
         }
     }, [bottom_inView, bottomHasMore, bottomLoading]);
+
+//     useEffect(()=>{
+//         if(!scrollToItem) return;
+        
+//         if(topLoading || bottomLoading) return;
+
+//         const targetMessage = document.getElementById(
+//             `message-${scrollToItem}`
+//         );
+
+//         if (targetMessage) {
+//             targetMessage.classList.add("bg-link/15");
+
+//             setTimeout(() => {
+//                 targetMessage.classList.remove("bg-link/15");
+//             }, 1000);
+//             targetMessage.scrollIntoView({
+//                 behavior: "instant",
+//                 block: "center",
+//             });
+//             dispatch(setMention(null));
+//         }
+//   },[scrollToItem,topLoading,bottomLoading])
 
     function ButtonLoading({ position }) {
         if (position == "top") {

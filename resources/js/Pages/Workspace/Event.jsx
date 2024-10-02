@@ -3,7 +3,7 @@ import React, { useCallback, useMemo, useRef } from "react";
 import { useEffect } from "react";
 import { setManyOnline, setOnlineStatus } from "@/Store/OnlineStatusSlice";
 import { useDispatch, useSelector } from "react-redux";
-import { addActivity } from "@/Store/activitySlice";
+import { addActivity, addNotificationCount } from "@/Store/activitySlice";
 import { isChannelsNotificationBroadcast } from "@/helpers/notificationTypeHelper";
 
 import { toggleHuddle } from "@/Store/huddleSlice";
@@ -44,42 +44,13 @@ export default function Event() {
     const mainChannel = useMemo(() => {
         return channels.find((cn) => cn.is_main_channel);
     }, [channels]);
-    const loadChannelDataTokens = useRef([]);
-    function loadChannelRelatedData(types) {
-        if (loadChannelDataTokens.current.length > 0) {
-            loadChannelDataTokens.current.forEach((token) => token.abort());
-        }
-        return Promise.all(
-            types.map((type, index) => loadChannelData(type, index))
-        );
-    }
-
-    function loadChannelData(type, index) {
-        loadChannelDataTokens.current[index] = new AbortController();
-        return axios
-            .get(
-                route("channels.initChannelData", {
-                    channel: channelId,
-                }),
-                {
-                    params: {
-                        only: type,
-                    },
-                    signal: loadChannelDataTokens.current[index].signal,
-                }
-            )
-            .then((response) => {
-                dispatch(
-                    setChannelData({ id: channelId, data: response.data })
-                );
-            });
-    }
+    
 
     const userListener = useCallback(() => {
         Echo.private("App.Models.User." + auth.user.id).notification(
             (notification) => {
                 console.log("new", notification);
-                dispatch(addActivity(notification));
+                dispatch(addNotificationCount());
                 if (isChannelsNotificationBroadcast(notification.type)) {
                     const { channel, changesType } = notification;
                     switch (changesType) {
@@ -93,7 +64,7 @@ export default function Event() {
                                 loadChannelRelatedData([
                                     "permissions",
                                     "channelPermissions",
-                                ]);
+                                ],channelId, dispatch, setChannelData);
                             }
                             break;
                         case "removedFromChannel":
@@ -118,7 +89,7 @@ export default function Event() {
                                     loadChannelRelatedData([
                                         "permissions",
                                         "channelPermissions",
-                                    ]);
+                                    ],channelId, dispatch, setChannelData);
                                 }
                             }
                             break;
@@ -208,6 +179,7 @@ export default function Event() {
                 console.error(error);
             });
     }
+    
     function listenChannels() {
         channels.forEach((cn) => {
             console.log("Listen for channel: " + cn.name);
@@ -279,7 +251,7 @@ export default function Event() {
                                 loadChannelRelatedData([
                                     "permissions",
                                     "channelPermissions",
-                                ]);
+                                ],channelId, dispatch, setChannelData);
                             }
                             break;
                         case "removeManager":
@@ -293,7 +265,7 @@ export default function Event() {
                                 loadChannelRelatedData([
                                     "permissions",
                                     "channelPermissions",
-                                ]);
+                                ],channelId, dispatch, setChannelData);
                             }
                             break;
 
@@ -301,7 +273,7 @@ export default function Event() {
                             loadChannelRelatedData([
                                 "permissions",
                                 "channelPermissions",
-                            ]);
+                            ],channelId, dispatch, setChannelData);
                             break;
                         case "leave":
                             dispatch(
@@ -346,14 +318,14 @@ export default function Event() {
                             loadChannelRelatedData([
                                 "permissions",
                                 "channelPermissions",
-                            ]);
+                            ],channelId, dispatch, setChannelData);
                             break;
 
                         case "archiveChannel":
                             loadChannelRelatedData([
                                 "permissions",
                                 "channelPermissions",
-                            ]);
+                            ],channelId, dispatch, setChannelData);
                             break;
                         case "join":
                             dispatch(
@@ -369,11 +341,11 @@ export default function Event() {
     }
     useEffect(() => {
         listenChannels();
-        return () => {
-            channels.forEach((cn) => {
-                Echo.leave(`private_channels.${cn.id}`);
-            });
-        };
+        // return () => {
+        //     channels.forEach((cn) => {
+        //         Echo.leave(`private_channels.${cn.id}`);
+        //     });
+        // };
     }, [channels]);
     useEffect(() => {
         workspaceListener();
