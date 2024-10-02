@@ -12,19 +12,15 @@ import { FaLock } from "react-icons/fa";
 import OverlaySimpleNotification from "@/Components/Overlay/OverlaySimpleNotification";
 import { useState } from "react";
 import { useChannelData } from "@/helpers/customHooks";
+import { useNavigate } from "react-router-dom";
 export default function ChannelNotification({
     notification,
     handleNotificationClick,
 }) {
-    const {
-        auth,
-       channelId
-
-        
-    } = usePage().props;
-    const {workspaceUsers} = useSelector(state=>state.workspaceUsers)
+    const { auth, channelId } = usePage().props;
+    const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
     console.log(notification);
-    
+
     const { fromUser, channel, workspace, data, changesType } =
         isChannelsNotificationBroadcast(notification.type)
             ? notification
@@ -32,7 +28,7 @@ export default function ChannelNotification({
     const read_at = notification.read_at;
     const created_at = notification.created_at;
     const view_at = notification.view_at;
-    const dispatch = useDispatch();
+    const navigate = useNavigate();
     const [errors, setErrors] = useState(null);
 
     function handleNotificationClickedPart() {
@@ -47,15 +43,7 @@ export default function ChannelNotification({
                     return;
                 }
                 if (changesType != "deleteChannel") {
-                    router.visit(
-                        route("channels.show", {
-                            workspace: workspace.id,
-                            channel: channel.id,
-                        }),
-                        {
-                            preserveState: true,
-                        }
-                    );
+                    navigate(`channels/${channel.id}`);
                 }
             });
     }

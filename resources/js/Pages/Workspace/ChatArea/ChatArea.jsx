@@ -32,6 +32,7 @@ import {
 } from "@/Store/channelsDataSlice";
 import Editor from "./Editor";
 import { useParams } from "react-router-dom";
+import { setMention } from "@/Store/mentionSlice";
 export default function ChatArea() {
     const { auth } = usePage().props;
     const { channelId } = useParams();
@@ -40,7 +41,7 @@ export default function ChatArea() {
     const { permissions, messages } = useChannelData(channelId);
     const { channelUsers } = useChannelUsers(channelId);
     const { channel } = useChannel(channelId);
-   console.log(channel);
+    console.log(channel);
     const { messageId: threadMessageId } = useSelector((state) => state.thread);
     const { messageId, threadMessage: mentionThreadMessage } = useSelector(
         (state) => state.mention
@@ -59,14 +60,16 @@ export default function ChatArea() {
     const [bottomHasMore, setBottomHasMore] = useState();
     const [loadingMessageIdMessages, setLoadingMessageIdMessages] =
         useState(false);
+    const [hasMention, setHasMention] = useState(false);
+    const [mentionFulfilled, setMentionFulfilled] = useState(null);
     useEffect(() => {
-        if (loaded) {
+        if (messages) {
             const { minId, maxId } = findMinMaxId(messages);
             console.log(minId, maxId);
             setTopHasMore(maxId);
             setBottomHasMore(minId);
         }
-    }, [channel?.id, loaded]);
+    }, [channel?.id, messages]);
 
     const loadMoreTopToken = useRef(null);
     const loadMoreBottomToken = useRef(null);
@@ -113,13 +116,15 @@ export default function ChatArea() {
                                 setBottomHasMore(null);
                             }
                         }
-                        dispatch(
-                            addMessages({
-                                id: channelId,
-                                data: response.data,
-                                position,
-                            })
-                        );
+                        if (response.data.length > 0) {
+                            dispatch(
+                                addMessages({
+                                    id: channelId,
+                                    data: response.data,
+                                    position,
+                                })
+                            );
+                        }
                         successCallBack();
                     }
                 })
@@ -133,9 +138,14 @@ export default function ChatArea() {
         }
     };
 
-   
+    useEffect(() => {
+        if (messageId) {
+            setHasMention(messageId);
+            setMentionFulfilled(false);
+            dispatch(setMention(null));
+        }
+    }, [messageId]);
 
-   
     useEffect(() => {
         Echo.private(`private_channels.${channelId}`).listen(
             "MessageEvent",
@@ -158,11 +168,11 @@ export default function ChatArea() {
 
     useEffect(() => {
         if (!channel) return;
-
+        if (!messageId) setNewMessageReceived(true);
         dispatch(resetMessageCountForChannel(channel));
         axios.post(route("channel.last_read", channel.id), {});
         return () => {
-            setNewMessageReceived(true);
+           
             axios.post(route("channel.last_read", channel.id), {});
         };
     }, [channel?.id]);
@@ -248,6 +258,28 @@ export default function ChatArea() {
         if (!channel) return false;
         return channelUsers.some((u) => u.id === auth.user.id);
     }, [channelUsers]);
+
+    useEffect(() => {
+        if (hasMention && groupedMessages && !mentionFulfilled) {
+            const targetMessage = document.getElementById(
+                `message-${hasMention}`
+            );
+            if (!targetMessage) return;
+            if (targetMessage) {
+                targetMessage.classList.add("bg-link/15");
+
+                setTimeout(() => {
+                    targetMessage.classList.remove("bg-link/15");
+                }, 3000);
+                targetMessage.scrollIntoView({
+                    behavior: "instant",
+                    block: "center",
+                });
+                setHasMention(null);
+                setMentionFulfilled(true);
+            }
+        }
+    }, [groupedMessages, hasMention, mentionFulfilled]);
     return (
         <div className="flex-1 flex min-h-0 max-h-full w-full">
             <InitData loaded={loaded} setLoaded={(value) => setLoaded(value)} />
@@ -274,10 +306,8 @@ export default function ChatArea() {
                                 successCallBack
                             )
                         }
-                        topHasMore={!loadingMessageIdMessages && topHasMore}
-                        bottomHasMore={
-                            !loadingMessageIdMessages && bottomHasMore
-                        }
+                        topHasMore={topHasMore}
+                        bottomHasMore={bottomHasMore}
                         topLoading={topLoading}
                         bottomLoading={bottomLoading}
                         triggerScrollBottom={newMessageReceived}

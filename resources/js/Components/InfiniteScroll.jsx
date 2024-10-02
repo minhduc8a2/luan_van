@@ -20,7 +20,7 @@ export default function InfiniteScroll({
     triggerScrollBottom,
     clearTriggerScrollBottom,
     rootMargin = "500px",
-    scrollToItem=null,
+    scrollToItem = null,
 }) {
     const containerRef = useRef(null);
     const lockScrollPositionRef = useRef(null);
@@ -36,7 +36,7 @@ export default function InfiniteScroll({
     });
     const [justTopLoaded, setJustTopLoaded] = useState(false);
     const preScrollPositionRef = useRef(null);
-    const dispatch = useDispatch()
+    const dispatch = useDispatch();
     useEffect(() => {
         if (triggerScrollBottom) {
             containerRef.current.scrollTop =
@@ -46,7 +46,6 @@ export default function InfiniteScroll({
         }
     }, [triggerScrollBottom]);
 
-  
     useEffect(() => {
         console.log("top_inView", top_inView);
 
@@ -58,8 +57,9 @@ export default function InfiniteScroll({
             loadMoreOnTop(() => {
                 if (!reverse) {
                     preScrollPositionRef.current = {
-                        oldScrollHeight: containerRef.current.scrollHeight,
-                        oldScrollTop: containerRef.current.scrollTop,
+                        oldScrollHeight:
+                            containerRef.current?.scrollHeight || 0,
+                        oldScrollTop: containerRef.current?.scrollTop || 0,
                     };
                     setJustTopLoaded(true);
                 }
@@ -68,18 +68,17 @@ export default function InfiniteScroll({
     }, [top_inView, topHasMore, topLoading]);
 
     useEffect(() => {
-        if(scrollToItem) {setJustTopLoaded(false);}
+        if (scrollToItem) {
+            setJustTopLoaded(false);
+        }
         if (justTopLoaded) {
             containerRef.current.scrollTop =
                 containerRef.current.scrollHeight -
-                preScrollPositionRef.current.oldScrollHeight +
-                preScrollPositionRef.current.oldScrollTop;
+                preScrollPositionRef.current?.oldScrollHeight +
+                preScrollPositionRef.current?.oldScrollTop;
             setJustTopLoaded(false);
         }
     }, [justTopLoaded]);
-
-
-   
 
     useEffect(() => {
         console.log("bottom_inView", bottom_inView);
@@ -91,8 +90,9 @@ export default function InfiniteScroll({
             loadMoreOnBottom(() => {
                 if (reverse) {
                     preScrollPositionRef.current = {
-                        oldScrollHeight: containerRef.current.scrollHeight,
-                        oldScrollTop: containerRef.current.scrollTop,
+                        oldScrollHeight:
+                            containerRef.current?.scrollHeight || 0,
+                        oldScrollTop: containerRef.current?.scrollTop || 0,
                     };
                     setJustTopLoaded(true);
                 }
@@ -100,28 +100,28 @@ export default function InfiniteScroll({
         }
     }, [bottom_inView, bottomHasMore, bottomLoading]);
 
-//     useEffect(()=>{
-//         if(!scrollToItem) return;
-        
-//         if(topLoading || bottomLoading) return;
+    //     useEffect(()=>{
+    //         if(!scrollToItem) return;
 
-//         const targetMessage = document.getElementById(
-//             `message-${scrollToItem}`
-//         );
+    //         if(topLoading || bottomLoading) return;
 
-//         if (targetMessage) {
-//             targetMessage.classList.add("bg-link/15");
+    //         const targetMessage = document.getElementById(
+    //             `message-${scrollToItem}`
+    //         );
 
-//             setTimeout(() => {
-//                 targetMessage.classList.remove("bg-link/15");
-//             }, 1000);
-//             targetMessage.scrollIntoView({
-//                 behavior: "instant",
-//                 block: "center",
-//             });
-//             dispatch(setMention(null));
-//         }
-//   },[scrollToItem,topLoading,bottomLoading])
+    //         if (targetMessage) {
+    //             targetMessage.classList.add("bg-link/15");
+
+    //             setTimeout(() => {
+    //                 targetMessage.classList.remove("bg-link/15");
+    //             }, 1000);
+    //             targetMessage.scrollIntoView({
+    //                 behavior: "instant",
+    //                 block: "center",
+    //             });
+    //             dispatch(setMention(null));
+    //         }
+    //   },[scrollToItem,topLoading,bottomLoading])
 
     function ButtonLoading({ position }) {
         if (position == "top") {

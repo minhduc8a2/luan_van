@@ -15,19 +15,17 @@ import { useState } from "react";
 import { useChannel, useChannelData } from "@/helpers/customHooks";
 import { setChannelData } from "@/Store/channelsDataSlice";
 import { loadChannelRelatedData } from "@/helpers/channelDataLoader";
+import { loadSpecificMessagesById } from "@/helpers/loadSpecificMessagesById";
+import { useNavigate, useParams } from "react-router-dom";
 export default function MentionNotification({
     notification,
     handleNotificationClick,
 }) {
-    const {
-        auth,
-        users: workspaceUsers,
-
-        channelId,
-    } = usePage().props;
-    const { channels } = useSelector((state) => state.channels);
-
-    const currentChannel = useChannel(channelId);
+    const { auth } = usePage().props;
+    const channelsData = useSelector((state) => state.channelsData);
+    const { channelId } = useParams();
+    const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
+    const {channel:currentChannel} = useChannel(channelId);
     const { messages } = useChannelData(channelId);
     const [errors, setErrors] = useState(null);
     const { fromUser, toUser, channel, workspace, message, threadMessage } =
@@ -38,7 +36,7 @@ export default function MentionNotification({
     const created_at = notification.created_at;
     const view_at = notification.view_at;
     const dispatch = useDispatch();
-
+    const navigate = useNavigate();
     function handleNotificationClickedPart() {
         //check channel is available
         axios
@@ -53,16 +51,12 @@ export default function MentionNotification({
                 }
 
                 if (
-                    channel.id === currentChannel.id &&
+                    channel.id == currentChannel.id &&
                     messages.find((msg) => msg.id == message.id)
                 ) {
-                    dispatch(
-                        setMention({
-                            messageId: message.id,
-                            threadMessage,
-                        })
-                    );
+                   
                     if (!threadMessage) {
+                        
                         const targetMessage = document.getElementById(
                             `message-${message.id}`
                         );
@@ -72,32 +66,33 @@ export default function MentionNotification({
 
                             setTimeout(() => {
                                 targetMessage.classList.remove("bg-link/15");
-                            }, 1000);
+                            }, 3000);
                             targetMessage.scrollIntoView({
                                 behavior: "instant",
                                 block: "center",
                             });
-                            dispatch(setMention(null));
                         }
+                    } else {
+                        dispatch(
+                            setMention({
+                                messageId: message.id,
+                                threadMessage,
+                            })
+                        );
+                        dispatch(setThreadedMessageId(message.id));
                     }
-                    // if (threadMessage)
-                    //     dispatch(setThreadedMessageId(message.id));
-                } else
-
-                    loadChannelRelatedData([])
-                    router.get(
-                        route("channels.show", {
-                            workspace: workspace.id,
-                            channel: channel.id,
-                        }),
-                        {},
-                        {
-                            preserveState: true,
-                            onSuccess: () => {
-                                dispatch(setMention({ messageId: message.id }));
-                            },
-                        }
-                    );
+                } else {
+                    if (channelsData.hasOwnProperty(channel.id)) {
+                        loadSpecificMessagesById(
+                            message.id,
+                            channel.id,
+                            dispatch,
+                            setChannelData
+                        );
+                    }
+                    dispatch(setMention({ messageId: message.id }));
+                    navigate(`channels/${channel.id}`);
+                }
             });
 
         //

@@ -1,5 +1,5 @@
 const loadChannelMessagesToken = { current: null };
-export function loadChannelMessages(
+export function loadSpecificMessagesById(
     messageId,
     channelId,
     dispatch,
