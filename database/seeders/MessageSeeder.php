@@ -16,6 +16,11 @@ class MessageSeeder extends Seeder
      */
     public function run(): void
     {
-        Message::factory()->count(50)->create();
+        // Message::factory()->count(50)->create();
+        for ($i = 10; $i >=0 ; $i--) {
+            for ($j = 10; $j >= 0; $j--) {
+                Message::factory()->create(['created_at' => Carbon::now()->subDays($i)->subHours($j)]);
+            }
+        }
     }
 }

@@ -170,6 +170,7 @@ import Mention from "@tiptap/extension-mention";
 import { MentionList } from "./MentionList.jsx";
 import Button from "./Button";
 import { useSelector } from "react-redux";
+import { useChannelUsers } from "@/helpers/customHooks";
 
 export default function TipTapEditor({
     onSubmit,
@@ -180,9 +181,9 @@ export default function TipTapEditor({
     closeEditMessageEditor = () => {},
     onlyText = false,
 }) {
-    const { auth, channelId, channelUsers } = usePage().props;
+    const { auth, channelId } = usePage().props;
     const { channels } = useSelector((state) => state.channels);
-
+    const { channelUsers } = useChannelUsers(channelId);
     const channel = useMemo(
         () => channels.find((cn) => cn.id == channelId),
         [channels, channelId]

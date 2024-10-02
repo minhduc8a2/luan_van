@@ -1,5 +1,5 @@
 import { router, usePage } from "@inertiajs/react";
-import React from "react";
+import React, { useMemo, useRef } from "react";
 import { FiHeadphones } from "react-icons/fi";
 import Avatar from "@/Components/Avatar";
 import { UTCToDateTime } from "@/helpers/dateTimeHelper";
@@ -12,6 +12,8 @@ import { setMention } from "@/Store/mentionSlice";
 import { setThreadedMessageId } from "@/Store/threadSlice";
 import OverlaySimpleNotification from "@/Components/Overlay/OverlaySimpleNotification";
 import { useState } from "react";
+import { useChannel, useChannelData } from "@/helpers/customHooks";
+import { setChannelData } from "@/Store/channelsDataSlice";
 export default function MentionNotification({
     notification,
     handleNotificationClick,
@@ -24,11 +26,8 @@ export default function MentionNotification({
     } = usePage().props;
     const { channels } = useSelector((state) => state.channels);
 
-    const currentChannel = useMemo(
-        () => channels.find((cn) => cn.id == channelId),
-        [channels, channelId]
-    );
-    const { messages } = useSelector((state) => state.messages);
+    const currentChannel = useChannel(channelId);
+    const { messages } = useChannelData(channelId);
     const [errors, setErrors] = useState(null);
     const { fromUser, toUser, channel, workspace, message, threadMessage } =
         isMentionNotificationBroadcast(notification.type)
@@ -38,7 +37,36 @@ export default function MentionNotification({
     const created_at = notification.created_at;
     const view_at = notification.view_at;
     const dispatch = useDispatch();
+    const loadChannelMessagesToken = useRef(null);
 
+    function loadChannelMessages(messageId) {
+        loadChannelMessagesToken.current = new AbortController();
+        return axios
+            .get(
+                route("messages.getSpecificMessagesById", {
+                    channel: channelId,
+                    messageId: messageId,
+                }),
+                {
+                    signal: loadChannelMessagesToken.current.signal,
+                }
+            )
+            .then((response) => {
+                response.data.sort((a, b) => b.id - a.id);
+                console.log(response.data);
+                dispatch(
+                    setChannelData({
+                        id: channelId,
+                        data: { messages: response.data },
+                    })
+                );
+                const { minId, maxId } = findMinMaxId(response.data);
+                console.log(minId, maxId);
+                setTopHasMore(maxId);
+                setBottomHasMore(minId);
+            })
+            .finally(() => {});
+    }
     function handleNotificationClickedPart() {
         //check channel is available
         axios
@@ -74,37 +102,54 @@ export default function MentionNotification({
                                 targetMessage.classList.remove("bg-link/15");
                             }, 1000);
                             targetMessage.scrollIntoView({
-                                behavior: "smooth",
+                                behavior: "instant",
                                 block: "center",
                             });
                             dispatch(setMention(null));
                         }
                     }
-                    if (threadMessage)
-                        dispatch(setThreadedMessageId(message.id));
-                } else
-                    router.get(
-                        route("channels.show", {
-                            workspace: workspace.id,
-                            channel: channel.id,
-                        }),
-                        { message_id: message.id },
-                        {
-                            preserveState: true,
+                    // if (threadMessage)
+                    //     dispatch(setThreadedMessageId(message.id));
+                } 
+                // else
+                //     router.get(
+                //         route("channels.show", {
+                //             workspace: workspace.id,
+                //             channel: channel.id,
+                //         }),
+                //         {},
+                //         {
+                //             preserveState: true,
 
-                            onFinish: () => {
-                                dispatch(
-                                    setMention({
-                                        messageId: message.id,
-                                        threadMessage,
-                                    })
-                                );
+                //             onFinish: () => {
+                //                 loadChannelMessages(message.id).then(() => {
+                //                     setTimeout(() => {
+                //                         const targetMessage =
+                //                             document.getElementById(
+                //                                 `message-${message.id}`
+                //                             );
 
-                                if (threadMessage)
-                                    dispatch(setThreadedMessageId(message.id));
-                            },
-                        }
-                    );
+                //                         if (targetMessage) {
+                //                             targetMessage.classList.add(
+                //                                 "bg-link/15"
+                //                             );
+
+                //                             setTimeout(() => {
+                //                                 targetMessage.classList.remove(
+                //                                     "bg-link/15"
+                //                                 );
+                //                             }, 1000);
+                //                             targetMessage.scrollIntoView({
+                //                                 behavior: "instant",
+                //                                 block: "center",
+                //                             });
+                //                             dispatch(setMention(null));
+                //                         }
+                //                     }, 500);
+                //                 });
+                //             },
+                //         }
+                //     );
             });
 
         //

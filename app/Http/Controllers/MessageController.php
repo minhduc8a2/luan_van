@@ -68,6 +68,37 @@ class MessageController extends Controller
 
         return $messagesQuery->limit($perPage)->get();
     }
+
+    public function getSpecificMessagesById(Request $request,  Channel $channel)
+    {
+        $messageId = $request->query('messageId');
+
+
+        $specificMessage = Message::find($messageId);
+        if (!$specificMessage) {
+            return abort(404, 'Message was deleted!');
+        }
+
+        $beforeMessages = Message::where('id', '<', $specificMessage->id)->where('channel_id', '=', $channel->id)
+            ->orderBy('id', 'desc')
+            ->limit(5)
+            ->get();
+
+        $afterMessages = Message::where('id', '>', $specificMessage->id)->where('channel_id', '=', $channel->id)
+            ->orderBy('id', 'asc')
+            ->limit(5)
+            ->get();
+
+
+        $messages = $afterMessages->concat([$specificMessage])->concat($beforeMessages);
+
+
+
+
+
+        return $messages;
+    }
+
     public function getMessage(Request $request)
     {
 

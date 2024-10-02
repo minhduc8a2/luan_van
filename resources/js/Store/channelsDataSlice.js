@@ -4,9 +4,9 @@ export const channelsDataSlice = createSlice({
     name: "channelsData",
     initialState: {},
     reducers: {
-        removeChannelData(state,action){
-            console.log("remove channel data",action.payload.id);
-            if(state[action.payload.id]){
+        removeChannelData(state, action) {
+            console.log("remove channel data", action.payload.id);
+            if (state[action.payload.id]) {
                 delete state[action.payload.id];
             }
         },
@@ -75,7 +75,21 @@ export const channelsDataSlice = createSlice({
                 });
             }
         },
-
+        addMessages(state, action) {
+            if (state[action.payload.id] && state[action.payload.id].messages) {
+                if (action.payload.position == "top") {
+                    state[action.payload.id].messages = [
+                        ...action.payload.data,
+                        ...state[action.payload.id].messages,
+                    ];
+                } else {
+                    state[action.payload.id].messages = [
+                        ...state[action.payload.id].messages,
+                        ...action.payload.data,
+                    ];
+                }
+            }
+        },
         addMessage(state, action) {
             if (state[action.payload.id] && state[action.payload.id].messages) {
                 if (
@@ -190,7 +204,8 @@ export const {
     addThreadMessagesCount,
     subtractThreadMessagesCount,
     deleteFile,
-    removeChannelData
+    removeChannelData,
+    addMessages,
 } = channelsDataSlice.actions;
 
 export default channelsDataSlice.reducer;

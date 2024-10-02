@@ -14,6 +14,7 @@ import { IoMdMore } from "react-icons/io";
 import { usePage } from "@inertiajs/react";
 import DeleteMessage from "./DeleteMessage";
 import { PiShareFat } from "react-icons/pi";
+import { useChannelData } from "@/helpers/customHooks";
 export default function MessageToolbar({
     message,
     threadStyle = false,
@@ -24,7 +25,8 @@ export default function MessageToolbar({
     forwardFn,
 }) {
     const dispatch = useDispatch();
-    const { auth, permissions } = usePage().props;
+    const { auth, channelId } = usePage().props;
+    const { permissions } = useChannelData(channelId);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [showMore, setShowMore] = useState(false);
 
@@ -86,7 +88,9 @@ export default function MessageToolbar({
                 >
                     <button
                         className="rounded p-2 hover:bg-white/15"
-                        onClick={() => dispatch(setThreadedMessageId(message.id))}
+                        onClick={() =>
+                            dispatch(setThreadedMessageId(message.id))
+                        }
                     >
                         <BiMessageRoundedDetail className="text-lg" />
                     </button>

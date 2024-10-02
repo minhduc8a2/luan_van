@@ -52,6 +52,7 @@ Route::middleware('auth')->group(function () {
     Route::get("/workspaces/{workspace}/direct_channels", [WorkspaceController::class, 'getDirectChannels'])->name('workspace.direct_channels');
     Route::get("channels/{channel}/init_channel_data", [ChannelController::class, 'initChannelData'])->name('channels.initChannelData');
     Route::get("channels/{channel}/messages/infinite_messages", [MessageController::class, 'infiniteMessages'])->name('messages.infiniteMessages');
+    Route::get("channels/{channel}/messages/specific_messages", [MessageController::class, 'getSpecificMessagesById'])->name('messages.getSpecificMessagesById');
     Route::get("/workspaces/{workspace}/channels/{channel}", [ChannelController::class, 'show'])->name('channels.show');
     Route::get("workspaces/{workspace}/channels", [ChannelController::class, 'index'])->name('channels.index');
     Route::post("workspaces/{workspace}/channels", [ChannelController::class, 'store'])->name('channel.store');

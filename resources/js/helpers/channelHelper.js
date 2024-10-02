@@ -1,19 +1,18 @@
-export function getChannelName(channel, channelUsers, currentUser) {
+export function getChannelName(channel, workspaceUsers, currentUser) {
     let isDirectChannel = channel.type == "DIRECT";
+    if (!isDirectChannel) return channel.name;
 
-    if (isDirectChannel) {
-        try {
-            const user = channelUsers.find((user) => user.id != currentUser.id);
-            return user.display_name || user.name;
-        } catch (error) {
-            console.error(error);
-        }
+    try {
+        const user = getDirectChannelUser(channel, workspaceUsers, currentUser);
+
+        return user?.display_name || user?.name || "Name not found";
+    } catch (error) {
+        console.error(error);
     }
-    return channel.name;
 }
 
 export function getDirectChannelUser(channel, workspaceUsers, currentUser) {
-    if (!channel || workspaceUsers || currentUser) return null;
+    if (!channel || !workspaceUsers || !currentUser) return null;
     try {
         const userIds = channel?.name.split("_");
         const userId = userIds.find((id) => id != currentUser.id);
@@ -36,6 +35,21 @@ export function getDirectChannelFromUserId(channels, userId) {
     }
 
     return null;
+}
+
+export function findMinMaxId(messages) {
+    if (messages.length === 0) {
+        return { minId: null, maxId: null };
+    }
+
+    return messages.reduce(
+        (acc, msg) => {
+            if (msg.id < acc.minId) acc.minId = msg.id;
+            if (msg.id > acc.maxId) acc.maxId = msg.id;
+            return acc;
+        },
+        { minId: messages[0].id, maxId: messages[0].id }
+    );
 }
 
 const channelProps = [

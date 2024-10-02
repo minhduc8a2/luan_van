@@ -24,7 +24,7 @@ class MessageFactory extends Factory
             "user_id" => 1,
             "channel_id" => 1,
            
-            "created_at" => Carbon::now()->subMinutes(random_int(24, 10000))
+            "created_at" => Carbon::now()
             
         ];
     }
