@@ -32,6 +32,7 @@ import {
     setChannelData,
 } from "@/Store/channelsDataSlice";
 import { useParams } from "react-router-dom";
+import { loadSomeChannelData } from "@/helpers/channelDataLoader";
 
 export default function Event() {
     const { auth } = usePage().props;
@@ -48,6 +49,22 @@ export default function Event() {
         return channels.find((cn) => cn.is_main_channel);
     }, [channels]);
 
+    const loadSomeChannelDataToken = useRef([]);
+    function reloadPermissions(channelId, dispatch, setChannelData) {
+        if (loadSomeChannelDataToken.current.length > 0)
+            loadSomeChannelDataToken.current.forEach((token) => token.abort());
+        loadSomeChannelDataToken.current = [
+            new AbortController(),
+            new AbortController(),
+        ];
+        loadSomeChannelData(
+            ["permissions", "channelPermissions"],
+            channelId,
+            dispatch,
+            setChannelData,
+            loadSomeChannelDataToken.current
+        );
+    }
     const userListener = useCallback(() => {
         Echo.private("App.Models.User." + auth.user.id).notification(
             (notification) => {
@@ -63,8 +80,7 @@ export default function Event() {
                                 console.log(
                                     "Added to new channel and has channel data already, need to update"
                                 );
-                                loadChannelRelatedData(
-                                    ["permissions", "channelPermissions"],
+                                reloadPermissions(
                                     channelId,
                                     dispatch,
                                     setChannelData
@@ -90,8 +106,7 @@ export default function Event() {
                                         );
                                     }
                                 } else {
-                                    loadChannelRelatedData(
-                                        ["permissions", "channelPermissions"],
+                                    reloadPermissions(
                                         channelId,
                                         dispatch,
                                         setChannelData
@@ -254,8 +269,7 @@ export default function Event() {
                                 })
                             );
                             if (e.data?.find((id) => id == auth.user.id)) {
-                                loadChannelRelatedData(
-                                    ["permissions", "channelPermissions"],
+                                reloadPermissions(
                                     channelId,
                                     dispatch,
                                     setChannelData
@@ -270,8 +284,7 @@ export default function Event() {
                                 })
                             );
                             if (e.data == auth.user.id) {
-                                loadChannelRelatedData(
-                                    ["permissions", "channelPermissions"],
+                                reloadPermissions(
                                     channelId,
                                     dispatch,
                                     setChannelData
@@ -280,8 +293,7 @@ export default function Event() {
                             break;
 
                         case "changeType":
-                            loadChannelRelatedData(
-                                ["permissions", "channelPermissions"],
+                            reloadPermissions(
                                 channelId,
                                 dispatch,
                                 setChannelData
@@ -327,8 +339,7 @@ export default function Event() {
 
                             break;
                         case "updateChannelPermissions":
-                            loadChannelRelatedData(
-                                ["permissions", "channelPermissions"],
+                            reloadPermissions(
                                 channelId,
                                 dispatch,
                                 setChannelData
@@ -336,8 +347,7 @@ export default function Event() {
                             break;
 
                         case "archiveChannel":
-                            loadChannelRelatedData(
-                                ["permissions", "channelPermissions"],
+                            reloadPermissions(
                                 channelId,
                                 dispatch,
                                 setChannelData

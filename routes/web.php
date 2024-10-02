@@ -45,9 +45,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::post("/workspaces", [WorkspaceController::class, 'store'])->name('workspace.store');
     Route::get("/workspaces/{workspace}", [WorkspaceController::class, 'show'])->name('workspace.show');
-    Route::get("/workspaces/{workspace}/channels/{channel}", [WorkspaceController::class, 'show'])->name('channels.show');
+    Route::get("/workspaces/{workspace}/channels/{channel}", [ChannelController::class, 'show'])->name('channels.show');
     Route::get("/workspaces/{workspace}/init_workspace_data", [WorkspaceController::class, 'initWorkspaceData'])->name('workspaces.initWorkspaceData');
-    Route::get('/workspaces/{workspace}/users', [UserController::class, 'browseUsers'])->name("users.browseUsers");
+    Route::get('/workspaces/{workspace}/browse_users', [UserController::class, 'browseUsers'])->name("users.browseUsers");
 
     Route::get("/workspaces/{workspace}/getChannels", [ChannelController::class, 'getWorkspaceChannels'])->name('workspaces.getChannels');
     Route::get("/workspaces/{workspace}/direct_channels", [WorkspaceController::class, 'getDirectChannels'])->name('workspace.direct_channels');
@@ -55,7 +55,7 @@ Route::middleware('auth')->group(function () {
     Route::get("channels/{channel}/messages/infinite_messages", [MessageController::class, 'infiniteMessages'])->name('messages.infiniteMessages');
     Route::get("channels/{channel}/messages/specific_messages", [MessageController::class, 'getSpecificMessagesById'])->name('messages.getSpecificMessagesById');
    
-    Route::get("workspaces/{workspace}/channels", [ChannelController::class, 'index'])->name('channels.index');
+    Route::get("workspaces/{workspace}/browse_channels", [ChannelController::class, 'browseChannels'])->name('channels.browseChannels');
     Route::post("workspaces/{workspace}/channels", [ChannelController::class, 'store'])->name('channel.store');
     Route::get("/channels/check_exists", [ChannelController::class, 'checkChannelExists'])->name('channel.checkExists');
 

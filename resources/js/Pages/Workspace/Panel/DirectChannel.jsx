@@ -4,28 +4,18 @@ import { router } from "@inertiajs/react";
 import { useSelector } from "react-redux";
 import { channelProps } from "@/helpers/channelHelper";
 import { useMemo } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useChannel } from "@/helpers/customHooks";
 export function DirectChannel({ channel, user, isOnline = false }) {
-    const { auth,channelId,  workspace } = usePage().props;
-    const { channels } = useSelector((state) => state.channels);
+    const { auth } = usePage().props;
+    const { channelId } = useParams();
 
-    const currentChannel = useMemo(
-        () => channels.find((cn) => cn.id == channelId),
-        [channels, channelId]
-    );
+    const navigate = useNavigate();
+    const { channel: currentChannel } = useChannel(channelId);
     const onlineStatusMap = useSelector((state) => state.onlineStatus);
-  
+
     function changeChannel() {
-        router.get(
-            route("channels.show", {
-                workspace: workspace.id,
-                channel: channel.id,
-            }),
-            {},
-            {
-                preserveState: true,
-                only: channelProps,
-            }
-        );
+        navigate(`channels/${channel.id}`);
     }
     return (
         <li>

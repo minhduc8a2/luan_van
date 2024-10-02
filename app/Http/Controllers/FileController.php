@@ -131,7 +131,7 @@ class FileController extends Controller
                         return $files;
                 }
             }
-            return Inertia::render("Workspace/BrowseFiles/BrowseFiles");
+            return Inertia::render("Workspace/Index");
         } catch (\Throwable $th) {
             dd($th);
         }

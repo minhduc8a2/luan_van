@@ -15,7 +15,8 @@ import InfiniteScroll from "@/Components/InfiniteScroll";
 import { setLeftWindowType } from "@/Store/windowTypeSlice";
 import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
 export default function BrowseChannels() {
-    const { auth, workspace } = usePage().props;
+    const { auth} = usePage().props;
+    const {workspace} = useSelector(state=>state.workspace)
     const dispatch = useDispatch();
     const [allChannels, setAllChannels] = useState([]);
 
@@ -209,7 +210,7 @@ export default function BrowseChannels() {
             }
 
             return axios
-                .get(route("channels.index", workspace.id), {
+                .get(route("channels.browseChannels", workspace.id), {
                     params: {
                         ownType: filter.ownType,
                         privacyType: filter.privacyType,
@@ -261,7 +262,7 @@ export default function BrowseChannels() {
 
         token.current = new AbortController();
         return axios
-            .get(route("channels.index", workspace.id), {
+            .get(route("channels.browseChannels", workspace.id), {
                 params: {
                     ownType: filter.ownType,
                     privacyType: filter.privacyType,

@@ -133,46 +133,9 @@ export default function ChatArea() {
         }
     };
 
-    const loadChannelMessagesToken = useRef(null);
-    function loadChannelMessages(messageId) {
-        setLoadingMessageIdMessages(true);
-        if (loadChannelMessagesToken.current)
-            loadChannelMessagesToken.current.abort();
-        loadChannelMessagesToken.current = new AbortController();
-        return axios
-            .get(
-                route("messages.getSpecificMessagesById", {
-                    channel: channelId,
-                    messageId: messageId,
-                }),
-                {
-                    signal: loadChannelMessagesToken.current.signal,
-                }
-            )
-            .then((response) => {
-                response.data.sort((a, b) => b.id - a.id);
-                console.log(response.data);
-                dispatch(
-                    setChannelData({
-                        id: channelId,
-                        data: { messages: response.data },
-                    })
-                );
-                const { minId, maxId } = findMinMaxId(response.data);
-                console.log(minId, maxId);
-                setTopHasMore(maxId);
-                setBottomHasMore(minId);
-            })
-            .finally(() => {
-                setLoadingMessageIdMessages(false);
-            });
-    }
+   
 
-    useEffect(() => {
-        if (messageId) {
-            loadChannelMessages(messageId);
-        }
-    }, [messageId, channelId]);
+   
     useEffect(() => {
         Echo.private(`private_channels.${channelId}`).listen(
             "MessageEvent",

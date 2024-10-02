@@ -139,7 +139,7 @@ class ChannelController extends Controller
             abort(500, "Something went wrong! Please try later.");
         }
     }
-    public function index(Request $request, Workspace $workspace)
+    public function browseChannels(Request $request, Workspace $workspace)
     {
         $perPage = 10;
         $ownType = $request->query('ownType');
@@ -262,7 +262,7 @@ class ChannelController extends Controller
                 dd($th);
             }
         }
-        return Inertia::render("Workspace/BrowseChannels/BrowseChannels");
+        return Inertia::render("Workspace/Index");
     }
     /**
      * Show the form for creating a new resource.
@@ -321,9 +321,7 @@ class ChannelController extends Controller
         if ($request->user()->cannot('view', $channel)) {
             return  redirect(route('workspace.show', $channel->workspace->id));
         }
-        return Inertia::render("Workspace/ChatArea/ChatArea", [
-            'channelId' => $channel->id,
-        ]);
+        return Inertia::render("Workspace/Index");
     }
 
     /**

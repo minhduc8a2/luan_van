@@ -72,7 +72,7 @@ class UserController extends Controller
                 return $user;
             });
         }
-        return Inertia::render("Workspace/BrowseUsers/BrowseUsers");
+        return Inertia::render("Workspace/Index");
     }
 
     /**

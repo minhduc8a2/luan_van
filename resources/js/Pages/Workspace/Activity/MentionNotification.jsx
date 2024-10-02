@@ -14,6 +14,7 @@ import OverlaySimpleNotification from "@/Components/Overlay/OverlaySimpleNotific
 import { useState } from "react";
 import { useChannel, useChannelData } from "@/helpers/customHooks";
 import { setChannelData } from "@/Store/channelsDataSlice";
+import { loadChannelRelatedData } from "@/helpers/channelDataLoader";
 export default function MentionNotification({
     notification,
     handleNotificationClick,
@@ -82,6 +83,8 @@ export default function MentionNotification({
                     // if (threadMessage)
                     //     dispatch(setThreadedMessageId(message.id));
                 } else
+
+                    loadChannelRelatedData([])
                     router.get(
                         route("channels.show", {
                             workspace: workspace.id,

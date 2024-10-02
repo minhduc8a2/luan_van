@@ -27,9 +27,10 @@ import {
     useChannelData,
     useChannelUsers,
 } from "@/helpers/customHooks";
+import { useParams } from "react-router-dom";
 export default function Thread() {
     const dispatch = useDispatch();
-    const { channelId } = usePage().props;
+    const { channelId } = useParams()
     const { permissions } = useChannelData(channelId);
     const { channel } = useChannel(channelId);
     const { threadMessage: mentionThreadMessage } = useSelector(
