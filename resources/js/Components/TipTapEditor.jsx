@@ -169,9 +169,7 @@ import tippy from "tippy.js";
 import Mention from "@tiptap/extension-mention";
 import { MentionList } from "./MentionList.jsx";
 import Button from "./Button";
-import { useSelector } from "react-redux";
-import { useChannel, useChannelUsers } from "@/helpers/customHooks";
-import { useParams } from "react-router-dom";
+
 
 export default function TipTapEditor({
     onSubmit,
@@ -181,12 +179,11 @@ export default function TipTapEditor({
     isEditMessage = false,
     closeEditMessageEditor = () => {},
     onlyText = false,
+    channel,
+    channelUsers,
 }) {
     const { auth } = usePage().props;
-    const { channelId } = useParams();
 
-    const { channelUsers } = useChannelUsers(channelId);
-    const channel = useChannel(channelId);
     const inputId = useId();
     const serverResponseFileList = useRef([]);
     const [fileList, setFileList] = useState([]);

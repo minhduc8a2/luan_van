@@ -14,11 +14,13 @@ import { FaPhone } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { setProfile } from "@/Store/profileSlice";
 import { useChannelData } from "@/helpers/customHooks";
+import { useParams } from "react-router-dom";
 export default function About({ channelName, onClose }) {
-    const { auth, channelId } = usePage().props;
+    const { auth } = usePage().props;
+    const { channelId } = useParams();
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
     const { channels } = useSelector((state) => state.channels);
-    const {permissions} = useChannelData(channelId);
+    const { permissions } = useChannelData(channelId);
     const channel = useMemo(
         () => channels.find((cn) => cn.id == channelId),
         [channels, channelId]
@@ -54,9 +56,9 @@ export default function About({ channelName, onClose }) {
                 />
             )}
             {channel.type != "DIRECT" && channel.type != "SELF" && <Managers />}
-            {channel.type != "DIRECT" && channel.type != "SELF" && permissions.leave && (
-                <LeaveChannel channel={channel} />
-            )}
+            {channel.type != "DIRECT" &&
+                channel.type != "SELF" &&
+                permissions.leave && <LeaveChannel channel={channel} />}
             {channel.type == "DIRECT" && (
                 <div className="border border-white/15 rounded-br-lg rounded-bl-lg p-4 border-t-0">
                     <h5 className="font-bold text-white/85 text-sm">

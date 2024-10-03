@@ -13,6 +13,7 @@ import {
     CloseButton,
 } from "@headlessui/react";
 import { useChannel, useChannelData, useManagers } from "@/helpers/customHooks";
+import { useParams } from "react-router-dom";
 
 export default function Member({
     user,
@@ -20,7 +21,8 @@ export default function Member({
     removeFromChannel,
     removeChannelManager,
 }) {
-    const { channelId } = usePage().props;
+    const {channelId} = useParams()
+
     const { managers } = useManagers(channelId);
     const { permissions } = useChannelData(channelId);
     const { channel } = useChannel(channelId);

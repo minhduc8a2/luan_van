@@ -9,9 +9,11 @@ import {
     useChannelData,
     useCustomedForm,
 } from "@/helpers/customHooks";
+import { useParams } from "react-router-dom";
 
 export default function ChannelPermissions() {
-    const { channelId } = usePage().props;
+  
+    const {channelId} = useParams()
     const { channel } = useChannel(channelId);
     const { permissions } = useChannelData(channelId);
 

@@ -6,9 +6,11 @@ import { router, usePage } from "@inertiajs/react";
 import OverlayNotification from "@/Components/Overlay/OverlayNotification";
 import ErrorsList from "@/Components/ErrorsList";
 import { useSelector } from "react-redux";
+import { useParams } from "react-router-dom";
 
 export default function DeleteChannel() {
-    const { channelId } = usePage().props;
+   
+    const {channelId} = useParams()
     const { channels } = useSelector((state) => state.channels);
     const channel = useMemo(
         () => channels.find((cn) => cn.id == channelId),

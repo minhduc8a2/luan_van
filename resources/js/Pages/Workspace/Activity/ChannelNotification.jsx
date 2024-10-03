@@ -19,7 +19,7 @@ export default function ChannelNotification({
 }) {
     const { auth, channelId } = usePage().props;
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
-    console.log(notification);
+    // console.log(notification);
 
     const { fromUser, channel, workspace, data, changesType } =
         isChannelsNotificationBroadcast(notification.type)

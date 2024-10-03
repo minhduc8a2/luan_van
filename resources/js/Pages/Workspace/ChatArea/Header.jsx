@@ -14,9 +14,10 @@ import {
     useChannelData,
     useChannelUsers,
 } from "@/helpers/customHooks";
+import { useParams } from "react-router-dom";
 export default function Header({ channelName }) {
-    const { auth, channelId } = usePage().props;
-
+    const { auth } = usePage().props;
+    const {channelId} = useParams()
     const { channelId: huddleChannelId } = useSelector((state) => state.huddle);
     const { channel } = useChannel(channelId);
 

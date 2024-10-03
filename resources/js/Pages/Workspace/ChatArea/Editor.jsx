@@ -4,6 +4,8 @@ import Button from "@/Components/Button";
 import TipTapEditor from "@/Components/TipTapEditor";
 import { router } from "@inertiajs/react";
 import { getMentionsFromContent } from "@/helpers/tiptapHelper";
+import { useChannel, useChannelData } from "@/helpers/customHooks";
+import { useParams } from "react-router-dom";
 
 export default function Editor({
     channel,
@@ -12,6 +14,9 @@ export default function Editor({
     channelName,
     setFocus,
 }) {
+    const { channelId } = useParams();
+
+    const { channelUsers } = useChannelData(channelId);
     function joinChannel() {
         router.post(
             route("channel.join", channel.id),
@@ -62,7 +67,13 @@ export default function Editor({
     }
     return (
         <div className="m-6 border border-white/15 pt-4 px-2 rounded-lg ">
-            {permissions.chat && <TipTapEditor onSubmit={onSubmit} />}
+            {permissions.chat && (
+                <TipTapEditor
+                    onSubmit={onSubmit}
+                    channel={channel}
+                    channelUsers={channelUsers}
+                />
+            )}
             {!permissions.chat && !channel?.is_archived && isChannelMember && (
                 <h5 className="mb-4 text-center ml-4">
                     You're not allowed to post in channel. Contact Admins or

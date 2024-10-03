@@ -1,11 +1,11 @@
 import {
     addThreadMessage,
+    addThreadMessages,
     deleteThreadMessage,
     editThreadMessage,
     setThreadedMessage,
     setThreadedMessageId,
     setThreadMessages,
-    setThreadWidth,
 } from "@/Store/threadSlice";
 import React, { useMemo } from "react";
 import { IoClose } from "react-icons/io5";
@@ -27,12 +27,12 @@ import {
     useChannelData,
     useChannelUsers,
 } from "@/helpers/customHooks";
-import { useParams } from "react-router-dom";
+
+import InfiniteScroll from "@/Components/InfiniteScroll";
+import { findMinMaxId } from "@/helpers/channelHelper";
 export default function Thread() {
     const dispatch = useDispatch();
-    const { channelId } = useParams()
-    const { permissions } = useChannelData(channelId);
-    const { channel } = useChannel(channelId);
+
     const { threadMessage: mentionThreadMessage } = useSelector(
         (state) => state.mention
     );
@@ -42,47 +42,118 @@ export default function Thread() {
         messageId: threadedMessageId,
         messages,
     } = useSelector((state) => state.thread);
+    const channelId = threadedMessage?.channel_id;
+
+    const { permissions } = useChannelData(channelId);
+
+    const { channel } = useChannel(channelId);
     const { channelUsers } = useChannelUsers(channelId);
 
-    const nextPageUrlRef = useRef(null);
-    const previousPageUrlRef = useRef(null);
-    const messageContainerRef = useRef(null);
-    const isInfiniteScrollRef = useRef(false);
     const user = useMemo(() => {
         if (!threadedMessage) return null;
-        return channelUsers.filter(
+        return workspaceUsers.filter(
             (mem) => mem.id === threadedMessage.user_id
         )[0];
-    }, [threadedMessage, channelUsers]);
+    }, [threadedMessage, workspaceUsers]);
     const [loadingMessages, setLoadingMessages] = useState(false);
-
-    const preScrollPositionRef = useRef(null);
 
     const [newMessageReactionReceive, setNewMessageReactionReceive] =
         useState(null);
     const threadConnectionRef = useRef(null);
     const [newMessageReceived, setNewMessageReceived] = useState(true);
-
     let preValue = null;
     let hasChanged = false;
-    const {
-        ref: top_ref,
-        inView: top_inView,
-        entry: top_entry,
-    } = useInView({
-        /* Optional options */
-        threshold: 0,
-        initialInView: true,
-    });
-    const {
-        ref: bottom_ref,
-        inView: bottom_inView,
-        entry: bottom_entry,
-    } = useInView({
-        /* Optional options */
-        threshold: 0,
-        initialInView: true,
-    });
+    //Mention
+    const [hasMention, setHasMention] = useState(false);
+    const [mentionFulfilled, setMentionFulfilled] = useState(true);
+    //Infinite scroll
+    const [topLoading, setTopLoading] = useState(false);
+    const [bottomLoading, setBottomLoading] = useState(false);
+    const [topHasMore, setTopHasMore] = useState();
+    const [bottomHasMore, setBottomHasMore] = useState();
+
+    useEffect(() => {
+        if (messages) {
+            const { minId, maxId } = findMinMaxId(messages);
+            console.log(minId, maxId);
+            setTopHasMore(maxId);
+            setBottomHasMore(minId);
+        }
+    }, [channel?.id, messages]);
+    const loadMoreTopToken = useRef(null);
+    const loadMoreBottomToken = useRef(null);
+    const loadMore = (channelId, position, token, successCallBack) => {
+        if (token != null) token.abort();
+        token = new AbortController();
+        let last_id;
+        if (position == "top") {
+            last_id = topHasMore;
+        } else {
+            last_id = bottomHasMore;
+        }
+        if (last_id) {
+            if (position == "top") {
+                setTopLoading(true);
+            } else {
+                setBottomLoading(true);
+            }
+
+            return axios
+                .get(route("messages.infiniteMessages", channelId), {
+                    params: {
+                        last_id,
+                        direction: position,
+                        threaded_message_id: threadedMessageId,
+                    },
+                    signal: token.signal,
+                })
+                .then((response) => {
+                    if (response.status == 200) {
+                        console.log(position, response.data);
+                        if (position == "top") {
+                            if (response.data.length > 0) {
+                                setTopHasMore(response.data[0].id);
+                            } else {
+                                setTopHasMore(null);
+                            }
+                        } else {
+                            if (response.data.length > 0) {
+                                setBottomHasMore(
+                                    response.data[response.data.length - 1].id
+                                );
+                            } else {
+                                setBottomHasMore(null);
+                            }
+                        }
+                        if (response.data.length > 0) {
+                            dispatch(
+                                addThreadMessages({
+                                    data: response.data,
+                                    position,
+                                })
+                            );
+                        }
+                        successCallBack();
+                    }
+                })
+                .finally(() => {
+                    if (position == "top") {
+                        setTopLoading(false);
+                    } else {
+                        setBottomLoading(false);
+                    }
+                });
+        }
+    };
+
+    useEffect(() => {
+        if (mentionThreadMessage) {
+            setHasMention(mentionThreadMessage?.id);
+            setMentionFulfilled(false);
+            dispatch(setMention(null));
+        }
+    }, [mentionThreadMessage]);
+
     function onSubmit(content, fileObjects, JSONContent) {
         let mentionsList = getMentionsFromContent(JSONContent);
         if (
@@ -115,10 +186,11 @@ export default function Thread() {
     }
 
     useEffect(() => {
+        setNewMessageReceived(true);
         return () => {
             dispatch(setThreadMessages([]));
         };
-    }, []);
+    }, [threadedMessageId]);
     useEffect(() => {
         axios
             .get(route("messages.getMessage"), {
@@ -166,7 +238,10 @@ export default function Thread() {
             .error((error) => {
                 console.error(error);
             });
+    }, [threadedMessageId]);
 
+    useEffect(() => {
+        if (!threadedMessage || messages.length > 0) return;
         setLoadingMessages(true);
         // router.get(
         //     route("messages.threadMessages", threadedMessageId),
@@ -174,56 +249,48 @@ export default function Thread() {
         // );
         axios
             .get(
-                route("messages.threadMessages", {
-                    message: threadedMessageId,
-                }),
+                route("messages.infiniteMessages", threadedMessage.channel_id),
                 {
-                    params: mentionThreadMessage
-                        ? { message_id: mentionThreadMessage.id }
-                        : {},
+                    params: {
+                        threaded_message_id: threadedMessageId,
+                    },
                 }
             )
             .then((response) => {
-                console.log(response);
-                nextPageUrlRef.current = response.data?.messages?.next_page_url;
-                previousPageUrlRef.current =
-                    response.data?.messages?.prev_page_url;
-                dispatch(
-                    setThreadMessages(response.data?.messages?.data || [])
-                );
+                dispatch(setThreadMessages(response.data || []));
                 setLoadingMessages(false);
             });
         return () => {
             dispatch(setThreadMessages([]));
             Echo.leave(`threads.${threadedMessageId}`);
         };
-    }, [threadedMessageId]);
+    }, [threadedMessage, threadedMessageId]);
 
-    useEffect(() => {
-        if (!mentionThreadMessage) return;
-        setLoadingMessages(true);
-        axios
-            .get(
-                route("messages.threadMessages", {
-                    message: threadedMessageId,
-                }),
-                {
-                    params: mentionThreadMessage
-                        ? { message_id: mentionThreadMessage.id }
-                        : {},
-                }
-            )
-            .then((response) => {
-                console.log(response);
-                nextPageUrlRef.current = response.data?.messages?.next_page_url;
-                previousPageUrlRef.current =
-                    response.data?.messages?.prev_page_url;
-                dispatch(
-                    setThreadMessages(response.data?.messages?.data || [])
-                );
-                setLoadingMessages(false);
-            });
-    }, [mentionThreadMessage]);
+    // useEffect(() => {
+    //     if (!mentionThreadMessage) return;
+    //     setLoadingMessages(true);
+    //     axios
+    //         .get(
+    //             route("messages.threadMessages", {
+    //                 message: threadedMessageId,
+    //             }),
+    //             {
+    //                 params: mentionThreadMessage
+    //                     ? { message_id: mentionThreadMessage.id }
+    //                     : {},
+    //             }
+    //         )
+    //         .then((response) => {
+    //             console.log(response);
+    //             nextPageUrlRef.current = response.data?.messages?.next_page_url;
+    //             previousPageUrlRef.current =
+    //                 response.data?.messages?.prev_page_url;
+    //             dispatch(
+    //                 setThreadMessages(response.data?.messages?.data || [])
+    //             );
+    //             setLoadingMessages(false);
+    //         });
+    // }, [mentionThreadMessage]);
 
     const sortedMessages = useMemo(() => {
         const temp = [...messages];
@@ -231,122 +298,44 @@ export default function Thread() {
         return temp;
     }, [messages]);
 
-    useEffect(() => {
-        if (newMessageReceived && mentionThreadMessage)
-            setNewMessageReceived(false);
-        if (newMessageReceived && !mentionThreadMessage) {
-            console.log("new message received");
-            if (messageContainerRef.current) {
-                messageContainerRef.current.scrollTop =
-                    messageContainerRef.current.scrollHeight -
-                    messageContainerRef.current.clientHeight;
-                setNewMessageReceived(false);
-            }
-        }
-    }, [newMessageReceived, mentionThreadMessage, sortedMessages]);
-
-    const timeOutRef = useRef(null);
-
-    useEffect(() => {
-        timeOutRef.current = setTimeout(() => {
-            if (mentionThreadMessage && !loadingMessages) {
-                console.log("Jump to message");
-                const targetMessage = document.getElementById(
-                    `message-${mentionThreadMessage.id}`
-                );
-                console.log(targetMessage);
-                if (targetMessage) {
-                    console.log("did it in thread");
-                    targetMessage.classList.add("bg-link/15");
-
-                    setTimeout(() => {
-                        targetMessage.classList.remove("bg-link/15");
-                    }, 2000);
-                    targetMessage.scrollIntoView({
-                        behavior: "instant",
-                        block: "start",
-                    });
-                    setTimeout(() => {
-                        dispatch(setMention(null));
-                    }, 500);
-                }
-            }
-        }, 500);
-        return () => {
-            clearTimeout(timeOutRef.current);
-        };
-    }, [mentionThreadMessage, sortedMessages]);
-    useEffect(() => {
-        console.log("thread_top_inView", top_inView);
-        if (!top_inView) return;
-        if (!nextPageUrlRef.current) return;
-        axios.get(nextPageUrlRef.current).then((response) => {
-            if (response.status == 200) {
-                nextPageUrlRef.current = response.data.messages.next_page_url;
-
-                dispatch(
-                    setThreadMessages([
-                        ...response.data.messages.data,
-                        ...messages,
-                    ])
-                );
-                isInfiniteScrollRef.current = true;
-                preScrollPositionRef.current = {
-                    oldScrollHeight: messageContainerRef.current.scrollHeight,
-                    oldScrollTop: messageContainerRef.current.scrollTop,
-                    position: "top",
-                };
-            }
-        });
-    }, [top_inView]); //hande scroll top
-
-    useEffect(() => {
-        console.log("bottom_thread_inView", bottom_inView);
-        if (!bottom_inView) return;
-        if (!previousPageUrlRef.current) return;
-        axios.get(previousPageUrlRef.current).then((response) => {
-            if (response.status == 200) {
-                previousPageUrlRef.current =
-                    response.data.messages.prev_page_url;
-                dispatch(
-                    setThreadMessages([
-                        ...response.data.messages.data,
-                        ...messages,
-                    ])
-                );
-                isInfiniteScrollRef.current = true;
-                preScrollPositionRef.current = {
-                    oldScrollHeight: messageContainerRef.current.scrollHeight,
-                    oldScrollTop: messageContainerRef.current.scrollTop,
-                    position: "bottom",
-                };
-            }
-        });
-    }, [bottom_inView]); //hande scroll bottom
-
-    useEffect(() => {
-        console.log("isInfiniteScroll");
-        if (!isInfiniteScrollRef.current) return;
-        if (!messageContainerRef.current) return;
-        if (!preScrollPositionRef.current) return;
-        if (preScrollPositionRef.current.position == "top") {
-            console.log("scroll top persists");
-            messageContainerRef.current.scrollTop =
-                messageContainerRef.current.scrollHeight -
-                preScrollPositionRef.current.oldScrollHeight +
-                preScrollPositionRef.current.oldScrollTop;
-            isInfiniteScrollRef.current = false;
-        } else if (preScrollPositionRef.current.position == "bottom") {
-            console.log("scroll bottom persists");
-            messageContainerRef.current.scrollTop =
-                preScrollPositionRef.current.oldScrollTop;
-            isInfiniteScrollRef.current = false;
-        }
-    }, [sortedMessages]); //for infinite scrolling
-
     //resize thread width
+    useEffect(() => {
+        if (mentionThreadMessage) {
+            setHasMention(mentionThreadMessage.id);
+            setMentionFulfilled(false);
+            dispatch(setMention(null));
+            if (newMessageReceived) setNewMessageReceived(false);
+        }
+    }, [mentionThreadMessage, newMessageReceived]);
+    useEffect(() => {
+        if (hasMention && sortedMessages && !mentionFulfilled) {
+            const targetMessage = document.getElementById(
+                `message-${hasMention}`
+            );
+            if (!targetMessage || topLoading || bottomLoading) {
+            }
+            if (targetMessage) {
+                targetMessage.classList.add("bg-link/15");
 
-    const thread_messages_count = messages.length || 0;
+                setTimeout(() => {
+                    targetMessage.classList.remove("bg-link/15");
+                }, 3000);
+                targetMessage.scrollIntoView({
+                    behavior: "instant",
+                    block: "center",
+                });
+                setHasMention(null);
+                setMentionFulfilled(true);
+            }
+        }
+    }, [
+        sortedMessages,
+        hasMention,
+        mentionFulfilled,
+        topLoading,
+        bottomLoading,
+    ]);
+    const thread_messages_count = threadedMessage?.thread_messages_count || 0;
     return (
         <>
             <div className="p-4 z-10">
@@ -398,16 +387,43 @@ export default function Thread() {
                     Loading messages ...
                 </div>
             )}
-            <div
-                className="overflow-y-auto max-w-full flex-1 scrollbar"
-                ref={messageContainerRef}
-            >
-                <ul className="mt-8 pb-8">
-                    <div ref={top_ref} className="h-4  "></div>
+
+            {!loadingMessages && messages && channel && channelUsers && (
+                <InfiniteScroll
+                    loadMoreOnTop={(successCallBack) =>
+                        loadMore(
+                            channelId,
+                            "top",
+                            loadMoreTopToken.current,
+                            successCallBack
+                        )
+                    }
+                    loadMoreOnBottom={(successCallBack) =>
+                        loadMore(
+                            channelId,
+                            "bottom",
+                            loadMoreBottomToken.current,
+                            successCallBack
+                        )
+                    }
+                    topHasMore={topHasMore}
+                    bottomHasMore={bottomHasMore}
+                    topLoading={topLoading}
+                    bottomLoading={bottomLoading}
+                    triggerScrollBottom={newMessageReceived}
+                    clearTriggerScrollBottom={() =>
+                        setNewMessageReceived(false)
+                    }
+                    reverse
+                    rootMargin="100px"
+                    scrollToItem={hasMention}
+                    className="overflow-y-auto max-w-full flex-1 scrollbar"
+                >
                     {sortedMessages.map((msg, index) => {
-                        const user = channelUsers.filter(
+                        const user = channelUsers.find(
                             (mem) => mem.id === msg.user_id
-                        )[0];
+                        );
+
                         hasChanged = false;
                         if (preValue) {
                             if (
@@ -439,14 +455,16 @@ export default function Thread() {
                             />
                         );
                     })}
-                    <div ref={bottom_ref} className="h-4  "></div>
-                </ul>
-            </div>
+                </InfiniteScroll>
+            )}
+
             <div className="m-6 border border-white/15 pt-4 px-2 rounded-lg">
                 {permissions.thread && threadedMessage && (
                     <TipTapEditor
                         onSubmit={onSubmit}
                         message={threadedMessage}
+                        channel={channel}
+                        channelUsers={channelUsers}
                     />
                 )}
                 {!permissions.thread && (

@@ -1,17 +1,15 @@
 import React from "react";
-import { FiArchive } from "react-icons/fi";
-import Button from "@/Components/Button";
-import { FaRegTrashCan } from "react-icons/fa6";
-import { useState } from "react";
+
 import ChangeToPrivateConfirm from "./ChangeToPrivateConfirm";
-import { router, usePage } from "@inertiajs/react";
-import OverlayNotification from "@/Components/Overlay/OverlayNotification";
+
 import DeleteChannel from "./DeleteChannel";
 import ChannelPermissions from "./ChannelPermissions";
 import ArchiveChannel from "./ArchiveChannel";
 import { useChannelData } from "@/helpers/customHooks";
+import { useParams } from "react-router-dom";
 export default function Settings({ channel, channelName, workspace }) {
-    const { channelId } = usePage().props;
+   
+    const {channelId} = useParams()
     const { permissions } = useChannelData(channelId);
 
     return (

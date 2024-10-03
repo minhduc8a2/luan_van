@@ -26,7 +26,16 @@ export const threadSlice = createSlice({
             if (!state.messageId) state.message = null;
         },
         addThreadMessage(state, action) {
+            state.message.thread_messages_count += 1;
             state.messages.push(action.payload);
+        },
+        addThreadMessages(state, action) {
+           
+            if (action.payload.position == "top") {
+                state.messages = [...action.payload.data, ...state.messages];
+            } else {
+                state.messages = [...state.messages, ...action.payload.data];
+            }
         },
         setThreadMessages(state, action) {
             state.messages = action.payload;
@@ -50,12 +59,10 @@ export const threadSlice = createSlice({
                 state.messages[messageIndex].reactions = [];
 
                 state.messages[messageIndex].files = [];
+                // state.message.thread_messages_count -= 1;
             }
         },
-        setThreadWidth(state, action) {
-            localStorage.setItem("threadWidth", action.payload);
-            state.width = action.payload;
-        },
+
         deleteFileInThread(state, action) {
             //masterMessage
 
@@ -104,8 +111,8 @@ export const {
     deleteThreadMessage,
     addThreadMessage,
     editThreadMessage,
-    setThreadWidth,
     deleteFileInThread,
+    addThreadMessages,
 } = threadSlice.actions;
 
 export default threadSlice.reducer;

@@ -11,8 +11,9 @@ import AddManagers from "./AddManagers";
 import ErrorsList from "@/Components/ErrorsList";
 import { useSelector } from "react-redux";
 import { useChannel, useChannelData, useManagers } from "@/helpers/customHooks";
+import { useParams } from "react-router-dom";
 export default function Managers() {
-    const { channelId } = usePage().props;
+    const { channelId } = useParams()
     const { channel } = useChannel(channelId);
     const { permissions } = useChannelData(channelId);
     const onlineStatusMap = useSelector((state) => state.onlineStatus);

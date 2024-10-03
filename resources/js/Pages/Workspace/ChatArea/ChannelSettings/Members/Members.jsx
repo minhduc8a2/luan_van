@@ -11,10 +11,12 @@ import Member from "./Member";
 import { useChannelData, useChannelUsers } from "@/helpers/customHooks";
 
 import useErrorHandler from "@/helpers/useErrorHandler";
+import { useParams } from "react-router-dom";
 
 export default function Members() {
     const [errors, setErrors] = useState(null);
-    const { channelId } = usePage().props;
+    const {channelId} = useParams()
+
     const { permissions } = useChannelData(channelId);
     const { channelUsers } = useChannelUsers(channelId);
 

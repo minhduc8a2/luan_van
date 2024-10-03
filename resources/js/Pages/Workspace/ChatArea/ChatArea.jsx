@@ -27,7 +27,6 @@ import InfiniteScroll from "@/Components/InfiniteScroll";
 import {
     addMessages,
     addThreadMessagesCount,
-    setChannelData,
     subtractThreadMessagesCount,
 } from "@/Store/channelsDataSlice";
 import Editor from "./Editor";
@@ -36,12 +35,12 @@ import { setMention } from "@/Store/mentionSlice";
 export default function ChatArea() {
     const { auth } = usePage().props;
     const { channelId } = useParams();
-    console.log(channelId);
+    // console.log(channelId);
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
     const { permissions, messages } = useChannelData(channelId);
     const { channelUsers } = useChannelUsers(channelId);
     const { channel } = useChannel(channelId);
-    console.log(channel);
+    // console.log(channel);
     const { messageId: threadMessageId } = useSelector((state) => state.thread);
     const { messageId, threadMessage: mentionThreadMessage } = useSelector(
         (state) => state.mention
@@ -53,19 +52,19 @@ export default function ChatArea() {
     const [newMessageReactionReceive, setNewMessageReactionReceive] =
         useState(null);
     const channelConnectionRef = useRef(null);
+    //Mention
+    const [hasMention, setHasMention] = useState(false);
+    const [mentionFulfilled, setMentionFulfilled] = useState(true);
     //infinite scrolling
     const [topLoading, setTopLoading] = useState(false);
     const [bottomLoading, setBottomLoading] = useState(false);
     const [topHasMore, setTopHasMore] = useState();
     const [bottomHasMore, setBottomHasMore] = useState();
-    const [loadingMessageIdMessages, setLoadingMessageIdMessages] =
-        useState(false);
-    const [hasMention, setHasMention] = useState(false);
-    const [mentionFulfilled, setMentionFulfilled] = useState(null);
+
     useEffect(() => {
         if (messages) {
             const { minId, maxId } = findMinMaxId(messages);
-            console.log(minId, maxId);
+            // console.log(minId, maxId);
             setTopHasMore(maxId);
             setBottomHasMore(minId);
         }
@@ -100,7 +99,7 @@ export default function ChatArea() {
                 })
                 .then((response) => {
                     if (response.status == 200) {
-                        console.log(position, response.data);
+                        // console.log(position, response.data);
                         if (position == "top") {
                             if (response.data.length > 0) {
                                 setTopHasMore(response.data[0].id);
@@ -139,14 +138,6 @@ export default function ChatArea() {
     };
 
     useEffect(() => {
-        if (messageId) {
-            setHasMention(messageId);
-            setMentionFulfilled(false);
-            dispatch(setMention(null));
-        }
-    }, [messageId]);
-
-    useEffect(() => {
         Echo.private(`private_channels.${channelId}`).listen(
             "MessageEvent",
             (e) => {
@@ -172,11 +163,17 @@ export default function ChatArea() {
         dispatch(resetMessageCountForChannel(channel));
         axios.post(route("channel.last_read", channel.id), {});
         return () => {
-           
             axios.post(route("channel.last_read", channel.id), {});
         };
     }, [channel?.id]);
-
+    useEffect(() => {
+        if (messageId && !mentionThreadMessage) {
+            setHasMention(messageId);
+            setMentionFulfilled(false);
+            dispatch(setMention(null));
+            if (newMessageReceived) setNewMessageReceived(false);
+        }
+    }, [messageId, newMessageReceived]);
     const groupedMessages = useMemo(() => {
         if (!messages) return [];
         const gMessages = groupListByDate(messages);
@@ -264,7 +261,7 @@ export default function ChatArea() {
             const targetMessage = document.getElementById(
                 `message-${hasMention}`
             );
-            if (!targetMessage) return;
+            if (!targetMessage || topLoading || bottomLoading) return;
             if (targetMessage) {
                 targetMessage.classList.add("bg-link/15");
 
@@ -279,7 +276,13 @@ export default function ChatArea() {
                 setMentionFulfilled(true);
             }
         }
-    }, [groupedMessages, hasMention, mentionFulfilled]);
+    }, [
+        groupedMessages,
+        hasMention,
+        mentionFulfilled,
+        topLoading,
+        bottomLoading,
+    ]);
     return (
         <div className="flex-1 flex min-h-0 max-h-full w-full">
             <InitData loaded={loaded} setLoaded={(value) => setLoaded(value)} />
@@ -315,7 +318,7 @@ export default function ChatArea() {
                             setNewMessageReceived(false)
                         }
                         reverse
-                        scrollToItem={mentionThreadMessage ? null : messageId}
+                        scrollToItem={hasMention}
                         className="overflow-y-auto max-w-full scrollbar"
                     >
                         <div className="p-8">

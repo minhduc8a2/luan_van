@@ -34,10 +34,12 @@ class MessageController extends Controller
         // $page = $request->query('page') ?? 1;
         $last_id = $request->query('last_id');
         $direction = $request->query('direction') ?? "bottom";
+        $threaded_message_id = $request->query('threaded_message_id');
+
         // $page = 2;
         $user = $request->user();
         $hiddenUserIds =  $user->hiddenUsers()->wherePivot('workspace_id', $channel->workspace->id)->pluck('hidden_user_id')->toArray();
-        $messagesQuery = $channel->messages()->whereNotIn('user_id', $hiddenUserIds)->where('threaded_message_id', null)->withTrashed()->with([
+        $messagesQuery = $channel->messages()->whereNotIn('user_id', $hiddenUserIds)->withTrashed()->with([
             'files' => function ($query) {
                 $query->withTrashed();
             },
@@ -54,6 +56,11 @@ class MessageController extends Controller
             }
         ])->where('content', 'like', '%' . $content . '%');
 
+        if ($threaded_message_id) {
+            $messagesQuery->where('threaded_message_id', $threaded_message_id);
+        } else {
+            $messagesQuery->where('threaded_message_id', null);
+        }
 
 
         if ($last_id) {
@@ -72,23 +79,27 @@ class MessageController extends Controller
     public function getSpecificMessagesById(Request $request,  Channel $channel)
     {
         $messageId = $request->query('messageId');
-
+        $threaded_message_id = $request->query('thread_message_id');
 
         $specificMessage = Message::find($messageId);
         if (!$specificMessage) {
             return abort(404, 'Message was deleted!');
         }
 
-        $beforeMessages = Message::where('id', '<', $specificMessage->id)->where('channel_id', '=', $channel->id)
+        $beforeMessagesQuery = Message::where('id', '<', $specificMessage->id)->where('channel_id', '=', $channel->id)
             ->orderBy('id', 'desc')
-            ->limit(5)
-            ->get();
-
-        $afterMessages = Message::where('id', '>', $specificMessage->id)->where('channel_id', '=', $channel->id)
+            ->limit(5);
+        $afterMessagesQuery = Message::where('id', '>', $specificMessage->id)->where('channel_id', '=', $channel->id)
             ->orderBy('id', 'asc')
-            ->limit(5)
-            ->get();
+            ->limit(5);
 
+        if ($threaded_message_id) {
+            $beforeMessagesQuery =  $beforeMessagesQuery->where('threaded_message_id', $threaded_message_id);
+            $afterMessagesQuery = $afterMessagesQuery->where('threaded_message_id', $threaded_message_id);
+        }
+
+        $beforeMessages = $beforeMessagesQuery->get();
+        $afterMessages = $afterMessagesQuery->get();
 
         $messages = $afterMessages->concat([$specificMessage])->concat($beforeMessages);
 

@@ -23,7 +23,7 @@ export default function InfiniteScroll({
     scrollToItem = null,
 }) {
     const containerRef = useRef(null);
-    const lockScrollPositionRef = useRef(null);
+
     const { ref: top_ref, inView: top_inView } = useInView({
         threshold: 0.1,
         root: containerRef.current,
@@ -36,15 +36,6 @@ export default function InfiniteScroll({
     });
     const [justTopLoaded, setJustTopLoaded] = useState(false);
     const preScrollPositionRef = useRef(null);
-    const dispatch = useDispatch();
-    useEffect(() => {
-        if (triggerScrollBottom) {
-            containerRef.current.scrollTop =
-                containerRef.current.scrollHeight -
-                containerRef.current.clientHeight;
-            if (clearTriggerScrollBottom) clearTriggerScrollBottom();
-        }
-    }, [triggerScrollBottom]);
 
     useEffect(() => {
         console.log("top_inView", top_inView);
@@ -61,17 +52,15 @@ export default function InfiniteScroll({
                             containerRef.current?.scrollHeight || 0,
                         oldScrollTop: containerRef.current?.scrollTop || 0,
                     };
-                    setJustTopLoaded(true);
+                    if (!scrollToItem) setJustTopLoaded(true);
                 }
             });
         }
-    }, [top_inView, topHasMore, topLoading]);
+    }, [top_inView, topHasMore, topLoading, scrollToItem]);
 
     useEffect(() => {
-        if (scrollToItem) {
-            setJustTopLoaded(false);
-        }
         if (justTopLoaded) {
+            console.log("persist top scroll");
             containerRef.current.scrollTop =
                 containerRef.current.scrollHeight -
                 preScrollPositionRef.current?.oldScrollHeight +
@@ -79,6 +68,20 @@ export default function InfiniteScroll({
             setJustTopLoaded(false);
         }
     }, [justTopLoaded]);
+
+    useEffect(() => {
+        if (scrollToItem) {
+            if (clearTriggerScrollBottom) clearTriggerScrollBottom();
+            return;
+        }
+        if (triggerScrollBottom && !topLoading && !bottomLoading) {
+            console.log("scroll bottom");
+            containerRef.current.scrollTop =
+                containerRef.current.scrollHeight -
+                containerRef.current.clientHeight;
+            if (clearTriggerScrollBottom) clearTriggerScrollBottom();
+        }
+    }, [triggerScrollBottom, topLoading, bottomLoading, scrollToItem]);
 
     useEffect(() => {
         console.log("bottom_inView", bottom_inView);
@@ -94,11 +97,11 @@ export default function InfiniteScroll({
                             containerRef.current?.scrollHeight || 0,
                         oldScrollTop: containerRef.current?.scrollTop || 0,
                     };
-                    setJustTopLoaded(true);
+                    if (!scrollToItem) setJustTopLoaded(true);
                 }
             });
         }
-    }, [bottom_inView, bottomHasMore, bottomLoading]);
+    }, [bottom_inView, bottomHasMore, bottomLoading, scrollToItem]);
 
     //     useEffect(()=>{
     //         if(!scrollToItem) return;

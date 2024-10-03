@@ -9,7 +9,7 @@ import { isMentionNotificationBroadcast } from "@/helpers/notificationTypeHelper
 import { getChannelName } from "@/helpers/channelHelper";
 import { setMention } from "@/Store/mentionSlice";
 
-import { setThreadedMessageId } from "@/Store/threadSlice";
+import { setThreadedMessageId, setThreadMessages } from "@/Store/threadSlice";
 import OverlaySimpleNotification from "@/Components/Overlay/OverlaySimpleNotification";
 import { useState } from "react";
 import { useChannel, useChannelData } from "@/helpers/customHooks";
@@ -17,6 +17,7 @@ import { setChannelData } from "@/Store/channelsDataSlice";
 import { loadChannelRelatedData } from "@/helpers/channelDataLoader";
 import { loadSpecificMessagesById } from "@/helpers/loadSpecificMessagesById";
 import { useNavigate, useParams } from "react-router-dom";
+import { addNewChannelToChannelsStore } from "@/Store/channelsSlice";
 export default function MentionNotification({
     notification,
     handleNotificationClick,
@@ -25,7 +26,8 @@ export default function MentionNotification({
     const channelsData = useSelector((state) => state.channelsData);
     const { channelId } = useParams();
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
-    const {channel:currentChannel} = useChannel(channelId);
+    const { channel: currentChannel } = useChannel(channelId);
+    const { channels } = useSelector((state) => state.channels);
     const { messages } = useChannelData(channelId);
     const [errors, setErrors] = useState(null);
     const { fromUser, toUser, channel, workspace, message, threadMessage } =
@@ -37,6 +39,7 @@ export default function MentionNotification({
     const view_at = notification.view_at;
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const loadChannelRelatedDataToken = useRef(null)
     function handleNotificationClickedPart() {
         //check channel is available
         axios
@@ -49,49 +52,93 @@ export default function MentionNotification({
                     setErrors(true);
                     return;
                 }
-
-                if (
+                if (threadMessage) {
+                    if (!channelsData.hasOwnProperty(channel.id)) {
+                        if(loadChannelRelatedDataToken.current) loadChannelRelatedDataToken.current.abort()
+                        loadChannelRelatedDataToken.current = new AbortController()
+                        loadChannelRelatedData(
+                            channel.id,
+                            dispatch,
+                            setChannelData,
+                            addNewChannelToChannelsStore,
+                            channels,
+                            channelsData,
+                            loadChannelRelatedDataToken.current
+                        ).then(() => {
+                            loadSpecificMessagesById(
+                                threadMessage.id,
+                                channel.id,
+                                message.id
+                            )
+                                .then((data) => {
+                                    dispatch(setThreadMessages(data));
+                                })
+                                .then(() => {
+                                    dispatch(setThreadedMessageId(message.id));
+                                    dispatch(
+                                        setMention({
+                                            messageId: message.id,
+                                            threadMessage,
+                                        })
+                                    );
+                                });
+                        });
+                    } else {
+                        loadSpecificMessagesById(
+                            threadMessage.id,
+                            channel.id,
+                            message.id
+                        )
+                            .then((data) => {
+                                dispatch(setThreadMessages(data));
+                            })
+                            .then(() => {
+                                dispatch(setThreadedMessageId(message.id));
+                                dispatch(
+                                    setMention({
+                                        messageId: message.id,
+                                        threadMessage,
+                                    })
+                                );
+                            });
+                    }
+                } else if (
                     channel.id == currentChannel.id &&
                     messages.find((msg) => msg.id == message.id)
                 ) {
-                   
-                    if (!threadMessage) {
-                        
-                        const targetMessage = document.getElementById(
-                            `message-${message.id}`
-                        );
+                    const targetMessage = document.getElementById(
+                        `message-${message.id}`
+                    );
 
-                        if (targetMessage) {
-                            targetMessage.classList.add("bg-link/15");
+                    if (targetMessage) {
+                        targetMessage.classList.add("bg-link/15");
 
-                            setTimeout(() => {
-                                targetMessage.classList.remove("bg-link/15");
-                            }, 3000);
-                            targetMessage.scrollIntoView({
-                                behavior: "instant",
-                                block: "center",
-                            });
-                        }
-                    } else {
-                        dispatch(
-                            setMention({
-                                messageId: message.id,
-                                threadMessage,
-                            })
-                        );
-                        dispatch(setThreadedMessageId(message.id));
+                        setTimeout(() => {
+                            targetMessage.classList.remove("bg-link/15");
+                        }, 3000);
+                        targetMessage.scrollIntoView({
+                            behavior: "instant",
+                            block: "center",
+                        });
                     }
                 } else {
                     if (channelsData.hasOwnProperty(channel.id)) {
-                        loadSpecificMessagesById(
-                            message.id,
-                            channel.id,
-                            dispatch,
-                            setChannelData
+                        loadSpecificMessagesById(message.id, channel.id).then(
+                            (data) => {
+                                dispatch(
+                                    setChannelData({
+                                        id: channel.id,
+                                        data: { messages: data },
+                                    })
+                                );
+                                dispatch(setMention({ messageId: message.id }));
+                                navigate(`channels/${channel.id}`);
+                            }
                         );
+                    } else {
+                        dispatch(setMention({ messageId: message.id }));
+                        navigate(`channels/${channel.id}`);
                     }
-                    dispatch(setMention({ messageId: message.id }));
-                    navigate(`channels/${channel.id}`);
                 }
             });
 

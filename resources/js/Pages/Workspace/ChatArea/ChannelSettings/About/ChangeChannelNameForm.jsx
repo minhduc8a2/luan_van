@@ -8,8 +8,9 @@ import { SettingsButton } from "./SettingsButton";
 import { FaLock } from "react-icons/fa";
 import { useSelector } from "react-redux";
 import { useChannel, useChannelData } from "@/helpers/customHooks";
+import { useParams } from "react-router-dom";
 export default function ChangeChannelNameForm({ channelName }) {
-    const { channelId } = usePage().props;
+    const { channelId } = useParams();
     const { channel } = useChannel(channelId);
     const {  permissions } =
         useChannelData(channelId);

@@ -8,8 +8,11 @@ import React, { useMemo } from "react";
 import { useState } from "react";
 import { FaLock } from "react-icons/fa";
 import { useSelector } from "react-redux";
+import { useParams } from "react-router-dom";
 export default function ChangeToPrivateConfirm({ channelName }) {
-    const { channelId, workspace } = usePage().props;
+    const {  workspace } = useSelector(state=>state.workspace)
+    const {channelId} = useParams()
+
     const { channels } = useSelector((state) => state.channels);
 
     const channel = useMemo(

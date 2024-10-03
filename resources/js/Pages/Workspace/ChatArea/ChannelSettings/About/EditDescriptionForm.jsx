@@ -2,14 +2,13 @@ import { useForm } from "@inertiajs/react";
 
 import TextArea from "@/Components/Input/TextArea";
 import Form1 from "@/Components/Form1";
-import { router, usePage } from "@inertiajs/react";
 
 import { useState, useEffect, useMemo } from "react";
 import { SettingsButton } from "./SettingsButton";
-import { useSelector } from "react-redux";
 import { useChannel, useChannelData } from "@/helpers/customHooks";
+import { useParams } from "react-router-dom";
 export function EditDescriptionForm() {
-    const { channelId } = usePage().props;
+    const { channelId } = useParams();
     const { channel } = useChannel(channelId);
     const { permissions } = useChannelData(channelId);
     const [success, setSuccess] = useState(false);
