@@ -327,6 +327,7 @@ export default function TipTapEditor({
 
             suggestion: {
                 items: ({ query }) => {
+                    
                     return channelUsers
                         .filter(
                             (item) =>

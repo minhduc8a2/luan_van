@@ -3,16 +3,10 @@ import { GrMicrophone } from "react-icons/gr";
 import { PiVideoCameraSlash } from "react-icons/pi";
 import { CgScreen } from "react-icons/cg";
 import { IoMdPersonAdd } from "react-icons/io";
-import { RiMore2Fill } from "react-icons/ri";
+
 import Button from "@/Components/Button";
 import IconButton from "@/Components/IconButton";
 
-import {
-    Popover,
-    PopoverButton,
-    PopoverPanel,
-    CloseButton,
-} from "@headlessui/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
     addHuddleUser,
@@ -27,7 +21,6 @@ import {
     getAudioStream,
     getVideoStream,
     getScreenStream,
-    checkDeviceInUse,
     streamHasVideoTracks,
     streamHasAudioTracks,
     removeVideoTracks,
@@ -40,6 +33,7 @@ import OverlayPanel from "@/Components/Overlay/OverlayPanel";
 import HuddleInvitation from "./HuddleInvitation";
 import { getChannelName, getDirectChannelUser } from "@/helpers/channelHelper";
 import Tooltip from "@/Components/Tooltip";
+import Settings from "./Settings";
 export default function Huddle() {
     const { auth } = usePage().props;
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
@@ -288,12 +282,7 @@ export default function Huddle() {
                 console.error(error);
             }
         });
-        peer.on("close", () => {
-            peersRef.current.get(user.id)?.destroy();
-            peersRef.current.delete(user.id);
-            otherUserStreams.current.delete(user.id);
-            shouldRerender();
-        });
+       
         peersRef.current.set(user.id, peer);
     }
     useEffect(() => {
@@ -323,7 +312,11 @@ export default function Huddle() {
                     addPeer(user, false);
                 })
                 .leaving((user) => {
-                    dispatch(removeHuddleUser(user));
+                    dispatch(removeHuddleUser(user.id));
+                    peersRef.current.get(user.id)?.destroy();
+                    peersRef.current.delete(user.id);
+                    otherUserStreams.current.delete(user.id);
+                
                 })
                 .listen("HuddleEvent", (e) => {
                     // setlocalMessages((pre) => [...pre, e.message]);
@@ -336,21 +329,6 @@ export default function Huddle() {
         return () => {
             leaveHuddle();
         };
-    }, [huddleChannelId]);
-
-    function autoInvitation() {
-        if (huddleChannelId && channel.type == "DIRECT") {
-            router.post(
-                route("huddle.invitation", channel.id),
-                { users: [otherUser] },
-                {
-                    preserveState: true,
-                }
-            );
-        }
-    }
-    useEffect(() => {
-        autoInvitation();
     }, [huddleChannelId]);
 
     if (!huddleChannelId) return "";
@@ -519,69 +497,19 @@ export default function Huddle() {
                 >
                     {({ close }) => <HuddleInvitation close={close} />}
                 </OverlayPanel>
-                <Popover className="relative ">
-                    <PopoverButton className="block">
-                        <IconButton
-                            description="More options"
-                            activable={false}
-                        >
-                            <RiMore2Fill />
-                        </IconButton>
-                    </PopoverButton>
-                    <PopoverPanel anchor="bottom start">
-                        <div className="flex flex-col py-2 bg-background rounded-lg text-white/85 mb-4 min-w-60 max-w-80 border border-white/15 ">
-                            <h5 className="text-lg px-4 font-bold">
-                                Audio devices
-                            </h5>
-                            {audioDevices.map((au) => (
-                                <CloseButton
-                                    className="px-6 py-2 hover:bg-white/10 text-left text-sm"
-                                    key={au.deviceId}
-                                    onClick={() => {
-                                        currentAudioRef.current = au;
-                                        addTrackToStream("audio");
-                                    }}
-                                >
-                                    {au.label}
-                                    {checkDeviceInUse(
-                                        "audio",
-                                        currentStreamRef.current,
-                                        au.deviceId
-                                    ) && (
-                                        <span className="font-bold text-cyan-400">
-                                            {" - In use"}
-                                        </span>
-                                    )}
-                                </CloseButton>
-                            ))}
-                            <hr className="my-2 opacity-15" />
-                            <h5 className="text-lg px-4 font-bold">
-                                Video devices
-                            </h5>
-                            {cameraDevices.map((cam) => (
-                                <CloseButton
-                                    className="px-6 py-2 hover:bg-white/10 text-left text-sm"
-                                    key={cam.deviceId}
-                                    onClick={() => {
-                                        currentVideoRef.current = cam;
-                                        addTrackToStream("video");
-                                    }}
-                                >
-                                    {cam.label}
-                                    {checkDeviceInUse(
-                                        "video",
-                                        currentStreamRef.current,
-                                        cam.deviceId
-                                    ) && (
-                                        <span className="font-bold text-cyan-400">
-                                            {" - In use"}
-                                        </span>
-                                    )}
-                                </CloseButton>
-                            ))}
-                        </div>
-                    </PopoverPanel>
-                </Popover>
+                <Settings
+                    audioDevices={audioDevices}
+                    setAudioDevice={(au) => {
+                        currentAudioRef.current = au;
+                        addTrackToStream("audio");
+                    }}
+                    currentStreamRef={currentStreamRef}
+                    cameraDevices={cameraDevices}
+                    setVideoDevice={(cam) => {
+                        currentVideoRef.current = cam;
+                        addTrackToStream("video");
+                    }}
+                />
 
                 <li>
                     <Button

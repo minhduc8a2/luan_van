@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\File;
 use Inertia\Inertia;
+use App\Helpers\Helper;
 use App\Models\Channel;
 use App\Models\Message;
 use App\Models\Workspace;
@@ -182,7 +183,7 @@ class FileController extends Controller
      */
     public function destroy(Request $request,  File $file)
     {
-        // abort(500, "Something went wrong! Please try later.");
+        // Helper::createErrorResponse();
 
         if ($request->user()->cannot('delete', [File::class, $file])) return abort(403, "Unauthorized request! Please try later.");
         try {
@@ -199,7 +200,7 @@ class FileController extends Controller
         } catch (\Throwable $th) {
             DB::rollBack();
             dd($th);
-            abort(500, "Something went wrong! Please try later.");
+            Helper::createErrorResponse();
         }
     }
 }

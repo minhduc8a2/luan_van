@@ -40,6 +40,7 @@ export default function ChatArea() {
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
     const { permissions, messages } = useChannelData(channelId);
     const { channelUsers } = useChannelUsers(channelId);
+   
     const { channel } = useChannel(channelId);
     // console.log(channel);
     const { messageId: threadMessageId } = useSelector((state) => state.thread);
@@ -304,7 +305,7 @@ export default function ChatArea() {
 
     return (
         <div className="flex-1 flex min-h-0 max-h-full w-full relative">
-            {!loaded && <OverlayLoadingSpinner/>}
+            {!loaded && <OverlayLoadingSpinner />}
             <InitData loaded={loaded} setLoaded={(value) => setLoaded(value)} />
 
             <div className="bg-background  chat-area-container flex-1 ">
@@ -465,6 +466,7 @@ export default function ChatArea() {
                         isChannelMember={isChannelMember}
                         channelName={channelName}
                         setFocus={setFocus}
+                       
                     />
                 )}
             </div>

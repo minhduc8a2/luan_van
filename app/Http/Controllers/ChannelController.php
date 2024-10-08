@@ -6,17 +6,18 @@ use App\Models\Role;
 use App\Models\User;
 use Inertia\Inertia;
 
+use App\Helpers\Helper;
 use App\Models\Channel;
 use App\Models\Message;
+use App\Models\Reaction;
 use App\Models\Workspace;
 use App\Helpers\BaseRoles;
-use Illuminate\Http\Request;
 use App\Events\ChannelEvent;
+use Illuminate\Http\Request;
 use App\Helpers\ChannelTypes;
 use App\Events\WorkspaceEvent;
 use Illuminate\Support\Carbon;
 use App\Helpers\PermissionTypes;
-use App\Models\Reaction;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Broadcast;
@@ -138,7 +139,7 @@ class ChannelController extends Controller
             $concatenated = $regularchannels->concat($directChannels)->concat([$selfChannel]);
             return $concatenated->all();
         } catch (\Throwable $th) {
-            abort(500, "Something went wrong! Please try later.");
+            Helper::createErrorResponse();
         }
     }
     public function browseChannels(Request $request, Workspace $workspace)
@@ -308,7 +309,7 @@ class ChannelController extends Controller
         } catch (\Throwable $th) {
             DB::rollBack();
 
-            abort(500, "Something went wrong! Please try later.");
+            Helper::createErrorResponse();
         }
     }
 
@@ -362,7 +363,7 @@ class ChannelController extends Controller
         } catch (\Throwable $th) {
             DB::rollBack();
 
-            abort(500, "Something went wrong! Please try later.");
+            Helper::createErrorResponse();
         }
     }
     public function editName(Request $request, Channel $channel)
@@ -383,7 +384,7 @@ class ChannelController extends Controller
         } catch (\Throwable $th) {
             DB::rollBack();
 
-            abort(500, "Something went wrong! Please try later.");
+            Helper::createErrorResponse();
         }
     }
 
@@ -419,7 +420,7 @@ class ChannelController extends Controller
         } catch (\Throwable $th) {
             DB::rollBack();
 
-            abort(500, "Something went wrong! Please try later.");
+            Helper::createErrorResponse();
         }
     }
 
@@ -443,7 +444,7 @@ class ChannelController extends Controller
         } catch (\Throwable $th) {
             DB::rollBack();
 
-            abort(500, "Something went wrong! Please try later.");
+            Helper::createErrorResponse();
         }
     }
     public function join(Request $request, Channel $channel)
@@ -466,7 +467,7 @@ class ChannelController extends Controller
         } catch (\Throwable $th) {
             DB::rollBack();
 
-            abort(500, "Something went wrong! Please try later.");
+            Helper::createErrorResponse();
         }
     }
     public function removeUserFromChannel(Request $request, Channel $channel)
@@ -501,7 +502,7 @@ class ChannelController extends Controller
         } catch (\Throwable $th) {
             DB::rollBack();
 
-            abort(500, "Something went wrong! Please try later.");
+            Helper::createErrorResponse();
         }
     }
     public function addUsersToChannel(Request $request, Channel $channel)
@@ -532,7 +533,7 @@ class ChannelController extends Controller
         } catch (\Throwable $th) {
             DB::rollBack();
             dd($th);
-            abort(500, "Something went wrong! Please try later.");
+            Helper::createErrorResponse();
         }
     }
 
@@ -563,7 +564,7 @@ class ChannelController extends Controller
         } catch (\Throwable $th) {
             DB::rollBack();
 
-            abort(500, "Something went wrong! Please try later.");
+            Helper::createErrorResponse();
         }
     }
     public function removeManager(Request $request, Channel $channel)
@@ -597,7 +598,7 @@ class ChannelController extends Controller
         } catch (\Throwable $th) {
             DB::rollBack();
 
-            abort(500, "Something went wrong! Please try later.");
+            Helper::createErrorResponse();
         }
     }
     public function lastRead(Request $request, Channel $channel)
@@ -617,7 +618,7 @@ class ChannelController extends Controller
         } catch (\Throwable $th) {
             DB::rollBack();
 
-            abort(500, "Something went wrong! Please try later.");
+            Helper::createErrorResponse();
         }
     }
 
@@ -688,7 +689,7 @@ class ChannelController extends Controller
             return [];
         } catch (\Throwable $th) {
             DB::rollBack();
-            abort(500, "Something went wrong! Please try later.");
+            Helper::createErrorResponse();
         }
     }
 
@@ -791,7 +792,7 @@ class ChannelController extends Controller
         } catch (\Throwable $th) {
             DB::rollBack();
 
-            abort(500, "Something went wrong! Please try later.");
+            Helper::createErrorResponse();
         }
     }
 }

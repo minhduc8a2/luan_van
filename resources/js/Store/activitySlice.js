@@ -12,10 +12,12 @@ export const activitySlice = createSlice({
         },
         addNotificationCount(state, action) {
             state.new_count += 1;
+            console.log("in add count", state.new_count);
         },
         addActivity(state, action) {
             state.notifications.unshift(action.payload);
             state.new_count += 1;
+            console.log("in add activity", state.new_count);
         },
         pushActivity(state, action) {
             state.notifications.push(action.payload);
@@ -31,7 +33,6 @@ export const activitySlice = createSlice({
                     : new Date().toUTCString(),
             }));
             state.new_count -= 1;
-
         },
         setAsView(state, action) {
             const index = state.notifications.findIndex(
@@ -58,7 +59,7 @@ export const {
     pushActivity,
     pushManyActivity,
     setNotificationsCount,
-    addNotificationCount
+    addNotificationCount,
 } = activitySlice.actions;
 
 export default activitySlice.reducer;

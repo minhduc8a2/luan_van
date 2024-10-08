@@ -16,6 +16,7 @@ export function getDirectChannelUser(channel, workspaceUsers, currentUser) {
     try {
         const userIds = channel?.name.split("_");
         const userId = userIds.find((id) => id != currentUser.id);
+       console.log(typeof workspaceUsers);
         return workspaceUsers.find((user) => user.id == userId);
     } catch (error) {
         console.error(error);
@@ -44,10 +45,8 @@ export function findMinMaxId(messages) {
 
     return messages.reduce(
         (acc, msg) => {
-            if (msg.id < acc.minId)
-                acc.minId = msg.id;
-            if (msg.id> acc.maxId)
-                acc.maxId = msg.id;
+            if (msg.id < acc.minId) acc.minId = msg.id;
+            if (msg.id > acc.maxId) acc.maxId = msg.id;
             return acc;
         },
         {

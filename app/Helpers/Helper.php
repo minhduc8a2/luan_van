@@ -34,4 +34,9 @@ class Helper
         ]);
         return  $editor->sanitize($content);
     }
+
+    public static function createErrorResponse()
+    {
+        return abort(500, "Something went wrong! Please try later!");
+    }
 }

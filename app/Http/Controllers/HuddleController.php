@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Channel;
 use App\Notifications\HuddleInvitationNotification;
 use Illuminate\Http\Request;
+use App\Helpers\Helper;
 
 class HuddleController extends Controller
 {
@@ -20,10 +21,10 @@ class HuddleController extends Controller
                 $user = User::find($u['id']);
                 $user->notify(new HuddleInvitationNotification($channel, $channel->workspace, $request->user(), $user));
             }
-            
-            return back()->with("data",["type"=>"HUDDLE_INVITATION_RESPONSE","code"=>1]);
+
+            return ["message" => "ok"];
         } catch (\Throwable $th) {
-            return back()->with("data",["type"=>"HUDDLE_INVITATION_RESPONSE","code"=>0]);
+            Helper::createErrorResponse();
         }
     }
 }

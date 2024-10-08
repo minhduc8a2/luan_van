@@ -96,7 +96,7 @@ export default function Event() {
     const userListener = useCallback(() => {
         Echo.private("App.Models.User." + auth.user.id).notification(
             (notification) => {
-                console.log("new", notification);
+               console.log(notification);
                 dispatch(addNotificationCount());
                 if (isChannelsNotificationBroadcast(notification.type)) {
                     const { channel, changesType } = notification;
@@ -149,8 +149,10 @@ export default function Event() {
     }, [channelId, workspace.id, mainChannel.id, auth.user.id, channelsData]);
     useEffect(() => {
         userListener();
+        console.log("user listener registered");
         return () => {
             Echo.leave("App.Models.User." + auth.user.id);
+            console.log("leave user listener");
         };
     }, [userListener, auth.user.id]);
 

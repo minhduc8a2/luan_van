@@ -13,11 +13,12 @@ export default function HuddleNotification({
     notification,
     handleNotificationClick,
 }) {
-    const {
-        auth,
-        workspace: currentWorkspace,
-        users: workspaceUsers,
-    } = usePage().props;
+    const { auth } = usePage().props;
+    const { workspace: currentWorkspace } = useSelector(
+        (state) => state.workspace
+    );
+    const {workspaceUsers} = useSelector((state) => state.workspaceUsers);
+  
     const dispatch = useDispatch();
     const { channelId: huddleChannelId } = useSelector((state) => state.huddle);
 
@@ -61,7 +62,7 @@ export default function HuddleNotification({
                                     onSuccess: () =>
                                         dispatch(
                                             toggleHuddle({
-                                                channelId:channel.id,
+                                                channelId: channel.id,
                                                 user: auth.user,
                                             })
                                         ),
@@ -70,7 +71,7 @@ export default function HuddleNotification({
                         } else
                             dispatch(
                                 toggleHuddle({
-                                    channelId:channel.id,
+                                    channelId: channel.id,
                                     user: auth.user,
                                 })
                             );
@@ -88,7 +89,7 @@ export default function HuddleNotification({
                                 onSuccess: () =>
                                     dispatch(
                                         toggleHuddle({
-                                            channelId:channel.id,
+                                            channelId: channel.id,
                                             user: auth.user,
                                         })
                                     ),
@@ -97,7 +98,7 @@ export default function HuddleNotification({
                     } else
                         dispatch(
                             toggleHuddle({
-                                channelId:channel.id,
+                                channelId: channel.id,
                                 user: auth.user,
                             })
                         );
@@ -129,7 +130,7 @@ export default function HuddleNotification({
                         Huddle in{" "}
                         <span className="font-bold">
                             #
-                            {getChannelName(channel, auth.user, workspaceUsers)}
+                            {getChannelName(channel, workspaceUsers, auth.user)}
                         </span>{" "}
                         (<span className="">{workspace.name}</span>)
                     </div>
@@ -156,8 +157,8 @@ export default function HuddleNotification({
                                     #
                                     {getChannelName(
                                         channel,
-                                        auth.user,
-                                        workspaceUsers
+                                        workspaceUsers,
+                                        auth.user
                                     )}
                                 </span>{" "}
                             </div>

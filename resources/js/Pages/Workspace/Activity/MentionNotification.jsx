@@ -39,7 +39,7 @@ export default function MentionNotification({
     const view_at = notification.view_at;
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const loadChannelRelatedDataToken = useRef(null)
+    const loadChannelRelatedDataToken = useRef(null);
     function handleNotificationClickedPart() {
         //check channel is available
         axios
@@ -54,8 +54,10 @@ export default function MentionNotification({
                 }
                 if (threadMessage) {
                     if (!channelsData.hasOwnProperty(channel.id)) {
-                        if(loadChannelRelatedDataToken.current) loadChannelRelatedDataToken.current.abort()
-                        loadChannelRelatedDataToken.current = new AbortController()
+                        if (loadChannelRelatedDataToken.current)
+                            loadChannelRelatedDataToken.current.abort();
+                        loadChannelRelatedDataToken.current =
+                            new AbortController();
                         loadChannelRelatedData(
                             channel.id,
                             dispatch,
@@ -169,7 +171,7 @@ export default function MentionNotification({
                         Mention in{" "}
                         <span className="font-bold">
                             #
-                            {getChannelName(channel, auth.user, workspaceUsers)}
+                            {getChannelName(channel, workspaceUsers, auth.user)}
                         </span>
                         {threadMessage ? " thread " : " "}(
                         <span className="">{workspace.name}</span>)

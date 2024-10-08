@@ -4,7 +4,7 @@ import Button from "@/Components/Button";
 import TipTapEditor from "@/Components/TipTapEditor";
 import { router } from "@inertiajs/react";
 import { getMentionsFromContent } from "@/helpers/tiptapHelper";
-import { useChannel, useChannelData } from "@/helpers/customHooks";
+import {  useChannelUsers } from "@/helpers/customHooks";
 import { useParams } from "react-router-dom";
 
 export default function Editor({
@@ -13,10 +13,11 @@ export default function Editor({
     isChannelMember,
     channelName,
     setFocus,
+
 }) {
     const { channelId } = useParams();
 
-    const { channelUsers } = useChannelData(channelId);
+    const { channelUsers } = useChannelUsers(channelId);
     function joinChannel() {
         router.post(
             route("channel.join", channel.id),

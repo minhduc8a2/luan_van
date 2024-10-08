@@ -5,9 +5,13 @@ import AutocompleInput from "./AutocompleInput";
 import Button from "@/Components/Button";
 import { useState } from "react";
 import { useSelector } from "react-redux";
+import { useChannelUsers } from "@/helpers/customHooks";
+import { useParams } from "react-router-dom";
 export default function HuddleInvitation({ close }) {
     const { flash } = usePage().props;
-    const { channelUsers, auth,channelId } = usePage().props;
+    const { auth } = usePage().props;
+    const { channelId } = useParams();
+    const { channelUsers } = useChannelUsers(channelId);
     const { channels } = useSelector((state) => state.channels);
     const { channelId: huddleChannelId, userIds } = useSelector(
         (state) => state.huddle
@@ -17,18 +21,18 @@ export default function HuddleInvitation({ close }) {
     }, [channels, huddleChannelId]);
     const [choosenUsers, setChoosenUsers] = useState({});
     const onlineStatusMap = useSelector((state) => state.onlineStatus);
-
+    const [success, setSuccess] = useState(false);
     function submit() {
-        router.post(
-            route("huddle.invitation", channel.id),
-            { users: [...Object.values(choosenUsers)] },
-            {
-                preserveState: true,
-            }
-        );
+        axios
+            .post(route("huddle.invitation", channel.id), {
+                users: [...Object.values(choosenUsers)],
+            })
+            .then(() => {
+                setSuccess(true);
+            });
     }
 
-    if (flash.data && flash.data.type == "HUDDLE_INVITATION_RESPONSE") {
+    if (success) {
         const invitedUsers = [...Object.values(choosenUsers)];
 
         return (
