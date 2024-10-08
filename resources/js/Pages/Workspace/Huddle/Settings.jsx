@@ -6,7 +6,7 @@ import {
     PopoverButton,
     PopoverPanel,
 } from "@headlessui/react";
-import React from "react";
+import React, { useState } from "react";
 import { RiMore2Fill } from "react-icons/ri";
 
 export default function Settings({
@@ -15,7 +15,10 @@ export default function Settings({
     currentStreamRef,
     cameraDevices,
     setVideoDevice,
+    currentVideoRef,
+    currentAudioRef,
 }) {
+    const [refresh, setRefresh] = useState(0);
     return (
         <Popover className="relative ">
             <PopoverButton className="block">
@@ -24,7 +27,7 @@ export default function Settings({
                 </IconButton>
             </PopoverButton>
             <PopoverPanel anchor="bottom start">
-                <div className="flex flex-col py-2 bg-background rounded-lg text-white/85 mb-4 min-w-60 max-w-80 border border-white/15 ">
+                <div className="flex flex-col py-2 bg-background z-30 relative rounded-lg text-white/85 mb-4 min-w-60 max-w-80 border border-white/15 ">
                     <h5 className="text-lg px-4 font-bold">Audio devices</h5>
                     {audioDevices.map((au) => (
                         <CloseButton
@@ -32,6 +35,7 @@ export default function Settings({
                             key={au.deviceId}
                             onClick={() => {
                                 setAudioDevice(au);
+                                setRefresh((pre) => pre + 1);
                             }}
                         >
                             {au.label}
@@ -39,10 +43,16 @@ export default function Settings({
                                 "audio",
                                 currentStreamRef.current,
                                 au.deviceId
-                            ) && (
+                            ) ? (
                                 <span className="font-bold text-cyan-400">
                                     {" - In use"}
                                 </span>
+                            ) : currentAudioRef.current?.deviceId == au.deviceId ? (
+                                <span className="font-bold text-cyan-400">
+                                    {" - current"}
+                                </span>
+                            ) : (
+                                ""
                             )}
                         </CloseButton>
                     ))}
@@ -54,6 +64,7 @@ export default function Settings({
                             key={cam.deviceId}
                             onClick={() => {
                                 setVideoDevice(cam);
+                                setRefresh((pre) => pre + 1);
                             }}
                         >
                             {cam.label}
@@ -61,10 +72,16 @@ export default function Settings({
                                 "video",
                                 currentStreamRef.current,
                                 cam.deviceId
-                            ) && (
+                            ) ? (
                                 <span className="font-bold text-cyan-400">
                                     {" - In use"}
                                 </span>
+                            ) : currentVideoRef.current?.deviceId == cam.deviceId ? (
+                                <span className="font-bold text-cyan-400">
+                                    {" - current"}
+                                </span>
+                            ) : (
+                                ""
                             )}
                         </CloseButton>
                     ))}
