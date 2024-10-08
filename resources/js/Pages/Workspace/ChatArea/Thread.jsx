@@ -29,7 +29,7 @@ import {
 } from "@/helpers/customHooks";
 
 import InfiniteScroll from "@/Components/InfiniteScroll";
-import { findMinMaxCreatedAt } from "@/helpers/channelHelper";
+import {  findMinMaxId } from "@/helpers/channelHelper";
 export default function Thread() {
     const dispatch = useDispatch();
 
@@ -74,25 +74,41 @@ export default function Thread() {
 
     useEffect(() => {
         if (messages) {
-            const { minCreatedAt, maxCreatedAt } =
-                findMinMaxCreatedAt(messages);
-            // console.log(minCreatedAt, maxId);
-            setTopHasMore(maxCreatedAt);
-            setBottomHasMore(minCreatedAt);
+            const { minId, maxId } = findMinMaxId(messages);
+            // console.log(minId, maxId);
+            setTopHasMore(maxId);
+            setBottomHasMore(minId);
         }
+    }, [channel?.id, messages]);
+
+    useEffect(() => {
+        function handleReconnect() {
+            console.log("reconnected");
+            const { minId, maxId } = findMinMaxId(messages);
+            // console.log(minId, maxId);
+            setTopHasMore(maxId);
+            setBottomHasMore(minId);
+        }
+        Echo.connector.pusher.connection.bind("connected", handleReconnect);
+        return () => {
+            Echo.connector.pusher.connection.unbind(
+                "connected",
+                handleReconnect
+            );
+        };
     }, [channel?.id, messages]);
     const loadMoreTopToken = useRef(null);
     const loadMoreBottomToken = useRef(null);
     const loadMore = (channelId, position, token, successCallBack) => {
         if (token != null) token.abort();
         token = new AbortController();
-        let last_created_at;
+        let last_id;
         if (position == "top") {
-            last_created_at = topHasMore;
+            last_id = topHasMore;
         } else {
-            last_created_at = bottomHasMore;
+            last_id = bottomHasMore;
         }
-        if (last_created_at) {
+        if (last_id) {
             if (position == "top") {
                 setTopLoading(true);
             } else {
@@ -102,7 +118,7 @@ export default function Thread() {
             return axios
                 .get(route("messages.infiniteMessages", channelId), {
                     params: {
-                        last_created_at,
+                        last_id,
                         direction: position,
                         threaded_message_id: threadedMessageId,
                     },
@@ -113,7 +129,7 @@ export default function Thread() {
                         console.log(position, response.data);
                         if (position == "top") {
                             if (response.data.length > 0) {
-                                setTopHasMore(response.data[0].created_at);
+                                setTopHasMore(response.data[0].id);
                             } else {
                                 setTopHasMore(null);
                             }

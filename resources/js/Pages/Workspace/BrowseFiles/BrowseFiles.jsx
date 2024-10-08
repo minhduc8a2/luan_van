@@ -32,18 +32,17 @@ import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
 
 import DocumentInSearch from "./DocumentInSearch";
 import FileIcon from "@/Components/FileIcon";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setMedia } from "@/Store/mediaSlice";
 import Layout from "../Layout";
 import InfiniteScroll from "@/Components/InfiniteScroll";
 export default function BrowseFiles() {
-    const { auth, flash, workspace,  workspaceFiles } =
-        usePage().props;
+    const { auth } = usePage().props;
 
     const dispatch = useDispatch();
     const [files, setFiles] = useState([]);
     const [searchFilter, setSearchFilter] = useState("");
-
+    const { workspace } = useSelector((state) => state.workspace);
     const [filter, setFilter] = useState("shared");
     const [filterLoading, setFilterLoading] = useState(false);
 
@@ -154,13 +153,13 @@ export default function BrowseFiles() {
     }
     const loadMore = (position) => {
         // return new Promise((resolve, reject) => {});
-        let last_created_at;
+        let last_id;
         if (position == "top") {
-            last_created_at = topHasMore;
+            last_id = topHasMore;
         } else {
-            last_created_at = bottomHasMore;
+            last_id = bottomHasMore;
         }
-        if (last_created_at) {
+        if (last_id) {
             if (position == "top") {
                 setTopLoading(true);
             } else {
@@ -172,7 +171,7 @@ export default function BrowseFiles() {
                     params: {
                         name: searchFilter,
                         filter,
-                        last_created_at,
+                        last_id,
                         direction: position,
                     },
                     // signal: token.current.signal,
@@ -182,7 +181,7 @@ export default function BrowseFiles() {
                         console.log(position, response.data);
                         if (position == "top") {
                             if (response.data.length > 0) {
-                                setTopHasMore(response.data[0].created_at);
+                                setTopHasMore(response.data[0].id);
                             } else {
                                 setTopHasMore(null);
                             }
@@ -192,7 +191,8 @@ export default function BrowseFiles() {
                         } else {
                             if (response.data.length > 0) {
                                 setBottomHasMore(
-                                    response.data[response.data.length - 1].created_at
+                                    response.data[response.data.length - 1]
+                                        .id
                                 );
                             } else {
                                 setBottomHasMore(null);
@@ -223,7 +223,7 @@ export default function BrowseFiles() {
                 params: {
                     name: searchValue,
                     filter,
-                    last_created_at: "",
+                    last_id: null,
                     direction: "bottom",
                 },
                 signal: token.current.signal,
@@ -434,4 +434,3 @@ export default function BrowseFiles() {
         </div>
     );
 }
-

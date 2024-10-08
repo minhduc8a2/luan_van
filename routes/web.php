@@ -121,5 +121,5 @@ Route::get("/notifications", [NotificationController::class, 'get'])->name('noti
 // Route::get('/mailable', function () {
 //     return new  InvitationMail("https://google.com", "company A", "A", "B");
 // });
-Route::get('/workspaces/{workspace}/files', [FileController::class, 'index'])->name('files.index');
+Route::get('/workspaces/{workspace}/browse_files', [FileController::class, 'index'])->name('files.index')->middleware(['auth']);
 Route::delete('/files/{file}', [FileController::class, 'destroy'])->name('files.delete');

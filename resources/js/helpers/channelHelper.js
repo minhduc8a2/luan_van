@@ -37,28 +37,22 @@ export function getDirectChannelFromUserId(channels, userId) {
     return null;
 }
 
-export function findMinMaxCreatedAt(messages) {
+export function findMinMaxId(messages) {
     if (messages.length === 0) {
-        return { minCreatedAt: null, maxCreatedAt: null };
+        return { minId: null, maxId: null };
     }
 
     return messages.reduce(
         (acc, msg) => {
-            if (
-                new Date(msg.created_at).getTime() <
-                new Date(acc.minCreatedAt).getTime()
-            )
-                acc.minCreatedAt = msg.created_at;
-            if (
-                new Date(msg.created_at).getTime() >
-                new Date(acc.maxCreatedAt).getTime()
-            )
-                acc.maxCreatedAt = msg.created_at;
+            if (msg.id < acc.minId)
+                acc.minId = msg.id;
+            if (msg.id> acc.maxId)
+                acc.maxId = msg.id;
             return acc;
         },
         {
-            minCreatedAt: messages[0].created_at,
-            maxCreatedAt: messages[0].created_at,
+            minId: messages[0].id,
+            maxId: messages[0].id,
         }
     );
 }

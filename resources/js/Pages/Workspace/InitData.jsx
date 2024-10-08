@@ -9,7 +9,7 @@ import { useParams } from "react-router-dom";
 
 export default function InitData({ loaded, setLoaded }) {
     const { workspaceId } = useParams();
-    console.log(workspaceId);
+
     const { newNotificationsCount } = useSelector((state) => state.workspace);
     const dispatch = useDispatch();
     function loadWorkspaceRelatedData() {
@@ -56,6 +56,25 @@ export default function InitData({ loaded, setLoaded }) {
             .catch((error) => {
                 console.log(error);
             });
+    }, [workspaceId]);
+
+    useEffect(() => {
+        function handleReconnect() {
+            loadWorkspaceRelatedData()
+                .then(() => {
+                    dispatch(setNotificationsCount(newNotificationsCount));
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
+        }
+        Echo.connector.pusher.connection.bind("connected", handleReconnect);
+        return () => {
+            Echo.connector.pusher.connection.unbind(
+                "connected",
+                handleReconnect
+            );
+        };
     }, [workspaceId]);
     if (loaded) {
         return <></>;

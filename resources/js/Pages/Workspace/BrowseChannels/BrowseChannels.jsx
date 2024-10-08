@@ -121,12 +121,12 @@ export default function BrowseChannels() {
                 break;
             case "newest_channel":
                 tempChannels.sort((a, b) =>
-                    compareDateTime(b.created_at, a.created_at)
+                    b.id-a.id
                 );
                 break;
             case "oldest_channel":
                 tempChannels.sort((a, b) =>
-                    compareDateTime(a.created_at, b.created_at)
+                    a.id-b.id
                 );
                 break;
             case "most_members":
@@ -196,13 +196,13 @@ export default function BrowseChannels() {
     }
 
     function loadMore(position) {
-        let last_created_at;
+        let last_id;
         if (position == "top") {
-            last_created_at = topHasMore;
+            last_id = topHasMore;
         } else {
-            last_created_at = bottomHasMore;
+            last_id = bottomHasMore;
         }
-        if (last_created_at) {
+        if (last_id) {
             if (position == "top") {
                 setTopLoading(true);
             } else {
@@ -215,7 +215,7 @@ export default function BrowseChannels() {
                         ownType: filter.ownType,
                         privacyType: filter.privacyType,
                         name: searchValue,
-                        last_created_at,
+                        last_id,
                         direction: position,
                     },
                     // signal: token.current.signal,
@@ -224,7 +224,7 @@ export default function BrowseChannels() {
                     if (response.status == 200) {
                         if (position == "top") {
                             if (response.data.length > 0) {
-                                setTopHasMore(response.data[0].created_at);
+                                setTopHasMore(response.data[0].id);
                             } else {
                                 setTopHasMore(null);
                             }
@@ -234,7 +234,7 @@ export default function BrowseChannels() {
                         } else {
                             if (response.data.length > 0) {
                                 setBottomHasMore(
-                                    response.data[response.data.length - 1].created_at
+                                    response.data[response.data.length - 1].id
                                 );
                             } else {
                                 setBottomHasMore(null);
@@ -267,7 +267,7 @@ export default function BrowseChannels() {
                     ownType: filter.ownType,
                     privacyType: filter.privacyType,
                     name: searchValue,
-                    last_created_at: "",
+                    last_id: "",
                     direction: "bottom",
                 },
                 signal: token.current.signal,

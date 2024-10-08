@@ -32,7 +32,7 @@ class MessageController extends Controller
 
         $content = $request->query('content') ?? "";
         // $page = $request->query('page') ?? 1;
-        $last_created_at = $request->query('last_created_at');
+        $last_id = $request->query('last_id');
         $direction = $request->query('direction') ?? "bottom";
         $threaded_message_id = $request->query('threaded_message_id');
 
@@ -63,14 +63,14 @@ class MessageController extends Controller
         }
 
 
-        if ($last_created_at) {
+        if ($last_id) {
             if ($direction === 'bottom') {
-                $messagesQuery->where('created_at', '<', $last_created_at)->orderBy('created_at', 'desc');
+                $messagesQuery->where('id', '<', $last_id)->orderBy('id', 'desc');
             } else {
-                $messagesQuery->where('created_at', '>', $last_created_at)->orderBy('created_at', 'asc');
+                $messagesQuery->where('id', '>', $last_id)->orderBy('id', 'asc');
             }
         } else {
-            $messagesQuery->orderBy('created_at', 'desc');
+            $messagesQuery->orderBy('id', 'desc');
         }
 
         return $messagesQuery->limit($perPage)->get();
@@ -143,8 +143,8 @@ class MessageController extends Controller
                 if ($threadMessage) {
 
                     $threadMessagePosition = $message->threadMessages()->whereNotIn('user_id', $hiddenUserIds)
-                        ->latest() // Order by latest first
-                        ->where('created_at', '>=', $threadMessage->created_at) // Messages that are newer or equal to the mentioned one
+                        ->latest() 
+                        ->where('id', '>=', $threadMessage->id) 
                         ->count();
                     $pageNumber = ceil($threadMessagePosition / $perPage);
                 }
