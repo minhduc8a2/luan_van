@@ -20,10 +20,10 @@ export default function ChannelSettings({ channelName, buttonNode }) {
     const [show, setShow] = useState(false);
     useEffect(() => {
         setShow(false);
-    }, [channel.id]);
+    }, [channel?.id]);
     return (
         <OverlayPanel success={!show} buttonNode={buttonNode} className="p-0">
-            {({ close }) => (
+            {({ close }) => channel && (
                 <div className="w-[548px]  text-white/85">
                     <h2 className="text-2xl p-6 font-bold text-white/85">
                         <div className="flex items-baseline gap-x-2">

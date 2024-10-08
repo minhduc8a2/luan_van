@@ -1,12 +1,12 @@
-import Avatar from "@/Components/Avatar";
+
 import {
     Popover,
     PopoverButton,
     PopoverPanel,
-    CloseButton,
+ 
 } from "@headlessui/react";
 import { IoIosMore } from "react-icons/io";
-import { LuPlus } from "react-icons/lu";
+
 import { IoSearch } from "react-icons/io5";
 import { TbStack2 } from "react-icons/tb";
 

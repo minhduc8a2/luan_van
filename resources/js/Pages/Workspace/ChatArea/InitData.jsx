@@ -1,9 +1,4 @@
-import {
-    loadChannelData,
-    loadChannelIfNotExists,
-    loadChannelMessages,
-    loadChannelRelatedData,
-} from "@/helpers/channelDataLoader";
+import { loadChannelRelatedData } from "@/helpers/channelDataLoader";
 import { setChannelData } from "@/Store/channelsDataSlice";
 import { addNewChannelToChannelsStore } from "@/Store/channelsSlice";
 
@@ -20,11 +15,9 @@ export default function InitData({ loaded, setLoaded }) {
     const loadChannelIfNotExistsToken = useRef(null);
 
     const dispatch = useDispatch();
-    
 
     function init() {
         setLoaded(false);
-       
 
         if (loadChannelDataToken.current) {
             loadChannelDataToken.current.abort();
@@ -35,7 +28,22 @@ export default function InitData({ loaded, setLoaded }) {
         if (loadChannelIfNotExistsToken.current) {
             loadChannelIfNotExistsToken.current.abort();
         }
-        loadChannelRelatedData(channelId,dispatch,setChannelData,addNewChannelToChannelsStore,channels,channelsData,[loadChannelDataToken.current,loadChannelMessagesToken.current,loadChannelIfNotExistsToken.current])
+        loadChannelDataToken.current = new AbortController();
+        loadChannelMessagesToken.current = new AbortController();
+        loadChannelIfNotExistsToken.current = new AbortController();
+        loadChannelRelatedData(
+            channelId,
+            dispatch,
+            setChannelData,
+            addNewChannelToChannelsStore,
+            channels,
+            channelsData,
+            [
+                loadChannelDataToken.current,
+                loadChannelMessagesToken.current,
+                loadChannelIfNotExistsToken.current,
+            ]
+        )
             .then(() => {
                 setLoaded(true);
             })
@@ -47,9 +55,5 @@ export default function InitData({ loaded, setLoaded }) {
         init();
     }, [channelId]);
 
-    if (loaded) {
-        return <></>;
-    } else {
-        return <div className="">Loading channel data</div>;
-    }
+    return <></>;
 }

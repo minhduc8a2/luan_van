@@ -47,6 +47,7 @@ export default function InitData({ loaded, setLoaded }) {
     }
 
     useEffect(() => {
+        setLoaded(false);
         loadWorkspaceRelatedData()
             .then(() => {
                 setLoaded(true);
@@ -60,6 +61,7 @@ export default function InitData({ loaded, setLoaded }) {
 
     useEffect(() => {
         function handleReconnect() {
+            setLoaded(false);
             loadWorkspaceRelatedData()
                 .then(() => {
                     dispatch(setNotificationsCount(newNotificationsCount));

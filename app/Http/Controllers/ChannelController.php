@@ -102,6 +102,7 @@ class ChannelController extends Controller
             $hiddenUserIds =  $user->hiddenUsers()->wherePivot('workspace_id', $workspace->id)->pluck('hidden_user_id')->toArray();
             $regularchannels =  $user->channels()
                 ->whereIn("type", [ChannelTypes::PUBLIC->name, ChannelTypes::PRIVATE->name])
+                ->where("workspace_id",$workspace->id)
                 ->where('is_archived', false)
                 ->withCount([
                     'messages as unread_messages_count' => function (Builder $query) use ($user, $hiddenUserIds) {
@@ -117,6 +118,7 @@ class ChannelController extends Controller
 
             $directChannels = $user->channels()
                 ->where("type",  ChannelTypes::DIRECT->name)
+                ->where("workspace_id",$workspace->id)
                 ->whereDoesntHave('users', function ($query) use ($hiddenUserIds) {
                     $query->whereIn('users.id', $hiddenUserIds);
                 })

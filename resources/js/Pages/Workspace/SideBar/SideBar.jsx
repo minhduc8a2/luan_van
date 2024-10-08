@@ -3,7 +3,7 @@ import React, { useMemo } from "react";
 import { PiHouseLineBold, PiHouseLineFill } from "react-icons/pi";
 import { FaRegBell } from "react-icons/fa6";
 
-import { Link } from "@inertiajs/react";
+
 
 import Dropdown from "@/Components/Dropdown";
 import WorkspaceAvatar from "@/Components/WorkspaceAvatar";
@@ -20,6 +20,7 @@ import More from "./More";
 import UserOptions from "./UserOptions";
 import { setSideBarWidth } from "@/Store/sizeSlice";
 import { setLeftWindowType } from "@/Store/windowTypeSlice";
+import { Link } from "react-router-dom";
 export default function SideBar({}) {
     const { workspace } = useSelector((state) => state.workspace);
     const { workspaces } = useSelector((state) => state.workspace);
@@ -52,9 +53,7 @@ export default function SideBar({}) {
                         <hr className="opacity-10" />
                         <div className="max-h-[50vh] overflow-y-auto scrollbar">
                             {workspaces.map((wsp) => (
-                                <Link
-                                    href={route("workspace.show", wsp.id)}
-                                    key={wsp.id}
+                                <Link to={`/workspaces/${wsp.id}` } key={wsp.id}
                                 >
                                     <WorkspaceListItem
                                         workspace={wsp}

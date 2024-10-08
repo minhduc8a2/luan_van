@@ -43,7 +43,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    Route::post("/workspaces", [WorkspaceController::class, 'store'])->name('workspace.store');
+    Route::post("/workspaces", [WorkspaceController::class, 'store'])->name('workspaces.store');
     Route::get("/workspaces/{workspace}", [WorkspaceController::class, 'show'])->name('workspace.show');
     Route::get("/workspaces/{workspace}/channels/{channel}", [ChannelController::class, 'show'])->name('channels.show');
     Route::get("/workspaces/{workspace}/init_workspace_data", [WorkspaceController::class, 'initWorkspaceData'])->name('workspaces.initWorkspaceData');

@@ -64,22 +64,17 @@ class WorkspaceController extends Controller
             /**
              * @var Workspace $workspace
              */
-
-
             $workspace = $user->ownWorkspaces()->create(['name' => $validated['name']]);
             $workspace->assignAdminRoleAndAdminPermissions($user);
             $workspace->createWorkspaceMemberPermissions();
             $workspace->createInitChannels($user, $validated['channel']);
-
             $workspace->createAndAssignSelfChannelForUser($user);
-
-            $mainChannel = $workspace->channels->where('is_main_channel', '=', true)->first();
-            return redirect()->route('channels.show', ['workspace' => $workspace->id, 'channel' => $mainChannel->id]);
             DB::commit();
+            return ['workspaceId' => $workspace->id, 'main_channel_id' => $workspace->mainChannel()->id];
         } catch (\Throwable $th) {
             DB::rollBack();
 
-            return back()->withErrors(['server' => 'Something went wrong! Please try later!']);
+            abort(500, 'Something went wrong! Please try later!');
         }
         //create workspace
 

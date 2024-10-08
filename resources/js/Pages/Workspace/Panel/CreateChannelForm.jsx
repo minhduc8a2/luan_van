@@ -5,10 +5,12 @@ import Form1 from "@/Components/Form1";
 import TextArea from "@/Components/Input/TextArea";
 import SelectInput from "@/Components/Input/SelectInput";
 import { useSelector } from "react-redux";
+import { useCustomedForm } from "@/helpers/customHooks";
 
 export function CreateChannelForm({ activateButtonNode, callback = () => {} }) {
-    const { workspace } = usePage().props;
-    const { workspacePermissions } = useSelector((state) => state.workspace);
+    const { workspacePermissions, workspace } = useSelector(
+        (state) => state.workspace
+    );
     const channelTypes = [
         { type: "PUBLIC", label: "Public - Anyone in " + workspace.name },
         {
@@ -16,27 +18,25 @@ export function CreateChannelForm({ activateButtonNode, callback = () => {} }) {
             label: "Private — only specific people \n Can only be viewed or joined by invitation",
         },
     ];
-    const { data, setData, post, processing, reset, errors, clearErrors } =
-        useForm({
-            name: "",
-            type: "PUBLIC",
-        });
+    const [refresh, setRefresh] = useState(0);
+    const {
+        getValues,
+        setValues,
+        errors,
+        reset,
+        submit,
+        loading: processing,
+    } = useCustomedForm(
+        { name: "", type: "PUBLIC" },
+        { url: route("channel.store", workspace.id) }
+    );
     const [success, setSuccess] = useState(false);
-    function submit(e) {
+    function onSubmit(e) {
         e.preventDefault();
-        post(route("channel.store", workspace.id), {
-            preserveState: true,
-            only: ["channels"],
-            onSuccess: () => {
-                setSuccess(true);
-                reset();
-            },
-            headers: {
-                "X-Socket-Id": Echo.socketId(),
-            },
-            onFinish: () => {
-                callback();
-            },
+        submit().then(() => {
+            setSuccess(true);
+            reset();
+            callback();
         });
     }
     return (
@@ -45,13 +45,13 @@ export function CreateChannelForm({ activateButtonNode, callback = () => {} }) {
             className="p-4"
             errors={errors}
             success={success}
-            submit={submit}
+            submit={onSubmit}
             submitting={processing}
             buttonName="Create"
             activateButtonNode={
                 <div
                     onClick={() => {
-                        clearErrors();
+                        reset();
                         setSuccess(false);
                     }}
                 >
@@ -74,14 +74,20 @@ export function CreateChannelForm({ activateButtonNode, callback = () => {} }) {
                 <TextArea
                     placeholder=""
                     label="Channel name:"
-                    value={data.name}
-                    onChange={(e) => setData("name", e.target.value)}
+                    value={getValues().name}
+                    onChange={(e) => {
+                        setValues("name", e.target.value);
+                        setRefresh((pre) => pre + 1);
+                    }}
                     disabled={!workspacePermissions?.createChannel}
                 />
                 <SelectInput
                     label="Channel type"
                     list={channelTypes}
-                    onChange={(item) => setData("type", item.type)}
+                    onChange={(item) => {
+                        setValues("type", item.type);
+                        setRefresh((pre) => pre + 1);
+                    }}
                     disabled={!workspacePermissions?.createChannel}
                 />
             </div>

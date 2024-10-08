@@ -15,7 +15,7 @@ import {
     useChannelUsers,
 } from "@/helpers/customHooks";
 import { useParams } from "react-router-dom";
-export default function Header({ channelName }) {
+export default function Header({ channelName , loaded}) {
     const { auth } = usePage().props;
     const {channelId} = useParams()
     const { channelId: huddleChannelId } = useSelector((state) => state.huddle);
@@ -45,7 +45,7 @@ export default function Header({ channelName }) {
         }
     }
     return (
-        <div className="p-4 border-b border-b-white/10 z-10">
+        <div className={`p-4 border-b border-b-white/10 z-10 ${loaded?"":"animate-pulse"}`}>
             <div className="flex justify-between font-bold text-lg opacity-75">
                 <div className="flex items-center gap-x-4">
                     <ChannelSettings

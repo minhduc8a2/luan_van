@@ -32,6 +32,7 @@ import {
 import Editor from "./Editor";
 import { useParams } from "react-router-dom";
 import { setMention } from "@/Store/mentionSlice";
+import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
 export default function ChatArea() {
     const { auth } = usePage().props;
     const { channelId } = useParams();
@@ -302,16 +303,18 @@ export default function ChatArea() {
     ]);
 
     return (
-        <div className="flex-1 flex min-h-0 max-h-full w-full">
+        <div className="flex-1 flex min-h-0 max-h-full w-full relative">
+            {!loaded && <OverlayLoadingSpinner/>}
             <InitData loaded={loaded} setLoaded={(value) => setLoaded(value)} />
 
-            {loaded && channel && (
-                <div className="bg-background  chat-area-container flex-1 ">
-                    <Header
-                        channel={channel}
-                        channelName={channelName}
-                        channelUsers={channelUsers}
-                    />
+            <div className="bg-background  chat-area-container flex-1 ">
+                <Header
+                    channel={channel}
+                    channelName={channelName}
+                    channelUsers={channelUsers}
+                    loaded={loaded}
+                />
+                {loaded && channel && (
                     <InfiniteScroll
                         loadMoreOnTop={(successCallBack) =>
                             loadMore(
@@ -454,7 +457,8 @@ export default function ChatArea() {
                             );
                         })}
                     </InfiniteScroll>
-
+                )}
+                {loaded && channel && (
                     <Editor
                         channel={channel}
                         permissions={permissions}
@@ -462,8 +466,8 @@ export default function ChatArea() {
                         channelName={channelName}
                         setFocus={setFocus}
                     />
-                </div>
-            )}
+                )}
+            </div>
         </div>
     );
 }

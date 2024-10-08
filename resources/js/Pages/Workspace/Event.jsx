@@ -75,7 +75,7 @@ export default function Event() {
 
     const mainChannel = useMemo(() => {
         return channels.find((cn) => cn.is_main_channel);
-    }, [channels]);
+    }, [channels, workspace?.id]);
 
     const loadSomeChannelDataToken = useRef([]);
     function reloadPermissions(channelId, dispatch, setChannelData) {
@@ -400,7 +400,7 @@ export default function Event() {
         //         Echo.leave(`private_channels.${cn.id}`);
         //     });
         // };
-    }, [channels]);
+    }, [channels, workspace?.id]);
     useEffect(() => {
         workspaceListener();
 
