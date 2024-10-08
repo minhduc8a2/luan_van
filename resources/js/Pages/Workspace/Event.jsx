@@ -33,6 +33,7 @@ import {
 } from "@/Store/channelsDataSlice";
 import { useParams } from "react-router-dom";
 import { loadSomeChannelData } from "@/helpers/channelDataLoader";
+import { setIsOnline } from "@/Store/isOnlineSlice";
 
 export default function Event() {
     const { auth } = usePage().props;
@@ -45,6 +46,33 @@ export default function Event() {
     const { threadMessageId } = useSelector((state) => state.thread);
     const connectionRef = useRef(null);
     const { channelId: huddleChannelId } = useSelector((state) => state.huddle);
+
+    useEffect(() => {
+        const handleOnline = () => {
+            console.log("You are online");
+            dispatch(setIsOnline({ isOnline: true }));
+        };
+        const handleOffline = () => {
+            console.log("You are offline");
+            dispatch(setIsOnline({ isOnline: false }));
+        };
+
+        Echo.connector.pusher.connection.bind("connected", handleOnline);
+        Echo.connector.pusher.connection.bind("disconnected", handleOffline);
+        Echo.connector.pusher.connection.bind("unavailable", handleOffline);
+
+        window.addEventListener("online", handleOnline);
+        window.addEventListener("offline", handleOffline);
+
+        return () => {
+            window.removeEventListener("online", handleOnline);
+            window.removeEventListener("offline", handleOffline);
+            Echo.connector.pusher.connection.unbind("connected", handleOnline);
+            Echo.connector.pusher.connection.unbind("disconnected", handleOffline);
+            Echo.connector.pusher.connection.unbind("unavailable", handleOffline);
+        };
+    }, [dispatch]);
+
     const mainChannel = useMemo(() => {
         return channels.find((cn) => cn.is_main_channel);
     }, [channels]);

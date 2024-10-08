@@ -7,9 +7,7 @@ export function loadSomeChannelData(
     setChannelData,
     tokens = []
 ) {
-    if (tokens.length > 0) {
-        tokens.forEach((token) => token.abort());
-    }
+    
     return Promise.all(
         types.map((type, index) =>
             loadChannelData(

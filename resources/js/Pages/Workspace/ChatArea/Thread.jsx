@@ -29,7 +29,7 @@ import {
 } from "@/helpers/customHooks";
 
 import InfiniteScroll from "@/Components/InfiniteScroll";
-import { findMinMaxId } from "@/helpers/channelHelper";
+import { findMinMaxCreatedAt } from "@/helpers/channelHelper";
 export default function Thread() {
     const dispatch = useDispatch();
 
@@ -74,10 +74,11 @@ export default function Thread() {
 
     useEffect(() => {
         if (messages) {
-            const { minId, maxId } = findMinMaxId(messages);
-            console.log(minId, maxId);
-            setTopHasMore(maxId);
-            setBottomHasMore(minId);
+            const { minCreatedAt, maxCreatedAt } =
+                findMinMaxCreatedAt(messages);
+            // console.log(minCreatedAt, maxId);
+            setTopHasMore(maxCreatedAt);
+            setBottomHasMore(minCreatedAt);
         }
     }, [channel?.id, messages]);
     const loadMoreTopToken = useRef(null);
@@ -85,13 +86,13 @@ export default function Thread() {
     const loadMore = (channelId, position, token, successCallBack) => {
         if (token != null) token.abort();
         token = new AbortController();
-        let last_id;
+        let last_created_at;
         if (position == "top") {
-            last_id = topHasMore;
+            last_created_at = topHasMore;
         } else {
-            last_id = bottomHasMore;
+            last_created_at = bottomHasMore;
         }
-        if (last_id) {
+        if (last_created_at) {
             if (position == "top") {
                 setTopLoading(true);
             } else {
@@ -101,7 +102,7 @@ export default function Thread() {
             return axios
                 .get(route("messages.infiniteMessages", channelId), {
                     params: {
-                        last_id,
+                        last_created_at,
                         direction: position,
                         threaded_message_id: threadedMessageId,
                     },
@@ -112,14 +113,15 @@ export default function Thread() {
                         console.log(position, response.data);
                         if (position == "top") {
                             if (response.data.length > 0) {
-                                setTopHasMore(response.data[0].id);
+                                setTopHasMore(response.data[0].created_at);
                             } else {
                                 setTopHasMore(null);
                             }
                         } else {
                             if (response.data.length > 0) {
                                 setBottomHasMore(
-                                    response.data[response.data.length - 1].id
+                                    response.data[response.data.length - 1]
+                                        .created_at
                                 );
                             } else {
                                 setBottomHasMore(null);

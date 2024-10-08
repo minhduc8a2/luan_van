@@ -11,28 +11,30 @@ class MessageObserver
     /**
      * Handle the Message "created" event.
      */
-    public function created(Message $message): void
-    {
-       
-    }
+    public function created(Message $message): void {}
 
     /**
      * Handle the Message "updated" event.
      */
     public function updated(Message $message): void
     {
-        if ($message->threaded_message_id == null) { //channel Message
-            broadcast(new MessageEvent($message->channel, $message->load([
-                'files' => function ($query) {
+        try {
+            //code...
+            if ($message->threaded_message_id == null) { //channel Message
+                broadcast(new MessageEvent($message->channel, $message->load([
+                    'files' => function ($query) {
+                        $query->withTrashed();
+                    },
+                    'reactions',
+
+                ])->loadCount('threadMessages'), "messageEdited"));
+            } else {
+                broadcast(new ThreadMessageEvent($message->threadedMessage, $message->load(['files' => function ($query) {
                     $query->withTrashed();
-                },
-                'reactions',
-                
-            ])->loadCount('threadMessages'), "messageEdited"));
-        } else {
-            broadcast(new ThreadMessageEvent($message->threadedMessage, $message->load(['files' => function ($query) {
-                $query->withTrashed();
-            }, 'reactions']), "messageEdited"));
+                }, 'reactions']), "messageEdited"));
+            }
+        } catch (\Throwable $th) {
+            //throw $th;
         }
     }
 
@@ -41,11 +43,16 @@ class MessageObserver
      */
     public function deleted(Message $message): void
     {
-        if ($message->threaded_message_id == null) {
-            broadcast(new MessageEvent($message->channel, $message, "messageDeleted"));
-        } else {
-            broadcast(new ThreadMessageEvent($message->threadedMessage, $message, "messageDeleted"));
+        try {
+            //code...
+            if ($message->threaded_message_id == null) {
+                broadcast(new MessageEvent($message->channel, $message, "messageDeleted"));
+            } else {
+                broadcast(new ThreadMessageEvent($message->threadedMessage, $message, "messageDeleted"));}
+        } catch (\Throwable $th) {
+            //throw $th;
         }
+        
     }
 
     /**

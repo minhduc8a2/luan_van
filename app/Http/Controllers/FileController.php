@@ -25,7 +25,7 @@ class FileController extends Controller
     /**
      * Display a listing of the resource.
      */
-    function getSharedFiles($user, $name, $workspace, $perPage = 10, $last_id = null, $direction = 'bottom')
+    function getSharedFiles($user, $name, $workspace, $perPage = 10, $last_created_at = null, $direction = 'bottom')
     {
         $hiddenUserIds = $user->hiddenUsers()->wherePivot('workspace_id', $workspace->id)->pluck('hidden_user_id')->toArray();
 
@@ -36,40 +36,40 @@ class FileController extends Controller
             ->where('name', 'like', '%' . $name . '%')
             ->where('user_id', '<>', $user->id);
 
-        if ($last_id) {
+        if ($last_created_at) {
             if ($direction == 'bottom') {
-                $filesQuery->where('id', '<', $last_id)->orderBy('id', 'desc');
+                $filesQuery->where('created_at', '<', $last_created_at)->orderBy('created_at', 'desc');
             } else {
-                $filesQuery->where('id', '>', $last_id)->orderBy('id', 'asc');
+                $filesQuery->where('created_at', '>', $last_created_at)->orderBy('created_at', 'asc');
             }
         } else {
-            $filesQuery->orderBy('id', 'desc');
+            $filesQuery->orderBy('created_at', 'desc');
         }
 
         return $filesQuery->limit($perPage)->get();
     }
-    function selfFiles($user, $name, $workspace, $perPage = 10,  $last_id, $direction)
+    function selfFiles($user, $name, $workspace, $perPage = 10,  $last_created_at, $direction)
     {
         $filesQuery = $user->files()
             ->where('name', 'like', '%' . $name . '%')
             ->where('workspace_id', $workspace->id);
 
-        if ($last_id) {
+        if ($last_created_at) {
             if ($direction === 'bottom') {
-                $filesQuery->where('id', '<', $last_id)->orderBy('id', 'desc');
+                $filesQuery->where('created_at', '<', $last_created_at)->orderBy('created_at', 'desc');
             } else {
-                $filesQuery->where('id', '>', $last_id)->orderBy('id', 'asc');
+                $filesQuery->where('created_at', '>', $last_created_at)->orderBy('created_at', 'asc');
             }
         } else {
-            // Default ordering if no last_id is provided
-            $filesQuery->orderBy('id', 'desc');
+
+            $filesQuery->orderBy('created_at', 'desc');
         }
         $files = $filesQuery->limit($perPage)->get();
 
         return $files;
     }
 
-    function all($user, $name, $workspace, $perPage = 10, $last_id = null, $direction = 'bottom')
+    function all($user, $name, $workspace, $perPage = 10, $last_created_at = null, $direction = 'bottom')
     {
         $hiddenUserIds = $user->hiddenUsers()->wherePivot('workspace_id', $workspace->id)->pluck('hidden_user_id')->toArray();
 
@@ -87,14 +87,14 @@ class FileController extends Controller
             })
             ->where('name', 'like', '%' . $name . '%');
 
-        if ($last_id) {
+        if ($last_created_at) {
             if ($direction === 'bottom') {
-                $filesQuery->where('id', '<', $last_id)->orderBy('id', 'desc');
+                $filesQuery->where('created_at', '<', $last_created_at)->orderBy('created_at', 'desc');
             } else {
-                $filesQuery->where('id', '>', $last_id)->orderBy('id', 'asc');
+                $filesQuery->where('created_at', '>', $last_created_at)->orderBy('created_at', 'asc');
             }
         } else {
-            $filesQuery->orderBy('id', 'desc');
+            $filesQuery->orderBy('created_at', 'desc');
         }
 
         return $filesQuery->limit($perPage)->get();
@@ -106,7 +106,7 @@ class FileController extends Controller
         $filter = $request->query('filter');
         $name = $request->query('name') ?? "";
         // $page = $request->query('page') ?? 1;
-        $last_id = $request->query('last_id');
+        $last_created_at = $request->query('$last_created_at');
         $direction = $request->query('direction') ?? "bottom";
         // $page = 2;
         $user = $request->user();
@@ -117,16 +117,16 @@ class FileController extends Controller
 
                 switch ($filter) {
                     case "shared":
-                        $files = $this->getSharedFiles($user, $name, $workspace, $perPage,  $last_id, $direction);
+                        $files = $this->getSharedFiles($user, $name, $workspace, $perPage,  $last_created_at, $direction);
 
                         return $files;
 
                     case "self":
-                        $files = $this->selfFiles($user, $name, $workspace, $perPage, $last_id, $direction);
+                        $files = $this->selfFiles($user, $name, $workspace, $perPage, $last_created_at, $direction);
 
                         return $files;
                     default:
-                        $files = $this->all($user, $name, $workspace, $perPage,  $last_id, $direction);
+                        $files = $this->all($user, $name, $workspace, $perPage,  $last_created_at, $direction);
 
                         return $files;
                 }

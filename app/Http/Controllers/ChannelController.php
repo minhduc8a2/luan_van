@@ -146,7 +146,7 @@ class ChannelController extends Controller
         $privacyType = $request->query('privacyType');
         $name = $request->query('name') ?? "";
         // $page = $request->query('page') ?? 1;
-        $last_id = $request->query('last_id');
+        $last_created_at = $request->query('last_created_at');
         $direction = $request->query('direction') ?? "bottom";
         $user = $request->user();
 
@@ -247,14 +247,14 @@ class ChannelController extends Controller
                             }
                         }
                 } //end switch
-                if ($last_id) {
+                if ($last_created_at) {
                     if ($direction === 'bottom') {
-                        $query->where('id', '<', $last_id)->orderBy('id', 'desc');
+                        $query->where('created_at', '<', $last_created_at)->orderBy('created_at', 'desc');
                     } else {
-                        $query->where('id', '>', $last_id)->orderBy('id', 'asc');
+                        $query->where('created_at', '>', $last_created_at)->orderBy('created_at', 'asc');
                     }
                 } else {
-                    $query->orderBy('id', 'desc');
+                    $query->orderBy('created_at', 'desc');
                 }
 
                 return $query->limit($perPage)->get();

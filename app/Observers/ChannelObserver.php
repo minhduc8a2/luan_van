@@ -26,7 +26,12 @@ class ChannelObserver
      */
     public function updated(Channel $channel): void
     {
-        broadcast(new WorkspaceEvent(workspace: $channel->workspace, type: "ChannelObserver_updated", fromUserId: "", data: $channel));
+        try {
+            //code...
+            broadcast(new WorkspaceEvent(workspace: $channel->workspace, type: "ChannelObserver_updated", fromUserId: "", data: $channel));
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
     }
 
     /**
@@ -34,7 +39,12 @@ class ChannelObserver
      */
     public function deleted(Channel $channel): void
     {
-        broadcast(new WorkspaceEvent(workspace: $channel->workspace, type: 'ChannelObserver_deleteChannel', data: $channel->id));
+        try {
+            broadcast(new WorkspaceEvent(workspace: $channel->workspace, type: 'ChannelObserver_deleteChannel', data: $channel->id));
+            //code...
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
     }
 
     /**

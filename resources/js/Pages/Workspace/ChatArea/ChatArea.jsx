@@ -11,7 +11,7 @@ import Message from "./Message/Message";
 import { useSelector, useDispatch } from "react-redux";
 import { EditDescriptionForm } from "./EditDescriptionForm";
 import axios from "axios";
-import { findMinMaxId, getChannelName } from "@/helpers/channelHelper";
+import { findMinMaxCreatedAt, getChannelName } from "@/helpers/channelHelper";
 import ForwardedMessage from "./Message/ForwardedMessage";
 import { isHiddenUser } from "@/helpers/userHelper";
 import Layout from "../Layout";
@@ -63,12 +63,32 @@ export default function ChatArea() {
 
     useEffect(() => {
         if (messages) {
-            const { minId, maxId } = findMinMaxId(messages);
-            // console.log(minId, maxId);
-            setTopHasMore(maxId);
-            setBottomHasMore(minId);
+            const { minCreatedAt, maxCreatedAt } =
+                findMinMaxCreatedAt(messages);
+            // console.log(minCreatedAt, maxId);
+            setTopHasMore(maxCreatedAt);
+            setBottomHasMore(minCreatedAt);
         }
     }, [channel?.id, messages]);
+
+    // useEffect(() => {
+    //     function handleReconnect() {
+    //         console.log("reconnected");
+    //         const { minCreatedAt, maxCreatedAt } =
+    //             findMinMaxCreatedAt(messages);
+    //         // console.log(minCreatedAt, maxId);
+
+    //         setTopHasMore(maxCreatedAt);
+    //         setBottomHasMore(minCreatedAt);
+    //     }
+    //     Echo.connector.pusher.connection.bind("connected", handleReconnect);
+    //     return () => {
+    //         Echo.connector.pusher.connection.unbind(
+    //             "connected",
+    //             handleReconnect
+    //         );
+    //     };
+    // }, [messages]);
 
     const loadMoreTopToken = useRef(null);
     const loadMoreBottomToken = useRef(null);
@@ -76,13 +96,13 @@ export default function ChatArea() {
     const loadMore = (position, token, successCallBack) => {
         if (token != null) token.abort();
         token = new AbortController();
-        let last_id;
+        let last_created_at;
         if (position == "top") {
-            last_id = topHasMore;
+            last_created_at = topHasMore;
         } else {
-            last_id = bottomHasMore;
+            last_created_at = bottomHasMore;
         }
-        if (last_id) {
+        if (last_created_at) {
             if (position == "top") {
                 setTopLoading(true);
             } else {
@@ -92,7 +112,7 @@ export default function ChatArea() {
             return axios
                 .get(route("messages.infiniteMessages", channel.id), {
                     params: {
-                        last_id,
+                        last_created_at,
                         direction: position,
                     },
                     signal: token.signal,
@@ -283,6 +303,7 @@ export default function ChatArea() {
         topLoading,
         bottomLoading,
     ]);
+
     return (
         <div className="flex-1 flex min-h-0 max-h-full w-full">
             <InitData loaded={loaded} setLoaded={(value) => setLoaded(value)} />

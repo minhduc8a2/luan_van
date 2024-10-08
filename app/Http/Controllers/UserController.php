@@ -24,47 +24,14 @@ class UserController extends Controller
     }
     public function browseUsers(Request $request, Workspace $workspace)
     {
-        // $perPage = 10;
-        // $mode = $request->query('mode');
-        // $name = $request->query('name') ?? "";
-        // $accountType = $request->query('accountType');
-        // // $page = $request->query('page') ?? 1;
-        // $last_id = $request->query('last_id');
-        // $direction = $request->query('direction') ?? "bottom";
+       
 
 
         // $page = 2;
         if ($request->expectsJson()) {
 
             $hiddenUserIds =  $request->user()->hiddenUsers()->wherePivot('workspace_id', $workspace->id)->pluck('hidden_user_id')->toArray();
-            // $query = $workspace->users();
-
-            // if ($accountType && in_array($accountType, [BaseRoles::ADMIN->name, BaseRoles::MEMBER->name, BaseRoles::GUEST->name])) {
-            //     if ($accountType == BaseRoles::ADMIN->name || $accountType == BaseRoles::GUEST->name) {
-            //         $query = $query->wherePivot('role_id', Role::getRoleIdByName($accountType));
-            //     }
-            //     if ($accountType == BaseRoles::MEMBER->name) {
-            //         $query = $query->wherePivotIn('role_id', [Role::getRoleIdByName(BaseRoles::ADMIN->name), Role::getRoleIdByName(BaseRoles::MEMBER->name)]);
-            //     }
-            // }
-
-            // if ($last_id) {
-            //     if ($direction === 'bottom') {
-            //         $query->where('users.id', '<', $last_id)->orderBy('id', 'desc');
-            //     } else {
-            //         $query->where('users.id', '>', $last_id)->orderBy('id', 'asc');
-            //     }
-            // } else {
-            //     $query->orderBy('users.id', 'desc');
-            // }
-
-            // if ($mode == "all") {
-            //     $workspaceUsers =  $query->where('users.name', 'like', '%' . $name . '%')->get();
-            // } else {
-            //     $workspaceUsers =  $query->limit($perPage)->where('users.name', 'like', '%' . $name . '%')->get();
-            // }
-
-            // return $workspaceUsers;
+           
             $workspaceUsers =  $workspace->users()->get();
             return $workspaceUsers->map(function ($user) use ($hiddenUserIds) {
                 if (in_array($user->id, $hiddenUserIds)) $user->is_hidden = true;

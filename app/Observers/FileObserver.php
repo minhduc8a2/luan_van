@@ -12,7 +12,12 @@ class FileObserver
      */
     public function created(File $file): void
     {
-        broadcast(new WorkspaceEvent(workspace: $file->workspace, type: "FileObserver_fileCreated", fromUserId: "", data: $file));
+        try {
+            broadcast(new WorkspaceEvent(workspace: $file->workspace, type: "FileObserver_fileCreated", fromUserId: "", data: $file));
+            //code...
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
     }
 
     /**
@@ -28,7 +33,12 @@ class FileObserver
      */
     public function deleted(File $file): void
     {
-        broadcast(new WorkspaceEvent(workspace: $file->workspace, type: "FileObserver_fileDeleted", fromUserId: "", data: $file->id));
+        try {
+            broadcast(new WorkspaceEvent(workspace: $file->workspace, type: "FileObserver_fileDeleted", fromUserId: "", data: $file->id));
+            //code...
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
     }
 
     /**

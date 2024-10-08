@@ -32,7 +32,7 @@ class MessageController extends Controller
 
         $content = $request->query('content') ?? "";
         // $page = $request->query('page') ?? 1;
-        $last_id = $request->query('last_id');
+        $last_created_at = $request->query('last_created_at');
         $direction = $request->query('direction') ?? "bottom";
         $threaded_message_id = $request->query('threaded_message_id');
 
@@ -63,14 +63,14 @@ class MessageController extends Controller
         }
 
 
-        if ($last_id) {
+        if ($last_created_at) {
             if ($direction === 'bottom') {
-                $messagesQuery->where('id', '<', $last_id)->orderBy('id', 'desc');
+                $messagesQuery->where('created_at', '<', $last_created_at)->orderBy('created_at', 'desc');
             } else {
-                $messagesQuery->where('id', '>', $last_id)->orderBy('id', 'asc');
+                $messagesQuery->where('created_at', '>', $last_created_at)->orderBy('created_at', 'asc');
             }
         } else {
-            $messagesQuery->orderBy('id', 'desc');
+            $messagesQuery->orderBy('created_at', 'desc');
         }
 
         return $messagesQuery->limit($perPage)->get();
@@ -245,8 +245,12 @@ class MessageController extends Controller
 
                     $fileInstances = $message->files()->createMany($files);
 
-
-                    broadcast(new WorkspaceEvent(workspace: $channel->workspace, type: "ChannelMessage_fileCreated", fromUserId: "", data: ['channelId' => $channel->id, 'files' => $fileInstances]));
+                    try {
+                        //code...
+                        broadcast(new WorkspaceEvent(workspace: $channel->workspace, type: "ChannelMessage_fileCreated", fromUserId: "", data: ['channelId' => $channel->id, 'files' => $fileInstances]));
+                    } catch (\Throwable $th) {
+                        // throw $th;
+                    }
                 }
             }
 
@@ -265,27 +269,31 @@ class MessageController extends Controller
             }
             //notify others about new message
 
+            try {
+                //code...
+                if ($forwardMode) {
+                    broadcast(new MessageEvent($message->channel, $message->load([
+                        'files' => function ($query) {
+                            $query->withTrashed();
+                        },
+                        'reactions',
 
-            if ($forwardMode) {
-                broadcast(new MessageEvent($message->channel, $message->load([
-                    'files' => function ($query) {
-                        $query->withTrashed();
-                    },
-                    'reactions',
+                        'forwardedMessage.files' => function ($query) {
 
-                    'forwardedMessage.files' => function ($query) {
+                            $query->withTrashed();
+                        },
+                    ])->loadCount('threadMessages')));
+                } else {
+                    broadcast(new MessageEvent($message->channel, $message->load([
+                        'files' => function ($query) {
+                            $query->withTrashed();
+                        },
+                        'reactions',
 
-                        $query->withTrashed();
-                    },
-                ])->loadCount('threadMessages')));
-            } else {
-                broadcast(new MessageEvent($message->channel, $message->load([
-                    'files' => function ($query) {
-                        $query->withTrashed();
-                    },
-                    'reactions',
-
-                ])->loadCount('threadMessages')));
+                    ])->loadCount('threadMessages')));
+                }
+            } catch (\Throwable $th) {
+                // throw $th;
             }
             DB::commit();
             back();
@@ -323,12 +331,21 @@ class MessageController extends Controller
                 $files = $this->createFiles($fileObjects, $request->user(), $channel->workspace);
 
                 $fileInstances = $newMessage->files()->createMany($files);
-
-                broadcast(new WorkspaceEvent(workspace: $channel->workspace, type: "ThreadMessage_fileCreated", fromUserId: "", data: ['channelId' => $channel->id, 'files' => $fileInstances]));
+                try {
+                    //code...
+                    broadcast(new WorkspaceEvent(workspace: $channel->workspace, type: "ThreadMessage_fileCreated", fromUserId: "", data: ['channelId' => $channel->id, 'files' => $fileInstances]));
+                } catch (\Throwable $th) {
+                    throw $th;
+                }
             }
-            broadcast(new ThreadMessageEvent($message, $newMessage->load(['files' => function ($query) {
-                $query->withTrashed();
-            }, 'reactions'])));
+            try {
+                //code...
+                broadcast(new ThreadMessageEvent($message, $newMessage->load(['files' => function ($query) {
+                    $query->withTrashed();
+                }, 'reactions'])));
+            } catch (\Throwable $th) {
+                throw $th;
+            }
 
             if (isset($newMessage)) {
 

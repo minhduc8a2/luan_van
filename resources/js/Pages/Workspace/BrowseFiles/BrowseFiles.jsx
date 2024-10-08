@@ -154,13 +154,13 @@ export default function BrowseFiles() {
     }
     const loadMore = (position) => {
         // return new Promise((resolve, reject) => {});
-        let last_id;
+        let last_created_at;
         if (position == "top") {
-            last_id = topHasMore;
+            last_created_at = topHasMore;
         } else {
-            last_id = bottomHasMore;
+            last_created_at = bottomHasMore;
         }
-        if (last_id) {
+        if (last_created_at) {
             if (position == "top") {
                 setTopLoading(true);
             } else {
@@ -172,7 +172,7 @@ export default function BrowseFiles() {
                     params: {
                         name: searchFilter,
                         filter,
-                        last_id,
+                        last_created_at,
                         direction: position,
                     },
                     // signal: token.current.signal,
@@ -182,7 +182,7 @@ export default function BrowseFiles() {
                         console.log(position, response.data);
                         if (position == "top") {
                             if (response.data.length > 0) {
-                                setTopHasMore(response.data[0].id);
+                                setTopHasMore(response.data[0].created_at);
                             } else {
                                 setTopHasMore(null);
                             }
@@ -192,7 +192,7 @@ export default function BrowseFiles() {
                         } else {
                             if (response.data.length > 0) {
                                 setBottomHasMore(
-                                    response.data[response.data.length - 1].id
+                                    response.data[response.data.length - 1].created_at
                                 );
                             } else {
                                 setBottomHasMore(null);
@@ -223,7 +223,7 @@ export default function BrowseFiles() {
                 params: {
                     name: searchValue,
                     filter,
-                    last_id: "",
+                    last_created_at: "",
                     direction: "bottom",
                 },
                 signal: token.current.signal,

@@ -24,6 +24,7 @@ import { usePage } from "@inertiajs/react";
 import { setLeftWindowType } from "@/Store/windowTypeSlice";
 import InitData from "./InitData";
 import { Outlet, useParams } from "react-router-dom";
+import { setIsOnline } from "@/Store/isOnlineSlice";
 export default function Layout() {
     const { channelId } = useParams();
 
@@ -32,6 +33,7 @@ export default function Layout() {
         console.log("store created");
         // Create the store instance the first time this renders
         storeRef.current = makeStore();
+
         //update panel width in localStorage
         try {
             const leftWindowWidth = parseInt(
@@ -101,18 +103,7 @@ function MainArea({ children }) {
     const { rightWindowType, leftWindowType } = useSelector(
         (state) => state.windowType
     );
-    let mainWindow = "";
-    // switch (pageName) {
-    //     case "browseChannels":
-    //         mainWindow = <BrowseChannels />;
-    //         break;
-    //     case "browseFiles":
-    //         mainWindow = <BrowseFiles />;
-    //         break;
-    //     default:
-    //         mainWindow = <ChatArea />;
-    //         break;
-    // }
+
     return (
         <>
             {leftWindowType && (

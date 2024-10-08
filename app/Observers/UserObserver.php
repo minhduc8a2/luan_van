@@ -21,13 +21,17 @@ class UserObserver
     public function updated(User $user): void
     {
         $user->workspaces()->each(function ($workspace) use ($user) {
-
-            broadcast(new WorkspaceEvent(
-                workspace: $workspace,
-                type: "UserObserver_updated",
-                fromUserId: "",
-                data: $user
-            ));
+            try {
+                //code...
+                broadcast(new WorkspaceEvent(
+                    workspace: $workspace,
+                    type: "UserObserver_updated",
+                    fromUserId: "",
+                    data: $user
+                ));
+            } catch (\Throwable $th) {
+                //throw $th;
+            }
         });
     }
 
