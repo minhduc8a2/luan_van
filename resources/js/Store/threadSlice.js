@@ -26,8 +26,9 @@ export const threadSlice = createSlice({
             if (!state.messageId) state.message = null;
         },
         addThreadMessage(state, action) {
+            console.log(action.payload);
             state.message.thread_messages_count += 1;
-            state.messages.push(action.payload);
+            state.messages = [ state.messages, action.payload]
         },
         addThreadMessages(state, action) {
            

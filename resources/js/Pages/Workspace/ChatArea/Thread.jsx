@@ -17,7 +17,6 @@ import TipTapEditor from "@/Components/TipTapEditor";
 import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
 import { compareDateTime, differenceInSeconds } from "@/helpers/dateTimeHelper";
 import { getMentionsFromContent } from "@/helpers/tiptapHelper";
-import { useInView } from "react-intersection-observer";
 import { setMention } from "@/Store/mentionSlice";
 
 import ForwardedMessage from "./Message/ForwardedMessage";
@@ -29,7 +28,7 @@ import {
 } from "@/helpers/customHooks";
 
 import InfiniteScroll from "@/Components/InfiniteScroll";
-import {  findMinMaxId } from "@/helpers/channelHelper";
+import { findMinMaxId } from "@/helpers/channelHelper";
 export default function Thread() {
     const dispatch = useDispatch();
 
@@ -136,8 +135,7 @@ export default function Thread() {
                         } else {
                             if (response.data.length > 0) {
                                 setBottomHasMore(
-                                    response.data[response.data.length - 1]
-                                        .created_at
+                                    response.data[response.data.length - 1].id
                                 );
                             } else {
                                 setBottomHasMore(null);
@@ -233,21 +231,28 @@ export default function Thread() {
                 // console.log("leaving thread", user);
             })
             .listen("ThreadMessageEvent", (e) => {
-                if (
-                    e.type == "newMessageCreated" &&
-                    !isHiddenUser(workspaceUsers, e.message?.user_id)
-                )
-                    dispatch(addThreadMessage(e.message));
-                else if (
-                    e.type == "messageEdited" &&
-                    !isHiddenUser(workspaceUsers, e.message?.user_id)
-                ) {
-                    dispatch(editThreadMessage(e.message));
-                } else if (
-                    e.type == "messageDeleted" &&
-                    !isHiddenUser(workspaceUsers, e.message?.user_id)
-                ) {
-                    dispatch(deleteThreadMessage(e.message.id));
+                console.log(e);
+                switch (e.type) {
+                    case "newMessageCreated":
+                        if (!isHiddenUser(workspaceUsers, e.message?.user_id))
+                            dispatch(addThreadMessage(e.message));
+                        break;
+                    case "messageEdited":
+                        if (!isHiddenUser(workspaceUsers, e.message?.user_id)) {
+                            dispatch(
+                                editThreadMessage({
+                                    message_id: e.message.id,
+                                    content: e.message.content,
+                                })
+                            );
+                        }
+                        break;
+
+                    case "messageDeleted":
+                        if (!isHiddenUser(workspaceUsers, e.message?.user_id)) {
+                            dispatch(deleteThreadMessage(e.message.id));
+                        }
+                        break;
                 }
             })
             .listenForWhisper("messageReaction", (e) => {
@@ -256,6 +261,9 @@ export default function Thread() {
             .error((error) => {
                 console.error(error);
             });
+        return () => {
+            Echo.leave(`threads.${threadedMessageId}`);
+        };
     }, [threadedMessageId]);
 
     useEffect(() => {
@@ -312,7 +320,7 @@ export default function Thread() {
 
     const sortedMessages = useMemo(() => {
         const temp = [...messages];
-        temp.sort((a, b) => compareDateTime(a.created_at, b.created_at));
+        temp.sort((a, b) => a.id - b.id);
         return temp;
     }, [messages]);
 
@@ -438,10 +446,15 @@ export default function Thread() {
                     className="overflow-y-auto max-w-full flex-1 scrollbar"
                 >
                     {sortedMessages.map((msg, index) => {
-                        const user = channelUsers.find(
+                        let user = channelUsers.find(
                             (mem) => mem.id === msg.user_id
                         );
-
+                        if (!user)
+                            user = {
+                                id: msg.user_id,
+                                name: msg.user_name,
+                                notMember: true,
+                            };
                         hasChanged = false;
                         if (preValue) {
                             if (
