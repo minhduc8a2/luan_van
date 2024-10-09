@@ -35,13 +35,13 @@ class Helper
         return  $editor->sanitize($content);
     }
 
-    public static function createErrorResponse()
+    public static function createErrorResponse($message = "Something went wrong! Please try later!")
     {
-        return abort(500, "Something went wrong! Please try later!");
+        return abort(500, $message);
     }
 
-    public static function createSuccessResponse()
+    public static function createSuccessResponse($message = "ok")
     {
-        return ['message'=>'ok'];
+        return ['message' => $message];
     }
 }

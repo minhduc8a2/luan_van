@@ -99,12 +99,14 @@ export default function Filter({ setFilter }) {
                     action={(value) => {
                         setFilter((pre) => ({ ...pre, ownType: value }));
                     }}
+                    initialValue={null}
                 />
                 <FilterButton
                     list={privacyTypes}
                     action={(value) => {
                         setFilter((pre) => ({ ...pre, privacyType: value }));
                     }}
+                    initialValue={null}
                 />
             </div>
             <FilterButton
@@ -112,13 +114,14 @@ export default function Filter({ setFilter }) {
                 action={(value) => {
                     setFilter((pre) => ({ ...pre, sort: value }));
                 }}
+                initialValue={sortTypes[2]}
             />
         </div>
     );
 }
 
-function FilterButton({ list, action }) {
-    const [selectedValue, setSelectedValue] = useState(list[0]);
+function FilterButton({ list, action, initialValue }) {
+    const [selectedValue, setSelectedValue] = useState(initialValue || list[0]);
 
     return (
         <Popover className="relative ">

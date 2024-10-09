@@ -6,6 +6,7 @@ import TextArea from "@/Components/Input/TextArea";
 import SelectInput from "@/Components/Input/SelectInput";
 import { useSelector } from "react-redux";
 import { useCustomedForm } from "@/helpers/customHooks";
+import useErrorHandler from "@/helpers/useErrorHandler";
 
 export function CreateChannelForm({ activateButtonNode, callback = () => {} }) {
     const { workspacePermissions, workspace } = useSelector(
@@ -31,13 +32,16 @@ export function CreateChannelForm({ activateButtonNode, callback = () => {} }) {
         { url: route("channel.store", workspace.id) }
     );
     const [success, setSuccess] = useState(false);
+    const errorHandler = useErrorHandler();
     function onSubmit(e) {
         e.preventDefault();
-        submit().then(() => {
-            setSuccess(true);
-            reset();
-            callback();
-        });
+        submit()
+            .then(() => {
+                setSuccess(true);
+                reset();
+                callback();
+            })
+            .catch(errorHandler);
     }
     return (
         <Form1

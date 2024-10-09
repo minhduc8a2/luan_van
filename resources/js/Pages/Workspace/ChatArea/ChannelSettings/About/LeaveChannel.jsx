@@ -5,12 +5,15 @@ import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
 import OverlayNotification from "@/Components/Overlay/OverlayNotification";
 
 import { FaLock } from "react-icons/fa";
-import { useCustomedForm } from "@/helpers/customHooks";
+import { useCustomedForm, useMainChannel } from "@/helpers/customHooks";
 import { router } from "@inertiajs/react";
 import { removeChannel } from "@/Store/channelsSlice";
 import useReloadPermissions from "@/helpers/useReloadPermissions";
+import useGoToChannel from "@/helpers/useGoToChannel";
+import { useSelector } from "react-redux";
 
 export default function LeaveChannel({ channel }) {
+    const { workspace } = useSelector((state) => state.workspace);
     const {
         success,
         loading: processing,
@@ -23,23 +26,16 @@ export default function LeaveChannel({ channel }) {
             method: "post",
         }
     );
+    const goToChannel = useGoToChannel();
     const reloadPermissions = useReloadPermissions();
+    const mainChannel = useMainChannel(workspace.id);
     function onSubmit(e) {
         e.preventDefault();
         submit().then((response) => {
             if (response.data) {
                 if (channel.type == "PRIVATE") {
                     dispatch(removeChannel(cn.id));
-                    router.get(
-                        route("channels.show", {
-                            workspace: workspace.id,
-                            channel: mainChannel.id,
-                        }),
-                        {},
-                        {
-                            preserveState: true,
-                        }
-                    );
+                    goToChannel(mainChannel.workspace_id, mainChannel.id);
                 } else {
                     reloadPermissions(channel.id);
                 }

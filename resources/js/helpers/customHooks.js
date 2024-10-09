@@ -58,6 +58,18 @@ const useChannel = (channelId) => {
     };
 };
 
+const useMainChannel =  (workspaceId) => {
+    const { channels } = useSelector((state) => state.channels);
+
+    const mainChannel = useMemo(() => {
+        return channels.find((cn) => cn.is_main_channel && cn.workspace_id==workspaceId) || null; 
+    }, [channels,workspaceId]);
+
+    return {
+        mainChannel,
+    };
+};
+
 const useCustomedForm = (
     initValues = {},
     {
@@ -138,4 +150,5 @@ export {
     useChannel,
     useChannelUsers,
     useCustomedForm,
+    useMainChannel
 };

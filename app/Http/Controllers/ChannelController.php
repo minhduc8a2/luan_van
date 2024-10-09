@@ -317,6 +317,7 @@ class ChannelController extends Controller
 
         if ($request->user()->cannot('create', [Channel::class, $workspace])) abort(403);
         $validated = $request->validate(["name" => "required|string|max:255", "type" => "required|in:PUBLIC,PRIVATE"]);
+        
         try {
             DB::beginTransaction();
 
@@ -324,7 +325,7 @@ class ChannelController extends Controller
 
             $channelExists = $workspace->channels()->where('name', '=', $validated['name'])->exists();
             if ($channelExists) {
-                return back()->withErrors(['client' => "Channel exists! Please choose a different name!"]);
+                  abort(400, "Channel exists! Please choose a different name!");
             }
             //
             /**
@@ -336,10 +337,9 @@ class ChannelController extends Controller
 
 
             DB::commit();
-            return ['message' => 'successfull'];
+            return Helper::createSuccessResponse();
         } catch (\Throwable $th) {
             DB::rollBack();
-
             Helper::createErrorResponse();
         }
     }

@@ -54,10 +54,7 @@ export default function BrowseChannels() {
 
                     case "ChannelObserver_storeChannel":
                         setAllChannels((pre) => {
-                            const sorted = [...e.data.files];
-                            sorted.sort((a, b) => b.id - a.id);
-
-                            const temp = [...sorted, ...pre];
+                            const temp = [e.data, ...pre];
                             if (temp.length > 0) {
                                 setTopHasMore(temp[0].id);
                                 setBottomHasMore(temp[temp.length - 1].id);
@@ -82,7 +79,7 @@ export default function BrowseChannels() {
     const [filter, setFilter] = useState({
         ownType: "all_channels",
         privacyType: "any_channel_type",
-        sort: "a_to_z",
+        sort: "newest_channel",
     });
 
     const filteredChannels = useMemo(() => {
@@ -142,7 +139,7 @@ export default function BrowseChannels() {
         return tempChannels;
     }, [filter, allChannels, searchValue]);
     function changeChannel(channel) {
-        goToChannel(workspace.id,channel.id);
+        goToChannel(workspace.id, channel.id);
     }
     function joinChannel(channel, options) {
         options.onBefore();
