@@ -8,6 +8,7 @@ import { FaLock } from "react-icons/fa";
 import { useCustomedForm } from "@/helpers/customHooks";
 import { router } from "@inertiajs/react";
 import { removeChannel } from "@/Store/channelsSlice";
+import useReloadPermissions from "@/helpers/useReloadPermissions";
 
 export default function LeaveChannel({ channel }) {
     const {
@@ -22,6 +23,7 @@ export default function LeaveChannel({ channel }) {
             method: "post",
         }
     );
+    const reloadPermissions = useReloadPermissions();
     function onSubmit(e) {
         e.preventDefault();
         submit().then((response) => {
@@ -39,10 +41,7 @@ export default function LeaveChannel({ channel }) {
                         }
                     );
                 } else {
-                    loadChannelRelatedData([
-                        "permissions",
-                        "channelPermissions",
-                    ]);
+                    reloadPermissions(channel.id);
                 }
             }
         });
