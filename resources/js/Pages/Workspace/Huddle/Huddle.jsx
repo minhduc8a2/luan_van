@@ -232,7 +232,7 @@ export default function Huddle() {
             });
         });
         peer.on("connect", () => {
-            console.log("CONNECT");
+            console.log("PEER CONNECT");
         });
 
         peer.on("stream", (stream) => {

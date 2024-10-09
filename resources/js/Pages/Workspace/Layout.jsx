@@ -59,6 +59,37 @@ export default function Layout() {
             storeRef.current.dispatch(setLeftWindowType("panel"));
         }
     }
+    useEffect(() => {
+        const handleOnline = () => {
+            console.log("You are online");
+            storeRef.current.dispatch(setIsOnline({ isOnline: true }));
+        };
+        const handleOffline = () => {
+            console.log("You are offline");
+            storeRef.current.dispatch(setIsOnline({ isOnline: false }));
+        };
+
+        Echo.connector.pusher.connection.bind("connected", handleOnline);
+        Echo.connector.pusher.connection.bind("disconnected", handleOffline);
+        Echo.connector.pusher.connection.bind("unavailable", handleOffline);
+
+        window.addEventListener("online", handleOnline);
+        window.addEventListener("offline", handleOffline);
+
+        return () => {
+            window.removeEventListener("online", handleOnline);
+            window.removeEventListener("offline", handleOffline);
+            Echo.connector.pusher.connection.unbind("connected", handleOnline);
+            Echo.connector.pusher.connection.unbind(
+                "disconnected",
+                handleOffline
+            );
+            Echo.connector.pusher.connection.unbind(
+                "unavailable",
+                handleOffline
+            );
+        };
+    }, []);
     return (
         <Provider store={storeRef.current}>
             <Wrapper>

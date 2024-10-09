@@ -59,25 +59,25 @@ export default function InitData({ loaded, setLoaded }) {
             });
     }, [workspaceId]);
 
-    useEffect(() => {
-        function handleReconnect() {
-            setLoaded(false);
-            loadWorkspaceRelatedData()
-                .then(() => {
-                    dispatch(setNotificationsCount(newNotificationsCount));
-                })
-                .catch((error) => {
-                    console.log(error);
-                });
-        }
-        Echo.connector.pusher.connection.bind("connected", handleReconnect);
-        return () => {
-            Echo.connector.pusher.connection.unbind(
-                "connected",
-                handleReconnect
-            );
-        };
-    }, [workspaceId]);
+    // useEffect(() => {
+    //     function handleReconnect() {
+    //         setLoaded(false);
+    //         loadWorkspaceRelatedData()
+    //             .then(() => {
+    //                 dispatch(setNotificationsCount(newNotificationsCount));
+    //             })
+    //             .catch((error) => {
+    //                 console.log(error);
+    //             });
+    //     }
+    //     Echo.connector.pusher.connection.bind("connected", handleReconnect);
+    //     return () => {
+    //         Echo.connector.pusher.connection.unbind(
+    //             "connected",
+    //             handleReconnect
+    //         );
+    //     };
+    // }, [workspaceId]);
     if (loaded) {
         return <></>;
     } else {

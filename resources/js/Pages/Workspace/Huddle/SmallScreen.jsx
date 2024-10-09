@@ -213,25 +213,27 @@ export default function SmallScreen({
                 >
                     {({ close }) => <HuddleInvitation close={close} />}
                 </OverlayPanel>
-                <Settings
-                    audioDevices={audioDevices}
-                    setAudioDevice={(au) => {
-                        currentAudioRef.current = au;
+                <div className="flex items-center h-full">
+                    <Settings
+                        audioDevices={audioDevices}
+                        setAudioDevice={(au) => {
+                            currentAudioRef.current = au;
 
-                        addTrackToStream("audio");
-                    }}
-                    currentStreamRef={currentStreamRef}
-                    cameraDevices={cameraDevices}
-                    currentVideoRef={currentVideoRef}
-                    currentAudioRef={currentAudioRef}
-                    setVideoDevice={(cam) => {
-                        currentVideoRef.current = cam;
+                            addTrackToStream("audio");
+                        }}
+                        currentStreamRef={currentStreamRef}
+                        cameraDevices={cameraDevices}
+                        currentVideoRef={currentVideoRef}
+                        currentAudioRef={currentAudioRef}
+                        setVideoDevice={(cam) => {
+                            currentVideoRef.current = cam;
 
-                        if (showUserVideo || showShareScreen) {
-                            addTrackToStream("video");
-                        }
-                    }}
-                />
+                            if (showUserVideo || showShareScreen) {
+                                addTrackToStream("video");
+                            }
+                        }}
+                    />
+                </div>
 
                 <li>
                     <Button

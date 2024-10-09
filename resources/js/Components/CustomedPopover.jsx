@@ -3,7 +3,6 @@ import {
     Popover,
     PopoverButton,
     PopoverPanel,
-    CloseButton,
     useClose,
 } from "@headlessui/react";
 function CustomedPopover({
@@ -11,24 +10,42 @@ function CustomedPopover({
     children,
     width = "w-96",
     anchor = "",
-    className=""
+    className = "",
+    setIsHovered = () => {},
+    zIndex = "z-20"
 }) {
     return (
-        <Popover className="relative">
+        <Popover className="relative flex items-center">
             <PopoverButton className="!outline-none">
                 {triggerNode}
             </PopoverButton>
             <PopoverPanel
                 anchor={anchor}
-                className={`flex flex-col ${width} border border-white/15 rounded-lg bg-background py-3 ${className}`}
+                className={`flex flex-col  ${width} border border-white/15 rounded-lg bg-background py-3 ${className}`}
             >
-                {children}
+                {({ close }) => (
+                    <>
+                        <div className={zIndex}>
+
+
+                        {children}
+                        </div>
+                        <div
+                            className="fixed top-0 bottom-0 right-0 left-0 bg-transparent overflow-hidden z-10"
+                            onClick={() => {
+                                console.log("object clicked");
+                                close();
+                                setIsHovered(false);
+                            }}
+                        ></div>
+                    </>
+                )}
             </PopoverPanel>
         </Popover>
     );
 }
 
-function ListItem({ children, onClick, className,  }) {
+function ListItem({ children, onClick, className }) {
     const close = useClose();
     return (
         <div

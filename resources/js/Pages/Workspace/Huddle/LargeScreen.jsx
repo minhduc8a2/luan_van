@@ -18,6 +18,7 @@ import Settings from "./Settings";
 import { IoMdPersonAdd } from "react-icons/io";
 import Button from "@/Components/Button";
 import StreamVideo from "@/Components/StreamVideo";
+import { IoCloseCircle } from "react-icons/io5";
 
 export default function LargeScreen({
     channel,
@@ -46,7 +47,7 @@ export default function LargeScreen({
     exitFullScreen,
 }) {
     const [mainStream, setMainStream] = useState(null);
-
+    const [isHover, setIsHover] = useState(false);
     useEffect(() => {
         if (otherUserStreams.current.size > 0 && !mainStream) {
             const streamEntry = Array.from(
@@ -57,7 +58,12 @@ export default function LargeScreen({
                 setMainStream(stream);
             }
         }
-    }, [otherUserStreams]);
+        if (showUserVideo || showShareScreen) {
+            if (currentStreamRef.current && !mainStream) {
+                setMainStream(currentStreamRef.current);
+            }
+        }
+    }, [otherUserStreams, showUserVideo, showShareScreen]);
     return (
         <div className="bg-primary-600 ring-black/50 ring-[40px] flex flex-col  text-white/85 z-50   rounded-xl top-8 left-8 right-8 bottom-8 fixed">
             <div className="flex justify-between p-4 items-center">
@@ -93,49 +99,165 @@ export default function LargeScreen({
                         else return "";
                     }
                 )}
-                <div className="flex-1 bg-black">
-                {mainStream && (
-                        <StreamVideo
-                            size="w-full h-full"
-                            ref={(videoElement) => {
-                                if (videoElement) {
-                                    videoElement.srcObject =
-                                        mainStream;
+
+                <div className="flex-1 group/main_stream relative overflow-hidden flex items-center justify-center">
+                    <video
+                        className="mx-auto max-h-full max-w-full object-contain rounded-lg"
+                        ref={(videoElement) => {
+                            if (videoElement) {
+                                videoElement.srcObject = mainStream;
+                            }
+                        }}
+                        autoPlay
+                        muted
+                    />
+                    <button className="absolute top-4 right-4 hidden group-hover/main_stream:block ">
+                        <IoCloseCircle className="mix-blend-difference text-2xl" />
+                    </button>
+                    <ul
+                        className={`group-hover/main_stream:flex ${
+                            isHover ? "flex" : "hidden"
+                        } gap-x-2 items-center p-4 px-6 justify-center bg-black/50 rounded-xl absolute bottom-6 left-1/2 -translate-x-1/2 `}
+                    >
+                        <IconButton
+                            description="Mute mic"
+                            activeDescription="Unmute mic"
+                            initActiveState={true}
+                            onClick={() => {
+                                setEnableAudio((pre) => {
+                                    return !pre;
+                                });
+                                if (!enableAudio) {
+                                    addTrackToStream("audio");
+                                } else {
+                                    removeTrackTFromStream("audio");
                                 }
                             }}
-                            autoPlay
-                            muted
-                        />
-                    )}
+                        >
+                            <GrMicrophone />
+                        </IconButton>
+                        <IconButton
+                            description="Turn on video"
+                            activeDescription="Turn off video"
+                            selfActive={false}
+                            show={showUserVideo}
+                            onClick={() => {
+                                setShowUserVideo((pre) => {
+                                    return !pre;
+                                });
+                                if (!showUserVideo) addTrackToStream("video");
+                                else removeTrackTFromStream("video");
+                            }}
+                        >
+                            <PiVideoCameraSlash />
+                        </IconButton>
+                        <IconButton
+                            description="Share screen"
+                            activeDescription="Stop sharing"
+                            selfActive={false}
+                            show={showShareScreen}
+                            onClick={() => {
+                                setShowShareScreen((pre) => {
+                                    return !pre;
+                                });
+                                if (!showShareScreen)
+                                    addTrackToStream("screen");
+                                else removeTrackTFromStream("screen");
+                            }}
+                        >
+                            <CgScreen />
+                        </IconButton>
+                        <OverlayPanel
+                            buttonNode={
+                                <IconButton
+                                    description="Invite people"
+                                    activable={false}
+                                >
+                                    <IoMdPersonAdd />
+                                </IconButton>
+                            }
+                        >
+                            {({ close }) => <HuddleInvitation close={close} />}
+                        </OverlayPanel>
+                        <div className="flex items-center h-full">
+                            <Settings
+                                zIndex="z-50"
+                                setIsHover={setIsHover}
+                                audioDevices={audioDevices}
+                                setAudioDevice={(au) => {
+                                    currentAudioRef.current = au;
+
+                                    addTrackToStream("audio");
+                                }}
+                                currentStreamRef={currentStreamRef}
+                                cameraDevices={cameraDevices}
+                                currentVideoRef={currentVideoRef}
+                                currentAudioRef={currentAudioRef}
+                                setVideoDevice={(cam) => {
+                                    currentVideoRef.current = cam;
+
+                                    if (showUserVideo || showShareScreen) {
+                                        addTrackToStream("video");
+                                    }
+                                }}
+                            />
+                        </div>
+
+                        <li>
+                            <Button
+                                className="bg-pink-600 text-sm"
+                                onClick={() => {
+                                    leaveHuddle();
+                                    dispatch(toggleHuddle());
+                                }}
+                            >
+                                Leave
+                            </Button>
+                        </li>
+                    </ul>
                 </div>
+
                 <div className="grid grid-cols-2 gap-x-2 p-3 rounded-lg bg-black/15">
                     {(showUserVideo || showShareScreen) && (
-                        <StreamVideo
-                            size="w-36 h-36"
-                            ref={(videoElement) => {
-                                if (videoElement) {
-                                    videoElement.srcObject =
-                                        currentStreamRef.current;
-                                }
-                            }}
-                            autoPlay
-                            muted
-                        />
+                        <button
+                            onClick={() =>
+                                setMainStream(currentStreamRef.current)
+                            }
+                            className="w-min h-min"
+                        >
+                            <StreamVideo
+                                size="w-36 h-36"
+                                ref={(videoElement) => {
+                                    if (videoElement) {
+                                        videoElement.srcObject =
+                                            currentStreamRef.current;
+                                    }
+                                }}
+                                autoPlay
+                                muted
+                            />
+                        </button>
                     )}
                     {Array.from(otherUserStreams.current.entries()).map(
                         ([userId, stream]) => {
                             if (streamHasVideoTracks(stream))
                                 return (
-                                    <StreamVideo
-                                        size="w-36 h-36"
+                                    <button
+                                         className="w-min h-min"
+                                        onClick={() => setMainStream(stream)}
                                         key={userId}
-                                        ref={(videoElement) => {
-                                            if (videoElement) {
-                                                videoElement.srcObject = stream;
-                                            }
-                                        }}
-                                        autoPlay
-                                    />
+                                    >
+                                        <StreamVideo
+                                            size="w-36 h-36"
+                                            ref={(videoElement) => {
+                                                if (videoElement) {
+                                                    videoElement.srcObject =
+                                                        stream;
+                                                }
+                                            }}
+                                            autoPlay
+                                        />
+                                    </button>
                                 );
                             else return "";
                         }
@@ -175,98 +297,6 @@ export default function LargeScreen({
                     })}
                 </div>
             </div>
-            <ul className="flex gap-x-2 items-center p-4 justify-center">
-                <IconButton
-                    description="Mute mic"
-                    activeDescription="Unmute mic"
-                    initActiveState={true}
-                    onClick={() => {
-                        setEnableAudio((pre) => {
-                            return !pre;
-                        });
-                        if (!enableAudio) {
-                            addTrackToStream("audio");
-                        } else {
-                            removeTrackTFromStream("audio");
-                        }
-                    }}
-                >
-                    <GrMicrophone />
-                </IconButton>
-                <IconButton
-                    description="Turn on video"
-                    activeDescription="Turn off video"
-                    selfActive={false}
-                    show={showUserVideo}
-                    onClick={() => {
-                        setShowUserVideo((pre) => {
-                            return !pre;
-                        });
-                        if (!showUserVideo) addTrackToStream("video");
-                        else removeTrackTFromStream("video");
-                    }}
-                >
-                    <PiVideoCameraSlash />
-                </IconButton>
-                <IconButton
-                    description="Share screen"
-                    activeDescription="Stop sharing"
-                    selfActive={false}
-                    show={showShareScreen}
-                    onClick={() => {
-                        setShowShareScreen((pre) => {
-                            return !pre;
-                        });
-                        if (!showShareScreen) addTrackToStream("screen");
-                        else removeTrackTFromStream("screen");
-                    }}
-                >
-                    <CgScreen />
-                </IconButton>
-                <OverlayPanel
-                    buttonNode={
-                        <IconButton
-                            description="Invite people"
-                            activable={false}
-                        >
-                            <IoMdPersonAdd />
-                        </IconButton>
-                    }
-                >
-                    {({ close }) => <HuddleInvitation close={close} />}
-                </OverlayPanel>
-                <Settings
-                    audioDevices={audioDevices}
-                    setAudioDevice={(au) => {
-                        currentAudioRef.current = au;
-
-                        addTrackToStream("audio");
-                    }}
-                    currentStreamRef={currentStreamRef}
-                    cameraDevices={cameraDevices}
-                    currentVideoRef={currentVideoRef}
-                    currentAudioRef={currentAudioRef}
-                    setVideoDevice={(cam) => {
-                        currentVideoRef.current = cam;
-
-                        if (showUserVideo || showShareScreen) {
-                            addTrackToStream("video");
-                        }
-                    }}
-                />
-
-                <li>
-                    <Button
-                        className="bg-pink-600 text-sm"
-                        onClick={() => {
-                            leaveHuddle();
-                            dispatch(toggleHuddle());
-                        }}
-                    >
-                        Leave
-                    </Button>
-                </li>
-            </ul>
         </div>
     );
 }
