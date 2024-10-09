@@ -49,6 +49,7 @@ Route::middleware('auth')->group(function () {
     Route::get("/workspaces/{workspace}/init_workspace_data", [WorkspaceController::class, 'initWorkspaceData'])->name('workspaces.initWorkspaceData');
     Route::get('/workspaces/{workspace}/browse_users', [UserController::class, 'browseUsers'])->name("users.browseUsers");
 
+    Route::get("/workspaces/{workspace}/get_regular_channels", [ChannelController::class, 'getRegularChannels'])->name('workspaces.getRegularChannels');
     Route::get("/workspaces/{workspace}/getChannels", [ChannelController::class, 'getWorkspaceChannels'])->name('workspaces.getChannels');
     Route::get("/workspaces/{workspace}/direct_channels", [WorkspaceController::class, 'getDirectChannels'])->name('workspace.direct_channels');
     Route::get("channels/{channel}/init_channel_data", [ChannelController::class, 'initChannelData'])->name('channels.initChannelData');

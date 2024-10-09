@@ -32,8 +32,8 @@ import {
     setChannelData,
 } from "@/Store/channelsDataSlice";
 import { useParams } from "react-router-dom";
-import { loadSomeChannelData } from "@/helpers/channelDataLoader";
 
+import useReloadPermissions from "@/helpers/useReloadPermissions";
 
 export default function Event() {
     const { auth } = usePage().props;
@@ -46,33 +46,16 @@ export default function Event() {
     const { threadMessageId } = useSelector((state) => state.thread);
     const connectionRef = useRef(null);
     const { channelId: huddleChannelId } = useSelector((state) => state.huddle);
-
-   
+    const reloadPermissions = useReloadPermissions();
 
     const mainChannel = useMemo(() => {
         return channels.find((cn) => cn.is_main_channel);
     }, [channels, workspace?.id]);
 
-    const loadSomeChannelDataToken = useRef([]);
-    function reloadPermissions(channelId, dispatch, setChannelData) {
-        if (loadSomeChannelDataToken.current.length > 0)
-            loadSomeChannelDataToken.current.forEach((token) => token.abort());
-        loadSomeChannelDataToken.current = [
-            new AbortController(),
-            new AbortController(),
-        ];
-        loadSomeChannelData(
-            ["permissions", "channelPermissions"],
-            channelId,
-            dispatch,
-            setChannelData,
-            loadSomeChannelDataToken.current
-        );
-    }
     const userListener = useCallback(() => {
         Echo.private("App.Models.User." + auth.user.id).notification(
             (notification) => {
-               console.log(notification);
+                console.log(notification);
                 dispatch(addNotificationCount());
                 if (isChannelsNotificationBroadcast(notification.type)) {
                     const { channel, changesType } = notification;
@@ -84,11 +67,7 @@ export default function Event() {
                                 console.log(
                                     "Added to new channel and has channel data already, need to update"
                                 );
-                                reloadPermissions(
-                                    channelId,
-                                    dispatch,
-                                    setChannelData
-                                );
+                                reloadPermissions(channelId);
                             }
                             break;
                         case "removedFromChannel":
@@ -112,8 +91,7 @@ export default function Event() {
                                 } else {
                                     reloadPermissions(
                                         channelId,
-                                        dispatch,
-                                        setChannelData
+                                        
                                     );
                                 }
                             }
@@ -277,8 +255,7 @@ export default function Event() {
                             if (e.data?.find((id) => id == auth.user.id)) {
                                 reloadPermissions(
                                     channelId,
-                                    dispatch,
-                                    setChannelData
+                                   
                                 );
                             }
                             break;
@@ -292,8 +269,7 @@ export default function Event() {
                             if (e.data == auth.user.id) {
                                 reloadPermissions(
                                     channelId,
-                                    dispatch,
-                                    setChannelData
+                                   
                                 );
                             }
                             break;
@@ -301,8 +277,7 @@ export default function Event() {
                         case "changeType":
                             reloadPermissions(
                                 channelId,
-                                dispatch,
-                                setChannelData
+                                
                             );
                             break;
                         case "leave":
@@ -347,16 +322,14 @@ export default function Event() {
                         case "updateChannelPermissions":
                             reloadPermissions(
                                 channelId,
-                                dispatch,
-                                setChannelData
+                              
                             );
                             break;
 
                         case "archiveChannel":
                             reloadPermissions(
                                 channelId,
-                                dispatch,
-                                setChannelData
+                               
                             );
                             break;
                         case "join":

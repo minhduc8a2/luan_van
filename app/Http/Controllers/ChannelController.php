@@ -92,6 +92,37 @@ class ChannelController extends Controller
         ];
     }
 
+    public function getRegularChannels(Request $request, Workspace $workspace)
+    {
+        if ($request->user()->cannot('view', [Workspace::class, $workspace])) {
+            abort(404);
+        }
+        $user = $request->user();
+        $channelId = $request->query('channelId');
+        $hiddenUserIds =  $user->hiddenUsers()->wherePivot('workspace_id', $workspace->id)->pluck('hidden_user_id')->toArray();
+        $query =
+            $user->channels()
+
+            ->withCount([
+                'messages as unread_messages_count' => function (Builder $query) use ($user, $hiddenUserIds) {
+                    $query->whereNotIn('user_id', $hiddenUserIds)->where("created_at", ">", function ($query) use ($user) {
+                        $query->select('last_read_at')
+                            ->from('channel_user')
+                            ->whereColumn('channel_user.channel_id', 'channels.id')
+                            ->where('channel_user.user_id', $user->id)
+                            ->limit(1);
+                    })->orWhereNull('last_read_at');
+                }
+            ])->withCount('users');
+        if ($channelId) {
+            $channels = $query->where('channels.id', $channelId)->first();
+        } else {
+            $channels = $query->whereIn("type", [ChannelTypes::PUBLIC->name, ChannelTypes::PRIVATE->name])
+                ->where("workspace_id", $workspace->id)
+                ->where('is_archived', false)->get();
+        }
+        return $channels;
+    }
 
     public function getWorkspaceChannels(Request $request, Workspace $workspace)
     {
@@ -103,7 +134,7 @@ class ChannelController extends Controller
             $hiddenUserIds =  $user->hiddenUsers()->wherePivot('workspace_id', $workspace->id)->pluck('hidden_user_id')->toArray();
             $regularchannels =  $user->channels()
                 ->whereIn("type", [ChannelTypes::PUBLIC->name, ChannelTypes::PRIVATE->name])
-                ->where("workspace_id",$workspace->id)
+                ->where("workspace_id", $workspace->id)
                 ->where('is_archived', false)
                 ->withCount([
                     'messages as unread_messages_count' => function (Builder $query) use ($user, $hiddenUserIds) {
@@ -119,7 +150,7 @@ class ChannelController extends Controller
 
             $directChannels = $user->channels()
                 ->where("type",  ChannelTypes::DIRECT->name)
-                ->where("workspace_id",$workspace->id)
+                ->where("workspace_id", $workspace->id)
                 ->whereDoesntHave('users', function ($query) use ($hiddenUserIds) {
                     $query->whereIn('users.id', $hiddenUserIds);
                 })

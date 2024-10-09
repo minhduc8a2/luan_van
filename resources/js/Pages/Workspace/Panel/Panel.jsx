@@ -13,25 +13,26 @@ import { CreateChannelForm } from "./createChannelForm";
 import { FiArchive } from "react-icons/fi";
 
 import { useMemo } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import useGoToChannel from "@/helpers/useGoToChannel";
 
 export default function Panel({}) {
     const { auth } = usePage().props;
     const { workspace } = useSelector((state) => state.workspace);
     const { channelId, workspaceId } = useParams();
-    const navigate = useNavigate();
+
     const { channels } = useSelector((state) => state.channels);
 
     const currentChannel = useMemo(
         () => channels.find((cn) => cn.id == channelId),
         [channels, channelId]
     );
-
+    const goToChannel = useGoToChannel();
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
 
-    // const { messages } = useSelector((state) => state.messages);
+   
     function changeChannel(channel) {
-        navigate(`channels/${channel.id}`);
+        goToChannel(channel.workspace_id, channel.id);
     }
     const directChannels = useMemo(() => {
         return channels.filter((cn) => cn.type == "DIRECT");

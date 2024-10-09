@@ -3,7 +3,7 @@ import Button from "@/Components/Button";
 import AutocompleInput from "@/Components/Input/AutocompleInput";
 import Overlay from "@/Components/Overlay/Overlay";
 import TipTapEditor from "@/Components/TipTapEditor";
-import { channelProps, getDirectChannelUser } from "@/helpers/channelHelper";
+
 import { router, useForm, usePage } from "@inertiajs/react";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaLock } from "react-icons/fa";
@@ -11,25 +11,22 @@ import Message from "../Message";
 import { useDispatch, useSelector } from "react-redux";
 import { setNotificationPopup } from "@/Store/notificationPopupSlice";
 import { getMentionsFromContent } from "@/helpers/tiptapHelper";
-import { setThreadedMessageId } from "@/Store/threadSlice";
+
+import { useChannelUsers } from "@/helpers/customHooks";
+import { useParams } from "react-router-dom";
+import useGoToChannel from "@/helpers/useGoToChannel";
 
 export default function ForwardMessage({ message, show, onClose }) {
     const dispatch = useDispatch();
-    const { directChannels, auth, channelUsers, channel } = usePage().props;
+    const { auth } = usePage().props;
+    const { channelId } = useParams();
+    const { channelUsers } = useChannelUsers(channelId);
     const { channels } = useSelector((state) => state.channels);
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
-
+    const goToChannel = useGoToChannel();
     const [choosenChannelsList, setChoosenChannelsList] = useState([]);
     function changeChannel(channel) {
-        dispatch(setThreadedMessageId(null));
-        router.get(
-            route("channels.show", {
-                workspace: workspace.id,
-                channel: channel.id,
-            }),
-            {},
-            { preserveState: true, only: channelProps }
-        );
+       goToChannel(channel.workspace_id,channel.id)
     }
     function onSubmit(content, _, JSONContent) {
         if (choosenChannelsList.length < 1) return;

@@ -1,3 +1,5 @@
+import axios from "axios";
+
 export function getChannelName(channel, workspaceUsers, currentUser) {
     let isDirectChannel = channel.type == "DIRECT";
     if (!isDirectChannel) return channel.name;
@@ -15,7 +17,7 @@ export function getDirectChannelUser(channel, workspaceUsers, currentUser) {
     try {
         const userIds = channel?.name.split("_");
         const userId = userIds.find((id) => id != currentUser.id);
-      
+
         return workspaceUsers.find((user) => user.id == userId);
     } catch (error) {
         console.error(error);
@@ -55,12 +57,12 @@ export function findMinMaxId(messages) {
     );
 }
 
-const channelProps = [
-    "channelPermissions",
-    "permissions",
-    "channelId",
-    "managers",
-    "messages",
-    "channelUsers",
-];
-export { channelProps };
+export function loadRegularChannels(workspaceId, channelId) {
+    return axios.get(route("workspaces.getRegularChannels", workspaceId), {
+        params: { channelId: channelId },
+    });
+}
+
+
+
+

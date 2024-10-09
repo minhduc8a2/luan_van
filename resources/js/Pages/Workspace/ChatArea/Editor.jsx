@@ -4,8 +4,10 @@ import Button from "@/Components/Button";
 import TipTapEditor from "@/Components/TipTapEditor";
 import { router } from "@inertiajs/react";
 import { getMentionsFromContent } from "@/helpers/tiptapHelper";
-import {  useChannelUsers } from "@/helpers/customHooks";
+import { useChannelUsers } from "@/helpers/customHooks";
 import { useParams } from "react-router-dom";
+
+import useJoinChannel from "@/helpers/useJoinChannel";
 
 export default function Editor({
     channel,
@@ -13,31 +15,10 @@ export default function Editor({
     isChannelMember,
     channelName,
     setFocus,
-
 }) {
     const { channelId } = useParams();
-
     const { channelUsers } = useChannelUsers(channelId);
-    function joinChannel() {
-        router.post(
-            route("channel.join", channel.id),
-            {},
-            {
-                preserveState: true,
-                only: [
-                    "channels",
-
-                    "channel",
-                    "permissions",
-                    "channelPermissions",
-                    "channelUsers",
-                ],
-                headers: {
-                    "X-Socket-Id": Echo.socketId(),
-                },
-            }
-        );
-    }
+    const joinChannel = useJoinChannel();
     function onSubmit(content, fileObjects, JSONContent) {
         let mentionsList = getMentionsFromContent(JSONContent);
         if (
@@ -100,7 +81,10 @@ export default function Editor({
                                 </Button>
                             }
                         />
-                        <Button className="bg-green-900" onClick={joinChannel}>
+                        <Button
+                            className="bg-green-900"
+                            onClick={() => joinChannel(channelId)}
+                        >
                             Join Channel
                         </Button>
                     </div>

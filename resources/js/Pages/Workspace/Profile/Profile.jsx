@@ -11,18 +11,14 @@ import { MdOutlineMail } from "react-icons/md";
 import { FaPhoneAlt } from "react-icons/fa";
 import Button from "@/Components/Button";
 import { TbMessageCircle } from "react-icons/tb";
-import { FiHeadphones, FiMoreVertical } from "react-icons/fi";
-import {
-    channelProps,
-    getDirectChannelFromUserId,
-} from "@/helpers/channelHelper";
-import { setThreadedMessageId } from "@/Store/threadSlice";
+import { FiHeadphones } from "react-icons/fi";
+import { getDirectChannelFromUserId } from "@/helpers/channelHelper";
 import { toggleHuddle } from "@/Store/huddleSlice";
 import MoreOptions from "./MoreOptions";
 import { LiaUserMinusSolid } from "react-icons/lia";
-import { setLeftWindowType } from "@/Store/windowTypeSlice";
+import useGoToChannel from "@/helpers/useGoToChannel";
 export default function Profile() {
-    const {  auth, workspace } = usePage().props;
+    const { auth, workspace } = usePage().props;
     const { default_avatar_url } = useSelector((state) => state.workspace);
 
     const { userId } = useSelector((state) => state.profile);
@@ -37,24 +33,11 @@ export default function Profile() {
     const hasOwnership = auth.user.id == user.id;
     const isOnline = onlineStatusMap[user.id];
     const dispatch = useDispatch();
+    const goToChannel = useGoToChannel();
     function message() {
         const channel = getDirectChannelFromUserId(channels, user.id);
         if (!channel) return;
-        dispatch(setThreadedMessageId(null));
-        router.get(
-            route("channels.show", {
-                workspace: workspace.id,
-                channel: channel.id,
-            }),
-            {},
-            {
-                preserveState: true,
-                only: channelProps,
-                onSuccess: () => {
-                    dispatch(setLeftWindowType("panel"));
-                },
-            }
-        );
+        goToChannel(channel.workspace_id,channel.id);
     }
     function handleHuddleButtonClicked() {
         const channel = getDirectChannelFromUserId(channels, user.id);

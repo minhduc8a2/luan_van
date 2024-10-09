@@ -1,21 +1,20 @@
 import { usePage, Link } from "@inertiajs/react";
 import Avatar from "@/Components/Avatar";
-import { router } from "@inertiajs/react";
 import { useSelector } from "react-redux";
-import { channelProps } from "@/helpers/channelHelper";
-import { useMemo } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import {  useParams } from "react-router-dom";
 import { useChannel } from "@/helpers/customHooks";
+
+import useGoToChannel from "@/helpers/useGoToChannel";
 export function DirectChannel({ channel, user, isOnline = false }) {
     const { auth } = usePage().props;
     const { channelId } = useParams();
 
-    const navigate = useNavigate();
+    const goToChannel = useGoToChannel();
     const { channel: currentChannel } = useChannel(channelId);
     const onlineStatusMap = useSelector((state) => state.onlineStatus);
 
     function changeChannel() {
-        navigate(`channels/${channel.id}`);
+        goToChannel(channel.workspace_id,channel.id);
     }
     return (
         <li>
