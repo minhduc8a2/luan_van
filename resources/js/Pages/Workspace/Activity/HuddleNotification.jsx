@@ -7,7 +7,7 @@ import { toggleHuddle } from "@/Store/huddleSlice";
 import { isHuddleInvitationNotificationBroadcast } from "@/helpers/notificationTypeHelper";
 import { useDispatch, useSelector } from "react-redux";
 import { getChannelName } from "@/helpers/channelHelper";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import OverlaySimpleNotification from "@/Components/Overlay/OverlaySimpleNotification";
 export default function HuddleNotification({
     notification,
@@ -17,11 +17,9 @@ export default function HuddleNotification({
     const { workspace: currentWorkspace } = useSelector(
         (state) => state.workspace
     );
-    const {workspaceUsers} = useSelector((state) => state.workspaceUsers);
-  
+    const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
     const dispatch = useDispatch();
     const { channelId: huddleChannelId } = useSelector((state) => state.huddle);
-
     const { fromUser, toUser, channel, workspace } =
         isHuddleInvitationNotificationBroadcast(notification.type)
             ? notification
@@ -30,7 +28,7 @@ export default function HuddleNotification({
     const created_at = notification.created_at;
     const view_at = notification.view_at;
     const [errors, setErrors] = useState(null);
-
+    
     function handleNotificationClickedPart() {
         axios
             .get(route("channel.checkExists"), {
@@ -105,6 +103,10 @@ export default function HuddleNotification({
                 }
             });
     }
+    const channelName = useMemo(
+        () => getChannelName(channel, workspaceUsers, auth.user),
+        [channel, workspaceUsers, auth]
+    );
     return (
         <li>
             <OverlaySimpleNotification
@@ -128,11 +130,8 @@ export default function HuddleNotification({
                     <FiHeadphones className="text-sm" />
                     <div className="text-sm font-semibold text-white/75">
                         Huddle in{" "}
-                        <span className="font-bold">
-                            #
-                            {getChannelName(channel, workspaceUsers, auth.user)}
-                        </span>{" "}
-                        (<span className="">{workspace.name}</span>)
+                        <span className="font-bold">#{channelName}</span> (
+                        <span className="">{workspace.name}</span>)
                     </div>
                 </div>
                 <div className="flex gap-x-2 justify-between">
@@ -155,11 +154,7 @@ export default function HuddleNotification({
                                 {`${fromUser.name} has invited you to join huddle in channel `}{" "}
                                 <span className="font-bold">
                                     #
-                                    {getChannelName(
-                                        channel,
-                                        workspaceUsers,
-                                        auth.user
-                                    )}
+                                    {channelName}
                                 </span>{" "}
                             </div>
                         </div>

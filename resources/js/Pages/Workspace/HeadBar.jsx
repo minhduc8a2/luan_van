@@ -1,12 +1,11 @@
-import { usePage } from "@inertiajs/react";
 import React from "react";
 import { IoIosSearch } from "react-icons/io";
 import { IoArrowBack } from "react-icons/io5";
 import { IoArrowForward } from "react-icons/io5";
-
+import { useSelector } from "react-redux";
 
 export default function HeadBar() {
-    const { workspace } = usePage().props;
+    const { workspace } = useSelector((state) => state.workspace);
 
     return (
         <div className="flex items-center h-full">

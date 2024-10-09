@@ -1,3 +1,4 @@
+import "@/../css/app.css";
 import IconButton from "@/Components/IconButton";
 import OverlayPanel from "@/Components/Overlay/OverlayPanel";
 import SquareImage from "@/Components/SquareImage";
@@ -7,10 +8,10 @@ import {
     streamHasAudioTracks,
     streamHasVideoTracks,
 } from "@/helpers/mediaHelper";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { CgScreen } from "react-icons/cg";
 import { GrMicrophone } from "react-icons/gr";
-import { MdOutlineZoomOutMap } from "react-icons/md";
+import { MdOutlineZoomInMap, MdOutlineZoomOutMap } from "react-icons/md";
 import { PiVideoCameraSlash } from "react-icons/pi";
 import HuddleInvitation from "./HuddleInvitation";
 import Settings from "./Settings";
@@ -18,7 +19,7 @@ import { IoMdPersonAdd } from "react-icons/io";
 import Button from "@/Components/Button";
 import StreamVideo from "@/Components/StreamVideo";
 
-export default function SmallScreen({
+export default function LargeScreen({
     channel,
     workspaceUsers,
     auth,
@@ -42,38 +43,35 @@ export default function SmallScreen({
     setShowShareScreen,
     currentVideoRef,
     enableAudio,
-    goFullScreen,
+    exitFullScreen,
 }) {
+    const [mainStream, setMainStream] = useState(null);
+
+    useEffect(() => {
+        if (otherUserStreams.current.size > 0 && !mainStream) {
+            const streamEntry = Array.from(
+                otherUserStreams.current.entries()
+            )[0];
+            if (streamEntry) {
+                const [_, stream] = streamEntry;
+                setMainStream(stream);
+            }
+        }
+    }, [otherUserStreams]);
     return (
-        <div
-            className="bg-primary-400 w-96  text-white/85  fixed bottom-12 rounded-xl"
-            style={{ left: sideBarWidth + 16 }}
-        >
+        <div className="bg-primary-600 ring-black/50 ring-[40px] flex flex-col  text-white/85 z-50   rounded-xl top-8 left-8 right-8 bottom-8 fixed">
             <div className="flex justify-between p-4 items-center">
                 <div className="text-sm">
                     {getChannelName(channel, workspaceUsers, auth.user)}
                 </div>
                 <button
                     className="hover:bg-white/15 rounded-full p-2"
-                    onClick={goFullScreen}
+                    onClick={exitFullScreen}
                 >
-                    <MdOutlineZoomOutMap />
+                    <MdOutlineZoomInMap />
                 </button>
             </div>
-            <div className="p-4 flex justify-center gap-2 bg-white/10 mx-4 rounded-lg flex-wrap">
-                {(showUserVideo || showShareScreen) && (
-                    <StreamVideo
-                        size="w-36 h-36"
-                        ref={(videoElement) => {
-                            if (videoElement) {
-                                videoElement.srcObject =
-                                    currentStreamRef.current;
-                            }
-                        }}
-                        autoPlay
-                        muted
-                    />
-                )}
+            <div className="p-4 flex justify-center gap-2 bg-white/10 mx-4 rounded-lg flex-wrap flex-1">
                 {Array.from(otherUserStreams.current.entries()).map(
                     ([userId, stream]) => {
                         if (
@@ -83,9 +81,9 @@ export default function SmallScreen({
                             return (
                                 <audio
                                     key={userId}
-                                    ref={(videoElement) => {
-                                        if (videoElement) {
-                                            videoElement.srcObject = stream;
+                                    ref={(audioElement) => {
+                                        if (audioElement) {
+                                            audioElement.srcObject = stream;
                                         }
                                     }}
                                     autoPlay
@@ -95,63 +93,87 @@ export default function SmallScreen({
                         else return "";
                     }
                 )}
-                {Array.from(otherUserStreams.current.entries()).map(
-                    ([userId, stream]) => {
-                        if (streamHasVideoTracks(stream))
-                            return (
-                                <StreamVideo
-                                    size="w-36 h-36"
-                                    key={userId}
-                                    ref={(videoElement) => {
-                                        if (videoElement) {
-                                            videoElement.srcObject = stream;
-                                        }
-                                    }}
-                                    autoPlay
-                                />
-                            );
-                        else return "";
-                    }
-                )}
-                {users.map((user) => {
-                    if (user.id == auth.user.id)
-                        if (showUserVideo || showShareScreen) return "";
-                        else
-                            return (
-                                <Tooltip
-                                    key={user.id}
-                                    content={
-                                        <button className="text-nowrap">
-                                            {user.display_name || user.name}
-                                        </button>
-                                    }
-                                >
-                                    <SquareImage
-                                        url={user.avatar_url}
-                                        removable={false}
-                                        size={
-                                            hasAnyVideoTrack
-                                                ? "w-36 h-36"
-                                                : "w-10 h-10"
-                                        }
-                                    />
-                                </Tooltip>
-                            );
-                    return (
-                        !streamHasVideoTracks(
-                            otherUserStreams.current.get(user.id)
-                        ) && (
-                            <SquareImage
-                                key={user.id}
-                                url={user.avatar_url}
-                                removable={false}
-                                size={
-                                    hasAnyVideoTrack ? "w-36 h-36" : "w-10 h-10"
+                <div className="flex-1 bg-black">
+                {mainStream && (
+                        <StreamVideo
+                            size="w-full h-full"
+                            ref={(videoElement) => {
+                                if (videoElement) {
+                                    videoElement.srcObject =
+                                        mainStream;
                                 }
-                            />
-                        )
-                    );
-                })}
+                            }}
+                            autoPlay
+                            muted
+                        />
+                    )}
+                </div>
+                <div className="grid grid-cols-2 gap-x-2 p-3 rounded-lg bg-black/15">
+                    {(showUserVideo || showShareScreen) && (
+                        <StreamVideo
+                            size="w-36 h-36"
+                            ref={(videoElement) => {
+                                if (videoElement) {
+                                    videoElement.srcObject =
+                                        currentStreamRef.current;
+                                }
+                            }}
+                            autoPlay
+                            muted
+                        />
+                    )}
+                    {Array.from(otherUserStreams.current.entries()).map(
+                        ([userId, stream]) => {
+                            if (streamHasVideoTracks(stream))
+                                return (
+                                    <StreamVideo
+                                        size="w-36 h-36"
+                                        key={userId}
+                                        ref={(videoElement) => {
+                                            if (videoElement) {
+                                                videoElement.srcObject = stream;
+                                            }
+                                        }}
+                                        autoPlay
+                                    />
+                                );
+                            else return "";
+                        }
+                    )}
+                    {users.map((user) => {
+                        if (user.id == auth.user.id)
+                            if (showUserVideo || showShareScreen) return "";
+                            else
+                                return (
+                                    <Tooltip
+                                        key={user.id}
+                                        content={
+                                            <button className="text-nowrap">
+                                                {user.display_name || user.name}
+                                            </button>
+                                        }
+                                    >
+                                        <SquareImage
+                                            url={user.avatar_url}
+                                            removable={false}
+                                            size={"w-36 h-36"}
+                                        />
+                                    </Tooltip>
+                                );
+                        return (
+                            !streamHasVideoTracks(
+                                otherUserStreams.current.get(user.id)
+                            ) && (
+                                <SquareImage
+                                    key={user.id}
+                                    url={user.avatar_url}
+                                    removable={false}
+                                    size={"w-36 h-36"}
+                                />
+                            )
+                        );
+                    })}
+                </div>
             </div>
             <ul className="flex gap-x-2 items-center p-4 justify-center">
                 <IconButton

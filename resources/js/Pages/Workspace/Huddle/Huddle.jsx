@@ -22,6 +22,8 @@ import { usePage } from "@inertiajs/react";
 import { getDirectChannelUser } from "@/helpers/channelHelper";
 
 import SmallScreen from "./SmallScreen";
+import NewWindow from "react-new-window";
+import LargeScreen from "./LargeScreen";
 export default function Huddle() {
     const { auth } = usePage().props;
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
@@ -53,7 +55,7 @@ export default function Huddle() {
     const otherUserStreams = useRef(new Map());
     const [showUserVideo, setShowUserVideo] = useState(false);
     const [showShareScreen, setShowShareScreen] = useState(false);
-
+    const [isFullScreen, setIsFullScreen] = useState(false);
     function shouldRerender() {
         setRefresh((pre) => pre + 1);
     }
@@ -318,34 +320,70 @@ export default function Huddle() {
         };
     }, [huddleChannelId]);
 
+   
+    
     if (!huddleChannelId) return "";
+    if (!isFullScreen)
+        return (
+            <SmallScreen
+                channel={channel}
+                workspaceUsers={workspaceUsers}
 
-    return (
-        <SmallScreen
-            channel={channel}
-            workspaceUsers={workspaceUsers}
-            auth={auth}
-            sideBarWidth={sideBarWidth}
-            showUserVideo={showUserVideo}
-            showShareScreen={showShareScreen}
-            currentStreamRef={currentStreamRef}
-            otherUserStreams={otherUserStreams}
-            users={users}
-            hasAnyVideoTrack={hasAnyVideoTrack}
-            setEnableAudio={setEnableAudio}
-            addTrackToStream={addTrackToStream}
-            removeTrackTFromStream={removeTrackTFromStream}
-            currentAudioRef={currentAudioRef}
-            leaveHuddle={leaveHuddle}
-            dispatch={dispatch}
-            toggleHuddle={toggleHuddle}
-            cameraDevices={cameraDevices}
-            audioDevices={audioDevices}
-            setShowUserVideo={setShowUserVideo}
-            setShowShareScreen={setShowShareScreen}
-            currentVideoRef={currentVideoRef}
-            enableAudio={enableAudio}
+                auth={auth}
+                sideBarWidth={sideBarWidth}
+                showUserVideo={showUserVideo}
+                showShareScreen={showShareScreen}
+                currentStreamRef={currentStreamRef}
+                otherUserStreams={otherUserStreams}
+                users={users}
+                hasAnyVideoTrack={hasAnyVideoTrack}
+                setEnableAudio={setEnableAudio}
+                addTrackToStream={addTrackToStream}
+                removeTrackTFromStream={removeTrackTFromStream}
+                currentAudioRef={currentAudioRef}
+                leaveHuddle={leaveHuddle}
+                dispatch={dispatch}
+                toggleHuddle={toggleHuddle}
+                cameraDevices={cameraDevices}
+                audioDevices={audioDevices}
+                setShowUserVideo={setShowUserVideo}
+                setShowShareScreen={setShowShareScreen}
+                currentVideoRef={currentVideoRef}
+                enableAudio={enableAudio}
+                goFullScreen={() => setIsFullScreen(true)}
+            />
+        );
+    else
+        return (
             
-        />
-    );
+                <LargeScreen
+                    channel={channel}
+                    workspaceUsers={workspaceUsers}
+                    auth={auth}
+                    sideBarWidth={sideBarWidth}
+                    showUserVideo={showUserVideo}
+                    showShareScreen={showShareScreen}
+                    currentStreamRef={currentStreamRef}
+                    otherUserStreams={otherUserStreams}
+                    users={users}
+                    hasAnyVideoTrack={hasAnyVideoTrack}
+                    setEnableAudio={setEnableAudio}
+                    addTrackToStream={addTrackToStream}
+                    removeTrackTFromStream={removeTrackTFromStream}
+                    currentAudioRef={currentAudioRef}
+                    leaveHuddle={leaveHuddle}
+                    dispatch={dispatch}
+                    toggleHuddle={toggleHuddle}
+                    cameraDevices={cameraDevices}
+                    audioDevices={audioDevices}
+                    setShowUserVideo={setShowUserVideo}
+                    setShowShareScreen={setShowShareScreen}
+                    currentVideoRef={currentVideoRef}
+                    enableAudio={enableAudio}
+                    exitFullScreen={() => setIsFullScreen(false)}
+                />
+            
+        );
 }
+
+

@@ -4,7 +4,6 @@ export function getChannelName(channel, workspaceUsers, currentUser) {
 
     try {
         const user = getDirectChannelUser(channel, workspaceUsers, currentUser);
-
         return user?.display_name || user?.name || "Name not found";
     } catch (error) {
         console.error(error);
@@ -16,7 +15,7 @@ export function getDirectChannelUser(channel, workspaceUsers, currentUser) {
     try {
         const userIds = channel?.name.split("_");
         const userId = userIds.find((id) => id != currentUser.id);
-       console.log(typeof workspaceUsers);
+      
         return workspaceUsers.find((user) => user.id == userId);
     } catch (error) {
         console.error(error);

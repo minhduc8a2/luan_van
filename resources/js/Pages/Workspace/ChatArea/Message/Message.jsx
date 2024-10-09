@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import { UTCToDateTime, UTCToTime } from "@/helpers/dateTimeHelper";
 import Avatar from "@/Components/Avatar";
 import { isDocument, isImage, isVideo } from "@/helpers/fileHelpers";
-import "react-photo-view/dist/react-photo-view.css";
+
 import { useState } from "react";
 import FileItem from "@/Components/FileItem";
 import DocumentAttachment from "./DocumentAttachment";
@@ -334,6 +334,7 @@ export default function Message({
                 {isEditing ? (
                     <div className="border rounded-lg border-white/15 p-2 mt-2">
                         <TipTapEditor
+                            channel={channel}
                             message={message}
                             onSubmit={editMessage}
                             isEditMessage={true}

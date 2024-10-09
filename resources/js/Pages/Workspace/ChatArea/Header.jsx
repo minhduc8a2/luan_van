@@ -95,7 +95,7 @@ export default function Header({ channelName , loaded}) {
                                     huddleChannelId ? "bg-green-700 " : ""
                                 }`}
                             >
-                                {permissions.huddle ? (
+                                {permissions?.huddle ? (
                                     <button
                                         className={`flex items-center gap-x-1 `}
                                         onClick={handleHuddleButtonClicked}

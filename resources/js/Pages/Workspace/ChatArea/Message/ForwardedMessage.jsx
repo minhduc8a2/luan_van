@@ -2,9 +2,7 @@ import React, { useMemo } from "react";
 import { UTCToDateTime, UTCToTime } from "@/helpers/dateTimeHelper";
 import Avatar from "@/Components/Avatar";
 import { isDocument, isImage, isVideo } from "@/helpers/fileHelpers";
-import "react-photo-view/dist/react-photo-view.css";
 import { useState } from "react";
-import FileItem from "@/Components/FileItem";
 
 import MessageToolbar from "./MessageToolbar";
 import { router, usePage } from "@inertiajs/react";
@@ -19,8 +17,6 @@ import TipTapEditor from "@/Components/TipTapEditor";
 import { editMessage as editMessageInStore } from "@/Store/channelsDataSlice";
 import { getMentionsFromContent } from "@/helpers/tiptapHelper";
 
-import { setNotificationPopup } from "@/Store/notificationPopupSlice";
-import OverlayConfirm from "@/Components/Overlay/OverlayConfirm";
 import ForwardMessage from "./ForwardMessage/ForwardMessage";
 import Message from "./Message";
 export default function ForwardedMessage({

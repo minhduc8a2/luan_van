@@ -88,7 +88,7 @@ class WorkspaceController extends Controller
 
         if ($request->user()->cannot('view', [Workspace::class, $workspace])) abort(403);
 
-        return Inertia::render("Workspace/Index", ['workspace' => $workspace->id]);
+        return Inertia::render("Workspace/Index");
     }
 
 

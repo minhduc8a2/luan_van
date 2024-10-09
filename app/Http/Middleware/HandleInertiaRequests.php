@@ -34,42 +34,19 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        $user = $request->user();
-        /**
-         * @var Workspace $workspace
-         */
-        $workspace = $request->route('workspace');
-        $hiddenUserIds = null;
-        $channels = [];
-        $directChannels = [];
-        $selfChannel = [];
-        $workspaces = [];
-        $users = [];
-        $newNotificationsCount = 0;
-        $workspacePermissions = null;
-
-        if ($user && $workspace) {
-          
-
-           
-            
-           
-        }
         return [
             ...parent::share($request),
             'auth' => [
                 'user' => $request->user(),
 
             ],
-           
-
             'flash' => [
                 'message' => fn() => $request->session()->get('message'),
                 'invitation_link' => fn() => $request->session()->get('invitation_link'),
                 'invitation_sent' => fn() => $request->session()->get('invitation_sent'),
                 'data' => fn() => $request->session()->get('data'),
             ],
-            'workspace' => fn() => $request->route('workspace') ?? null,
+           
             
            
             
