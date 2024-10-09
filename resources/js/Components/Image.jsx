@@ -1,6 +1,6 @@
-import React, { memo, useEffect, useMemo, useRef, useState } from "react";
+import React, { memo, useEffect,  useRef, useState } from "react";
 import OverlayLoadingSpinner from "./Overlay/OverlayLoadingSpinner";
-import { PhotoView } from "react-photo-view";
+
 import { IoClose, IoCloudDownloadOutline } from "react-icons/io5";
 import {
     Popover,
@@ -8,7 +8,7 @@ import {
     PopoverPanel,
     useClose,
 } from "@headlessui/react";
-import { usePage } from "@inertiajs/react";
+
 import copy from "copy-to-clipboard";
 import { MdDownload, MdMoreVert } from "react-icons/md";
 import { useSelector } from "react-redux";

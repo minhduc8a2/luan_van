@@ -158,18 +158,27 @@ function MainArea({ children }) {
 function NotificationPopup() {
     const { type, messages } = useSelector((state) => state.notificationPopup);
     const dispatch = useDispatch();
-
+    let color;
+    switch (type) {
+        case "error":
+            color = "text-danger-400";
+            break;
+        case "success":
+            color = "text-blue-400";
+            break;
+        default:
+            color = "";
+            break;
+    }
     return (
         <OverlaySimpleNotification
             show={type}
             onClose={() => dispatch(setNotificationPopup(null))}
         >
-            <ul className="gap-y-2 flex flex-col">
+            <ul className="gap-y-2 flex  flex-col">
                 {messages.map((message) => (
                     <li
-                        className={`${
-                            type == "error" ? "text-danger-400" : ""
-                        } text-lg`}
+                        className={`${color} text-lg`}
                         key={message}
                     >
                         {message}

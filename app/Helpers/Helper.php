@@ -39,4 +39,9 @@ class Helper
     {
         return abort(500, "Something went wrong! Please try later!");
     }
+
+    public static function createSuccessResponse()
+    {
+        return ['message'=>'ok'];
+    }
 }

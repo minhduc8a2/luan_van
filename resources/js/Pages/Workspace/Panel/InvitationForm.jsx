@@ -8,90 +8,84 @@ import Form1 from "@/Components/Form1";
 import { Link, router, usePage } from "@inertiajs/react";
 import { LuPlus } from "react-icons/lu";
 import OverlayNotification from "@/Components/Overlay/OverlayNotification";
+import { useCustomedForm } from "@/helpers/customHooks";
+import { setNotificationPopup } from "@/Store/notificationPopupSlice";
+import useErrorHandler from "@/helpers/useErrorHandler";
+import useSuccessHandler from "@/helpers/useSuccessHandler";
 
 export function InvitationForm({ workspace }) {
     const { flash } = usePage().props;
-    const uuid = uuidv4();
     const [invitationLink, setInvitationLink] = useState("");
     const [invitationSent, setInvitationSent] = useState("");
-    const { data, setData, post, processing, transform } = useForm({
-        emailList: "",
-        code: uuid,
-        workspace_id: workspace.id,
-    });
+    const [refresh, setRefresh] = useState(0);
+    const errorHandler = useErrorHandler();
+    const successHandler = useSuccessHandler("Invitation sent successfully!");
+
+    const {
+        getValues,
+        setValues,
+        loading: processing,
+        submit,
+        reset,
+    } = useCustomedForm(
+        {
+            emailList: "",
+            workspace_id: workspace.id,
+        },
+        {
+            url: route("invitation.mail", workspace.id),
+        }
+    );
+
     function onSubmit(e) {
         e.preventDefault();
-        transform((data) => {
-            const emailList = data.emailList.split(",");
-
-            return {
-                ...data,
-                emailList: emailList
-                    .map((em) => em.trim())
-                    .filter((em) => em != ""),
-            };
+        if (typeof getValues().emailList == "string") {
+            const emailList = getValues().emailList.split(",");
+            setValues(
+                "emailList",
+                emailList.map((em) => em.trim()).filter((em) => em != "")
+            );
+        }
+        
+        submit().then((response) => {
+            copy(response.data.invitation_link);
+            setInvitationLink(response.data.invitation_link);
+            setInvitationSent(response.data.invitation_sent);
+            successHandler(response);
         });
-        post(route("invitation.mail", { workspace: workspace.id }));
     }
     function generateInviteLink(e) {
         e.preventDefault();
-        if (flash.invitation_link) {
-            copy(flash.invitation_link);
-            setInvitationLink(flash.invitation_link);
+        if (invitationLink) {
+            copy(invitationLink);
             return;
         }
 
-        router.post(
-            route("invitation.store", workspace.id),
-            {
+        axios
+            .post(route("invitation.store", workspace.id), {
                 code: uuid,
                 workspace_id: workspace.id,
-            },
-            { preserveState: true, only: [], preserveScroll: true }
-        );
+            })
+            .then((response) => {
+                copy(response.data.invitation_link);
+                setInvitationLink(response.data.invitation_link);
+            })
+            .catch(errorHandler);
     }
-    useEffect(() => {
-        if (flash.invitation_link) {
-            copy(flash.invitation_link);
-            setInvitationLink(flash.invitation_link);
-        }
-        // console.log(flash.invitation_link);
-    }, [flash.invitation_link]);
-    useEffect(() => {
-        if (flash.invitation_sent) {
-            setInvitationSent(flash.invitation_sent);
-        }
-    }, [flash.invitation_sent]);
+
     return (
         <div className="">
-            {invitationSent && (
-                <OverlayNotification
-                    show={invitationSent}
-                    close={() => setInvitationSent(null)}
-                >
-                    {flash.invitation_sent.length != 0 && (
-                        <div className="">
-                            <p className="text-lg">You've invited:</p>
-                            <ol className="">
-                                {flash.invitation_sent.map((em, index) => (
-                                    <li key={em} className=" mt-2">
-                                        {index + 1}.{" "}
-                                        <span className="text-link">{em}</span>
-                                    </li>
-                                ))}
-                            </ol>
-                        </div>
-                    )}
-                </OverlayNotification>
-            )}
             <Form1
                 className="p-4"
-                success={flash.invitation_sent}
+                success={invitationSent}
                 submit={onSubmit}
                 buttonName="Send"
                 submitting={processing}
                 activateButtonNode={
-                    <div className="grid-item mt-2 px-4 w-fit">
+                    <div
+                        className="grid-item mt-2 px-4 w-fit"
+                        onClick={() => reset()}
+                    >
                         <div className="flex items-center ">
                             <LuPlus className="text-sm" />
                         </div>
@@ -121,8 +115,11 @@ export function InvitationForm({ workspace }) {
                     rows="2"
                     label="To:"
                     placeholder="name@gmail.com"
-                    value={data.email}
-                    onChange={(e) => setData("emailList", e.target.value)}
+                    value={getValues().emailList}
+                    onChange={(e) => {
+                        setRefresh((pre) => pre + 1);
+                        setValues("emailList", e.target.value);
+                    }}
                 />
             </Form1>
         </div>

@@ -1,6 +1,7 @@
 import { useSelector } from "react-redux";
 import { useMemo, useRef, useState } from "react";
 import axios from "axios";
+import useErrorHandler from "./useErrorHandler";
 const useChannelData = (channelId) => {
     const channelsData = useSelector((state) => state.channelsData);
 
@@ -47,7 +48,7 @@ const useChannelUsers = (channelId) => {
 };
 const useChannel = (channelId) => {
     const { channels } = useSelector((state) => state.channels);
-   
+
     const channel = useMemo(() => {
         return channels.find((cn) => cn.id == channelId) || null; // Return null if not found
     }, [channels, channelId]);
@@ -70,6 +71,7 @@ const useCustomedForm = (
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
     const [errors, setErrors] = useState(false);
+    const errorHandler = useErrorHandler();
     const values = useRef(initValues);
     const token = useRef(null);
     function setValues(name, value) {
@@ -115,13 +117,7 @@ const useCustomedForm = (
             .finally(() => {
                 setLoading(false);
             })
-            .catch((errors) => {
-                if (errors.response && errors.response.data.errors) {
-                    setErrors(errors.response.data.errors); // Assuming your API returns validation errors
-                } else {
-                    setErrors(["An unexpected error occurred"]);
-                }
-            });
+            .catch(errorHandler);
     }
 
     return {
@@ -135,9 +131,6 @@ const useCustomedForm = (
         reset,
     };
 };
-
-
-
 
 export {
     useChannelData,

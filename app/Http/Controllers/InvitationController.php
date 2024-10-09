@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Helpers\Helper;
 use App\Models\Workspace;
 use App\Models\Invitation;
+use Illuminate\Support\Str;
 use App\Mail\InvitationMail;
 use Illuminate\Http\Request;
 use App\Events\WorkspaceEvent;
@@ -43,7 +44,7 @@ class InvitationController extends Controller implements HasMiddleware
             $workspace = Workspace::find($invitation->workspace_id);
             $workspace->addUserToWorkspace($user);
 
-            broadcast(new WorkspaceEvent(workspace: $workspace, type: "newUserJoinWorkspace", fromUserId: $request->user()->id, data:$user));
+            broadcast(new WorkspaceEvent(workspace: $workspace, type: "newUserJoinWorkspace", fromUserId: $request->user()->id, data: $user));
             DB::commit();
             //
             return redirect(route('workspace.show', $workspace->id));
@@ -58,21 +59,22 @@ class InvitationController extends Controller implements HasMiddleware
         if ($request->user()->cannot('create', [Invitation::class, $workspace])) abort(403);
 
         $validated = $request->validate([
-            'code' => 'required|string|max:255',
+
             'workspace_id' => 'required|integer',
         ]);
         try {
+            $code = Str::uuid();
             DB::beginTransaction();
             Invitation::create([
-                'code' => $validated['code'],
+                'code' => $code,
                 'workspace_id' => $validated['workspace_id']
             ]);
-            $invitationLink = env('PUBLIC_APP_URL') . '/invitations/' . $validated['code'];
+            $invitationLink = env('PUBLIC_APP_URL') . '/invitations/' . $code;
             DB::commit();
-            return back()->with('invitation_link', $invitationLink);
+            return ['invitation_link' => $invitationLink];
         } catch (\Throwable $th) {
             DB::rollBack();
-            return abort(403);
+            Helper::createErrorResponse();
         }
     }
 
@@ -81,18 +83,19 @@ class InvitationController extends Controller implements HasMiddleware
         if ($request->user()->cannot('create', [Invitation::class, $workspace])) abort(403);
 
         $validated = $request->validate([
-            'code' => 'required|string|max:255',
+
             'workspace_id' => 'required|integer',
             'emailList.*' => 'required|email'
         ]);
 
         try {
+            $code = Str::uuid();
             Invitation::create([
-                'code' => $validated['code'],
+                'code' => $code,
                 'workspace_id' => $validated['workspace_id']
             ]);
             $workspace = Workspace::findOrFail($validated['workspace_id']);
-            $invitationLink = env('PUBLIC_APP_URL') . '/invitations/' . $validated['code'];
+            $invitationLink = env('PUBLIC_APP_URL') . '/invitations/' . $code;
             $emailList = $validated['emailList'];
             $invitatioEmailSent = [];
             foreach ($emailList as $email) {
@@ -103,10 +106,10 @@ class InvitationController extends Controller implements HasMiddleware
             }
             // $request->session()->flash('invitation_link', $invitationLink);
 
-            return back()->with('invitation_sent', $invitatioEmailSent);
+            return ['invitation_sent' => $invitatioEmailSent, 'invitation_link' => $invitationLink];
         } catch (\Throwable $th) {
-            dd($th);
-            return abort(403);
+
+            return Helper::createErrorResponse();
         }
     }
 }

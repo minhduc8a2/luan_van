@@ -40,21 +40,6 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
 
             ],
-            'flash' => [
-                'message' => fn() => $request->session()->get('message'),
-                'invitation_link' => fn() => $request->session()->get('invitation_link'),
-                'invitation_sent' => fn() => $request->session()->get('invitation_sent'),
-                'data' => fn() => $request->session()->get('data'),
-            ],
-           
-            
-           
-            
-            
-          
-
-         
-
         ];
     }
 }

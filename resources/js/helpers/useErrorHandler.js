@@ -1,14 +1,14 @@
 // src/hooks/useErrorHandler.js
 import { setNotificationPopup } from "@/Store/notificationPopupSlice";
 import { useDispatch } from "react-redux";
-// Adjust based on your Redux setup
+
 
 const useErrorHandler = () => {
     const dispatch = useDispatch();
 
     return (error) => {
         if (error.response) {
-            // const status = error.response.status;
+       
             const message = error.response.data.message || "An error occurred.";
 
             dispatch(
