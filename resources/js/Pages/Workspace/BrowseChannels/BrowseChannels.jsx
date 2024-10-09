@@ -15,9 +15,13 @@ import useErrorHandler from "@/helpers/useErrorHandler";
 import useSuccessHandler from "@/helpers/useSuccessHandler";
 import {
     addNewChannelToChannelsStore,
+    removeChannel,
     removeChannelFromChannelsStore,
 } from "@/Store/channelsSlice";
 import useGoToChannel from "@/helpers/useGoToChannel";
+import useLeaveChannel from "@/helpers/useLeaveChannel";
+import useIsChannelMember from "@/helpers/useIsChannelMember";
+import { addJoinedChannelId } from "@/Store/joinedChannelIdsSlice";
 export default function BrowseChannels() {
     const { auth } = usePage().props;
     const { workspace } = useSelector((state) => state.workspace);
@@ -34,6 +38,7 @@ export default function BrowseChannels() {
     const joinSuccessHandler = useSuccessHandler("Join channel successfully");
     const leaveSuccessHandler = useSuccessHandler("Leave channel successfully");
     const goToChannel = useGoToChannel();
+    const leaveChannelInHook = useLeaveChannel(workspace.id);
     useEffect(() => {
         Echo.private(`private_workspaces.${workspace.id}`).listen(
             "WorkspaceEvent",
@@ -53,14 +58,24 @@ export default function BrowseChannels() {
                         break;
 
                     case "ChannelObserver_storeChannel":
-                        setAllChannels((pre) => {
-                            const temp = [e.data, ...pre];
-                            if (temp.length > 0) {
-                                setTopHasMore(temp[0].id);
-                                setBottomHasMore(temp[temp.length - 1].id);
-                            }
-                            return temp;
-                        });
+                        loadRegularChannels(e.data.workspace_id, e.data.id)
+                            .then((response) => {
+                                const newChannel = response.data;
+
+                                setAllChannels((pre) => {
+                                    const temp = [newChannel, ...pre];
+                                    if (temp.length > 0) {
+                                        setTopHasMore(temp[0].id);
+                                        setBottomHasMore(
+                                            temp[temp.length - 1].id
+                                        );
+                                    }
+                                    return temp;
+                                });
+                            })
+                            .catch((errors) => {
+                                console.log(errors);
+                            });
 
                         break;
                     default:
@@ -157,9 +172,9 @@ export default function BrowseChannels() {
                 }
             )
             .then(() => {
+                dispatch(addJoinedChannelId({ id: channel.id }));
                 loadRegularChannels(workspace.id, channel.id)
                     .then((response) => {
-                        dispatch(addNewChannelToChannelsStore(response.data));
                         options.onSuccess();
                         joinSuccessHandler(response);
                         search(searchValue);
@@ -172,39 +187,10 @@ export default function BrowseChannels() {
     }
     function leaveChannel(channel, options) {
         options.onBefore();
-        axios
-            .post(
-                route("channel.leave", {
-                    workspace: workspace.id,
-                    channel: channel.id,
-                }),
-                {},
-                {
-                    headers: {
-                        "X-Socket-Id": Echo.socketId(),
-                    },
-                }
-            )
-            .then((response) => {
-                options.onSuccess();
-                leaveSuccessHandler(response);
-                search(searchValue);
-                dispatch(removeChannelFromChannelsStore(channel.id));
-            })
-            .catch(errorHandler);
-        // router.post(
-        //    ,
-        //     {},
-        //     {
-        //         preserveState: true,
-        //         only: ["channels"],
-
-        //         onFinish: () => {
-        //             search(searchValue);
-        //         },
-        //         ...options,
-        //     }
-        // );
+        leaveChannelInHook(channel.id, channel.type, false).then((response) => {
+            options.onSuccess();
+            search(searchValue);
+        });
     }
 
     function loadMore(position) {
@@ -411,13 +397,9 @@ export default function BrowseChannels() {
 }
 
 function ChannelItem({ channel, changeChannel, joinChannel, leaveChannel }) {
-    const { channels } = useSelector((state) => state.channels);
     const [joinProcessing, setJoinProcessing] = useState(false);
     const [leaveProcessing, setLeaveProcessing] = useState(false);
-    const isChannelMember = useMemo(
-        () => channels.find((cn) => cn.id === channel.id),
-        [channels, channel]
-    );
+    const isChannelMember = useIsChannelMember(channel.id);
 
     return (
         <div className="p-4 relative group/browse_channel_item">

@@ -7,7 +7,6 @@ export function loadSomeChannelData(
     setChannelData,
     tokens = []
 ) {
-    
     return Promise.all(
         types.map((type, index) =>
             loadChannelData(
@@ -29,17 +28,12 @@ export function loadChannelData(
     token
 ) {
     return axios
-        .get(
-            route("channels.initChannelData", {
-                channel: channelId,
-            }),
-            {
-                params: {
-                    only: type,
-                },
-                signal: token?.signal,
-            }
-        )
+        .get(route("channels.initChannelData", channelId), {
+            params: {
+                only: type,
+            },
+            signal: token?.signal,
+        })
         .then((response) => {
             dispatch(setChannelData({ id: channelId, data: response.data }));
         });

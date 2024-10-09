@@ -5,41 +5,22 @@ import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
 import OverlayNotification from "@/Components/Overlay/OverlayNotification";
 
 import { FaLock } from "react-icons/fa";
-import { useCustomedForm, useMainChannel } from "@/helpers/customHooks";
-import { router } from "@inertiajs/react";
-import { removeChannel } from "@/Store/channelsSlice";
-import useReloadPermissions from "@/helpers/useReloadPermissions";
-import useGoToChannel from "@/helpers/useGoToChannel";
-import { useSelector } from "react-redux";
 
+import useLeaveChannel from "@/helpers/useLeaveChannel";
+import { useState } from "react";
+import { useSelector } from "react-redux";
 export default function LeaveChannel({ channel }) {
     const { workspace } = useSelector((state) => state.workspace);
-    const {
-        success,
-        loading: processing,
+    const leaveChannel = useLeaveChannel(workspace.id);
+    const [success, setSuccess] = useState(false);
+    const [processing, setProcessing] = useState(false);
 
-        submit,
-    } = useCustomedForm(
-        {},
-        {
-            url: route("channel.leave", channel.id),
-            method: "post",
-        }
-    );
-    const goToChannel = useGoToChannel();
-    const reloadPermissions = useReloadPermissions();
-    const mainChannel = useMainChannel(workspace.id);
     function onSubmit(e) {
         e.preventDefault();
-        submit().then((response) => {
-            if (response.data) {
-                if (channel.type == "PRIVATE") {
-                    dispatch(removeChannel(cn.id));
-                    goToChannel(mainChannel.workspace_id, mainChannel.id);
-                } else {
-                    reloadPermissions(channel.id);
-                }
-            }
+        setProcessing(true);
+        leaveChannel(channel.id, channel.type, true).then(() => {
+            setSuccess(true);
+            setProcessing(false);
         });
     }
 

@@ -146,7 +146,7 @@ class ChannelController extends Controller
                                 ->limit(1);
                         })->orWhereNull('last_read_at');
                     }
-                ])->withCount('users')->get();
+                ])->get();
 
             $directChannels = $user->channels()
                 ->where("type",  ChannelTypes::DIRECT->name)
@@ -317,7 +317,7 @@ class ChannelController extends Controller
 
         if ($request->user()->cannot('create', [Channel::class, $workspace])) abort(403);
         $validated = $request->validate(["name" => "required|string|max:255", "type" => "required|in:PUBLIC,PRIVATE"]);
-        
+
         try {
             DB::beginTransaction();
 
@@ -325,7 +325,7 @@ class ChannelController extends Controller
 
             $channelExists = $workspace->channels()->where('name', '=', $validated['name'])->exists();
             if ($channelExists) {
-                  abort(400, "Channel exists! Please choose a different name!");
+                abort(400, "Channel exists! Please choose a different name!");
             }
             //
             /**
@@ -435,6 +435,7 @@ class ChannelController extends Controller
             broadcast(new ChannelEvent($channel, "changeType"))->toOthers();
             $channelUsers = $channel->users;
             foreach ($channelUsers as $channelUser) {
+                if ($channelUser->id == $user->id) continue;
                 $channelUser->notify(new ChannelsNotification(
                     fromUser: $user,
                     toUser: null,

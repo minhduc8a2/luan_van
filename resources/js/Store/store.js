@@ -16,6 +16,7 @@ import channelsReducer from "./channelsSlice";
 import workspaceReducer from "./workspaceSlice";
 import channelsDataReducer from "./channelsDataSlice";
 import isOnlineReducer from "./isOnlineSlice";
+import joinedChannelIdsReducer from "./joinedChannelIdsSlice";
 export const makeStore = () => {
     return configureStore({
         reducer: {
@@ -36,6 +37,7 @@ export const makeStore = () => {
             workspace: workspaceReducer,
             channelsData: channelsDataReducer,
             isOnline: isOnlineReducer,
+            joinedChannelIds: joinedChannelIdsReducer,
         },
     });
 };

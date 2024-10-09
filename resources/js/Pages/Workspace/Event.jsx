@@ -89,10 +89,7 @@ export default function Event() {
                                         );
                                     }
                                 } else {
-                                    reloadPermissions(
-                                        channelId,
-                                        
-                                    );
+                                    reloadPermissions(channelId);
                                 }
                             }
                             break;
@@ -253,10 +250,7 @@ export default function Event() {
                                 })
                             );
                             if (e.data?.find((id) => id == auth.user.id)) {
-                                reloadPermissions(
-                                    channelId,
-                                   
-                                );
+                                reloadPermissions(cn.id);
                             }
                             break;
                         case "removeManager":
@@ -267,18 +261,12 @@ export default function Event() {
                                 })
                             );
                             if (e.data == auth.user.id) {
-                                reloadPermissions(
-                                    channelId,
-                                   
-                                );
+                                reloadPermissions(cn.id);
                             }
                             break;
 
                         case "changeType":
-                            reloadPermissions(
-                                channelId,
-                                
-                            );
+                            reloadPermissions(cn.id);
                             break;
                         case "leave":
                             dispatch(
@@ -320,17 +308,11 @@ export default function Event() {
 
                             break;
                         case "updateChannelPermissions":
-                            reloadPermissions(
-                                channelId,
-                              
-                            );
+                            reloadPermissions(cn.id);
                             break;
 
                         case "archiveChannel":
-                            reloadPermissions(
-                                channelId,
-                               
-                            );
+                            reloadPermissions(cn.id);
                             break;
                         case "join":
                             dispatch(

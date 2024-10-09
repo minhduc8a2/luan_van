@@ -176,10 +176,10 @@ function NotificationPopup() {
             onClose={() => dispatch(setNotificationPopup(null))}
         >
             <ul className="gap-y-2 flex  flex-col">
-                {messages.map((message) => (
+                {messages.map((message,index) => (
                     <li
                         className={`${color} text-lg`}
-                        key={message}
+                        key={index}
                     >
                         {message}
                     </li>

@@ -1,8 +1,9 @@
 import { setNotificationsCount } from "@/Store/activitySlice";
 import { setChannels } from "@/Store/channelsSlice";
+import { setJoinedChannelIds } from "@/Store/joinedChannelIdsSlice";
 import { setWorkspaceData } from "@/Store/workspaceSlice";
 import { setWorkspaceUsers } from "@/Store/workspaceUsersSlice";
-import { usePage } from "@inertiajs/react";
+
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
@@ -36,6 +37,11 @@ export default function InitData({ loaded, setLoaded }) {
             .get(route("workspaces.getChannels", workspaceId))
             .then((response) => {
                 dispatch(setChannels(response.data));
+                const channelIds = response.data.reduce(
+                    (pre, cn) => [...pre, cn.id],
+                    []
+                );
+                dispatch(setJoinedChannelIds({ data: channelIds }));
             });
     }
     function loadWorkspaceData() {
