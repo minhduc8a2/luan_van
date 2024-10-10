@@ -1,9 +1,13 @@
+import { useDispatch } from "react-redux";
 import useErrorHandler from "./useErrorHandler";
 import useReloadPermissions from "./useReloadPermissions";
+import { addJoinedChannelId } from "@/Store/joinedChannelIdsSlice";
 
 const useJoinChannel = () => {
     const reloadPermissions = useReloadPermissions();
     const errorHandler = useErrorHandler();
+    const dispatch = useDispatch();
+
     return (channelId) => {
         return axios
             .post(
@@ -17,7 +21,8 @@ const useJoinChannel = () => {
             )
             .then((response) => {
                 reloadPermissions(channelId);
-                return response
+                dispatch(addJoinedChannelId({ id: channelId }));
+                return response;
             })
             .catch(errorHandler);
     };

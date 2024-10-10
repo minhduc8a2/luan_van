@@ -22,6 +22,7 @@ import useGoToChannel from "@/helpers/useGoToChannel";
 import useLeaveChannel from "@/helpers/useLeaveChannel";
 import useIsChannelMember from "@/helpers/useIsChannelMember";
 import { addJoinedChannelId } from "@/Store/joinedChannelIdsSlice";
+import useJoinChannel from "@/helpers/useJoinChannel";
 export default function BrowseChannels() {
     const { auth } = usePage().props;
     const { workspace } = useSelector((state) => state.workspace);
@@ -34,11 +35,10 @@ export default function BrowseChannels() {
     const [bottomLoading, setBottomLoading] = useState(false);
     const [topHasMore, setTopHasMore] = useState();
     const [bottomHasMore, setBottomHasMore] = useState();
-    const errorHandler = useErrorHandler();
-    const joinSuccessHandler = useSuccessHandler("Join channel successfully");
-    const leaveSuccessHandler = useSuccessHandler("Leave channel successfully");
+   
     const goToChannel = useGoToChannel();
     const leaveChannelInHook = useLeaveChannel(workspace.id);
+    const joinChannelInHook = useJoinChannel();
     useEffect(() => {
         Echo.private(`private_workspaces.${workspace.id}`).listen(
             "WorkspaceEvent",
@@ -158,32 +158,10 @@ export default function BrowseChannels() {
     }
     function joinChannel(channel, options) {
         options.onBefore();
-        axios
-            .post(
-                route("channel.join", {
-                    workspace: workspace.id,
-                    channel: channel.id,
-                }),
-                {},
-                {
-                    headers: {
-                        "X-Socket-Id": Echo.socketId(),
-                    },
-                }
-            )
-            .then(() => {
-                dispatch(addJoinedChannelId({ id: channel.id }));
-                loadRegularChannels(workspace.id, channel.id)
-                    .then((response) => {
-                        options.onSuccess();
-                        joinSuccessHandler(response);
-                        search(searchValue);
-                    })
-                    .catch((errors) => {
-                        throw errors;
-                    });
-            })
-            .catch(errorHandler);
+        joinChannelInHook(channel.id).then(() => {
+            options.onSuccess();
+            search(searchValue);
+        });
     }
     function leaveChannel(channel, options) {
         options.onBefore();

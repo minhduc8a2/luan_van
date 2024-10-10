@@ -23,7 +23,7 @@ export default function ChannelSettings({ channelName, buttonNode }) {
     }, [channel?.id]);
     return (
         <OverlayPanel success={!show} buttonNode={buttonNode} className="p-0">
-            {({ close }) => channel && (
+            {({ close }) => channel && permissions&& (
                 <div className="w-[548px]  text-white/85">
                     <h2 className="text-2xl p-6 font-bold text-white/85">
                         <div className="flex items-baseline gap-x-2">

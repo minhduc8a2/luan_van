@@ -52,6 +52,7 @@ export default function InitData({ loaded, setLoaded }) {
             });
     }
     useEffect(() => {
+        console.log("Init channel data running");
         init();
     }, [channelId]);
 
