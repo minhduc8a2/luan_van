@@ -16,9 +16,14 @@ import {
 } from "@/helpers/customHooks";
 import { useParams } from "react-router-dom";
 import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
-export default function Header({ channelName , loaded, topLoading,bottomLoading}) {
+export default function Header({
+    channelName,
+    loaded,
+    topLoading,
+    bottomLoading,
+}) {
     const { auth } = usePage().props;
-    const {channelId} = useParams()
+    const { channelId } = useParams();
     const { channelId: huddleChannelId } = useSelector((state) => state.huddle);
     const { channel } = useChannel(channelId);
 
@@ -46,7 +51,11 @@ export default function Header({ channelName , loaded, topLoading,bottomLoading}
         }
     }
     return (
-        <div className={`p-4 border-b border-b-white/10 z-10 ${loaded?"":"animate-pulse"}`}>
+        <div
+            className={`p-4 border-b border-b-white/10 z-10 ${
+                loaded ? "" : "animate-pulse"
+            }`}
+        >
             <div className="flex justify-between font-bold text-lg opacity-75">
                 <div className="relative">
                     <ChannelSettings
@@ -66,12 +75,12 @@ export default function Header({ channelName , loaded, topLoading,bottomLoading}
                             </div>
                         }
                     />
-                     { (topLoading || bottomLoading) && (
-                        <div className="flex gap-x-2 items-center px-4 py-2 absolute -right-full top-1/2 -translate-y-1/2">
+                    {(topLoading || bottomLoading) && (
+                        <div className="flex  gap-x-2 items-center px-4 py-2 absolute left-full top-1/2 -translate-y-1/2">
                             <div className="h-6 w-6 relative">
                                 <OverlayLoadingSpinner />
                             </div>
-                            <div className="text-xs">Loading ...</div>
+                            <div className="text-xs text-nowrap">Loading ...</div>
                         </div>
                     )}
                 </div>
