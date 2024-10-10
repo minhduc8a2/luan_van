@@ -59,7 +59,7 @@ export default function LargeScreen({
             }
         }
         if (showUserVideo || showShareScreen) {
-            if (currentStreamRef.current && !mainStream) {
+            if (currentStreamRef.current && (!mainStream || !streamHasVideoTracks(mainStream))) {
                 setMainStream(currentStreamRef.current);
             }
         }
@@ -77,7 +77,7 @@ export default function LargeScreen({
                     <MdOutlineZoomInMap />
                 </button>
             </div>
-            <div className=" flex justify-center gap-2 bg-white/10 mx-4 rounded-lg flex-wrap flex-1">
+            <div className=" flex justify-center gap-2 pb-4 mx-4 rounded-lg flex-wrap flex-1">
                 {Array.from(otherUserStreams.current.entries()).map(
                     ([userId, stream]) => {
                         if (
@@ -100,8 +100,8 @@ export default function LargeScreen({
                     }
                 )}
 
-                <div className="flex-1 group/main_stream relative overflow-hidden flex items-center justify-center">
-                    {!mainStream &&
+                <div className="flex-1  group/main_stream gap-4 relative overflow-hidden flex items-center justify-center">
+                    {(!mainStream || !streamHasVideoTracks(mainStream)) &&
                         users.map((user) => {
                             if (user.id == auth.user.id)
                                 return (
@@ -124,16 +124,25 @@ export default function LargeScreen({
                                 !streamHasVideoTracks(
                                     otherUserStreams.current.get(user.id)
                                 ) && (
-                                    <SquareImage
+                                    <Tooltip
                                         key={user.id}
-                                        url={user.avatar_url}
-                                        removable={false}
-                                        size={"w-64 h-64"}
-                                    />
+                                        content={
+                                            <button className="text-nowrap">
+                                                {user.display_name || user.name}
+                                            </button>
+                                        }
+                                    >
+                                        <SquareImage
+                                            key={user.id}
+                                            url={user.avatar_url}
+                                            removable={false}
+                                            size={"w-64 h-64"}
+                                        />
+                                    </Tooltip>
                                 )
                             );
                         })}
-                    {mainStream && (
+                    {mainStream && streamHasVideoTracks(mainStream) && (
                         <video
                             className="mx-auto h-full w-auto max-w-full object-contain rounded-lg"
                             ref={(videoElement) => {
@@ -149,7 +158,7 @@ export default function LargeScreen({
                     <ul
                         className={`group-hover/main_stream:flex ${
                             isHover ? "flex" : "hidden"
-                        } gap-x-2 items-center p-4 px-6 justify-center bg-black/50 rounded-xl absolute bottom-6 left-1/2 -translate-x-1/2 `}
+                        } gap-x-2 items-center p-4 px-6 justify-center bg-black/75 rounded-xl absolute bottom-6 left-1/2 -translate-x-1/2 `}
                     >
                         <IconButton
                             description="Mute mic"
@@ -319,12 +328,21 @@ export default function LargeScreen({
                             !streamHasVideoTracks(
                                 otherUserStreams.current.get(user.id)
                             ) && (
-                                <SquareImage
+                                <Tooltip
                                     key={user.id}
-                                    url={user.avatar_url}
-                                    removable={false}
-                                    size={"w-36 h-36"}
-                                />
+                                    content={
+                                        <button className="text-nowrap">
+                                            {user.display_name || user.name}
+                                        </button>
+                                    }
+                                >
+                                    <SquareImage
+                                        key={user.id}
+                                        url={user.avatar_url}
+                                        removable={false}
+                                        size={"w-36 h-36"}
+                                    />{" "}
+                                </Tooltip>
                             )
                         );
                     })}
