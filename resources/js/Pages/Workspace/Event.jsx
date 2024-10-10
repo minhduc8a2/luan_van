@@ -36,10 +36,12 @@ import {
 import { useParams } from "react-router-dom";
 
 import useReloadPermissions from "@/helpers/useReloadPermissions";
+import { useMainChannel } from "@/helpers/customHooks";
+import useGoToChannel from "@/helpers/useGoToChannel";
 
 export default function Event() {
     const { auth } = usePage().props;
-    const { channelId } = useParams();
+    const { channelId, workspaceId } = useParams();
     const { workspace } = useSelector((state) => state.workspace);
     const dispatch = useDispatch();
     const { channels } = useSelector((state) => state.channels);
@@ -49,10 +51,8 @@ export default function Event() {
     const connectionRef = useRef(null);
     const { channelId: huddleChannelId } = useSelector((state) => state.huddle);
     const reloadPermissions = useReloadPermissions();
-
-    const mainChannel = useMemo(() => {
-        return channels.find((cn) => cn.is_main_channel);
-    }, [channels, workspace?.id]);
+    const goToChannel = useGoToChannel();
+    const { mainChannel } = useMainChannel(workspaceId);
 
     const userListener = useCallback(() => {
         Echo.private("App.Models.User." + auth.user.id).notification(
@@ -127,63 +127,7 @@ export default function Event() {
             .leaving((user) => {
                 dispatch(setOnlineStatus({ user, onlineStatus: false }));
             })
-            .listen("WorkspaceEvent", (e) => {
-                console.log("workspaceEvent", e);
-                switch (e.type) {
-                    case "ChannelObserver_storeChannel":
-                        const newChannel = e.data;
-                        if (
-                            newChannel.type == "DIRECT" &&
-                            newChannel.name
-                                .split("_")
-                                .some((id) => id == auth.user.id)
-                        ) {
-                            dispatch(addNewChannelToChannelsStore(e.data));
-                        } else if (newChannel.type != "DIRECT") {
-                            dispatch(addNewChannelToChannelsStore(e.data));
-                        }
-                        break;
-                    case "ChannelObserver_deleteChannel":
-                        if (huddleChannelId == e?.data) {
-                            dispatch(toggleHuddle());
-                        }
-                        dispatch(removeChannelFromChannelsStore(e.data));
-                        break;
-                    case "ChannelObserver_updated":
-                        dispatch(
-                            updateChannelInformation({
-                                id: e.data?.id,
-                                data: e.data,
-                            })
-                        );
-                        break;
-                    case "FileObserver_fileDeleted":
-                        dispatch(
-                            deleteFile({ id: cn.id, data: { file_id: e.data } })
-                        );
-                        dispatch(deleteFileInThread(e.data));
-                        break;
-                    case "UserObserver_updated":
-                        dispatch(
-                            updateWorkspaceUserInformation({
-                                id: e.data.id,
-                                data: e.data,
-                            })
-                        );
-                        break;
-                    case "newUserJoinWorkspace":
-                        dispatch(addWorkspaceUser(e.data));
-                        dispatch(
-                            addUsersToChannel({
-                                id: mainChannel.id,
-                                userIds: [e.data.id],
-                            })
-                        );
-                        break;
-                    default:
-                        break;
-                }
-            })
+
             .error((error) => {
                 console.error(error);
             });
@@ -315,7 +259,6 @@ export default function Event() {
 
                             break;
                         case "updateChannelPermissions":
-                            console.log("updateChannelPermissions called");
                             reloadPermissions(cn.id);
                             break;
 
@@ -355,6 +298,79 @@ export default function Event() {
             Echo.leave(`workspaces.${workspace.id}`);
         };
     }, [workspace.id]);
+
+    useEffect(() => {
+        Echo.private(`private_workspaces.${workspace.id}`).listen(
+            "WorkspaceEvent",
+            (e) => {
+                console.log("workspaceEvent", e);
+                switch (e.type) {
+                    case "ChannelObserver_storeChannel":
+                        const newChannel = e.data;
+                        if (
+                            newChannel.type == "DIRECT" &&
+                            newChannel.name
+                                .split("_")
+                                .some((id) => id == auth.user.id)
+                        ) {
+                            dispatch(addNewChannelToChannelsStore(e.data));
+                        } else if (newChannel.type != "DIRECT") {
+                            if (newChannel.user_id == auth.user.id) {
+                                dispatch(addNewChannelToChannelsStore(e.data));
+                            }
+                        }
+                        break;
+                    case "ChannelObserver_deleteChannel":
+                        if (huddleChannelId == e.data) {
+                            dispatch(toggleHuddle());
+                        }
+
+                        if (channelId == e.data) {
+                            goToChannel(workspaceId, mainChannel.id);
+                        }
+                        dispatch(removeChannel(e.data));
+                        break;
+                    case "ChannelObserver_updated":
+                        dispatch(
+                            updateChannelInformation({
+                                id: e.data?.id,
+                                data: e.data,
+                            })
+                        );
+                        break;
+                    case "FileObserver_fileDeleted":
+                        dispatch(
+                            deleteFile({ id: cn.id, data: { file_id: e.data } })
+                        );
+                        dispatch(deleteFileInThread(e.data));
+                        break;
+                    case "UserObserver_updated":
+                        dispatch(
+                            updateWorkspaceUserInformation({
+                                id: e.data.id,
+                                data: e.data,
+                            })
+                        );
+                        break;
+                    case "newUserJoinWorkspace":
+                        dispatch(addWorkspaceUser(e.data));
+                        dispatch(
+                            addUsersToChannel({
+                                id: mainChannel.id,
+                                userIds: [e.data.id],
+                            })
+                        );
+                        break;
+                    default:
+                        break;
+                }
+            }
+        );
+        return () => {
+            Echo.leave(`private_workspaces.${workspace.id}`);
+        };
+    }, [workspaceId, channelId, huddleChannelId, auth]);
+
     useEffect(() => {
         if (connectionRef.current)
             connectionRef.current

@@ -1,58 +1,57 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useContext } from "react";
 import Button from "@/Components/Button";
 import { FaRegTrashCan } from "react-icons/fa6";
 import { useState } from "react";
-import { router, usePage } from "@inertiajs/react";
+
 import OverlayNotification from "@/Components/Overlay/OverlayNotification";
-import ErrorsList from "@/Components/ErrorsList";
+
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
+import useErrorHandler from "@/helpers/useErrorHandler";
+import useSuccessHandler from "@/helpers/useSuccessHandler";
 
+import { ChannelSettingsContext } from "../ChannelSettings";
 export default function DeleteChannel() {
-   
-    const {channelId} = useParams()
+    const { channelId } = useParams();
+    const { setShow } = useContext(ChannelSettingsContext);
+
     const { channels } = useSelector((state) => state.channels);
     const channel = useMemo(
         () => channels.find((cn) => cn.id == channelId),
         [channels, channelId]
     );
     const [confirm, setConfirm] = useState(false);
-    const [errors, setErrors] = useState(null);
-    const [success, setSuccess] = useState(false);
+
     const [processing, setProcessing] = useState(false);
+    const errorHandler = useErrorHandler();
+    const successHandler = useSuccessHandler("Channel deleted successfully!");
+
     function submit(e) {
         if (!confirm) return;
         setProcessing(true);
-        router.delete(
-            route("channel.delete", channel.id),
-            {},
-            {
-                preserveState: true,
-                preserveScroll: true,
-                
-                onError: (errors) => setErrors(errors),
-                onSuccess: () => {
-                    setSuccess(true);
-                },
-                onFinish: () => {
-                    setProcessing(false);
-                },
+        axios
+            .delete(route("channel.delete", channel.id), {
                 headers: {
                     "X-Socket-Id": Echo.socketId(),
                 },
-            }
-        );
+            })
+            .then((response) => {
+                setShow(false);
+                successHandler(response);
+            })
+            .catch(errorHandler)
+            .finally(() => {
+                setProcessing(false);
+            });
     }
     return (
         <OverlayNotification
-            success={success}
             className="min-w-[30vw] p-3"
             title={<div className=" ">Delete this channel?</div>}
             sameButtonRow={
                 <div
                     className="flex gap-x-2 items-center"
                     onClick={() => {
-                        setErrors(null);
                         setSuccess(false);
                     }}
                 >
@@ -88,33 +87,19 @@ export default function DeleteChannel() {
             }
         >
             <div className=" text-white/85 pb-4">
-                {!errors && (
-                    <>
-                        <div className=" ">
-                            When you delete a channel, all messages from this
-                            channel will be removed from Slack immediately.{" "}
-                            <span className="font-bold">
-                                This can’t be undone.
-                            </span>
-                        </div>
-                        <div className="mt-4">Keep in mind that:</div>
-                        <ul className="list-disc ml-4 ">
-                            <li>
-                                Any files uploaded to this channel won’t be
-                                removed
-                            </li>
-                            <li>
-                                You can archive a channel instead without
-                                removing its messages
-                            </li>
-                        </ul>
-                    </>
-                )}
-                {errors && (
-                    <div>
-                        <ErrorsList errors={errors} />
-                    </div>
-                )}
+                <div className=" ">
+                    When you delete a channel, all messages from this channel
+                    will be removed from Slack immediately.{" "}
+                    <span className="font-bold">This can’t be undone.</span>
+                </div>
+                <div className="mt-4">Keep in mind that:</div>
+                <ul className="list-disc ml-4 ">
+                    <li>Any files uploaded to this channel won’t be removed</li>
+                    <li>
+                        You can archive a channel instead without removing its
+                        messages
+                    </li>
+                </ul>
             </div>
         </OverlayNotification>
     );

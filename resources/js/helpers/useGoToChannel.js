@@ -6,6 +6,7 @@ const useGoToChannel = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     return (workspaceId, channelId) => {
+        console.log("Go to channel: "+channelId);
         dispatch(setLeftWindowType("panel"));
         navigate(`/workspaces/${workspaceId}/channels/${channelId}`);
     };
