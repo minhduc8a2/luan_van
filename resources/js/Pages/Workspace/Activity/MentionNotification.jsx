@@ -24,7 +24,7 @@ export default function MentionNotification({
 }) {
     const { auth } = usePage().props;
     const channelsData = useSelector((state) => state.channelsData);
-    const { channelId, workspaceId } = useParams();
+    const { channelId} = useParams();
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
    
     const { channels } = useSelector((state) => state.channels);

@@ -77,7 +77,7 @@ export default function LargeScreen({
                     <MdOutlineZoomInMap />
                 </button>
             </div>
-            <div className="p-4 flex justify-center gap-2 bg-white/10 mx-4 rounded-lg flex-wrap flex-1">
+            <div className=" flex justify-center gap-2 bg-white/10 mx-4 rounded-lg flex-wrap flex-1">
                 {Array.from(otherUserStreams.current.entries()).map(
                     ([userId, stream]) => {
                         if (
@@ -101,19 +101,51 @@ export default function LargeScreen({
                 )}
 
                 <div className="flex-1 group/main_stream relative overflow-hidden flex items-center justify-center">
-                    <video
-                        className="mx-auto max-h-full max-w-full object-contain rounded-lg"
-                        ref={(videoElement) => {
-                            if (videoElement) {
-                                videoElement.srcObject = mainStream;
-                            }
-                        }}
-                        autoPlay
-                        muted
-                    />
-                    <button className="absolute top-4 right-4 hidden group-hover/main_stream:block ">
-                        <IoCloseCircle className="mix-blend-difference text-2xl" />
-                    </button>
+                    {!mainStream &&
+                        users.map((user) => {
+                            if (user.id == auth.user.id)
+                                return (
+                                    <Tooltip
+                                        key={user.id}
+                                        content={
+                                            <button className="text-nowrap">
+                                                {user.display_name || user.name}
+                                            </button>
+                                        }
+                                    >
+                                        <SquareImage
+                                            url={user.avatar_url}
+                                            removable={false}
+                                            size={"w-64 h-64"}
+                                        />
+                                    </Tooltip>
+                                );
+                            return (
+                                !streamHasVideoTracks(
+                                    otherUserStreams.current.get(user.id)
+                                ) && (
+                                    <SquareImage
+                                        key={user.id}
+                                        url={user.avatar_url}
+                                        removable={false}
+                                        size={"w-64 h-64"}
+                                    />
+                                )
+                            );
+                        })}
+                    {mainStream && (
+                        <video
+                            className="mx-auto h-full w-auto max-w-full object-contain rounded-lg"
+                            ref={(videoElement) => {
+                                if (videoElement) {
+                                    videoElement.srcObject = mainStream;
+                                }
+                            }}
+                            autoPlay
+                            muted
+                        />
+                    )}
+
                     <ul
                         className={`group-hover/main_stream:flex ${
                             isHover ? "flex" : "hidden"
@@ -208,6 +240,7 @@ export default function LargeScreen({
                                 className="bg-pink-600 text-sm"
                                 onClick={() => {
                                     leaveHuddle();
+                                    exitFullScreen();
                                     dispatch(toggleHuddle());
                                 }}
                             >
@@ -217,7 +250,7 @@ export default function LargeScreen({
                     </ul>
                 </div>
 
-                <div className="grid grid-cols-2 gap-x-2 p-3 rounded-lg bg-black/15">
+                <div className="grid grid-cols-2 gap-x-2 p-3  bg-black/15">
                     {(showUserVideo || showShareScreen) && (
                         <button
                             onClick={() =>
@@ -243,7 +276,7 @@ export default function LargeScreen({
                             if (streamHasVideoTracks(stream))
                                 return (
                                     <button
-                                         className="w-min h-min"
+                                        className="w-min h-min"
                                         onClick={() => setMainStream(stream)}
                                         key={userId}
                                     >
