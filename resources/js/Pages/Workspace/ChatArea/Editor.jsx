@@ -28,25 +28,23 @@ export default function Editor({
             mentionsList.length == 0
         )
             return;
-        router.post(
-            route("message.store", { channel: channel.id }),
-            {
-                content,
-                fileObjects,
-                mentionsList,
-            },
-            {
-                only: [],
-                preserveState: true,
-                preserveScroll: true,
-                headers: {
-                    "X-Socket-Id": Echo.socketId(),
+        axios
+            .post(
+                route("message.store", { channel: channel.id }),
+                {
+                    content,
+                    fileObjects,
+                    mentionsList,
                 },
-                onFinish: () => {
-                    setFocus((pre) => pre + 1);
-                },
-            }
-        );
+                {
+                    headers: {
+                        "X-Socket-Id": Echo.socketId(),
+                    },
+                }
+            )
+            .then(() => {
+                setFocus((pre) => pre + 1);
+            });
     }
     return (
         <div className="m-6 border border-white/15 pt-4 px-2 rounded-lg ">

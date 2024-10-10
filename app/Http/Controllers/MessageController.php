@@ -344,11 +344,11 @@ class MessageController extends Controller
                 // throw $th;
             }
             DB::commit();
-            back();
+            return Helper::createSuccessResponse();
         } catch (\Throwable $th) {
             DB::rollBack();
             dd($th);
-            return back()->withErrors(['server' => "Something went wrong, please try later!"]);
+            return Helper::createErrorResponse();
         }
     }
 
