@@ -1,9 +1,11 @@
+import SquareImage from "@/Components/SquareImage";
+import Tooltip from "@/Components/Tooltip";
 import React from "react";
 
-export default function UserAvatar() {
+export default function UserAvatar({user, size="h-36 w-36"}) {
     return (
         <Tooltip
-            key={user.id}
+           
             content={
                 <button className="text-nowrap">
                     {user.display_name || user.name}
@@ -14,7 +16,7 @@ export default function UserAvatar() {
                 <SquareImage
                     url={user.avatar_url}
                     removable={false}
-                    size={"w-64 h-64"}
+                    size={size}
                 />
                 
             </div>

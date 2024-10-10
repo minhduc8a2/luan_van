@@ -19,6 +19,7 @@ import { IoMdPersonAdd } from "react-icons/io";
 import Button from "@/Components/Button";
 import StreamVideo from "@/Components/StreamVideo";
 import { IoCloseCircle } from "react-icons/io5";
+import UserAvatar from "./UserAvatar";
 
 export default function LargeScreen({
     channel,
@@ -59,7 +60,10 @@ export default function LargeScreen({
             }
         }
         if (showUserVideo || showShareScreen) {
-            if (currentStreamRef.current && (!mainStream || !streamHasVideoTracks(mainStream))) {
+            if (
+                currentStreamRef.current &&
+                (!mainStream || !streamHasVideoTracks(mainStream))
+            ) {
                 setMainStream(currentStreamRef.current);
             }
         }
@@ -105,40 +109,21 @@ export default function LargeScreen({
                         users.map((user) => {
                             if (user.id == auth.user.id)
                                 return (
-                                    <Tooltip
+                                    <UserAvatar
+                                        user={user}
                                         key={user.id}
-                                        content={
-                                            <button className="text-nowrap">
-                                                {user.display_name || user.name}
-                                            </button>
-                                        }
-                                    >
-                                        <SquareImage
-                                            url={user.avatar_url}
-                                            removable={false}
-                                            size={"w-64 h-64"}
-                                        />
-                                    </Tooltip>
+                                        size="h-64 w-64"
+                                    />
                                 );
                             return (
                                 !streamHasVideoTracks(
                                     otherUserStreams.current.get(user.id)
                                 ) && (
-                                    <Tooltip
+                                    <UserAvatar
+                                        user={user}
                                         key={user.id}
-                                        content={
-                                            <button className="text-nowrap">
-                                                {user.display_name || user.name}
-                                            </button>
-                                        }
-                                    >
-                                        <SquareImage
-                                            key={user.id}
-                                            url={user.avatar_url}
-                                            removable={false}
-                                            size={"w-64 h-64"}
-                                        />
-                                    </Tooltip>
+                                        size="h-64 w-64"
+                                    />
                                 )
                             );
                         })}
@@ -308,42 +293,11 @@ export default function LargeScreen({
                         if (user.id == auth.user.id)
                             if (showUserVideo || showShareScreen) return "";
                             else
-                                return (
-                                    <Tooltip
-                                        key={user.id}
-                                        content={
-                                            <button className="text-nowrap">
-                                                {user.display_name || user.name}
-                                            </button>
-                                        }
-                                    >
-                                        <SquareImage
-                                            url={user.avatar_url}
-                                            removable={false}
-                                            size={"w-36 h-36"}
-                                        />
-                                    </Tooltip>
-                                );
+                                return <UserAvatar user={user} key={user.id} />;
                         return (
                             !streamHasVideoTracks(
                                 otherUserStreams.current.get(user.id)
-                            ) && (
-                                <Tooltip
-                                    key={user.id}
-                                    content={
-                                        <button className="text-nowrap">
-                                            {user.display_name || user.name}
-                                        </button>
-                                    }
-                                >
-                                    <SquareImage
-                                        key={user.id}
-                                        url={user.avatar_url}
-                                        removable={false}
-                                        size={"w-36 h-36"}
-                                    />{" "}
-                                </Tooltip>
-                            )
+                            ) && <UserAvatar user={user} key={user.id} />
                         );
                     })}
                 </div>
