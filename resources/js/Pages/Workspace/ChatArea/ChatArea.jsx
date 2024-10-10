@@ -314,6 +314,8 @@ export default function ChatArea() {
                     channelName={channelName}
                     channelUsers={channelUsers}
                     loaded={loaded}
+                    topLoading={topLoading}
+                    bottomLoading={bottomLoading}
                 />
                 {loaded && channel && (
                     <InfiniteScroll

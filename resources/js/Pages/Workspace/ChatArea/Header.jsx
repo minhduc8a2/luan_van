@@ -15,7 +15,8 @@ import {
     useChannelUsers,
 } from "@/helpers/customHooks";
 import { useParams } from "react-router-dom";
-export default function Header({ channelName , loaded}) {
+import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
+export default function Header({ channelName , loaded, topLoading,bottomLoading}) {
     const { auth } = usePage().props;
     const {channelId} = useParams()
     const { channelId: huddleChannelId } = useSelector((state) => state.huddle);
@@ -47,7 +48,7 @@ export default function Header({ channelName , loaded}) {
     return (
         <div className={`p-4 border-b border-b-white/10 z-10 ${loaded?"":"animate-pulse"}`}>
             <div className="flex justify-between font-bold text-lg opacity-75">
-                <div className="flex items-center gap-x-4">
+                <div className="relative">
                     <ChannelSettings
                         channelName={channelName}
                         buttonNode={
@@ -65,6 +66,14 @@ export default function Header({ channelName , loaded}) {
                             </div>
                         }
                     />
+                     { (topLoading || bottomLoading) && (
+                        <div className="flex gap-x-2 items-center px-4 py-2 absolute -right-full top-1/2 -translate-y-1/2">
+                            <div className="h-6 w-6 relative">
+                                <OverlayLoadingSpinner />
+                            </div>
+                            <div className="text-xs">Loading ...</div>
+                        </div>
+                    )}
                 </div>
                 <div className="">
                     {!channel?.is_archived && (
