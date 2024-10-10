@@ -1,6 +1,4 @@
-import { useForm } from "@inertiajs/react";
-import { v4 as uuidv4 } from "uuid";
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import copy from "copy-to-clipboard";
 import TextArea from "@/Components/Input/TextArea";
 import { FaLink } from "react-icons/fa6";
@@ -46,7 +44,7 @@ export function InvitationForm({ workspace }) {
                 emailList.map((em) => em.trim()).filter((em) => em != "")
             );
         }
-        
+
         submit().then((response) => {
             copy(response.data.invitation_link);
             setInvitationLink(response.data.invitation_link);
@@ -63,7 +61,6 @@ export function InvitationForm({ workspace }) {
 
         axios
             .post(route("invitation.store", workspace.id), {
-                code: uuid,
                 workspace_id: workspace.id,
             })
             .then((response) => {

@@ -9,10 +9,12 @@ import { FiArchive } from "react-icons/fi";
 import { RiInboxUnarchiveLine } from "react-icons/ri";
 import Overlay from "@/Components/Overlay/Overlay";
 import OverlaySimpleNotification from "@/Components/Overlay/OverlaySimpleNotification";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
+import useErrorHandler from "@/helpers/useErrorHandler";
+import { updateChannelInformation } from "@/Store/channelsSlice";
 export default function ArchiveChannel() {
-    const {channelId} = useParams()
+    const { channelId } = useParams();
 
     const { channels } = useSelector((state) => state.channels);
 
@@ -23,40 +25,36 @@ export default function ArchiveChannel() {
     const [errors, setErrors] = useState(null);
     const [success, setSuccess] = useState(false);
     const [processing, setProcessing] = useState(false);
-
+    const errorHandler = useErrorHandler();
+    const dispatch = useDispatch();
     function submit(e) {
         if (!confirm) return;
         setProcessing(true);
-        router.post(
-            route("channel.archive", channel.id),
-            {
-                status: !channel.is_archived,
-            },
-            {
-                preserveState: true,
-                preserveScroll: true,
-                onError: (errors) => setErrors(errors),
-                onSuccess: () => {
-                    setSuccess(true);
+
+        axios
+            .post(
+                route("channels.archive", channel.id),
+                {
+                    status: !channel.is_archived,
                 },
-                onFinish: () => {
-                    setProcessing(false);
-                },
-                headers: {
-                    "X-Socket-Id": Echo.socketId(),
-                },
-            }
-        );
+                {
+                    headers: {
+                        "X-Socket-Id": Echo.socketId(),
+                    },
+                }
+            )
+            .then(() => {
+                setSuccess(true);
+               
+            })
+            .catch(errorHandler)
+            .finally(() => {
+                setProcessing(false);
+            });
     }
     if (channel.is_archived) {
         return (
             <>
-                <OverlaySimpleNotification
-                    show={errors}
-                    onClose={() => setErrors(null)}
-                >
-                    <ErrorsList errors={errors} />
-                </OverlaySimpleNotification>
                 <Button
                     className=" !hover:text-danger-500  bg-transparent w-full py-4 !rounded-none border-none flex !justify-start"
                     loading={processing}
@@ -146,12 +144,6 @@ export default function ArchiveChannel() {
                             </li>
                         </ul>
                     </>
-                )}
-
-                {errors && (
-                    <div>
-                        <ErrorsList errors={errors} />
-                    </div>
                 )}
             </div>
         </OverlayNotification>

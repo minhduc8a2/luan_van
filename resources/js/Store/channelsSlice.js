@@ -33,6 +33,14 @@ export const channelsSlice = createSlice({
             if (channelIndex >= 0) {
                 Object.keys(action.payload.data).forEach((key) => {
                     if (key == "id") return;
+                    console.log(
+                        "Update channel :" +
+                            action.payload.id +
+                            " with " +
+                            key +
+                            " = " +
+                            action.payload.data[key]
+                    );
                     state.channels[channelIndex][key] =
                         action.payload.data[key];
                 });

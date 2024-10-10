@@ -22,7 +22,7 @@ class ChannelEvent implements ShouldBroadcastNow
     {
         //
     }
-
+   
     /**
      * Get the channels the event should broadcast on.
      *

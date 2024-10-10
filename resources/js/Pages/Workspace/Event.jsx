@@ -32,7 +32,6 @@ import {
     editMessage,
     removeManagerFromChannel,
     removeUserFromChannel,
-    setChannelData,
 } from "@/Store/channelsDataSlice";
 import { useParams } from "react-router-dom";
 
@@ -316,11 +315,17 @@ export default function Event() {
 
                             break;
                         case "updateChannelPermissions":
+                            console.log("updateChannelPermissions called");
                             reloadPermissions(cn.id);
                             break;
 
                         case "archiveChannel":
                             reloadPermissions(cn.id);
+
+                            break;
+                        case "unarchiveChannel":
+                            reloadPermissions(cn.id);
+
                             break;
                         case "join":
                             dispatch(

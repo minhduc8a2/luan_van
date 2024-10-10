@@ -364,7 +364,7 @@ class ChannelController extends Controller
 
             $channel->description = $validated['description'] ?? "";
             $channel->save();
-            broadcast(new ChannelEvent($channel, "editDescription"))->toOthers();
+            broadcast(new ChannelEvent($channel, "editDescription"));
             DB::commit();
 
             return ['message' => 'successfull'];
@@ -385,7 +385,7 @@ class ChannelController extends Controller
 
             $channel->name = $validated['name'];
             $channel->save();
-            broadcast(new ChannelEvent($channel, "editName"))->toOthers();
+            broadcast(new ChannelEvent($channel, "editName"));
             DB::commit();
 
             return ['message' => 'successfull'];
@@ -409,7 +409,7 @@ class ChannelController extends Controller
             $channel->type = $validated['type'];
             $channel->save();
             Message::createStringMessageAndBroadcast($channel, $request->user(), $request->user()->name . " has changed channel privacy from " . $oldType . " to " . $channel->type . ".");
-            broadcast(new ChannelEvent($channel, "changeType"))->toOthers();
+            broadcast(new ChannelEvent($channel, "changeType"));
             $channelUsers = $channel->users;
             foreach ($channelUsers as $channelUser) {
                 if ($channelUser->id == $user->id) continue;
@@ -502,7 +502,7 @@ class ChannelController extends Controller
 
 
             //notify
-            broadcast(new ChannelEvent($channel, "removeUserFromChannel", $user->id))->toOthers();
+            broadcast(new ChannelEvent($channel, "removeUserFromChannel", $user->id));
             $user->notify(new ChannelsNotification($request->user(), $user, $channel, $channel->workspace, "removedFromChannel"));
             Message::createStringMessageAndBroadcast($channel, $request->user(), $request->user()->name . " has removed " . $user->name . " from channel");
 
@@ -705,7 +705,7 @@ class ChannelController extends Controller
 
     public function archive(Request $request, Channel $channel)
     {
-        // return back()->withErrors(['server' => "Something went wrong! Please try later."]);
+
 
         if ($request->user()->cannot('archive', $channel)) abort(403);
         $validated = $request->validate(['status' => 'required|boolean']);
@@ -714,7 +714,7 @@ class ChannelController extends Controller
             $channel->is_archived = $validated['status'];
             $user = $request->user();
             $channel->save();
-            broadcast(new ChannelEvent($channel, "archiveChannel"))->toOthers();
+            broadcast(new ChannelEvent($channel, "archiveChannel"));
             $channelUsers = $channel->users;
             foreach ($channelUsers as $channelUser) {
                 $channelUser->notify(new ChannelsNotification(
@@ -727,11 +727,10 @@ class ChannelController extends Controller
                 ));
             }
             DB::commit();
-            return back();
+            return Helper::createSuccessResponse();
         } catch (\Throwable $th) {
             DB::rollBack();
-            // dd($th);
-            return back()->withErrors(['server' => "Something went wrong! Please try later."]);
+            Helper::createErrorResponse();
         }
     }
 
@@ -744,7 +743,7 @@ class ChannelController extends Controller
         ];
         try {
             $channel = Channel::find($channelId);
-            
+
             if (!$channel) return ['result' => false];
             if ($channel->type == ChannelTypes::PUBLIC->name) {
                 return [
