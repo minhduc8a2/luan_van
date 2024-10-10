@@ -9,7 +9,6 @@ import {
 } from "@/helpers/notificationTypeHelper";
 import { useDispatch, useSelector } from "react-redux";
 import {
-   
     pushManyActivity,
     setActivity,
     setAsRead,
@@ -24,7 +23,9 @@ import axios from "axios";
 import { InView } from "react-intersection-observer";
 import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
 import { FaToggleOn } from "react-icons/fa";
+import { useParams } from "react-router-dom";
 export default function Activity() {
+    const { workspaceId } = useParams();
     const { leftWindowType } = useSelector((state) => state.windowType);
     const nextPageUrlRef = useRef(null);
     const dispatch = useDispatch();
@@ -51,7 +52,7 @@ export default function Activity() {
     }
     useEffect(() => {
         setLoading(true);
-        axios.get(route("notifications.get")).then((response) => {
+        axios.get(route("notifications.get", workspaceId)).then((response) => {
             nextPageUrlRef.current = response.data?.next_page_url;
             console.log(response);
             dispatch(setActivity(response.data?.data));

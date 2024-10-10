@@ -24,11 +24,12 @@ export default function HuddleNotification({
         isHuddleInvitationNotificationBroadcast(notification.type)
             ? notification
             : notification.data;
+  
     const read_at = notification.read_at;
     const created_at = notification.created_at;
     const view_at = notification.view_at;
     const [errors, setErrors] = useState(null);
-    
+
     function handleNotificationClickedPart() {
         axios
             .get(route("channel.checkExists"), {
@@ -153,8 +154,7 @@ export default function HuddleNotification({
                             <div className="text-left">
                                 {`${fromUser.name} has invited you to join huddle in channel `}{" "}
                                 <span className="font-bold">
-                                    #
-                                    {channelName}
+                                    #{channelName}
                                 </span>{" "}
                             </div>
                         </div>

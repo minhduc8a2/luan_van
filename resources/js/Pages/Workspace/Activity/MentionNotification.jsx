@@ -24,16 +24,17 @@ export default function MentionNotification({
 }) {
     const { auth } = usePage().props;
     const channelsData = useSelector((state) => state.channelsData);
-    const { channelId } = useParams();
+    const { channelId, workspaceId } = useParams();
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
-    const { channel: currentChannel } = useChannel(channelId);
+   
     const { channels } = useSelector((state) => state.channels);
     const { messages } = useChannelData(channelId);
     const [errors, setErrors] = useState(null);
-    const { fromUser, toUser, channel, workspace, message, threadMessage } =
+    const { fromUser,  channel, workspace, message, threadMessage } =
         isMentionNotificationBroadcast(notification.type)
             ? notification
             : notification.data;
+    
     const read_at = notification.read_at;
     const created_at = notification.created_at;
     const view_at = notification.view_at;
@@ -105,7 +106,7 @@ export default function MentionNotification({
                             });
                     }
                 } else if (
-                    channel.id == currentChannel.id &&
+                    channel.id == channelId &&
                     messages.find((msg) => msg.id == message.id)
                 ) {
                     const targetMessage = document.getElementById(

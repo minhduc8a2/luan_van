@@ -743,12 +743,8 @@ class ChannelController extends Controller
             'result' => false,
         ];
         try {
-            $channel = Channel::where('id',  $channelId)->whereHas('workspace', function ($workspaceQuery) use ($user) {
-                $workspaceQuery->whereHas('users', function ($userQuery) use ($user) {
-                    $userQuery->where('users.id', $user->id);
-                });
-            })->first();
-
+            $channel = Channel::find($channelId);
+            
             if (!$channel) return ['result' => false];
             if ($channel->type == ChannelTypes::PUBLIC->name) {
                 return [

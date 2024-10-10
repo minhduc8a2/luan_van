@@ -4,7 +4,10 @@ import { useEffect } from "react";
 import { setManyOnline, setOnlineStatus } from "@/Store/OnlineStatusSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { addActivity, addNotificationCount } from "@/Store/activitySlice";
-import { isChannelsNotificationBroadcast } from "@/helpers/notificationTypeHelper";
+import {
+    isBroadcastNotification,
+    isChannelsNotificationBroadcast,
+} from "@/helpers/notificationTypeHelper";
 
 import { toggleHuddle } from "@/Store/huddleSlice";
 import { deleteFileInThread, setThreadedMessageId } from "@/Store/threadSlice";
@@ -56,6 +59,11 @@ export default function Event() {
         Echo.private("App.Models.User." + auth.user.id).notification(
             (notification) => {
                 console.log(notification);
+                const { workspace: notificationWorkspace } =
+                    isBroadcastNotification(notification.type)
+                        ? notification
+                        : notification.data;
+                if (workspace.id != notificationWorkspace.id) return;
                 dispatch(addNotificationCount());
                 if (isChannelsNotificationBroadcast(notification.type)) {
                     const { channel, changesType } = notification;

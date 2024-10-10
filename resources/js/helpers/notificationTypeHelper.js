@@ -17,9 +17,7 @@ export function isMentionNotification(givenType) {
         "App\\Notifications\\MentionNotification",
         "MENTION_NOTIFICATION",
     ];
-    return (
-        mentionNotificationType.findIndex((i) => i == givenType) >= 0
-    );
+    return mentionNotificationType.findIndex((i) => i == givenType) >= 0;
 }
 
 export function isMentionNotificationBroadcast(givenType) {
@@ -32,11 +30,13 @@ export function isChannelsNotification(givenType) {
         "App\\Notifications\\ChannelsNotification",
         "CHANNELS_NOTIFICATION",
     ];
-    return (
-        channelsNotificationType.findIndex((i) => i == givenType) >= 0
-    );
+    return channelsNotificationType.findIndex((i) => i == givenType) >= 0;
 }
 
 export function isChannelsNotificationBroadcast(givenType) {
     return givenType == "App\\Notifications\\ChannelsNotification";
+}
+
+export function isBroadcastNotification(givenType) {
+    return givenType.startsWith("App\\Notifications");
 }

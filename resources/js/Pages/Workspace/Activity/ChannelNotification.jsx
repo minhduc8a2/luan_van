@@ -12,12 +12,15 @@ import { FaLock } from "react-icons/fa";
 import OverlaySimpleNotification from "@/Components/Overlay/OverlaySimpleNotification";
 import { useState } from "react";
 import { useChannelData } from "@/helpers/customHooks";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import useGoToChannel from "@/helpers/useGoToChannel";
+import { setNotificationPopup } from "@/Store/notificationPopupSlice";
 export default function ChannelNotification({
     notification,
     handleNotificationClick,
 }) {
-    const { auth, channelId } = usePage().props;
+    const { auth } = usePage().props;
+    const {workspaceId} = useParams()
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
     // console.log(notification);
 
@@ -25,12 +28,13 @@ export default function ChannelNotification({
         isChannelsNotificationBroadcast(notification.type)
             ? notification
             : notification.data;
+   
     const read_at = notification.read_at;
     const created_at = notification.created_at;
     const view_at = notification.view_at;
-    const navigate = useNavigate();
-    const [errors, setErrors] = useState(null);
 
+    const dispatch = useDispatch();
+    const goToChannel = useGoToChannel();
     function handleNotificationClickedPart() {
         axios
             .get(route("channel.checkExists"), {
@@ -39,11 +43,16 @@ export default function ChannelNotification({
             .then((response) => {
                 let result = response?.data?.result;
                 if (!result) {
-                    setErrors(true);
+                    dispatch(
+                        setNotificationPopup({
+                            type: "error",
+                            messages: ["Channel not found!"],
+                        })
+                    );
                     return;
                 }
                 if (changesType != "deleteChannel") {
-                    navigate(`channels/${channel.id}`);
+                    goToChannel(workspace.id, channel.id);
                 }
             });
     }
@@ -177,13 +186,7 @@ export default function ChannelNotification({
         }
     }, [notification]);
     return (
-        <li>
-            <OverlaySimpleNotification
-                show={errors}
-                onClose={() => setErrors(null)}
-            >
-                <div className="text-red-500">Channel was deleted!</div>
-            </OverlaySimpleNotification>
+        <div>
             <button
                 className={`p-4 pl-8 w-full hover:bg-white/15 border-t border-white/15 ${
                     read_at != null ? "" : "bg-primary-300/15"
@@ -237,6 +240,6 @@ export default function ChannelNotification({
                     </div>
                 </div>
             </button>
-        </li>
+        </div>
     );
 }

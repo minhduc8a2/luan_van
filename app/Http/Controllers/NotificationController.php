@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Workspace;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -22,7 +23,8 @@ class NotificationController extends Controller
       $notification->save();
    }
 
-   public function get(Request $request){
-      return $request->user()->notifications()->simplePaginate(8);
+   public function get(Request $request, Workspace $workspace)
+   {
+      return $request->user()->notifications()->whereJsonContains('data->workspace->id', $workspace->id)->simplePaginate(8);
    }
 }

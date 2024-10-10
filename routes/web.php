@@ -118,7 +118,7 @@ Route::post("/channels/{channel}/messages/{message}/reactions", [ReactionControl
 Route::post("/channels/{channel}/messages/{message}/reactions/delete", [ReactionController::class, 'delete'])->name('reaction.delete');
 
 
-Route::get("/notifications", [NotificationController::class, 'get'])->name('notifications.get');
+Route::get("/workspaces/{workspace}/notifications", [NotificationController::class, 'get'])->name('notifications.get');
 // Route::get('/mailable', function () {
 //     return new  InvitationMail("https://google.com", "company A", "A", "B");
 // });
