@@ -7,7 +7,7 @@ export const workspaceUsersSlice = createSlice({
     },
     reducers: {
         setWorkspaceUsers(state, action) {
-            state.workspaceUsers = action.payload;
+            state.workspaceUsers = action.payload || [];
         },
         updateWorkspaceUserInformation(state, action) {
             const userIndex = state.workspaceUsers.findIndex(

@@ -1,13 +1,9 @@
-const loadChannelMessagesToken = { current: null };
 export function loadSpecificMessagesById(
     messageId,
     channelId,
-
-    threaded_message_id = null
+    threaded_message_id = null,
+    token = null
 ) {
-    if (loadChannelMessagesToken.current)
-        loadChannelMessagesToken.current.abort();
-    loadChannelMessagesToken.current = new AbortController();
     return axios
         .get(
             route("messages.getSpecificMessagesById", {
@@ -16,7 +12,7 @@ export function loadSpecificMessagesById(
                 threaded_message_id,
             }),
             {
-                signal: loadChannelMessagesToken.current.signal,
+                signal: token?.signal,
             }
         )
         .then((response) => {

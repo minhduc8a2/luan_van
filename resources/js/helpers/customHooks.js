@@ -4,12 +4,19 @@ import axios from "axios";
 import useErrorHandler from "./useErrorHandler";
 const useChannelData = (channelId) => {
     const channelsData = useSelector((state) => state.channelsData);
-
+    if (!channelId)
+        return {
+            permissions: {},
+            messages: [],
+            channelPermissions: {},
+            channelUserIds: [],
+            managerIds: [],
+        };
     return (
         (channelsData.hasOwnProperty(channelId) && channelsData[channelId]) || {
             permissions: {},
             messages: [],
-            channelPermissions: [],
+            channelPermissions: {},
             channelUserIds: [],
             managerIds: [],
         }
@@ -33,8 +40,8 @@ const useManagers = (channelId) => {
 };
 
 const useChannelUsers = (channelId) => {
-    const { channelUserIds } = useChannelData(channelId);
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
+    const { channelUserIds } = useChannelData(channelId);
 
     const channelUsers = useMemo(() => {
         if (!channelUserIds?.length || !workspaceUsers?.length) {
@@ -43,7 +50,7 @@ const useChannelUsers = (channelId) => {
         return workspaceUsers.filter((user) =>
             channelUserIds.some((id) => user.id === id)
         );
-    }, [channelUserIds, workspaceUsers]);
+    }, [channelUserIds, workspaceUsers, channelId]);
     return { channelUsers };
 };
 const useChannel = (channelId) => {
@@ -58,12 +65,16 @@ const useChannel = (channelId) => {
     };
 };
 
-const useMainChannel =  (workspaceId) => {
+const useMainChannel = (workspaceId) => {
     const { channels } = useSelector((state) => state.channels);
 
     const mainChannel = useMemo(() => {
-        return channels.find((cn) => cn.is_main_channel && cn.workspace_id==workspaceId) || null; 
-    }, [channels,workspaceId]);
+        return (
+            channels.find(
+                (cn) => cn.is_main_channel && cn.workspace_id == workspaceId
+            ) || null
+        );
+    }, [channels, workspaceId]);
 
     return {
         mainChannel,
@@ -150,5 +161,5 @@ export {
     useChannel,
     useChannelUsers,
     useCustomedForm,
-    useMainChannel
+    useMainChannel,
 };

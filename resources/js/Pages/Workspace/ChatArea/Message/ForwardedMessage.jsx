@@ -19,6 +19,8 @@ import { getMentionsFromContent } from "@/helpers/tiptapHelper";
 
 import ForwardMessage from "./ForwardMessage/ForwardMessage";
 import Message from "./Message";
+import { useChannel, useChannelUsers } from "@/helpers/customHooks";
+import { useParams } from "react-router-dom";
 export default function ForwardedMessage({
     message,
     user,
@@ -30,9 +32,13 @@ export default function ForwardedMessage({
     resetNewMessageReactionReceive,
     noToolbar = false,
 }) {
-    const { auth, channelId } = usePage().props;
+    const { auth } = usePage().props;
+    const { channelId } = useParams();
     const dispatch = useDispatch();
+    const { channels } = useSelector((state) => state.channels);
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
+    const { channelUsers } = useChannelUsers(channelId);
+    const { channel } = useChannel(channelId);
     const { messageId } = useSelector((state) => state.mention);
     const files = message.files || [];
     const [reactions, setReactions] = useState(
@@ -51,10 +57,9 @@ export default function ForwardedMessage({
         else otherFiles.push(file);
     });
 
-    const [openOverlay, setOpenOverlay] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
-    const [showConfirm, setShowConfirm] = useState(null);
+
     const [forwardedMessage, setForwardedMessage] = useState(null);
 
     const forwardedMessageUser = useMemo(() => {
@@ -63,15 +68,10 @@ export default function ForwardedMessage({
         );
     }, [workspaceUsers, message]);
     const forwardedMessageChannel = useMemo(() => {
-        return (
-            channels.find(
-                (cn) => cn.id == message.forwarded_message.channel_id
-            ) ||
-            directChannels.find(
-                (cn) => cn.id == message.forwarded_message.channel_id
-            )
+        return channels.find(
+            (cn) => cn.id == message.forwarded_message.channel_id
         );
-    }, [channels, directChannels, message]);
+    }, [channels, message]);
     const groupedReactions = useMemo(() => {
         return groupReactions(reactions, channelUsers, auth.user);
     }, [reactions]);

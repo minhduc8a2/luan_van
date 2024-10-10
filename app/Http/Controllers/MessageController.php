@@ -80,16 +80,64 @@ class MessageController extends Controller
     {
         $messageId = $request->query('messageId');
         $threaded_message_id = $request->query('thread_message_id');
+        $user = $request->user();
+        $hiddenUserIds =  $user->hiddenUsers()->wherePivot('workspace_id', $channel->workspace->id)->pluck('hidden_user_id')->toArray();
+        $specificMessage = Message::where('id', $messageId)->withTrashed()->with([
+            'files' => function ($query) {
+                $query->withTrashed();
+            },
+            'reactions',
 
-        $specificMessage = Message::find($messageId);
+            'forwardedMessage.files' => function ($query) {
+
+                $query->withTrashed();
+            },
+        ])->withCount([
+            'threadMessages' => function ($query) use ($hiddenUserIds) {
+
+                $query->whereNotIn('user_id', $hiddenUserIds);
+            }
+        ])->first();
         if (!$specificMessage) {
             return abort(404, 'Message was deleted!');
         }
 
         $beforeMessagesQuery = Message::where('id', '<', $specificMessage->id)->where('channel_id', '=', $channel->id)
+            ->withTrashed()->with([
+                'files' => function ($query) {
+                    $query->withTrashed();
+                },
+                'reactions',
+
+                'forwardedMessage.files' => function ($query) {
+
+                    $query->withTrashed();
+                },
+            ])->withCount([
+                'threadMessages' => function ($query) use ($hiddenUserIds) {
+
+                    $query->whereNotIn('user_id', $hiddenUserIds);
+                }
+            ])
             ->orderBy('id', 'desc')
             ->limit(5);
         $afterMessagesQuery = Message::where('id', '>', $specificMessage->id)->where('channel_id', '=', $channel->id)
+            ->withTrashed()->with([
+                'files' => function ($query) {
+                    $query->withTrashed();
+                },
+                'reactions',
+
+                'forwardedMessage.files' => function ($query) {
+
+                    $query->withTrashed();
+                },
+            ])->withCount([
+                'threadMessages' => function ($query) use ($hiddenUserIds) {
+
+                    $query->whereNotIn('user_id', $hiddenUserIds);
+                }
+            ])
             ->orderBy('id', 'asc')
             ->limit(5);
 
@@ -143,8 +191,8 @@ class MessageController extends Controller
                 if ($threadMessage) {
 
                     $threadMessagePosition = $message->threadMessages()->whereNotIn('user_id', $hiddenUserIds)
-                        ->latest() 
-                        ->where('id', '>=', $threadMessage->id) 
+                        ->latest()
+                        ->where('id', '>=', $threadMessage->id)
                         ->count();
                     $pageNumber = ceil($threadMessagePosition / $perPage);
                 }
@@ -363,11 +411,11 @@ class MessageController extends Controller
                 }
             }
             DB::commit();
-            return back();
+            return Helper::createSuccessResponse();
         } catch (\Throwable $th) {
             DB::rollBack();
             dd($th);
-            return back()->withErrors(['server' => 'Something went wrong! Please try later.']);
+            return Helper::createErrorResponse();
         }
     }
 

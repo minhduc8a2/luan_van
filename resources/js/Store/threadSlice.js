@@ -26,17 +26,17 @@ export const threadSlice = createSlice({
             if (!state.messageId) state.message = null;
         },
         addThreadMessage(state, action) {
-            console.log(action.payload);
             state.message.thread_messages_count += 1;
-            state.messages = [ state.messages, action.payload]
+            state.messages = [...state.messages, action.payload];
+            console.log("addthread message", state.messages);
         },
         addThreadMessages(state, action) {
-           
             if (action.payload.position == "top") {
                 state.messages = [...action.payload.data, ...state.messages];
             } else {
                 state.messages = [...state.messages, ...action.payload.data];
             }
+            console.log("addThreadMessages", state.messages);
         },
         setThreadMessages(state, action) {
             state.messages = action.payload;

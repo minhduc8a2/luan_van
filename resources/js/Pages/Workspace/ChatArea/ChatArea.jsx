@@ -40,7 +40,7 @@ export default function ChatArea() {
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
     const { permissions, messages } = useChannelData(channelId);
     const { channelUsers } = useChannelUsers(channelId);
-   
+
     const { channel } = useChannel(channelId);
     // console.log(channel);
     const { messageId: threadMessageId } = useSelector((state) => state.thread);
@@ -190,6 +190,7 @@ export default function ChatArea() {
             setHasMention(messageId);
             setMentionFulfilled(false);
             dispatch(setMention(null));
+
             if (newMessageReceived) setNewMessageReceived(false);
         }
     }, [messageId, newMessageReceived]);
@@ -277,6 +278,7 @@ export default function ChatArea() {
 
     useEffect(() => {
         if (hasMention && groupedMessages && !mentionFulfilled) {
+            console.log("hasMention", hasMention);
             const targetMessage = document.getElementById(
                 `message-${hasMention}`
             );
@@ -286,13 +288,17 @@ export default function ChatArea() {
 
                 setTimeout(() => {
                     targetMessage.classList.remove("bg-link/15");
+                    try {
+                        setHasMention(null);
+                        setMentionFulfilled(true);
+                    } catch (error) {
+                        console.error("Failed to update mention state:", error);
+                    }
                 }, 3000);
                 targetMessage.scrollIntoView({
                     behavior: "instant",
                     block: "center",
                 });
-                setHasMention(null);
-                setMentionFulfilled(true);
             }
         }
     }, [
@@ -468,7 +474,6 @@ export default function ChatArea() {
                         isChannelMember={isChannelMember}
                         channelName={channelName}
                         setFocus={setFocus}
-                       
                     />
                 )}
             </div>

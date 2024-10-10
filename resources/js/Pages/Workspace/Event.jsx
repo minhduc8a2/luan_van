@@ -104,7 +104,7 @@ export default function Event() {
                 }
             }
         );
-    }, [channelId, workspace.id, mainChannel.id, auth.user.id, channelsData]);
+    }, [channelId, workspaceId, mainChannel?.id, auth.user.id, channelsData]);
     useEffect(() => {
         userListener();
         console.log("user listener registered");

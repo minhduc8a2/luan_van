@@ -31,11 +31,11 @@ import InfiniteScroll from "@/Components/InfiniteScroll";
 import { findMinMaxId } from "@/helpers/channelHelper";
 export default function Thread() {
     const dispatch = useDispatch();
-
     const { threadMessage: mentionThreadMessage } = useSelector(
         (state) => state.mention
     );
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
+
     const {
         message: threadedMessage,
         messageId: threadedMessageId,
@@ -49,11 +49,14 @@ export default function Thread() {
     const { channelUsers } = useChannelUsers(channelId);
 
     const user = useMemo(() => {
-        if (!threadedMessage) return null;
-        return workspaceUsers.filter(
-            (mem) => mem.id === threadedMessage.user_id
-        )[0];
+        if (!threadedMessage || !workspaceUsers) return null;
+
+        const foundUser = workspaceUsers.find(
+            (mem) => mem.id == threadedMessage.user_id
+        );
+        return foundUser || null;
     }, [threadedMessage, workspaceUsers]);
+
     const [loadingMessages, setLoadingMessages] = useState(false);
 
     const [newMessageReactionReceive, setNewMessageReactionReceive] =
@@ -73,6 +76,7 @@ export default function Thread() {
 
     useEffect(() => {
         if (messages) {
+            console.log(messages);
             const { minId, maxId } = findMinMaxId(messages);
             // console.log(minId, maxId);
             setTopHasMore(maxId);
@@ -178,36 +182,39 @@ export default function Thread() {
             mentionsList.length == 0
         )
             return;
-        router.post(
-            route("thread_message.store", {
-                channel: channel.id,
-                message: threadedMessageId,
-            }),
-            {
-                content,
-                fileObjects,
-                mentionsList: getMentionsFromContent(JSONContent),
-            },
-            {
-                onSuccess: () => {
-                    setNewMessageReceived(true);
+        axios
+            .post(
+                route("thread_message.store", {
+                    channel: channel.id,
+                    message: threadedMessageId,
+                }),
+                {
+                    content,
+                    fileObjects,
+                    mentionsList: getMentionsFromContent(JSONContent),
                 },
-                preserveState: true,
-                preserveScroll: true,
-                headers: {
-                    "X-Socket-Id": Echo.socketId(),
-                },
-            }
-        );
+                {
+                    headers: {
+                        "X-Socket-Id": Echo.socketId(),
+                    },
+                }
+            )
+            .then(() => {
+                setNewMessageReceived(true);
+            });
     }
 
     useEffect(() => {
         setNewMessageReceived(true);
+        console.log("reset thread");
         return () => {
             dispatch(setThreadMessages([]));
         };
     }, [threadedMessageId]);
     useEffect(() => {
+        if (!threadedMessageId) return;
+      
+        if (threadedMessage && threadedMessage.id == threadedMessageId) return;
         axios
             .get(route("messages.getMessage"), {
                 params: {
@@ -215,27 +222,22 @@ export default function Thread() {
                 },
             })
             .then((response) => {
-                console.log(response);
+                console.log("", response);
 
                 dispatch(setThreadedMessage(response.data));
             });
     }, [threadedMessageId]);
     useEffect(() => {
+        if (!threadedMessageId) return;
         threadConnectionRef.current = Echo.join(`threads.${threadedMessageId}`);
         threadConnectionRef.current
-            .here((users) => {})
-            .joining((user) => {
-                // console.log("join thread", user);
-            })
-            .leaving((user) => {
-                // console.log("leaving thread", user);
-            })
             .listen("ThreadMessageEvent", (e) => {
                 console.log(e);
                 switch (e.type) {
                     case "newMessageCreated":
                         if (!isHiddenUser(workspaceUsers, e.message?.user_id))
                             dispatch(addThreadMessage(e.message));
+
                         break;
                     case "messageEdited":
                         if (!isHiddenUser(workspaceUsers, e.message?.user_id)) {
@@ -268,6 +270,8 @@ export default function Thread() {
 
     useEffect(() => {
         if (!threadedMessage || messages.length > 0) return;
+
+       
         setLoadingMessages(true);
         // router.get(
         //     route("messages.threadMessages", threadedMessageId),
@@ -286,10 +290,6 @@ export default function Thread() {
                 dispatch(setThreadMessages(response.data || []));
                 setLoadingMessages(false);
             });
-        return () => {
-            dispatch(setThreadMessages([]));
-            Echo.leave(`threads.${threadedMessageId}`);
-        };
     }, [threadedMessage, threadedMessageId]);
 
     // useEffect(() => {
@@ -345,13 +345,17 @@ export default function Thread() {
 
                 setTimeout(() => {
                     targetMessage.classList.remove("bg-link/15");
+                    try {
+                        setHasMention(null);
+                        setMentionFulfilled(true);
+                    } catch (error) {
+                        console.error("Failed to update mention state:", error);
+                    }
                 }, 3000);
                 targetMessage.scrollIntoView({
                     behavior: "instant",
                     block: "center",
                 });
-                setHasMention(null);
-                setMentionFulfilled(true);
             }
         }
     }, [

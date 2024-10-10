@@ -8,7 +8,7 @@ import FileItem from "@/Components/FileItem";
 import DocumentAttachment from "./DocumentAttachment";
 import Video from "@/Components/Video";
 import MessageToolbar from "./MessageToolbar";
-import { Link, router, usePage } from "@inertiajs/react";
+import { router, usePage } from "@inertiajs/react";
 import { groupReactions } from "@/helpers/reactionHelper";
 import { useEffect } from "react";
 import Reactions from "./Reactions";
@@ -26,7 +26,9 @@ import ForwardMessage from "./ForwardMessage/ForwardMessage";
 import { setMention } from "@/Store/mentionSlice";
 import { setProfile } from "@/Store/profileSlice";
 import { useChannel } from "@/helpers/customHooks";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import useGoToChannel from "@/helpers/useGoToChannel";
+import useGoToMessage from "@/helpers/useGoToMessage";
 export default function Message({
     message,
     user,
@@ -40,11 +42,11 @@ export default function Message({
     forwarded = false,
 }) {
     const { auth } = usePage().props;
-    const { channelId } = useParams();
+    const { channelId, workspaceId } = useParams();
     const { channel } = useChannel(channelId);
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
     const dispatch = useDispatch();
-
+    const goToChannel = useGoToChannel();
     const files = message.files || [];
     const [reactions, setReactions] = useState(
         message.reactions ? [...message.reactions] : []
@@ -67,6 +69,7 @@ export default function Message({
     const [isEditing, setIsEditing] = useState(false);
     const [showConfirm, setShowConfirm] = useState(null);
     const [forwardedMessage, setForwardedMessage] = useState(null);
+    const goToMessageInHook = useGoToMessage()
     const groupedReactions = useMemo(() => {
         return groupReactions(reactions, workspaceUsers, auth.user);
     }, [reactions]);
@@ -219,35 +222,8 @@ export default function Message({
         );
     }
 
-    function goToMessage(channel) {
-        const isThreadMessage = message.threaded_message_id;
-        dispatch(setThreadedMessageId(null));
-        router.get(
-            route("channels.show", {
-                workspace: workspace.id,
-                channel: channel.id,
-            }),
-            { message_id: message.id },
-            {
-                preserveState: true,
-
-                onFinish: () => {
-                    dispatch(
-                        setMention({
-                            messageId: isThreadMessage
-                                ? message.threaded_message_id
-                                : message.id,
-                            threadMessage: isThreadMessage ? message : null,
-                        })
-                    );
-
-                    if (isThreadMessage)
-                        dispatch(
-                            setThreadedMessageId(message.threaded_message_id)
-                        );
-                },
-            }
-        );
+    function goToMessage() {
+        goToMessageInHook(message)
     }
     // if (!channel) return "";
     return (
@@ -255,7 +231,7 @@ export default function Message({
             className={`message-container transition-all pl-8 pt-1 pr-4 pb-2 relative break-all group hover:bg-white/10 ${
                 isHovered && !message.deleted_at ? "bg-white/10" : ""
             } ${hasChanged || index == 0 ? "pt-4" : "mt-0"}`}
-            id={`message-${message.id}`}
+            id={forwarded?`forwarded-message-${message.id}`:`message-${message.id}`}
         >
             <ForwardMessage
                 message={forwardedMessage}
@@ -433,9 +409,14 @@ export default function Message({
                 {forwarded && forwardedMessageChannel && (
                     <div className="text-sm flex items-baseline gap-x-1 mt-4">
                         Posted in{" "}
-                        <Link
-                            className="text-link hover:underline"
-                            href={route("channels.show", message.channel_id)}
+                        <div
+                            className="text-link hover:underline cursor-pointer"
+                            onClick={() => {
+                                goToChannel(
+                                    forwardedMessageChannel.workspace_id,
+                                    forwardedMessageChannel.id
+                                );
+                            }}
                         >
                             {forwardedMessageChannel.type != "DIRECT" ? (
                                 <div className="flex items-baseline gap-x-1  ">
@@ -450,11 +431,11 @@ export default function Message({
                             ) : (
                                 "Direct channel"
                             )}
-                        </Link>
+                        </div>
                         <span className="text-white/85 mx-2">|</span>
                         <button
                             className="text-link text-sm"
-                            onClick={() => goToMessage(forwardedMessageChannel)}
+                            onClick={() => goToMessage()}
                         >
                             View Message
                         </button>

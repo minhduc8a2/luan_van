@@ -173,7 +173,7 @@ import Button from "./Button";
 
 export default function TipTapEditor({
     onSubmit,
-    onFilePicked,
+    
     message = null,
     focus = 1,
     isEditMessage = false,

@@ -12,64 +12,98 @@ import { useDispatch, useSelector } from "react-redux";
 import { setNotificationPopup } from "@/Store/notificationPopupSlice";
 import { getMentionsFromContent } from "@/helpers/tiptapHelper";
 
-import { useChannelUsers } from "@/helpers/customHooks";
+import { useChannel, useChannelUsers } from "@/helpers/customHooks";
 import { useParams } from "react-router-dom";
 import useGoToChannel from "@/helpers/useGoToChannel";
+import {
+    loadChannelData,
+    loadChannelRelatedData,
+} from "@/helpers/channelDataLoader";
+import { setChannelData } from "@/Store/channelsDataSlice";
+import useErrorHandler from "@/helpers/useErrorHandler";
 
 export default function ForwardMessage({ message, show, onClose }) {
     const dispatch = useDispatch();
     const { auth } = usePage().props;
     const { channelId } = useParams();
+    const { channel } = useChannel(channelId);
+    const channelsData = useSelector((state) => state.channelsData);
     const { channelUsers } = useChannelUsers(channelId);
     const { channels } = useSelector((state) => state.channels);
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
     const goToChannel = useGoToChannel();
     const [choosenChannelsList, setChoosenChannelsList] = useState([]);
+    const [loadingChannelUserIds, setLoadingChannelUserIds] = useState(false);
+    const errorHandler = useErrorHandler();
     function changeChannel(channel) {
-       goToChannel(channel.workspace_id,channel.id)
+        goToChannel(channel.workspace_id, channel.id);
     }
     function onSubmit(content, _, JSONContent) {
         if (choosenChannelsList.length < 1) return;
+
         let mentionsList = getMentionsFromContent(JSONContent);
-        router.post(
-            route("message.store", { channel: channel.id }),
-            {
-                content,
-                channelId: choosenChannelsList[0].id,
-                forwardedMessageId: message.id,
-                mentionsList,
-            },
-            {
-                only: [],
-                preserveState: true,
-                preserveScroll: true,
-                headers: {
-                    "X-Socket-Id": Echo.socketId(),
+        axios
+            .post(
+                route("message.store", { channel: channel.id }),
+                {
+                    content,
+                    channelId: choosenChannelsList[0].id,
+                    forwardedMessageId: message.id,
+                    mentionsList,
                 },
-                onError: (errors) =>
-                    dispatch(
-                        setNotificationPopup({
-                            type: "error",
-                            messages: Object.values(errors),
-                        })
-                    ),
-                onSuccess: () => {
-                    changeChannel(choosenChannelsList[0]);
-                },
-            }
-        );
+                {
+                    headers: {
+                        "X-Socket-Id": Echo.socketId(),
+                    },
+                }
+            )
+            .then((response) => {
+                changeChannel(channel);
+            })
+            .catch(errorHandler);
     }
 
     function handleChooseChannel(cn) {
         if (choosenChannelsList.length > 0) return;
+
         setChoosenChannelsList([cn]);
+        if (channelsData.hasOwnProperty(cn.id)) return;
+        setLoadingChannelUserIds(true);
+
+        loadChannelData(
+            "channelUserIds",
+            cn.id,
+            dispatch,
+            setChannelData,
+            null
+        ).then(() => {
+            setLoadingChannelUserIds(false);
+        });
     }
     useEffect(() => {
         setChoosenChannelsList([]);
     }, [message]);
 
+    const selectedChannelUsers = useMemo(() => {
+        if (choosenChannelsList.length > 0) {
+            const choosenChannel = choosenChannelsList[0];
+            if (channelsData.hasOwnProperty(choosenChannel.id)) {
+                return channelsData[choosenChannel.id].channelUserIds.reduce(
+                    (val, id) => {
+                        const u = workspaceUsers.find((u) => u.id == id);
+                        if (u) return [...val, u];
+                        else return [...val];
+                    },
+                    []
+                );
+            }
+        }
+        return [];
+    }, [workspaceUsers, choosenChannelsList, channelsData]);
     if (!message) return "";
+
     const user = channelUsers.filter((mem) => mem.id === message.user_id)[0];
+
     return (
         <Overlay show={show} onClose={onClose}>
             <div
@@ -81,6 +115,7 @@ export default function ForwardMessage({ message, show, onClose }) {
                     Forward this message
                 </h2>
                 <AutocompleInput
+                    isLimitReached={choosenChannelsList.length > 0}
                     choosenList={choosenChannelsList}
                     inputPlaceholder="Add by name or channel"
                     renderChoosenList={() =>
@@ -161,6 +196,22 @@ export default function ForwardMessage({ message, show, onClose }) {
                                             />
                                         </button>
                                     );
+                                } else if (item.type == "SELF") {
+                                    return (
+                                        <button
+                                            key={item.id}
+                                            className="hover:bg-white/15 p-2 px-4"
+                                            onClick={() =>
+                                                handleChooseChannel(item)
+                                            }
+                                        >
+                                            <AvatarAndName
+                                                user={auth.user}
+                                                className="h-6 w-6"
+                                                noStatus={true}
+                                            />
+                                        </button>
+                                    );
                                 } else
                                     return (
                                         <button
@@ -183,9 +234,16 @@ export default function ForwardMessage({ message, show, onClose }) {
                             });
                     }}
                 />
-                <div className="border border-white/15 p-4 pb-2 mt-4 rounded-lg ">
-                    <TipTapEditor onSubmit={onSubmit} onlyText />
-                </div>
+                {choosenChannelsList.length > 0 && (
+                    <div className="border border-white/15 p-4 pb-2 mt-4 rounded-lg ">
+                        <TipTapEditor
+                            onSubmit={onSubmit}
+                            onlyText
+                            channel={choosenChannelsList[0]}
+                            channelUsers={selectedChannelUsers}
+                        />
+                    </div>
+                )}
                 <div className="max-h-[35vh] overflow-y-auto scrollbar mt-4 border-l-4 border-l-white/15 relative">
                     <Message
                         noToolbar
