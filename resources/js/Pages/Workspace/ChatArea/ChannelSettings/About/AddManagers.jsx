@@ -1,14 +1,15 @@
 import { router, useForm, usePage } from "@inertiajs/react";
 import React from "react";
-import AvatarAndName from "@/Components/AvatarAndName";
+
 import AutocompleInput from "./AutocompleInput";
 import Button from "@/Components/Button";
 import { useState } from "react";
 import { FaLock } from "react-icons/fa";
-import ErrorsList from "@/Components/ErrorsList";
+
 import { useChannel, useChannelUsers } from "@/helpers/customHooks";
+import { useParams } from "react-router-dom";
 export default function AddManagers({ close, setErrors }) {
-    const { channelId } = usePage().props;
+    const { channelId } = useParams()
     const { channelUsers } = useChannelUsers(channelId);
     const { channel } = useChannel(channelId);
     const [choosenUsers, setChoosenUsers] = useState({});
@@ -43,7 +44,7 @@ export default function AddManagers({ close, setErrors }) {
             <div className="text-2xl flex items-baseline gap-x-2 p-2 pb-0 font-bold text-white/85">
                 Add Channel Managers for{" "}
                 <div className="flex items-center gap-x-1">
-                    {channel.type != "PUBLIC" ? (
+                    {channel.type == "PUBLIC" ? (
                         <span className="text-lg">#</span>
                     ) : (
                         <FaLock className="text-sm" />

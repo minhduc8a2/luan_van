@@ -8,6 +8,7 @@ import { useChannelUsers } from "@/helpers/customHooks";
 import { useParams } from "react-router-dom";
 
 import useJoinChannel from "@/helpers/useJoinChannel";
+import { FaLock } from "react-icons/fa";
 
 export default function Editor({
     channel,

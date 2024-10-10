@@ -37,28 +37,45 @@ export default function About({ channelName, onClose }) {
         [channel, auth, workspaceUsers]
     );
     return (
-        <>
+        <div className="border border-white/15 rounded-lg ">
             <ChangeChannelNameForm channelName={channelName} />
             {channel.type != "DIRECT" && channel.type != "SELF" && (
-                <EditDescriptionForm channelName={channelName} />
+                <>
+                    <hr />
+                    <EditDescriptionForm channelName={channelName} />
+                </>
             )}
 
             {channel.type != "DIRECT" && channel.type != "SELF" && (
-                <SettingsButton
-                    title="Created by"
-                    description={`${
-                        channelOwner.display_name || channelOwner.name
-                    } on ${UTCToDateTime(channel.created_at)}`}
-                    className={`border-t-0 ${
-                        channel.is_main_channel ? "  " : ""
-                    }`}
-                    hasEdit={false}
-                />
+                <>
+                    <hr />
+
+                    <SettingsButton
+                        title="Created by"
+                        description={`${
+                            channelOwner.display_name || channelOwner.name
+                        } on ${UTCToDateTime(channel.created_at)}`}
+                        className={`border-t-0 ${
+                            channel.is_main_channel ? "  " : ""
+                        }`}
+                        hasEdit={false}
+                    />
+                </>
             )}
-            {channel.type != "DIRECT" && channel.type != "SELF" && <Managers />}
+            {channel.type != "DIRECT" && channel.type != "SELF" && (
+                <>
+                    <hr />
+
+                    <Managers />
+                </>
+            )}
             {channel.type != "DIRECT" &&
                 channel.type != "SELF" &&
-                permissions.leave && <LeaveChannel channel={channel} />}
+                permissions.leave && <>
+                    <hr />
+                
+                <LeaveChannel channel={channel} />
+                </>}
             {channel.type == "DIRECT" && (
                 <div className="border border-white/15 rounded-br-lg rounded-bl-lg p-4 border-t-0">
                     <h5 className="font-bold text-white/85 text-sm">
@@ -103,6 +120,6 @@ export default function About({ channelName, onClose }) {
                     </button>
                 </div>
             )}
-        </>
+        </div>
     );
 }

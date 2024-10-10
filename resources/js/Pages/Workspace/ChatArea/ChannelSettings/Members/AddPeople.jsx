@@ -7,9 +7,11 @@ import { useState } from "react";
 import { FaLock } from "react-icons/fa";
 import { useSelector } from "react-redux";
 import useErrorHandler from "@/helpers/useErrorHandler";
+import { useParams } from "react-router-dom";
 
 export default function AddPeople({ close, setErrors }) {
-    const { channelId, workspace } = usePage().props;
+    const {channelId} = useParams()
+    const {workspace} = useSelector(state=>state.workspace)
     const [choosenUsers, setChoosenUsers] = useState({});
     const { channels } = useSelector((state) => state.channels);
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
