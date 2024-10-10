@@ -17,6 +17,7 @@ import Settings from "./Settings";
 import { IoMdPersonAdd } from "react-icons/io";
 import Button from "@/Components/Button";
 import StreamVideo from "@/Components/StreamVideo";
+import UserAvatar from "./UserAvatar";
 
 export default function SmallScreen({
     channel,
@@ -118,33 +119,23 @@ export default function SmallScreen({
                         if (showUserVideo || showShareScreen) return "";
                         else
                             return (
-                                <Tooltip
+                                <UserAvatar
+                                    user={user}
                                     key={user.id}
-                                    content={
-                                        <button className="text-nowrap">
-                                            {user.display_name || user.name}
-                                        </button>
+                                    size={
+                                        hasAnyVideoTrack
+                                            ? "w-36 h-36"
+                                            : "w-10 h-10"
                                     }
-                                >
-                                    <SquareImage
-                                        url={user.avatar_url}
-                                        removable={false}
-                                        size={
-                                            hasAnyVideoTrack
-                                                ? "w-36 h-36"
-                                                : "w-10 h-10"
-                                        }
-                                    />
-                                </Tooltip>
+                                />
                             );
                     return (
                         !streamHasVideoTracks(
                             otherUserStreams.current.get(user.id)
                         ) && (
-                            <SquareImage
+                            <UserAvatar
+                                user={user}
                                 key={user.id}
-                                url={user.avatar_url}
-                                removable={false}
                                 size={
                                     hasAnyVideoTrack ? "w-36 h-36" : "w-10 h-10"
                                 }
