@@ -307,7 +307,6 @@ export default function Message({
                                 ? UTCToDateTime(message.created_at)
                                 : UTCToTime(message.created_at)}
                         </span>
-                        
                     </div>
                 ) : (
                     ""
@@ -338,8 +337,12 @@ export default function Message({
                                 (edited)
                             </span>
                         )}
-                        {message.isSending && <span className="text-xs animate-pulse">Sending...</span>}
-                        {message.isFailed&& <div className="text-xs text-red-500 flex gap-x-2">Failed! <MdError /></div>}
+
+                        {message.isFailed && (
+                            <div className="text-xs text-red-500 flex gap-x-2">
+                                Failed! <MdError />
+                            </div>
+                        )}
                     </>
                 )}
                 {imageFiles.length != 0 && (

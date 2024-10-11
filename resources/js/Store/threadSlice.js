@@ -28,15 +28,47 @@ export const threadSlice = createSlice({
         addThreadMessage(state, action) {
             state.message.thread_messages_count += 1;
             state.messages = [...state.messages, action.payload];
-            console.log("addthread message", state.messages);
+           
         },
         addThreadMessages(state, action) {
+            if (!Array.isArray(action.payload.data)) return;
+            // filter existing messages
+            state.messages = state.messages.filter((msg) => !msg.isTemporary);
+            const filteredNewMessages = action.payload.data.filter(
+                (msg) => !state.messages.some((m) => m.id == msg.id)
+            );
+
             if (action.payload.position == "top") {
-                state.messages = [...action.payload.data, ...state.messages];
+                state.messages = [...filteredNewMessages, ...state.messages];
             } else {
-                state.messages = [...state.messages, ...action.payload.data];
+                state.messages = [...state.messages, ...filteredNewMessages];
             }
-            console.log("addThreadMessages", state.messages);
+        },
+        updateThreadMessageAfterSendSuccessfully(state, action) {
+            if (state.messages) {
+                let messageIndex = state.messages.findIndex(
+                    (message) => message.id == action.payload.temporaryId
+                );
+                if (messageIndex >= 0) {
+                    const {id,files}=action.payload.data
+                    state.messages[messageIndex].id = id ;
+                    state.messages[messageIndex].files = files ;
+                    state.messages[messageIndex].isTemporary = false ;
+                    state.messages[messageIndex].isSending = false;
+
+                }
+            }
+        },
+        updateThreadMessageAfterSendFailed(state, action) {
+            if (state.messages) {
+                let messageIndex = state.messages.findIndex(
+                    (message) => message.id == action.payload.temporaryId
+                );
+                if (messageIndex >= 0) {
+                    state.messages[messageIndex].isSending = false;
+                    state.messages[messageIndex].isFailed = true;
+                }
+            }
         },
         setThreadMessages(state, action) {
             state.messages = action.payload;
@@ -114,6 +146,8 @@ export const {
     editThreadMessage,
     deleteFileInThread,
     addThreadMessages,
+    updateThreadMessageAfterSendSuccessfully,
+    updateThreadMessageAfterSendFailed
 } = threadSlice.actions;
 
 export default threadSlice.reducer;

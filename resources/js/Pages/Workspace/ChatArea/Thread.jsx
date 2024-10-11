@@ -6,6 +6,8 @@ import {
     setThreadedMessage,
     setThreadedMessageId,
     setThreadMessages,
+    updateThreadMessageAfterSendFailed,
+    updateThreadMessageAfterSendSuccessfully,
 } from "@/Store/threadSlice";
 import React, { useMemo } from "react";
 import { IoClose } from "react-icons/io5";
@@ -26,10 +28,15 @@ import {
     useChannelData,
     useChannelUsers,
 } from "@/helpers/customHooks";
-
+import { v4 as uuidv4 } from "uuid";
 import InfiniteScroll from "@/Components/InfiniteScroll";
 import { findMinMaxId } from "@/helpers/channelHelper";
+import {
+    addThreadMessagesCount,
+    subtractThreadMessagesCount,
+} from "@/Store/channelsDataSlice";
 export default function Thread() {
+    const { auth } = usePage().props;
     const dispatch = useDispatch();
     const { threadMessage: mentionThreadMessage } = useSelector(
         (state) => state.mention
@@ -73,9 +80,10 @@ export default function Thread() {
     const [bottomLoading, setBottomLoading] = useState(false);
     const [topHasMore, setTopHasMore] = useState();
     const [bottomHasMore, setBottomHasMore] = useState();
-
+    const [temporaryMessageSending, setTemporaryMessageSending] =
+        useState(false);
     useEffect(() => {
-        if (messages) {
+        if (messages && !temporaryMessageSending) {
             console.log(messages);
             const { minId, maxId } = findMinMaxId(messages);
             // console.log(minId, maxId);
@@ -182,6 +190,49 @@ export default function Thread() {
             mentionsList.length == 0
         )
             return;
+
+        //create new message on client side
+        const tempFiles = fileObjects.map((fileObject, index) => {
+            return {
+                id: index,
+                name: fileObject.name,
+                url:
+                    publicAppUrl +
+                    "/" +
+                    fileObject.path.replace("public", "storage"),
+                type: fileObject.type,
+                path: fileObject.path,
+                workspace_id: workspaceId,
+                user_id: auth.user.id,
+                created_at: new Date().toUTCString(),
+            };
+        });
+        const newMessageId = uuidv4();
+        const newMessage = {
+            id: newMessageId,
+            isTemporary: true,
+            threaded_message_id: threadedMessageId,
+            content,
+            reactions: [],
+            thread_messages_count: 0,
+            files: tempFiles,
+            user_id: auth.user.id,
+            channel_id: channelId,
+            isSending: true,
+            created_at: new Date().toUTCString(),
+        };
+        setTemporaryMessageSending(true);
+        dispatch(addThreadMessage(newMessage));
+        dispatch(
+            addThreadMessagesCount({
+                id: channelId,
+                data: { message_id: threadedMessageId },
+            })
+        );
+        setNewMessageReceived(true);
+        setTimeout(() => {
+            setTemporaryMessageSending(false);
+        }, 0);
         axios
             .post(
                 route("thread_message.store", {
@@ -189,6 +240,7 @@ export default function Thread() {
                     message: threadedMessageId,
                 }),
                 {
+                    created_at:newMessage.created_at,
                     content,
                     fileObjects,
                     mentionsList: getMentionsFromContent(JSONContent),
@@ -199,8 +251,28 @@ export default function Thread() {
                     },
                 }
             )
-            .then(() => {
-                setNewMessageReceived(true);
+            .then((response) => {
+                console.log("Success");
+                dispatch(
+                    updateThreadMessageAfterSendSuccessfully({
+                        temporaryId: newMessageId,
+                        data: response.data.message,
+                    })
+                );
+            })
+            .catch((error) => {
+                console.error(error);
+                dispatch(
+                    updateThreadMessageAfterSendFailed({
+                        temporaryId: newMessageId,
+                    })
+                );
+                dispatch(
+                    subtractThreadMessagesCount({
+                        id: channelId,
+                        data: { message_id: threadedMessageId },
+                    })
+                );
             });
     }
 
@@ -213,7 +285,7 @@ export default function Thread() {
     }, [threadedMessageId]);
     useEffect(() => {
         if (!threadedMessageId) return;
-      
+
         if (threadedMessage && threadedMessage.id == threadedMessageId) return;
         axios
             .get(route("messages.getMessage"), {
@@ -271,7 +343,6 @@ export default function Thread() {
     useEffect(() => {
         if (!threadedMessage || messages.length > 0) return;
 
-       
         setLoadingMessages(true);
         // router.get(
         //     route("messages.threadMessages", threadedMessageId),

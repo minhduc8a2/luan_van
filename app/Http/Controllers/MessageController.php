@@ -19,7 +19,7 @@ use App\Events\ThreadMessageEvent;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use App\Notifications\MentionNotification;
-
+use Carbon\Carbon;
 
 class MessageController extends Controller
 {
@@ -263,9 +263,9 @@ class MessageController extends Controller
 
         $validated = $forwardMode ?
             $request->validate(['content' => 'string', 'forwardedMessageId' => 'integer', 'channelId' => 'integer'])
-            :  $request->validate(['content' => 'string', 'fileObjects' => 'array', 'temporaryId' => 'required|string']);
+            :  $request->validate(['content' => 'string', 'fileObjects' => 'array', 'created_at' => 'required|date']);
         $content = $validated['content'];
-
+        $created_at =  Carbon::createFromFormat('D, d M Y H:i:s T', $validated['created_at'])->format('Y-m-d H:i:s');
         if ($forwardMode) {
             $forwardChannel = Channel::find($validated['channelId']);
         }
@@ -277,7 +277,9 @@ class MessageController extends Controller
             $message = $request->user()->messages()->create([
                 'content' => $content,
                 'channel_id' => $forwardMode ? $forwardChannel->id : $channel->id,
-                "forwarded_message_id" => $forwardMode ? $validated['forwardedMessageId'] : null
+                "forwarded_message_id" => $forwardMode ? $validated['forwardedMessageId'] : null,
+                'created_at' => $forwardMode ? Carbon::now() : $created_at,
+                'updated_at' => $forwardMode ? Carbon::now() : $created_at,
             ]);
 
             if (!$forwardMode) {
@@ -348,7 +350,7 @@ class MessageController extends Controller
                 },
                 'reactions',
 
-            ],)->loadCount('threadMessages'), 'temporaryId' => $validated['temporaryId']];
+            ],)->loadCount('threadMessages')];
         } catch (\Throwable $th) {
             DB::rollBack();
             dd($th);
@@ -361,8 +363,9 @@ class MessageController extends Controller
         if ($request->user()->cannot('createThread', [Message::class, $channel])) return abort(403);
         if ($message->is_auto_generated) return abort(403);
         try {
-            $validated = $request->validate(['content' => 'string', 'fileObjects' => 'array', 'mentionsList' => 'array', 'temporaryId' => 'required|string']);
+            $validated = $request->validate(['content' => 'string', 'fileObjects' => 'array', 'mentionsList' => 'array', 'created_at' => 'required|date']);
             $content = $validated['content'];
+            $created_at =  Carbon::createFromFormat('D, d M Y H:i:s T', $validated['created_at'])->format('Y-m-d H:i:s');
             DB::beginTransaction();
             $content = Helper::sanitizeContent($content);
             //check thread is created already
@@ -371,6 +374,8 @@ class MessageController extends Controller
                 'content' =>  $content,
                 'channel_id' => $channel->id,
                 'user_id' => $request->user()->id,
+                'created_at' => $created_at,
+                'updated_at' => $created_at,
             ]);
             $fileObjects = [];
             foreach ($validated['fileObjects'] as $i => $fileObject) {
@@ -413,7 +418,9 @@ class MessageController extends Controller
                 }
             }
             DB::commit();
-            return Helper::createSuccessResponse();
+            return ['message' => $newMessage->load(['files' => function ($query) {
+                $query->withTrashed();
+            }, 'reactions'])];
         } catch (\Throwable $th) {
             DB::rollBack();
             dd($th);

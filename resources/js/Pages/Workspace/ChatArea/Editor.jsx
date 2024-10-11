@@ -82,7 +82,7 @@ export default function Editor({
                     content,
                     fileObjects,
                     mentionsList,
-                    temporaryId: newMessageId,
+                    created_at:newMessage.created_at,
                 },
                 {
                     headers: {
@@ -94,7 +94,7 @@ export default function Editor({
                 dispatch(
                     updateMessageAfterSendSuccessfully({
                         id: channelId,
-                        temporaryId: response.data.temporaryId,
+                        temporaryId: newMessageId,
                         data: response.data.message,
                     })
                 );

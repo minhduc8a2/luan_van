@@ -24,7 +24,7 @@ return new class extends Migration
             $table->unsignedBigInteger('threaded_message_id')->nullable()->index();
             $table->foreign('threaded_message_id')->references('id')->on('messages')->onDelete('cascade');
             $table->softDeletes();
-            $table->timestamps();
+            $table->timestamps(3);
         });
     }
 

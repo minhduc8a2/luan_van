@@ -122,8 +122,16 @@ export const channelsDataSlice = createSlice({
                     (message) => message.id == action.payload.temporaryId
                 );
                 if (messageIndex >= 0) {
-                    state[action.payload.id].messages[messageIndex] =
-                        action.payload.data;
+                    const { id, files } = action.payload.data;
+                    state[action.payload.id].messages[messageIndex].id = id;
+                    state[action.payload.id].messages[messageIndex].files =
+                        files;
+                    state[action.payload.id].messages[
+                        messageIndex
+                    ].isTemporary = false;
+                    state[action.payload.id].messages[
+                        messageIndex
+                    ].isSending = false;
                 }
             }
         },
@@ -247,7 +255,7 @@ export const {
     removeChannelData,
     addMessages,
     updateMessageAfterSendSuccessfully,
-    updateMessageAfterSendFailed
+    updateMessageAfterSendFailed,
 } = channelsDataSlice.actions;
 
 export default channelsDataSlice.reducer;

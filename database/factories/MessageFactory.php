@@ -23,9 +23,9 @@ class MessageFactory extends Factory
             "content" => Helper::contentToHTML(fake()->sentence()),
             "user_id" => 1,
             "channel_id" => 1,
-           
-            "created_at" => Carbon::now()
-            
+            "created_at" => Carbon::now(),
+            "updated_at" => Carbon::now()
+
         ];
     }
 }

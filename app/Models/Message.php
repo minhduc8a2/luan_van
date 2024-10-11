@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
-use App\Helpers\Helper;
+use DateTimeInterface;
 
+use App\Helpers\Helper;
 use App\Events\MessageEvent;
+use Illuminate\Support\Carbon;
 use App\Observers\MessageObserver;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -30,8 +33,22 @@ class Message extends Model
         'is_auto_generated',
         "forwarded_message_id",
         "threaded_message_id",
-        
+        'updated_at'
+
     ];
+    public $timestamps = false;
+    protected function createdAt(): Attribute
+    {
+        return Attribute::make(
+            get: fn(string $value) => Carbon::parse($value)->setTimezone('UTC')->toISOString()
+        );
+    }
+    protected function updatedAt(): Attribute
+    {
+        return Attribute::make(
+            get: fn(string $value) => Carbon::parse($value)->setTimezone('UTC')->toISOString()
+        );
+    }
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
