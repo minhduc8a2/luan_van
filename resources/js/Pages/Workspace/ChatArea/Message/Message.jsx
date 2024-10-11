@@ -326,7 +326,7 @@ export default function Message({
                 ) : (
                     <>
                         <div
-                            className="prose prose-invert "
+                            className="prose prose-invert select-text"
                             dangerouslySetInnerHTML={{
                                 __html: message.deleted_at
                                     ? '<p class="italic text-white/50">Deleted message</p>'
@@ -338,7 +338,7 @@ export default function Message({
                                 (edited)
                             </span>
                         )}
-                        {message.isSending && <span className="text-xs">Sending...</span>}
+                        {message.isSending && <span className="text-xs animate-pulse">Sending...</span>}
                         {message.isFailed&& <div className="text-xs text-red-500 flex gap-x-2">Failed! <MdError /></div>}
                     </>
                 )}

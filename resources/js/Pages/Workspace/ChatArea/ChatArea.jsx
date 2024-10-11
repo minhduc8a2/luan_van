@@ -355,7 +355,7 @@ export default function ChatArea() {
                         scrollToItem={hasMention}
                         className="overflow-y-auto max-w-full scrollbar"
                     >
-                        {/* <div className="p-8">
+                       {!bottomHasMore&& <div className="p-8">
                             <h1 className="text-3xl font-extrabold text-white/85">
                                 {" "}
                                 {welcomeMessage}
@@ -367,9 +367,9 @@ export default function ChatArea() {
                                     <EditDescriptionForm />
                                 </div>
                             </div>
-                        </div> */}
+                        </div>}
                         {bottomHasMore && (
-                            <div className="my-4">
+                            <div className="my-4 flex flex-col gap-y-4">
                                 <MessagePlaceHolder />
                                 <MessagePlaceHolder />
                             </div>
