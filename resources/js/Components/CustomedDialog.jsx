@@ -33,17 +33,20 @@ function ActionButtons({
     onClickBtn2,
     classNameBtn2,
     loading = false,
-    type
+    type,
+    disabled = false,
+    className = ""
 }) {
     const { onClose } = useContext(DialogContext);
     return (
-        <div className="flex justify-end gap-x-4 mt-8">
+        <div className={"flex justify-end gap-x-4 mt-8 "+className}>
             <Button onClick={onClose}>{btnName1}</Button>
             <Button
                 onClick={onClickBtn2}
                 loading={loading}
                 className={classNameBtn2}
                 type={type}
+                disabled={disabled}
             >
                 {btnName2}
             </Button>
@@ -51,6 +54,16 @@ function ActionButtons({
     );
 }
 
+function CloseButton() {
+    const { onClose } = useContext(DialogContext);
+    return (
+        <div className="flex justify-end">
+            <Button onClick={onClose}>Close</Button>
+        </div>
+    );
+}
+
 CustomedDialog.Title = Title;
 CustomedDialog.ActionButtons = ActionButtons;
+CustomedDialog.CloseButton = CloseButton;
 export default CustomedDialog;

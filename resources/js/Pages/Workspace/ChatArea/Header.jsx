@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import ChannelSettings from "./ChannelSettings/ChannelSettings";
 import { FaAngleDown, FaLock, FaPlus } from "react-icons/fa";
 import Avatar from "@/Components/Avatar";
@@ -16,6 +16,8 @@ import {
 } from "@/helpers/customHooks";
 import { useParams } from "react-router-dom";
 import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
+import CustomedDialog from "@/Components/CustomedDialog";
+import Button from "@/Components/Button";
 export default function Header({
     channelName,
     loaded,
@@ -29,7 +31,7 @@ export default function Header({
 
     const { permissions } = useChannelData(channelId);
     const { channelUsers } = useChannelUsers(channelId);
-
+    const [isOpen, setIsOpen] = useState(false);
     const dispatch = useDispatch();
     function handleHuddleButtonClicked() {
         if (huddleChannelId && huddleChannelId != channel.id) {
@@ -58,16 +60,15 @@ export default function Header({
         >
             <div className="flex justify-between font-bold text-lg opacity-75">
                 <div className="relative">
-                    <ChannelSettings
-                        channelName={channelName}
-                       
-                    />
+                    <ChannelSettings channelName={channelName} />
                     {(topLoading || bottomLoading) && (
                         <div className="flex  gap-x-2 items-center px-4 py-2 absolute left-full top-1/2 -translate-y-1/2">
                             <div className="h-6 w-6 relative">
                                 <OverlayLoadingSpinner />
                             </div>
-                            <div className="text-xs text-nowrap">Loading ...</div>
+                            <div className="text-xs text-nowrap">
+                                Loading ...
+                            </div>
                         </div>
                     )}
                 </div>
@@ -109,25 +110,29 @@ export default function Header({
                                         <div className={`text-sm `}>Huddle</div>
                                     </button>
                                 ) : (
-                                    <OverlayNotification
-                                        buttonNode={
-                                            <button
-                                                className={`flex items-center gap-x-1 `}
-                                            >
-                                                <FiHeadphones className="text-xl" />
-                                                <div className={`text-sm `}>
-                                                    Huddle
-                                                </div>
-                                            </button>
-                                        }
-                                        className="p-3"
-                                    >
-                                        <h5 className="mb-4  ">
-                                            You're not allowed to huddle in
-                                            channel. Contact Admins or Channel
-                                            managers for more information!
-                                        </h5>
-                                    </OverlayNotification>
+                                    <>
+                                        <button
+                                            className={`flex items-center gap-x-1 `}
+                                            onClick={() => setIsOpen(true)}
+                                        >
+                                            <FiHeadphones className="text-xl" />
+                                            <div className={`text-sm `}>
+                                                Huddle
+                                            </div>
+                                        </button>
+                                        <CustomedDialog
+                                            isOpen={isOpen}
+                                            onClose={() => setIsOpen(false)}
+                                        >
+                                            <h5 className="mb-4  ">
+                                                You're not allowed to huddle in
+                                                channel. Contact Admins or
+                                                Channel managers for more
+                                                information!
+                                            </h5>
+                                            <CustomedDialog.CloseButton />
+                                        </CustomedDialog>
+                                    </>
                                 )}
                                 {/* <div className="flex items-center gap-x-1">
               <span className="text-sm opacity-25 ">|</span>
