@@ -9,6 +9,7 @@ use App\Models\Workspace;
 use App\Helpers\BaseRoles;
 use Illuminate\Http\Request;
 use App\Events\WorkspaceEvent;
+use App\Helpers\Helper;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\ProfileUpdateRequest;
@@ -24,14 +25,14 @@ class UserController extends Controller
     }
     public function browseUsers(Request $request, Workspace $workspace)
     {
-       
+
 
 
         // $page = 2;
         if ($request->expectsJson()) {
 
             $hiddenUserIds =  $request->user()->hiddenUsers()->wherePivot('workspace_id', $workspace->id)->pluck('hidden_user_id')->toArray();
-           
+
             $workspaceUsers =  $workspace->users()->get();
             return $workspaceUsers->map(function ($user) use ($hiddenUserIds) {
                 if (in_array($user->id, $hiddenUserIds)) $user->is_hidden = true;
@@ -95,10 +96,10 @@ class UserController extends Controller
 
             $user->save();
             DB::commit();
-            return back();
+            return Helper::createSuccessResponse();
         } catch (\Throwable $th) {
             DB::rollBack();
-            return back()->withErrors(['server' => "Something went wrong! Please try later."]);
+            return Helper::createErrorResponse();
         }
     }
     public function updateAvatar(Request $request, User $user)
@@ -188,7 +189,7 @@ class UserController extends Controller
                     ->where('workspace_id', $validated["workspaceId"])
                     ->delete();
             }
-           
+
 
             DB::commit();
             return back();

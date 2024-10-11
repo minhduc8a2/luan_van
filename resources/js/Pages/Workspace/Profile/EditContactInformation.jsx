@@ -2,38 +2,34 @@ import Button from "@/Components/Button";
 import CustomedDialog from "@/Components/CustomedDialog";
 import TextInput from "@/Components/Input/TextInput";
 
-import { useForm, usePage } from "@inertiajs/react";
 import { useState } from "react";
 
-import { useDispatch } from "react-redux";
-import { setNotificationPopup } from "@/Store/notificationPopupSlice";
-
 import { FaLock } from "react-icons/fa";
+import { useCustomedForm } from "@/helpers/customHooks";
 
 export default function EditContactInformation({ user, triggerButton }) {
     let [isOpen, setIsOpen] = useState(false);
 
-    const dispatch = useDispatch();
-    const { data, setData, patch, processing, errors } = useForm({
-        // email: user.email,
-        phone: user.phone || "",
-    });
+    const {
+        getValues,
+        setValues,
+        loading: processing,
+        submit,
+    } = useCustomedForm(
+        {
+            phone: user.phone || "",
+        },
+        {
+            method: "patch",
+            url: route("users.update", user.id),
+            hasEchoHeader: true,
+        }
+    );
 
     function onSubmit(e) {
         e.preventDefault();
-        patch(route("users.update", user.id), {
-            preserveState: true,
-            only: [],
-            onError: (errors) =>
-                dispatch(
-                    setNotificationPopup({
-                        type: "error",
-                        messages: Object.values(errors),
-                    })
-                ),
-            onSuccess: () => {
-                setIsOpen(false);
-            },
+        submit().then(() => {
+            setIsOpen(false);
         });
     }
     return (
@@ -68,9 +64,9 @@ export default function EditContactInformation({ user, triggerButton }) {
                         </label>
                         <TextInput
                             id="profile-phone"
-                            value={data.phone}
+                            value={getValues().phone}
                             placeholder="Phone number"
-                            onChange={(e) => setData("phone", e.target.value)}
+                            onChange={(e) => setValues("phone", e.target.value)}
                         />
                     </div>
                     <div className="flex gap-x-4 mt-4">

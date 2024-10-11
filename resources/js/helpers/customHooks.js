@@ -97,8 +97,10 @@ const useCustomedForm = (
     const errorHandler = useErrorHandler();
     const values = useRef(initValues);
     const token = useRef(null);
+    const [refresh,setRefresh] = useState(0)
     function setValues(name, value) {
         values.current[name] = value;
+        setRefresh(pre=>pre+1)
     }
 
     function getValues() {
