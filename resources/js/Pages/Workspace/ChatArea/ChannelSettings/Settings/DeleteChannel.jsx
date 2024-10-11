@@ -3,8 +3,6 @@ import Button from "@/Components/Button";
 import { FaRegTrashCan } from "react-icons/fa6";
 import { useState } from "react";
 
-import OverlayNotification from "@/Components/Overlay/OverlayNotification";
-
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import useErrorHandler from "@/helpers/useErrorHandler";

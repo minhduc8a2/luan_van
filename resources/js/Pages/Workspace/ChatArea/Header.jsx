@@ -1,9 +1,8 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import ChannelSettings from "./ChannelSettings/ChannelSettings";
-import { FaAngleDown, FaLock, FaPlus } from "react-icons/fa";
+import {  FaPlus } from "react-icons/fa";
 import Avatar from "@/Components/Avatar";
 import { FiHeadphones } from "react-icons/fi";
-import OverlayNotification from "@/Components/Overlay/OverlayNotification";
 import { CgFileDocument } from "react-icons/cg";
 import { usePage } from "@inertiajs/react";
 import { useDispatch, useSelector } from "react-redux";
