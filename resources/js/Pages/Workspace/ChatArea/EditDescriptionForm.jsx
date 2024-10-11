@@ -1,79 +1,62 @@
-import { useForm } from "@inertiajs/react";
-
 import TextArea from "@/Components/Input/TextArea";
-import { FaLink } from "react-icons/fa6";
-import Form1 from "@/Components/Form1";
-import { router, usePage } from "@inertiajs/react";
-import OverlayNotification from "@/Components/Overlay/OverlayNotification";
-import { useState, useEffect, useMemo } from "react";
-import { useSelector } from "react-redux";
+
+import { useState } from "react";
+
+import {
+    useChannel,
+    useChannelData,
+    useCustomedForm,
+} from "@/helpers/customHooks";
 import { useParams } from "react-router-dom";
-import { useChannel } from "@/helpers/customHooks";
+import CustomedDialog from "@/Components/CustomedDialog";
+
 export function EditDescriptionForm() {
     const { channelId } = useParams();
-    
-
-    const channel = useChannel(channelId);
-    const [success, setSuccess] = useState(false);
-    const { data, setData, post, processing, errors } = useForm({
-        description: channel.description,
-    });
+    const { channel } = useChannel(channelId);
+    const { permissions } = useChannelData(channelId);
+    const [isOpen, setIsOpen] = useState(false);
+    const { getValues, setValues, submit, loading } = useCustomedForm(
+        {
+            description: channel.description,
+        },
+        {
+            url: route("channel.edit_description", channel.id),
+            hasEchoHeader: true,
+        }
+    );
     function onSubmit(e) {
         e.preventDefault();
-        post(route("channel.edit_description", channel.id), {
-            preserveState: true,
-            headers: {
-                "X-Socket-Id": Echo.socketId(),
-            },
-            onSuccess: () => {
-                setSuccess(true);
-                router.get(
-                    route("channels.show", {
-                        workspace: workspace.id,
-                        channel: channel.id,
-                    }),
-                    {},
-                    {
-                        preserveState: true,
-                        preserveScroll: true,
-                        only: ["channel"],
-                    }
-                );
-            },
-        });
+        submit().then(() => setIsOpen(false));
     }
 
-    useEffect(() => {
-        setData("description", channel.description);
-    }, [channel.id]);
     return (
         <div>
-            <Form1
-                className="p-3"
-                errors={errors}
-                success={success}
-                submit={onSubmit}
-                buttonName={channel.description ? "Update" : "Add"}
-                submitting={processing}
-                activateButtonNode={
-                    <div
-                        className=" text-link"
-                        onClick={() => {
-                            setSuccess(false);
-                        }}
-                    >
-                        {channel.description ? "Edit" : "Add"} description
-                    </div>
-                }
-                title={`${channel.description ? "Edit" : "Add"} Description`}
-            >
-                {" "}
+            <button onClick={() => setIsOpen(true)} className=" text-link">
+                {channel.description ? "Edit" : "Add"} description
+            </button>
+            <CustomedDialog isOpen={isOpen} onClose={() => setIsOpen(false)}>
+                <CustomedDialog.Title>{`${
+                    channel.description ? "Edit" : "Add"
+                } Description`}</CustomedDialog.Title>
+                {!permissions.updateDescription && (
+                    <h3 className="text-lg my-4">
+                        ⚠️You are not allowed to edit channel description,
+                        contact admins or channel managers for more information.
+                    </h3>
+                )}
                 <TextArea
+                    disabled={!permissions.updateDescription}
                     rows="2"
-                    value={data.description}
-                    onChange={(e) => setData("description", e.target.value)}
+                    value={getValues().description}
+                    onChange={(e) => setValues("description", e.target.value)}
                 />
-            </Form1>
+
+                <CustomedDialog.ActionButtons
+                    btnName2={channel.description ? "Update" : "Add"}
+                    onClickBtn2={onSubmit}
+                    loading={loading}
+                />
+            </CustomedDialog>
         </div>
     );
 }
