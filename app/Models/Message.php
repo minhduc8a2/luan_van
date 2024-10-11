@@ -92,9 +92,10 @@ class Message extends Model
         $message = Message::create([
             'content' => $content,
             'channel_id' => $channel->id,
-
             'user_id' => $user->id,
             'is_auto_generated' => true,
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
         ]);
         broadcast(new MessageEvent($channel, $message->load([
             'files',
