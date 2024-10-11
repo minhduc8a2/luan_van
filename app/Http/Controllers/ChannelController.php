@@ -367,7 +367,7 @@ class ChannelController extends Controller
             broadcast(new ChannelEvent($channel, "editDescription"));
             DB::commit();
 
-            return ['message' => 'successfull'];
+            return Helper::createSuccessResponse();
         } catch (\Throwable $th) {
             DB::rollBack();
 
@@ -388,7 +388,7 @@ class ChannelController extends Controller
             broadcast(new ChannelEvent($channel, "editName"));
             DB::commit();
 
-            return ['message' => 'successfull'];
+            return Helper::createSuccessResponse();
         } catch (\Throwable $th) {
             DB::rollBack();
 

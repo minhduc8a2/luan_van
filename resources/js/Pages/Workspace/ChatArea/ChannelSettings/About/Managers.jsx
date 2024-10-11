@@ -12,83 +12,84 @@ import ErrorsList from "@/Components/ErrorsList";
 import { useSelector } from "react-redux";
 import { useChannel, useChannelData, useManagers } from "@/helpers/customHooks";
 import { useParams } from "react-router-dom";
+import useErrorHandler from "@/helpers/useErrorHandler";
+import CustomedDialog from "@/Components/CustomedDialog";
 export default function Managers() {
-    const { channelId } = useParams()
+    const { channelId } = useParams();
     const { channel } = useChannel(channelId);
     const { permissions } = useChannelData(channelId);
     const onlineStatusMap = useSelector((state) => state.onlineStatus);
     const { managers } = useManagers(channelId);
     const [searchValue, setSearchValue] = useState("");
     const [errors, setErrors] = useState(null);
+    const errorHandler = useErrorHandler();
+    const [isOpen, setIsOpen] = useState(false);
+    const [isOpenAddManager, setIsOpenAddManager] = useState(false);
     function removeManager(user) {
-        router.post(
-            route("channels.removeManager", channel.id),
-            {
-                user,
-            },
-            {
-                preserveState: true,
-                only: ["managers", "permissions"],
-                onError: (errors) => {
-                    setErrors(errors);
+        axios
+            .post(
+                route("channels.removeManager", channel.id),
+                {
+                    user,
                 },
-                headers: {
-                    "X-Socket-Id": Echo.socketId(),
-                },
-            }
-        );
+                {
+                    headers: {
+                        "X-Socket-Id": Echo.socketId(),
+                    },
+                }
+            )
+            .catch(errorHandler);
     }
     return (
-        <OverlayPanel
-            buttonNode={
-                <SettingsButton
-                    disabled={!permissions.addManagers}
-                    className={`border-t-0 ${
-                        channel.is_main_channel
-                            ? "rounded-bl-lg rounded-br-lg"
-                            : ""
-                    }`}
-                    onClick={() => setErrors(null)}
-                    title="Manage by"
-                    description={
-                        <div>
-                            {managers.length == 0 &&
-                                "Ask admins to add channel managers"}
-                            {managers.map((user, index) => {
-                                if (index == managers.length - 1)
-                                    return (
-                                        <span
-                                            className="text-link"
-                                            key={"name_" + user.id}
-                                        >
+        <>
+            <SettingsButton
+                disabled={!permissions.addManagers}
+                className={`border-t-0 ${
+                    channel.is_main_channel ? "rounded-bl-lg rounded-br-lg" : ""
+                }`}
+                onClick={() => setIsOpen(true)}
+                title="Manage by"
+                description={
+                    <div>
+                        {managers.length == 0 &&
+                            "Ask admins to add channel managers"}
+                        {managers.map((user, index) => {
+                            if (index == managers.length - 1)
+                                return (
+                                    <span
+                                        className="text-link"
+                                        key={"name_" + user.id}
+                                    >
+                                        {user.display_name || user.name}
+                                    </span>
+                                );
+                            else if (index == managers.length - 2)
+                                return (
+                                    <span key={"name_" + user.id}>
+                                        <span className="text-link">
+                                            {user.display_name || user.name}
+                                        </span>{" "}
+                                        and{" "}
+                                    </span>
+                                );
+                            else
+                                return (
+                                    <span key={"name_" + user.id}>
+                                        <span className="text-link">
                                             {user.display_name || user.name}
                                         </span>
-                                    );
-                                else if (index == managers.length - 2)
-                                    return (
-                                        <span key={"name_" + user.id}>
-                                            <span className="text-link">
-                                                {user.display_name || user.name}
-                                            </span>{" "}
-                                            and{" "}
-                                        </span>
-                                    );
-                                else
-                                    return (
-                                        <span key={"name_" + user.id}>
-                                            <span className="text-link">
-                                                {user.display_name || user.name}
-                                            </span>
-                                            ,{" "}
-                                        </span>
-                                    );
-                            })}
-                        </div>
-                    }
-                />
-            }
-        >
-            {({ close }) => (
+                                        ,{" "}
+                                    </span>
+                                );
+                        })}
+                    </div>
+                }
+            />
+            <CustomedDialog
+                isOpen={isOpen}
+                onClose={() => setIsOpen(false)}
+                className="px-0 w-fit"
+            >
                 <div className="w-[500px] pb-4  rounded-lg bg-background">
                     <div className="text-xl flex items-baseline gap-x-2 p-6 pb-0 font-bold text-white/85">
                         People who can manage{" "}
@@ -117,23 +118,26 @@ export default function Managers() {
                         <ErrorsList errors={errors} />
                     </div>
                     {permissions.addManagers && (
-                        <OverlayPanel
-                            buttonNode={
-                                <button className="flex gap-x-4 p-4 px-6 items-center mt-6 hover:bg-white/15 w-full">
-                                    <div className=" rounded p-2 bg-link/15">
-                                        <IoPersonAddOutline className="text-link text-xl" />
-                                    </div>
-                                    Add Channel Managers
-                                </button>
-                            }
-                        >
-                            {({ close }) => (
+                        <>
+                            <button
+                                className="flex gap-x-4 p-4 px-6 items-center mt-6 hover:bg-white/15 w-full"
+                                onClick={() => setIsOpenAddManager(true)}
+                            >
+                                <div className=" rounded p-2 bg-link/15">
+                                    <IoPersonAddOutline className="text-link text-xl" />
+                                </div>
+                                Add Channel Managers
+                            </button>
+                            <CustomedDialog
+                                isOpen={isOpenAddManager}
+                                onClose={() => setIsOpenAddManager(false)}
+                                className="px-0 w-fit"
+                            >
                                 <AddManagers
-                                    close={close}
-                                    setErrors={setErrors}
+                                    close={() => setIsOpenAddManager(false)}
                                 />
-                            )}
-                        </OverlayPanel>
+                            </CustomedDialog>
+                        </>
                     )}
 
                     <ul className="overflow-hidden h-[30vh]">
@@ -172,7 +176,7 @@ export default function Managers() {
                             ))}
                     </ul>
                 </div>
-            )}
-        </OverlayPanel>
+            </CustomedDialog>
+        </>
     );
 }

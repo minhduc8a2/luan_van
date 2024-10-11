@@ -7,76 +7,75 @@ import TextInput from "@/Components/Input/TextInput";
 import { SettingsButton } from "./SettingsButton";
 import { FaLock } from "react-icons/fa";
 import { useSelector } from "react-redux";
-import { useChannel, useChannelData } from "@/helpers/customHooks";
+import {
+    useChannel,
+    useChannelData,
+    useCustomedForm,
+} from "@/helpers/customHooks";
 import { useParams } from "react-router-dom";
+import CustomedDialog from "@/Components/CustomedDialog";
+import Button from "@/Components/Button";
 export default function ChangeChannelNameForm({ channelName }) {
     const { channelId } = useParams();
     const { channel } = useChannel(channelId);
-    const {  permissions } =
-        useChannelData(channelId);
-    const { data, setData, post, processing, errors, reset } = useForm({
-        name: channel.name,
-    });
-    const [success, setSuccess] = useState(false);
+    const { permissions } = useChannelData(channelId);
+    const {
+        getValues,
+        setValues,
+        loading,
+        submit,
+    } = useCustomedForm(
+        {
+            name: channel.name,
+        },
+        {
+            url: route("channel.edit_name", channel.id),
+        }
+    );
+    const [isOpen, setIsOpen] = useState(false);
     function onSubmit(e) {
         e.preventDefault();
-        post(route("channel.edit_name", channel.id), {
-            preserveState: true,
-            only: ["channel", "channels"],
-            onSuccess: () => {
-                setSuccess(true);
-            },
-
-            headers: {
-                "X-Socket-Id": Echo.socketId(),
-            },
+        submit().then(() => {
+            setIsOpen(false);
         });
     }
     return (
-        <Form1
-            disabled={!permissions.updateName || channel.type == "DIRECT"}
-            className="p-4"
-            errors={errors}
-            success={success}
-            submit={onSubmit}
-            submitting={processing}
-            title="Rename this channel"
-            buttonName="Save changes"
-            activateButtonNode={
-                <SettingsButton
-                    disabled={
-                        !permissions.updateName || channel.type == "DIRECT"
-                    }
-                    onClick={() => {
-                        setSuccess(false);
-                    }}
-                    title="Channel name"
-                    description={
-                        <div className="flex items-baseline gap-x-1">
-                            {channel.type == "PUBLIC" ? (
-                                <span className="text-lg">#</span>
-                            ) : (
-                                <FaLock className="text-sm inline" />
-                            )}{" "}
-                            {channelName}
-                        </div>
-                    }
-                    className="rounded-tl-lg rounded-tr-lg"
-                />
-            }
-        >
-            {!permissions.updateName && (
-                <h3 className="text-lg my-4">
-                    ⚠️You are not allowed to rename channel, contact admins or
-                    channel managers for more information.
-                </h3>
-            )}
-            <TextInput
-                disabled={!permissions.updateName}
-                row={1}
-                value={data.name}
-                onChange={(e) => setData("name", e.target.value)}
+        <>
+            <SettingsButton
+                onClick={() => setIsOpen(true)}
+                disabled={!permissions.updateName || channel.type == "DIRECT"}
+                title="Channel name"
+                description={
+                    <div className="flex items-baseline gap-x-1">
+                        {channel.type == "PUBLIC" ? (
+                            <span className="text-lg">#</span>
+                        ) : (
+                            <FaLock className="text-sm inline" />
+                        )}{" "}
+                        {channelName}
+                    </div>
+                }
+                className="rounded-tl-lg rounded-tr-lg"
             />
-        </Form1>
+            <CustomedDialog isOpen={isOpen} onClose={() => setIsOpen(false)}>
+                <CustomedDialog.Title>Edit Channel Name</CustomedDialog.Title>
+                {!permissions.updateName && (
+                    <h3 className="text-lg my-4">
+                        ⚠️You are not allowed to rename channel, contact admins
+                        or channel managers for more information.
+                    </h3>
+                )}
+                <TextInput
+                    disabled={!permissions.updateName}
+                    row={1}
+                    value={getValues().name}
+                    onChange={(e) => setValues("name", e.target.value)}
+                />
+                <div className="flex justify-end gap-x-4 mt-8">
+                    <Button onClick={() => setIsOpen(false)}>Close</Button>
+                    <Button onClick={onSubmit} loading={loading}>Save Changes</Button>
+                </div>
+            </CustomedDialog>
+        </>
     );
 }

@@ -5,53 +5,45 @@ import Form1 from "@/Components/Form1";
 
 import { useState, useEffect, useMemo } from "react";
 import { SettingsButton } from "./SettingsButton";
-import { useChannel, useChannelData } from "@/helpers/customHooks";
+import {
+    useChannel,
+    useChannelData,
+    useCustomedForm,
+} from "@/helpers/customHooks";
 import { useParams } from "react-router-dom";
+import CustomedDialog from "@/Components/CustomedDialog";
+import Button from "@/Components/Button";
 export function EditDescriptionForm() {
     const { channelId } = useParams();
     const { channel } = useChannel(channelId);
     const { permissions } = useChannelData(channelId);
-    const [success, setSuccess] = useState(false);
-    const { data, setData, post, processing, errors } = useForm({
-        description: channel.description,
-    });
+    const [isOpen, setIsOpen] = useState(false);
+    const { getValues, setValues, submit, loading } = useCustomedForm(
+        {
+            description: channel.description,
+        },
+        {
+            url: route("channel.edit_description", channel.id),
+            hasEchoHeader: true,
+        }
+    );
     function onSubmit(e) {
         e.preventDefault();
-        post(route("channel.edit_description", channel.id), {
-            preserveState: true,
-            headers: {
-                "X-Socket-Id": Echo.socketId(),
-            },
-            only: ["channel"],
-            onSuccess: () => {
-                setSuccess(true);
-            },
-        });
+        submit().then(() => setIsOpen(false));
     }
 
-    useEffect(() => {
-        setData("description", channel.description);
-    }, [channel.id]);
     return (
         <div>
-            <Form1
-                disabled={!permissions.updateDescription}
-                className="p-4"
-                errors={errors}
-                success={success}
-                submit={onSubmit}
-                buttonName={channel.description ? "Update" : "Add"}
-                submitting={processing}
-                activateButtonNode={
-                    <SettingsButton
-                        onClick={() => setSuccess(false)}
-                        title=" Description"
-                        description={channel.description}
-                        className="border-t-0"
-                    />
-                }
-                title={`${channel.description ? "Edit" : "Add"} Description`}
-            >
+            <SettingsButton
+                onClick={() => setIsOpen(true)}
+                title=" Description"
+                description={channel.description}
+                className="border-t-0"
+            />
+            <CustomedDialog isOpen={isOpen} onClose={() => setIsOpen(false)}>
+                <CustomedDialog.Title>{`${
+                    channel.description ? "Edit" : "Add"
+                } Description`}</CustomedDialog.Title>
                 {!permissions.updateDescription && (
                     <h3 className="text-lg my-4">
                         ⚠️You are not allowed to edit channel description,
@@ -61,10 +53,16 @@ export function EditDescriptionForm() {
                 <TextArea
                     disabled={!permissions.updateDescription}
                     rows="2"
-                    value={data.description}
-                    onChange={(e) => setData("description", e.target.value)}
+                    value={getValues().description}
+                    onChange={(e) => setValues("description", e.target.value)}
                 />
-            </Form1>
+                <div className="flex justify-end gap-x-4 mt-8">
+                    <Button onClick={() => setIsOpen(false)}>Close</Button>
+                    <Button onClick={onSubmit} loading={loading}>
+                        {channel.description ? "Update" : "Add"}
+                    </Button>
+                </div>
+            </CustomedDialog>
         </div>
     );
 }
