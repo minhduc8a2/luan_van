@@ -10,14 +10,14 @@ import {
     useCustomedForm,
 } from "@/helpers/customHooks";
 import { useParams } from "react-router-dom";
+import CustomedDialog from "@/Components/CustomedDialog";
 
 export default function ChannelPermissions() {
-  
-    const {channelId} = useParams()
+    const [isOpen, setIsOpen] = useState(false);
+    const { channelId } = useParams();
     const { channel } = useChannel(channelId);
     const { permissions } = useChannelData(channelId);
 
-    const [refresh, setRefresh] = useState(1);
     const whoes = [
         {
             value: "everyone",
@@ -35,7 +35,7 @@ export default function ChannelPermissions() {
     const {
         getValues,
         setValues,
-        success,
+
         loading: processing,
         reset,
         submit: onSubmit,
@@ -56,7 +56,9 @@ export default function ChannelPermissions() {
 
     function submit(e) {
         e.preventDefault();
-        onSubmit();
+        onSubmit().then(() => {
+            setIsOpen(false);
+        });
     }
     function description() {
         switch (permissions.channelPostPermission) {
@@ -73,27 +75,20 @@ export default function ChannelPermissions() {
         }
     }
     return (
-        <OverlayNotification
-            success={success}
-            buttonNode={
-                <SettingsButton
-                    onClick={() => {
-                        reset();
-                    }}
-                    className="border-none"
-                    title="Channel permissions"
-                    description={description()}
-                />
-            }
-            title={<div className="font-semibold ">Channel permissions</div>}
-            submitButtonNode={
-                <Button onClick={submit} loading={processing}>
-                    Save changes
-                </Button>
-            }
-            className="p-3 pb-6"
-        >
-            <div className=" pb-4">
+        <>
+            <SettingsButton
+                onClick={() => {
+                    reset();
+                    setIsOpen(true);
+                }}
+                className="border-none"
+                title="Channel permissions"
+                description={description()}
+            />
+            <CustomedDialog isOpen={isOpen} onClose={() => setIsOpen(false)}>
+                <CustomedDialog.Title>
+                    <div className="font-semibold ">Channel permissions</div>
+                </CustomedDialog.Title>
                 <div className="">
                     <h5 className=" font-bold ">
                         Who can post in this channel?
@@ -115,7 +110,6 @@ export default function ChannelPermissions() {
                                             getValues().channelPostPermission
                                         }
                                         onChange={(e) => {
-                                            setRefresh((pre) => pre + 1);
                                             setValues(
                                                 "channelPostPermission",
                                                 e.target.value
@@ -155,8 +149,6 @@ export default function ChannelPermissions() {
                                                 .addChannelMembersPermission
                                         }
                                         onChange={(e) => {
-                                            setRefresh((pre) => pre + 1);
-
                                             setValues(
                                                 "addChannelMembersPermission",
                                                 e.target.value
@@ -187,8 +179,6 @@ export default function ChannelPermissions() {
                                 id="allow_huddles"
                                 checked={getValues().allowHuddle}
                                 onChange={(e) => {
-                                    setRefresh((pre) => pre + 1);
-
                                     setValues("allowHuddle", true);
                                 }}
                             />
@@ -203,8 +193,6 @@ export default function ChannelPermissions() {
                                 id="not_allow_huddles"
                                 checked={!getValues().allowHuddle}
                                 onChange={(e) => {
-                                    setRefresh((pre) => pre + 1);
-
                                     setValues("allowHuddle", false);
                                 }}
                             />
@@ -222,8 +210,6 @@ export default function ChannelPermissions() {
                             className="mt-1"
                             checked={getValues().allowThread}
                             onChange={(e) => {
-                                setRefresh((pre) => pre + 1);
-
                                 setValues("allowThread", e.target.checked);
                             }}
                         />
@@ -237,7 +223,13 @@ export default function ChannelPermissions() {
                         </div>
                     </div>
                 </div>
-            </div>
-        </OverlayNotification>
+                <CustomedDialog.ActionButtons
+                    btnName2={<>Save changes</>}
+                    type="green"
+                    loading={processing}
+                    onClickBtn2={submit}
+                />
+            </CustomedDialog>
+        </>
     );
 }

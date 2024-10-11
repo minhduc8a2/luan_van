@@ -17,6 +17,9 @@ export default function Button({
             type =
                 "bg-transparent text-danger-500 hover:bg-danger-500 hover:text-white";
             break;
+        case "green":
+            type = "bg-dark-green text-white hover:bg-dark-green/85";
+            break;
         default:
             type = "bg-foreground text-white/85";
             break;
