@@ -451,136 +451,150 @@ export default function Thread() {
                     </button>
                 </div>
             </div>
-
-            <div className="max-h-[30%] overflow-y-auto scrollbar py-8">
-                {threadedMessage && threadedMessage.forwarded_message ? (
-                    <ForwardedMessage
-                        threadStyle={true}
-                        message={threadedMessage}
-                        user={user}
-                        hasChanged={true}
-                        index={0}
-                    />
-                ) : (
-                    threadedMessage && (
-                        <Message
-                            threadStyle={true}
-                            message={threadedMessage}
-                            user={user}
-                            hasChanged={true}
-                            index={0}
-                        />
-                    )
-                )}
-            </div>
-
-            <div className="flex items-center gap-x-4 pl-4 my-4">
-                <h3 className="text-sm text-white/75">
-                    {thread_messages_count}{" "}
-                    {thread_messages_count > 1 ? "replies" : "reply"}
-                </h3>{" "}
-                <hr className="border-white/15 flex-1" />
-            </div>
-            {loadingMessages && (
-                <div className="flex justify-center items-center">
-                    <div className="h-12 w-12 relative">
-                        <OverlayLoadingSpinner spinerStyle="border-link" />
-                    </div>
-                    Loading messages ...
-                </div>
-            )}
-
-            {!loadingMessages && messages && channel && channelUsers && (
-                <InfiniteScroll
-                    loadMoreOnTop={(successCallBack) =>
-                        loadMore(
-                            channelId,
-                            "top",
-                            loadMoreTopToken.current,
-                            successCallBack
-                        )
-                    }
-                    loadMoreOnBottom={(successCallBack) =>
-                        loadMore(
-                            channelId,
-                            "bottom",
-                            loadMoreBottomToken.current,
-                            successCallBack
-                        )
-                    }
-                    topHasMore={topHasMore}
-                    bottomHasMore={bottomHasMore}
-                    topLoading={topLoading}
-                    bottomLoading={bottomLoading}
-                    triggerScrollBottom={newMessageReceived}
-                    clearTriggerScrollBottom={() =>
-                        setNewMessageReceived(false)
-                    }
-                    reverse
-                    rootMargin="100px"
-                    scrollToItem={hasMention}
-                    className="overflow-y-auto max-w-full flex-1 scrollbar"
-                >
-                    {sortedMessages.map((msg, index) => {
-                        let user = channelUsers.find(
-                            (mem) => mem.id === msg.user_id
-                        );
-                        if (!user)
-                            user = {
-                                id: msg.user_id,
-                                name: msg.user_name,
-                                notMember: true,
-                            };
-                        hasChanged = false;
-                        if (preValue) {
-                            if (
-                                preValue.user.id != user.id ||
-                                differenceInSeconds(
-                                    preValue.msg.created_at,
-                                    msg.created_at
-                                ) > 10
-                            ) {
-                                hasChanged = true;
-                                preValue = { user, msg };
-                            }
-                        } else preValue = { user, msg };
-                        return (
-                            <Message
-                                key={msg.id}
-                                message={msg}
-                                user={user}
-                                hasChanged={hasChanged}
-                                index={index}
+            {
+                !threadedMessage && <div className="h-full w-full"><OverlayLoadingSpinner/></div>
+            }
+            {threadedMessage && (
+                <>
+                    <div className="max-h-[30%] overflow-y-auto scrollbar py-8">
+                        {threadedMessage &&
+                        threadedMessage.forwarded_message ? (
+                            <ForwardedMessage
                                 threadStyle={true}
-                                messagableConnectionRef={threadConnectionRef}
-                                newMessageReactionReceive={
-                                    newMessageReactionReceive
-                                }
-                                resetNewMessageReactionReceive={() =>
-                                    setNewMessageReactionReceive(null)
-                                }
+                                message={threadedMessage}
+                                user={user}
+                                hasChanged={true}
+                                index={0}
                             />
-                        );
-                    })}
-                </InfiniteScroll>
-            )}
+                        ) : (
+                            threadedMessage && (
+                                <Message
+                                    threadStyle={true}
+                                    message={threadedMessage}
+                                    user={user}
+                                    hasChanged={true}
+                                    index={0}
+                                />
+                            )
+                        )}
+                    </div>
 
-            <div className="m-6 border border-white/15 pt-4 px-2 rounded-lg">
-                {permissions.thread && threadedMessage && (
-                    <TipTapEditor
-                        onSubmit={onSubmit}
-                        message={threadedMessage}
-                        channel={channel}
-                        channelUsers={channelUsers}
-                    />
-                )}
-                {!permissions.thread && (
-                    <h5 className="mb-4 text-center ml-4">
-                        You're not allowed to post in thread. Contact Admins or
-                        Channel managers for more information!
-                    </h5>
-                )}
-            </div>
+                    <div className="flex items-center gap-x-4 pl-4 my-4">
+                        <h3 className="text-sm text-white/75">
+                            {thread_messages_count}{" "}
+                            {thread_messages_count > 1 ? "replies" : "reply"}
+                        </h3>{" "}
+                        <hr className="border-white/15 flex-1" />
+                    </div>
+                    {loadingMessages && (
+                        <div className="flex justify-center items-center">
+                            <div className="h-12 w-12 relative">
+                                <OverlayLoadingSpinner spinerStyle="border-link" />
+                            </div>
+                            Loading messages ...
+                        </div>
+                    )}
+
+                    {!loadingMessages &&
+                        messages &&
+                        channel &&
+                        channelUsers && (
+                            <InfiniteScroll
+                                loadMoreOnTop={(successCallBack) =>
+                                    loadMore(
+                                        channelId,
+                                        "top",
+                                        loadMoreTopToken.current,
+                                        successCallBack
+                                    )
+                                }
+                                loadMoreOnBottom={(successCallBack) =>
+                                    loadMore(
+                                        channelId,
+                                        "bottom",
+                                        loadMoreBottomToken.current,
+                                        successCallBack
+                                    )
+                                }
+                                topHasMore={topHasMore}
+                                bottomHasMore={bottomHasMore}
+                                topLoading={topLoading}
+                                bottomLoading={bottomLoading}
+                                triggerScrollBottom={newMessageReceived}
+                                clearTriggerScrollBottom={() =>
+                                    setNewMessageReceived(false)
+                                }
+                                reverse
+                                rootMargin="100px"
+                                scrollToItem={hasMention}
+                                className="overflow-y-auto max-w-full flex-1 scrollbar"
+                            >
+                                {sortedMessages.map((msg, index) => {
+                                    let user = channelUsers.find(
+                                        (mem) => mem.id === msg.user_id
+                                    );
+                                    if (!user)
+                                        user = {
+                                            id: msg.user_id,
+                                            name: msg.user_name,
+                                            notMember: true,
+                                        };
+                                    hasChanged = false;
+                                    if (preValue) {
+                                        if (
+                                            preValue.user.id != user.id ||
+                                            differenceInSeconds(
+                                                preValue.msg.created_at,
+                                                msg.created_at
+                                            ) > 10
+                                        ) {
+                                            hasChanged = true;
+                                            preValue = { user, msg };
+                                        }
+                                    } else preValue = { user, msg };
+                                    return (
+                                        <Message
+                                            key={msg.id}
+                                            message={msg}
+                                            user={user}
+                                            hasChanged={hasChanged}
+                                            index={index}
+                                            threadStyle={true}
+                                            messagableConnectionRef={
+                                                threadConnectionRef
+                                            }
+                                            newMessageReactionReceive={
+                                                newMessageReactionReceive
+                                            }
+                                            resetNewMessageReactionReceive={() =>
+                                                setNewMessageReactionReceive(
+                                                    null
+                                                )
+                                            }
+                                        />
+                                    );
+                                })}
+                            </InfiniteScroll>
+                        )}
+
+                    <div className="m-6 border border-white/15 pt-4 px-2 rounded-lg">
+                        {permissions.thread && threadedMessage && (
+                            <TipTapEditor
+                                onSubmit={onSubmit}
+                                message={threadedMessage}
+                                channel={channel}
+                                channelUsers={channelUsers}
+                            />
+                        )}
+                        {!permissions.thread && (
+                            <h5 className="mb-4 text-center ml-4">
+                                You're not allowed to post in thread. Contact
+                                Admins or Channel managers for more information!
+                            </h5>
+                        )}
+                    </div>
+                </>
+            )}
         </>
     );
 }

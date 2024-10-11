@@ -41,7 +41,7 @@ export function differenceInSeconds(utcTime1, utcTime2) {
 
     try {
         const differenceInMilliseconds = date2.getTime() - date1.getTime();
-        console.log(utcTime1,utcTime2,differenceInMilliseconds/10);
+
         return Math.abs(differenceInMilliseconds / 1000);
     } catch (error) {
         console.log(error);
