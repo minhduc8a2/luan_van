@@ -13,7 +13,7 @@ export default function Settings({ channel, channelName, workspace }) {
     const { permissions } = useChannelData(channelId);
 
     return (
-        <div className="p-6 ">
+        <div className=" ">
             <div className="border border-white/15 rounded-lg overflow-hidden">
                 {permissions.updatePermissions && <ChannelPermissions />}
 

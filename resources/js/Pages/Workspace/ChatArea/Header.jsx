@@ -60,20 +60,7 @@ export default function Header({
                 <div className="relative">
                     <ChannelSettings
                         channelName={channelName}
-                        buttonNode={
-                            <div className="flex items-center gap-x-2">
-                                <div className="flex items-baseline gap-x-1">
-                                    {channel?.type == "PUBLIC" ? (
-                                        <span className="text-xl">#</span>
-                                    ) : (
-                                        <FaLock className="text-sm inline" />
-                                    )}{" "}
-                                    {channelName}
-                                </div>
-
-                                <FaAngleDown className="text-sm" />
-                            </div>
-                        }
+                       
                     />
                     {(topLoading || bottomLoading) && (
                         <div className="flex  gap-x-2 items-center px-4 py-2 absolute left-full top-1/2 -translate-y-1/2">
