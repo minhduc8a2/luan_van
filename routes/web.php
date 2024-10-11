@@ -97,7 +97,7 @@ Route::middleware('auth')->group(function () {
         // dd($validated['files']);
         $temporaryFileObjects = [];
         $file = $validated['file'];
-        $path = $file->store('temporary/users_' . $user->id);
+        $path = $file->store('public/users_' . $user->id);
         array_push($temporaryFileObjects, ['path' => $path, 'type' => $file->getMimeType(), 'name' => $file->getClientOriginalName()]);
 
         DeleteTemporaryFiles::dispatch($temporaryFileObjects)->delay(now()->addMinutes(30));

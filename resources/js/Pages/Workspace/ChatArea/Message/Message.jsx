@@ -29,6 +29,7 @@ import { useChannel } from "@/helpers/customHooks";
 import { Link, useParams } from "react-router-dom";
 import useGoToChannel from "@/helpers/useGoToChannel";
 import useGoToMessage from "@/helpers/useGoToMessage";
+import { MdError } from "react-icons/md";
 export default function Message({
     message,
     user,
@@ -69,7 +70,7 @@ export default function Message({
     const [isEditing, setIsEditing] = useState(false);
     const [showConfirm, setShowConfirm] = useState(null);
     const [forwardedMessage, setForwardedMessage] = useState(null);
-    const goToMessageInHook = useGoToMessage()
+    const goToMessageInHook = useGoToMessage();
     const groupedReactions = useMemo(() => {
         return groupReactions(reactions, workspaceUsers, auth.user);
     }, [reactions]);
@@ -223,7 +224,7 @@ export default function Message({
     }
 
     function goToMessage() {
-        goToMessageInHook(message)
+        goToMessageInHook(message);
     }
     // if (!channel) return "";
     return (
@@ -231,7 +232,11 @@ export default function Message({
             className={`message-container transition-all pl-8 pt-1 pr-4 pb-2 relative break-all group hover:bg-white/10 ${
                 isHovered && !message.deleted_at ? "bg-white/10" : ""
             } ${hasChanged || index == 0 ? "pt-4" : "mt-0"}`}
-            id={forwarded?`forwarded-message-${message.id}`:`message-${message.id}`}
+            id={
+                forwarded
+                    ? `forwarded-message-${message.id}`
+                    : `message-${message.id}`
+            }
         >
             <ForwardMessage
                 message={forwardedMessage}
@@ -302,6 +307,7 @@ export default function Message({
                                 ? UTCToDateTime(message.created_at)
                                 : UTCToTime(message.created_at)}
                         </span>
+                        
                     </div>
                 ) : (
                     ""
@@ -332,6 +338,8 @@ export default function Message({
                                 (edited)
                             </span>
                         )}
+                        {message.isSending && <span className="text-xs">Sending...</span>}
+                        {message.isFailed&& <div className="text-xs text-red-500 flex gap-x-2">Failed! <MdError /></div>}
                     </>
                 )}
                 {imageFiles.length != 0 && (

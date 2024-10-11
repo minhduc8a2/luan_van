@@ -1,7 +1,7 @@
 
 self.addEventListener("fetch", (event) => {
    
-    if (event.request.url.includes("/storage")) {
+    if (event.request.url.includes("/storage") || event.request.url.includes("/images")) {
         event.respondWith(
             caches.open("static-cache").then((cache) => {
                 return cache.match(event.request).then((cachedResponse) => {

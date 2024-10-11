@@ -2,13 +2,20 @@ import React from "react";
 import ChannelSettings from "./ChannelSettings/ChannelSettings";
 import Button from "@/Components/Button";
 import TipTapEditor from "@/Components/TipTapEditor";
-import { router } from "@inertiajs/react";
+import { router, usePage } from "@inertiajs/react";
 import { getMentionsFromContent } from "@/helpers/tiptapHelper";
 import { useChannelUsers } from "@/helpers/customHooks";
 import { useParams } from "react-router-dom";
-
+import { v4 as uuidv4 } from "uuid";
 import useJoinChannel from "@/helpers/useJoinChannel";
 import { FaLock } from "react-icons/fa";
+import { useDispatch, useSelector } from "react-redux";
+import {
+    addMessage,
+    editMessage,
+    updateMessageAfterSendFailed,
+    updateMessageAfterSendSuccessfully,
+} from "@/Store/channelsDataSlice";
 
 export default function Editor({
     channel,
@@ -16,10 +23,15 @@ export default function Editor({
     isChannelMember,
     channelName,
     setFocus,
+    setTemporaryMessageSending,
+    setNewMessageReceived,
 }) {
-    const { channelId } = useParams();
+    const { auth } = usePage().props;
+    const { channelId, workspaceId } = useParams();
+    const { publicAppUrl } = useSelector((state) => state.workspace);
     const { channelUsers } = useChannelUsers(channelId);
     const joinChannel = useJoinChannel();
+    const dispatch = useDispatch();
     function onSubmit(content, fileObjects, JSONContent) {
         let mentionsList = getMentionsFromContent(JSONContent);
         if (
@@ -28,6 +40,41 @@ export default function Editor({
             mentionsList.length == 0
         )
             return;
+        //create new message on client side
+        const tempFiles = fileObjects.map((fileObject, index) => {
+            return {
+                id: index,
+                name: fileObject.name,
+                url:
+                    publicAppUrl +
+                    "/" +
+                    fileObject.path.replace("public", "storage"),
+                type: fileObject.type,
+                path: fileObject.path,
+                workspace_id: workspaceId,
+                user_id: auth.user.id,
+                created_at: new Date().toUTCString(),
+            };
+        });
+        const newMessageId = uuidv4();
+        const newMessage = {
+            id: newMessageId,
+            isTemporary: true,
+            content,
+            reactions: [],
+            thread_messages_count: 0,
+            files: tempFiles,
+            user_id: auth.user.id,
+            channel_id: channelId,
+            isSending: true,
+            created_at: new Date().toUTCString(),
+        };
+        setTemporaryMessageSending(true);
+        dispatch(addMessage({ id: channelId, data: newMessage }));
+        setNewMessageReceived(true);
+        setTimeout(() => {
+            setTemporaryMessageSending(false);
+        }, 0);
         axios
             .post(
                 route("message.store", { channel: channel.id }),
@@ -35,6 +82,7 @@ export default function Editor({
                     content,
                     fileObjects,
                     mentionsList,
+                    temporaryId: newMessageId,
                 },
                 {
                     headers: {
@@ -42,8 +90,23 @@ export default function Editor({
                     },
                 }
             )
-            .then(() => {
+            .then((response) => {
+                dispatch(
+                    updateMessageAfterSendSuccessfully({
+                        id: channelId,
+                        temporaryId: response.data.temporaryId,
+                        data: response.data.message,
+                    })
+                );
                 setFocus((pre) => pre + 1);
+            })
+            .catch((error) => {
+                dispatch(
+                    updateMessageAfterSendFailed({
+                        id: channelId,
+                        temporaryId: newMessageId,
+                    })
+                );
             });
     }
     return (

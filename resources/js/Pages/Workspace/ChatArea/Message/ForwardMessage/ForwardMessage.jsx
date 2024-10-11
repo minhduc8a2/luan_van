@@ -35,8 +35,8 @@ export default function ForwardMessage({ message, show, onClose }) {
     const [choosenChannelsList, setChoosenChannelsList] = useState([]);
     const [loadingChannelUserIds, setLoadingChannelUserIds] = useState(false);
     const errorHandler = useErrorHandler();
-    function changeChannel(channel) {
-        goToChannel(channel.workspace_id, channel.id);
+    function changeChannel(channelId) {
+        goToChannel(channel.workspace_id, channelId);
     }
     function onSubmit(content, _, JSONContent) {
         if (choosenChannelsList.length < 1) return;
@@ -58,7 +58,8 @@ export default function ForwardMessage({ message, show, onClose }) {
                 }
             )
             .then((response) => {
-                changeChannel(channel);
+                console.log(response);
+                changeChannel(choosenChannelsList[0].id);
             })
             .catch(errorHandler);
     }

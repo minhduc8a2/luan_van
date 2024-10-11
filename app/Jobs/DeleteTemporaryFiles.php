@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Models\File;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Queue\InteractsWithQueue;
@@ -26,10 +27,12 @@ class DeleteTemporaryFiles implements ShouldQueue
      */
     public function handle(): void
     {
-        $paths = [];
+
         foreach ($this->fileObjects as $fileObject) {
-            array_push($paths, $fileObject['path']);
+            $path =  $fileObject['path'];
+            $fileExists = File::where('path', $path)->exists();
+            if ($fileExists) continue;
+            Storage::delete($path);
         }
-        Storage::delete($paths);
     }
 }

@@ -21,16 +21,17 @@ export default function InfiniteScroll({
     clearTriggerScrollBottom,
     rootMargin = "500px",
     scrollToItem = null,
+    threshold = 0.1
 }) {
     const containerRef = useRef(null);
-
+    
     const { ref: top_ref, inView: top_inView } = useInView({
-        threshold: 0.1,
+        threshold,
         root: containerRef.current,
         rootMargin,
     });
     const { ref: bottom_ref, inView: bottom_inView } = useInView({
-        threshold: 0.1,
+        threshold,
         root: containerRef.current,
         rootMargin,
     });
@@ -45,6 +46,7 @@ export default function InfiniteScroll({
             if (!reverse) {
                 setJustTopLoaded(false);
             }
+           
             loadMoreOnTop(() => {
                 if (!reverse) {
                     preScrollPositionRef.current = {
@@ -52,6 +54,8 @@ export default function InfiniteScroll({
                             containerRef.current?.scrollHeight || 0,
                         oldScrollTop: containerRef.current?.scrollTop || 0,
                     };
+                   
+
                     if (!scrollToItem) setJustTopLoaded(true);
                 }
             });
@@ -90,6 +94,7 @@ export default function InfiniteScroll({
             if (reverse) {
                 setJustTopLoaded(false);
             }
+           
             loadMoreOnBottom(() => {
                 if (reverse) {
                     preScrollPositionRef.current = {
@@ -97,6 +102,7 @@ export default function InfiniteScroll({
                             containerRef.current?.scrollHeight || 0,
                         oldScrollTop: containerRef.current?.scrollTop || 0,
                     };
+                  
                     if (!scrollToItem) setJustTopLoaded(true);
                 }
             });

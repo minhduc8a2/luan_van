@@ -33,6 +33,7 @@ import Editor from "./Editor";
 import { useParams } from "react-router-dom";
 import { setMention } from "@/Store/mentionSlice";
 import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
+import MessagePlaceHolder from "./Message/MessagePlaceHolder";
 export default function ChatArea() {
     const { auth } = usePage().props;
     const { channelId } = useParams();
@@ -62,9 +63,10 @@ export default function ChatArea() {
     const [bottomLoading, setBottomLoading] = useState(false);
     const [topHasMore, setTopHasMore] = useState();
     const [bottomHasMore, setBottomHasMore] = useState();
-
+    const [temporaryMessageSending, setTemporaryMessageSending] =
+        useState(false);
     useEffect(() => {
-        if (messages) {
+        if (messages && !temporaryMessageSending) {
             const { minId, maxId } = findMinMaxId(messages);
             // console.log(minId, maxId);
             setTopHasMore(maxId);
@@ -180,11 +182,11 @@ export default function ChatArea() {
         if (!channel) return;
         if (!messageId) setNewMessageReceived(true);
         dispatch(resetMessageCountForChannel(channel));
-        axios.post(route("channel.last_read", channel.id), {});
+        axios.post(route("channel.last_read", channelId), {});
         return () => {
-            axios.post(route("channel.last_read", channel.id), {});
+            axios.post(route("channel.last_read", channelId), {});
         };
-    }, [channel?.id]);
+    }, [channelId]);
     useEffect(() => {
         if (messageId && !mentionThreadMessage) {
             setHasMention(messageId);
@@ -204,7 +206,7 @@ export default function ChatArea() {
             })
             .map((key) => {
                 const formatedDate = formatDDMMYYY(new Date(key));
-                // gMessages[key].sort((a, b) => a.id - b.id);
+                
                 return {
                     date: formatedDate == currentDate ? "Today" : formatedDate,
                     mgs: gMessages[key],
@@ -325,6 +327,8 @@ export default function ChatArea() {
                 />
                 {loaded && channel && (
                     <InfiniteScroll
+                        threshold={0.8}
+                        rootMargin="0px"
                         loadMoreOnTop={(successCallBack) =>
                             loadMore(
                                 "top",
@@ -351,7 +355,7 @@ export default function ChatArea() {
                         scrollToItem={hasMention}
                         className="overflow-y-auto max-w-full scrollbar"
                     >
-                        <div className="p-8">
+                        {/* <div className="p-8">
                             <h1 className="text-3xl font-extrabold text-white/85">
                                 {" "}
                                 {welcomeMessage}
@@ -363,7 +367,13 @@ export default function ChatArea() {
                                     <EditDescriptionForm />
                                 </div>
                             </div>
-                        </div>
+                        </div> */}
+                        {bottomHasMore && (
+                            <div className="my-4">
+                                <MessagePlaceHolder />
+                                <MessagePlaceHolder />
+                            </div>
+                        )}
                         {groupedMessages.map(({ date, mgs }, pIndex) => {
                             return (
                                 <div className="relative pb-4" key={date}>
@@ -474,6 +484,8 @@ export default function ChatArea() {
                         isChannelMember={isChannelMember}
                         channelName={channelName}
                         setFocus={setFocus}
+                        setTemporaryMessageSending={setTemporaryMessageSending}
+                        setNewMessageReceived={setNewMessageReceived}
                     />
                 )}
             </div>

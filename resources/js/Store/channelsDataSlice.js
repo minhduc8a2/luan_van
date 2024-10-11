@@ -76,16 +76,30 @@ export const channelsDataSlice = createSlice({
             }
         },
         addMessages(state, action) {
+            if (!Array.isArray(action.payload.data) || !action.payload.id)
+                return;
+
             if (state[action.payload.id] && state[action.payload.id].messages) {
+                // filter existing messages
+                state[action.payload.id].messages = state[
+                    action.payload.id
+                ].messages.filter((msg) => !msg.isTemporary);
+                const filteredNewMessages = action.payload.data.filter(
+                    (msg) =>
+                        !state[action.payload.id].messages.some(
+                            (m) => m.id == msg.id
+                        )
+                );
+                //
                 if (action.payload.position == "top") {
                     state[action.payload.id].messages = [
-                        ...action.payload.data,
+                        ...filteredNewMessages,
                         ...state[action.payload.id].messages,
                     ];
                 } else {
                     state[action.payload.id].messages = [
                         ...state[action.payload.id].messages,
-                        ...action.payload.data,
+                        ...filteredNewMessages,
                     ];
                 }
             }
@@ -102,6 +116,32 @@ export const channelsDataSlice = createSlice({
             }
         },
 
+        updateMessageAfterSendSuccessfully(state, action) {
+            if (state[action.payload.id] && state[action.payload.id].messages) {
+                let messageIndex = state[action.payload.id].messages.findIndex(
+                    (message) => message.id == action.payload.temporaryId
+                );
+                if (messageIndex >= 0) {
+                    state[action.payload.id].messages[messageIndex] =
+                        action.payload.data;
+                }
+            }
+        },
+        updateMessageAfterSendFailed(state, action) {
+            if (state[action.payload.id] && state[action.payload.id].messages) {
+                let messageIndex = state[action.payload.id].messages.findIndex(
+                    (message) => message.id == action.payload.temporaryId
+                );
+                if (messageIndex >= 0) {
+                    state[action.payload.id].messages[
+                        messageIndex
+                    ].isSending = false;
+                    state[action.payload.id].messages[
+                        messageIndex
+                    ].isFailed = true;
+                }
+            }
+        },
         editMessage(state, action) {
             if (state[action.payload.id] && state[action.payload.id].messages) {
                 let messageIndex = state[action.payload.id].messages.findIndex(
@@ -206,6 +246,8 @@ export const {
     deleteFile,
     removeChannelData,
     addMessages,
+    updateMessageAfterSendSuccessfully,
+    updateMessageAfterSendFailed
 } = channelsDataSlice.actions;
 
 export default channelsDataSlice.reducer;

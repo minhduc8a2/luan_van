@@ -46,6 +46,7 @@ export function findMinMaxId(messages) {
 
     return messages.reduce(
         (acc, msg) => {
+            if(msg.isTemporary) return acc;
             if (msg.id < acc.minId) acc.minId = msg.id;
             if (msg.id > acc.maxId) acc.maxId = msg.id;
             return acc;

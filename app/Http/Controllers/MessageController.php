@@ -263,7 +263,7 @@ class MessageController extends Controller
 
         $validated = $forwardMode ?
             $request->validate(['content' => 'string', 'forwardedMessageId' => 'integer', 'channelId' => 'integer'])
-            :  $request->validate(['content' => 'string', 'fileObjects' => 'array']);
+            :  $request->validate(['content' => 'string', 'fileObjects' => 'array', 'temporaryId' => 'required|string']);
         $content = $validated['content'];
 
         if ($forwardMode) {
@@ -283,9 +283,6 @@ class MessageController extends Controller
             if (!$forwardMode) {
                 $fileObjects = [];
                 foreach ($validated['fileObjects'] as $i => $fileObject) {
-                    $newPath = str_replace("temporary", "public", $fileObject['path']);
-                    Storage::move($fileObject['path'], $newPath);
-                    $fileObject['path'] = $newPath;
                     array_push($fileObjects, $fileObject);
                 }
                 if (count($fileObjects) > 0) {
@@ -338,13 +335,20 @@ class MessageController extends Controller
                         },
                         'reactions',
 
-                    ])->loadCount('threadMessages')));
+                    ],)->loadCount('threadMessages')))->toOthers();
                 }
             } catch (\Throwable $th) {
                 // throw $th;
             }
             DB::commit();
-            return Helper::createSuccessResponse();
+            if ($forwardMode) return Helper::createSuccessResponse();
+            return ['message' => $message->load([
+                'files' => function ($query) {
+                    $query->withTrashed();
+                },
+                'reactions',
+
+            ],)->loadCount('threadMessages'), 'temporaryId' => $validated['temporaryId']];
         } catch (\Throwable $th) {
             DB::rollBack();
             dd($th);
@@ -357,7 +361,7 @@ class MessageController extends Controller
         if ($request->user()->cannot('createThread', [Message::class, $channel])) return abort(403);
         if ($message->is_auto_generated) return abort(403);
         try {
-            $validated = $request->validate(['content' => 'string', 'fileObjects' => 'array', 'mentionsList' => 'array']);
+            $validated = $request->validate(['content' => 'string', 'fileObjects' => 'array', 'mentionsList' => 'array', 'temporaryId' => 'required|string']);
             $content = $validated['content'];
             DB::beginTransaction();
             $content = Helper::sanitizeContent($content);
@@ -370,9 +374,7 @@ class MessageController extends Controller
             ]);
             $fileObjects = [];
             foreach ($validated['fileObjects'] as $i => $fileObject) {
-                $newPath = str_replace("temporary", "public", $fileObject['path']);
-                Storage::move($fileObject['path'], $newPath);
-                $fileObject['path'] = $newPath;
+
                 array_push($fileObjects, $fileObject);
             }
             if (count($fileObjects) > 0) {
@@ -390,7 +392,7 @@ class MessageController extends Controller
                 //code...
                 broadcast(new ThreadMessageEvent($message, $newMessage->load(['files' => function ($query) {
                     $query->withTrashed();
-                }, 'reactions'])));
+                }, 'reactions']),))->toOthers();
             } catch (\Throwable $th) {
                 throw $th;
             }

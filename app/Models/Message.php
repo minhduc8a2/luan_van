@@ -29,7 +29,8 @@ class Message extends Model
         'created_at',
         'is_auto_generated',
         "forwarded_message_id",
-        "threaded_message_id"
+        "threaded_message_id",
+        
     ];
     public function user(): BelongsTo
     {

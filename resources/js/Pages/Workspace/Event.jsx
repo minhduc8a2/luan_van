@@ -32,6 +32,7 @@ import {
     editMessage,
     removeManagerFromChannel,
     removeUserFromChannel,
+    updateMessageAfterSendSuccessfully,
 } from "@/Store/channelsDataSlice";
 import { useParams } from "react-router-dom";
 
@@ -284,12 +285,12 @@ export default function Event() {
     }
     useEffect(() => {
         listenChannels();
-        // return () => {
-        //     channels.forEach((cn) => {
-        //         Echo.leave(`private_channels.${cn.id}`);
-        //     });
-        // };
-    }, [channels, workspace?.id]);
+        return () => {
+            channels.forEach((cn) => {
+                Echo.leave(`private_channels.${cn.id}`);
+            });
+        };
+    }, [channels, workspace?.id, channelId, auth.user.id, workspaceUsers]);
     useEffect(() => {
         workspaceListener();
 
@@ -369,7 +370,7 @@ export default function Event() {
         return () => {
             Echo.leave(`private_workspaces.${workspace.id}`);
         };
-    }, [workspaceId, channelId, huddleChannelId, auth]);
+    }, [workspaceId, channelId, huddleChannelId, auth.user.id]);
 
     useEffect(() => {
         if (connectionRef.current)
