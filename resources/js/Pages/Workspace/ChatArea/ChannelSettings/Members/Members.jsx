@@ -12,14 +12,15 @@ import { useChannelData, useChannelUsers } from "@/helpers/customHooks";
 
 import useErrorHandler from "@/helpers/useErrorHandler";
 import { useParams } from "react-router-dom";
+import CustomedDialog from "@/Components/CustomedDialog";
 
 export default function Members() {
     const [errors, setErrors] = useState(null);
-    const {channelId} = useParams()
+    const { channelId } = useParams();
 
     const { permissions } = useChannelData(channelId);
     const { channelUsers } = useChannelUsers(channelId);
-
+    const [isOpen, setIsOpen] = useState(false);
     const [searchValue, setSearchValue] = useState("");
     const handleError = useErrorHandler();
     function removeChannelManager(user) {
@@ -59,20 +60,23 @@ export default function Members() {
                 <ErrorsList errors={errors} />
             </div>
             {permissions.addUsersToChannel && (
-                <OverlayPanel
-                    buttonNode={
-                        <button className="flex gap-x-4 p-4 px-6 items-center mt-6 hover:bg-white/15 w-full">
-                            <div className=" rounded p-2 bg-link/15">
-                                <IoPersonAddOutline className="text-link text-xl" />
-                            </div>
-                            Add People
-                        </button>
-                    }
-                >
-                    {({ close }) => (
-                        <AddPeople close={close} setErrors={setErrors} />
-                    )}
-                </OverlayPanel>
+                <>
+                    <button
+                        className="flex gap-x-4 p-4 px-6 items-center mt-6 hover:bg-white/15 w-full"
+                        onClick={() => setIsOpen(true)}
+                    >
+                        <div className=" rounded p-2 bg-link/15">
+                            <IoPersonAddOutline className="text-link text-xl" />
+                        </div>
+                        Add People
+                    </button>
+                    <CustomedDialog
+                        isOpen={isOpen}
+                        onClose={() => setIsOpen(false)}
+                    >
+                        <AddPeople close={() => setIsOpen(false)} />
+                    </CustomedDialog>
+                </>
             )}
 
             <ul className="overflow-hidden h-[30vh]">

@@ -36,7 +36,7 @@ export default function AddPeople({ close, setErrors }) {
             });
     }
     return (
-        <div className="min-w-96 p-4 text-white/85 max-w-lg">
+        <div className="min-w-96  text-white/85 max-w-lg">
             <div className="text-2xl flex items-baseline gap-x-2 p-2 pb-0 font-bold text-white/85">
                 Add people to{" "}
                 <div className="flex items-center gap-x-1">
