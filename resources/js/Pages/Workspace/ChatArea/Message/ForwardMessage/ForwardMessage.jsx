@@ -58,7 +58,7 @@ export default function ForwardMessage({ message, show, onClose }) {
                 }
             )
             .then((response) => {
-                console.log(response);
+                onClose();
                 changeChannel(choosenChannelsList[0].id);
             })
             .catch(errorHandler);

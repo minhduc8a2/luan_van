@@ -35,6 +35,7 @@ import {
     addThreadMessagesCount,
     subtractThreadMessagesCount,
 } from "@/Store/channelsDataSlice";
+import { useParams } from "react-router-dom";
 export default function Thread() {
     const { auth } = usePage().props;
     const dispatch = useDispatch();
@@ -49,9 +50,9 @@ export default function Thread() {
         messages,
     } = useSelector((state) => state.thread);
     const channelId = threadedMessage?.channel_id;
-
+    const { workspaceId } = useParams();
     const { permissions } = useChannelData(channelId);
-
+    const { publicAppUrl } = useSelector((state) => state.workspace);
     const { channel } = useChannel(channelId);
     const { channelUsers } = useChannelUsers(channelId);
 
@@ -240,7 +241,7 @@ export default function Thread() {
                     message: threadedMessageId,
                 }),
                 {
-                    created_at:newMessage.created_at,
+                    created_at: newMessage.created_at,
                     content,
                     fileObjects,
                     mentionsList: getMentionsFromContent(JSONContent),
@@ -535,8 +536,8 @@ export default function Thread() {
                             if (
                                 preValue.user.id != user.id ||
                                 differenceInSeconds(
-                                    preValue.msg.updated_at,
-                                    msg.updated_at
+                                    preValue.msg.created_at,
+                                    msg.created_at
                                 ) > 10
                             ) {
                                 hasChanged = true;

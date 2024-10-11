@@ -327,7 +327,7 @@ export default function ChatArea() {
                 />
                 {loaded && channel && (
                     <InfiniteScroll
-                        threshold={0.5}
+                        threshold={0.25}
                         rootMargin="0px"
                         loadMoreOnTop={(successCallBack) =>
                             loadMore(

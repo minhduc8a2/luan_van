@@ -35,17 +35,18 @@ export function UTCToDateTime(utcTime) {
 
     return `${formattedDate}, ${formattedTime}`;
 }
-export function differenceInSeconds(utcTime_1, utcTime_2) {
-    const date1 = new Date(utcTime_1);
-    const date2 = new Date(utcTime_2);
+export function differenceInSeconds(utcTime1, utcTime2) {
+    const date1 = new Date(utcTime1);
+    const date2 = new Date(utcTime2);
 
-    const time1InMilliseconds = date1.getTime();
-    const time2InMilliseconds = date2.getTime();
-
-    const time1InSeconds = Math.floor(time1InMilliseconds / 1000);
-    const time2InSeconds = Math.floor(time2InMilliseconds / 1000);
-    // console.log(Math.abs(time1InSeconds - time2InSeconds));
-    return Math.abs(time1InSeconds - time2InSeconds);
+    try {
+        const differenceInMilliseconds = date2.getTime() - date1.getTime();
+        console.log(utcTime1,utcTime2,differenceInMilliseconds/10);
+        return Math.abs(differenceInMilliseconds / 1000);
+    } catch (error) {
+        console.log(error);
+        return 1000;
+    }
 }
 
 export function differenceInDate(utcTime_1, utcTime_2) {
@@ -102,7 +103,6 @@ export function compareDateTime(dateString1, dateString2) {
 }
 
 export const formatToMinuteSecond = (timeInSeconds) => {
-    
     const minutes = Math.floor(timeInSeconds / 60);
     const seconds = Math.floor(timeInSeconds % 60);
     return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;

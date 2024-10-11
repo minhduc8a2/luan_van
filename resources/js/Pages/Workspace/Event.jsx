@@ -54,6 +54,39 @@ export default function Event() {
     const reloadPermissions = useReloadPermissions();
     const goToChannel = useGoToChannel();
     const { mainChannel } = useMainChannel(workspaceId);
+    const channelsDataRef = useRef(null);
+    const channelsRef = useRef(null);
+    const workspaceUsersRef = useRef(null);
+    const threadMessageIdRef = useRef(null);
+    const channelIdRef = useRef(null);
+    const huddleChannelIdRef = useRef(null);
+    const mainChannelRef = useRef(null);
+    useEffect(() => {
+        channelsDataRef.current = channelsData;
+    }, [channelsData]);
+
+    useEffect(() => {
+        channelsRef.current = channels;
+    }, [channels]);
+    useEffect(() => {
+        workspaceUsersRef.current = workspaceUsers;
+    }, [workspaceUsers]);
+
+    useEffect(() => {
+        threadMessageIdRef.current = threadMessageId;
+    }, [threadMessageId]);
+
+    useEffect(() => {
+        channelIdRef.current = channelId;
+    }, [channelId]);
+
+    useEffect(() => {
+        huddleChannelIdRef.current = huddleChannelId;
+    }, [huddleChannelId]);
+
+    useEffect(() => {
+        mainChannelRef.current = mainChannel;
+    }, [mainChannel]);
 
     const userListener = useCallback(() => {
         Echo.private("App.Models.User." + auth.user.id).notification(
@@ -63,32 +96,36 @@ export default function Event() {
                     isBroadcastNotification(notification.type)
                         ? notification
                         : notification.data;
-                if (workspace.id != notificationWorkspace.id) return;
+                if (workspaceId != notificationWorkspace.id) return;
                 dispatch(addNotificationCount());
                 if (isChannelsNotificationBroadcast(notification.type)) {
                     const { channel, changesType } = notification;
                     switch (changesType) {
                         case "addedToNewChannel":
                             dispatch(addNewChannelToChannelsStore(channel));
-                            console.log(channelId);
-                            if (channelsData.hasOwnProperty(channelId)) {
+                          
+                            if (
+                                channelsDataRef.current.hasOwnProperty(
+                                    channelIdRef.current
+                                )
+                            ) {
                                 console.log(
                                     "Added to new channel and has channel data already, need to update"
                                 );
-                                reloadPermissions(channelId);
+                                reloadPermissions(channelIdRef.current);
                             }
                             break;
                         case "removedFromChannel":
-                            if (channel.id != channelId) {
+                            if (channel.id != channelIdRef.current) {
                                 dispatch(removeChannel(channel.id));
                             } else {
                                 if (channel.type == "PRIVATE") {
                                     dispatch(removeChannel(channel.id));
-                                    if (channel.id == channelId) {
+                                    if (channel.id == channelIdRef.current) {
                                         router.get(
                                             route("channels.show", {
-                                                workspace: workspace.id,
-                                                channel: mainChannel.id,
+                                                workspace: workspaceId,
+                                                channel: mainChannelRef.current.id,
                                             }),
                                             {},
                                             {
@@ -97,7 +134,7 @@ export default function Event() {
                                         );
                                     }
                                 } else {
-                                    reloadPermissions(channelId);
+                                    reloadPermissions(channelIdRef.current);
                                 }
                             }
                             break;
@@ -105,7 +142,7 @@ export default function Event() {
                 }
             }
         );
-    }, [channelId, workspaceId, mainChannel?.id, auth.user.id, channelsData]);
+    }, [ workspaceId,  auth.user.id]);
     useEffect(() => {
         userListener();
         console.log("user listener registered");
@@ -145,7 +182,7 @@ export default function Event() {
                         case "newMessageCreated":
                             if (
                                 !isHiddenUser(
-                                    workspaceUsers,
+                                    workspaceUsersRef.current,
                                     e.message?.user_id
                                 )
                             ) {
@@ -155,10 +192,10 @@ export default function Event() {
                                 // setNewMessageReceived(true);
                             }
                             if (e.message?.user_id != auth.user.id)
-                                if (cn.id != channelId)
+                                if (cn.id != channelIdRef.current)
                                     if (
                                         !isHiddenUser(
-                                            workspaceUsers,
+                                            workspaceUsersRef.current,
                                             e.message?.user_id
                                         )
                                     )
@@ -176,7 +213,7 @@ export default function Event() {
                             );
                             break;
                         case "messageDeleted":
-                            if (threadMessageId == e.message?.id)
+                            if (threadMessageIdRef.current == e.message?.id)
                                 dispatch(setThreadedMessageId(null));
                             dispatch(
                                 deleteMessage({
@@ -290,7 +327,7 @@ export default function Event() {
                 Echo.leave(`private_channels.${cn.id}`);
             });
         };
-    }, [channels, workspace?.id, channelId, auth.user.id, workspaceUsers]);
+    }, [channels, workspaceId,  auth.user.id]);
     useEffect(() => {
         workspaceListener();
 
@@ -322,12 +359,12 @@ export default function Event() {
                         }
                         break;
                     case "ChannelObserver_deleteChannel":
-                        if (huddleChannelId == e.data) {
+                        if (huddleChannelIdRef.current == e.data) {
                             dispatch(toggleHuddle());
                         }
 
-                        if (channelId == e.data) {
-                            goToChannel(workspaceId, mainChannel.id);
+                        if (channelIdRef.current == e.data) {
+                            goToChannel(workspaceId, mainChannelRef.current.id);
                         }
                         dispatch(removeChannel(e.data));
                         break;
@@ -357,7 +394,7 @@ export default function Event() {
                         dispatch(addWorkspaceUser(e.data));
                         dispatch(
                             addUsersToChannel({
-                                id: mainChannel.id,
+                                id: mainChannelRef.current.id,
                                 userIds: [e.data.id],
                             })
                         );
@@ -370,7 +407,7 @@ export default function Event() {
         return () => {
             Echo.leave(`private_workspaces.${workspace.id}`);
         };
-    }, [workspaceId, channelId, huddleChannelId, auth.user.id]);
+    }, [workspaceId, auth.user.id]);
 
     useEffect(() => {
         if (connectionRef.current)

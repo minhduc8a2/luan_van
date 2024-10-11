@@ -265,7 +265,7 @@ class MessageController extends Controller
             $request->validate(['content' => 'string', 'forwardedMessageId' => 'integer', 'channelId' => 'integer'])
             :  $request->validate(['content' => 'string', 'fileObjects' => 'array', 'created_at' => 'required|date']);
         $content = $validated['content'];
-        $created_at =  Carbon::createFromFormat('D, d M Y H:i:s T', $validated['created_at'])->format('Y-m-d H:i:s');
+        $created_at = isset($validated['created_at']) ? Carbon::createFromFormat('D, d M Y H:i:s T', $validated['created_at'])->format('Y-m-d H:i:s') : Carbon::now();
         if ($forwardMode) {
             $forwardChannel = Channel::find($validated['channelId']);
         }
