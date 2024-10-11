@@ -103,7 +103,7 @@ export default function Event() {
                     switch (changesType) {
                         case "addedToNewChannel":
                             dispatch(addNewChannelToChannelsStore(channel));
-                          
+
                             if (
                                 channelsDataRef.current.hasOwnProperty(
                                     channelIdRef.current
@@ -125,7 +125,8 @@ export default function Event() {
                                         router.get(
                                             route("channels.show", {
                                                 workspace: workspaceId,
-                                                channel: mainChannelRef.current.id,
+                                                channel:
+                                                    mainChannelRef.current.id,
                                             }),
                                             {},
                                             {
@@ -142,7 +143,7 @@ export default function Event() {
                 }
             }
         );
-    }, [ workspaceId,  auth.user.id]);
+    }, [workspaceId, auth.user.id]);
     useEffect(() => {
         userListener();
         console.log("user listener registered");
@@ -322,12 +323,13 @@ export default function Event() {
     }
     useEffect(() => {
         listenChannels();
-        return () => {
-            channels.forEach((cn) => {
-                Echo.leave(`private_channels.${cn.id}`);
-            });
-        };
-    }, [channels, workspaceId,  auth.user.id]);
+        //If leave channel, will not receive events 
+        // return () => {
+        //     channels.forEach((cn) => {
+        //         Echo.leave(`private_channels.${cn.id}`);
+        //     });
+        // };
+    }, [channels, workspaceId, auth.user.id]);
     useEffect(() => {
         workspaceListener();
 
