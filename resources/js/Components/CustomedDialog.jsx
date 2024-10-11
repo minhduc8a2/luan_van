@@ -1,17 +1,12 @@
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
 
-import { useState } from "react";
-function CustomedDialog({ children,isOpen,onClose,  className = "" }) {
-  
-
+import { createContext, useContext, useState } from "react";
+import Button from "./Button";
+const DialogContext = createContext(null);
+function CustomedDialog({ children, isOpen, onClose, className = "" }) {
     return (
-        <>
-            
-            <Dialog
-                open={isOpen}
-                onClose={onClose}
-                className="relative z-50"
-            >
+        <DialogContext.Provider value={{ onClose }}>
+            <Dialog open={isOpen} onClose={onClose} className="relative z-50">
                 <div className="fixed inset-0 flex w-screen items-center bg-black/50 justify-center p-4">
                     <DialogPanel
                         className={`w-[600px] max-w-full  bg-background p-8 rounded-lg ${className}`}
@@ -20,7 +15,7 @@ function CustomedDialog({ children,isOpen,onClose,  className = "" }) {
                     </DialogPanel>
                 </div>
             </Dialog>
-        </>
+        </DialogContext.Provider>
     );
 }
 
@@ -32,7 +27,30 @@ function Title({ children }) {
     );
 }
 
-
+function ActionButtons({
+    btnName1 = "Close",
+    btnName2 = "Submit",
+    onClickBtn2,
+    classNameBtn2,
+    loading = false,
+    type
+}) {
+    const { onClose } = useContext(DialogContext);
+    return (
+        <div className="flex justify-end gap-x-4 mt-8">
+            <Button onClick={onClose}>{btnName1}</Button>
+            <Button
+                onClick={onClickBtn2}
+                loading={loading}
+                className={classNameBtn2}
+                type={type}
+            >
+                {btnName2}
+            </Button>
+        </div>
+    );
+}
 
 CustomedDialog.Title = Title;
+CustomedDialog.ActionButtons = ActionButtons;
 export default CustomedDialog;

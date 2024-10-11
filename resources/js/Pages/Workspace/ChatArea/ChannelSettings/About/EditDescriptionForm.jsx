@@ -56,12 +56,12 @@ export function EditDescriptionForm() {
                     value={getValues().description}
                     onChange={(e) => setValues("description", e.target.value)}
                 />
-                <div className="flex justify-end gap-x-4 mt-8">
-                    <Button onClick={() => setIsOpen(false)}>Close</Button>
-                    <Button onClick={onSubmit} loading={loading}>
-                        {channel.description ? "Update" : "Add"}
-                    </Button>
-                </div>
+
+                <CustomedDialog.ActionButtons
+                    btnName2={channel.description ? "Update" : "Add"}
+                    onClickBtn2={onSubmit}
+                    loading={loading}
+                />
             </CustomedDialog>
         </div>
     );

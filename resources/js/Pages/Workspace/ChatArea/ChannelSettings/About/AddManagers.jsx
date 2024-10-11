@@ -8,36 +8,26 @@ import { FaLock } from "react-icons/fa";
 
 import { useChannel, useChannelUsers } from "@/helpers/customHooks";
 import { useParams } from "react-router-dom";
+import useErrorHandler from "@/helpers/useErrorHandler";
 export default function AddManagers({ close, setErrors }) {
-    const { channelId } = useParams()
+    const { channelId } = useParams();
     const { channelUsers } = useChannelUsers(channelId);
     const { channel } = useChannel(channelId);
     const [choosenUsers, setChoosenUsers] = useState({});
 
     const [processing, setProcessing] = useState(false);
-
+    const errorHandler = useErrorHandler();
     function submit() {
         setProcessing(true);
-        router.post(
-            route("channel.add_managers", channel.id),
-            {
+        axios
+            .post(route("channels.addManagers", channel.id), {
                 users: [...Object.values(choosenUsers)],
-            },
-            {
-                preserveState: true,
-                only: ["managers"],
-                onError: (errors) => {
-                    setErrors(errors);
-                },
-                onFinish: () => {
-                    setProcessing(false);
-                    close();
-                },
-                headers: {
-                    "X-Socket-Id": Echo.socketId(),
-                },
-            }
-        );
+            })
+            .then(() => {
+                setProcessing(false);
+                close();
+            })
+            .catch(errorHandler);
     }
     return (
         <div className="min-w-96 p-4 text-white/85 max-w-lg">
@@ -63,7 +53,7 @@ export default function AddManagers({ close, setErrors }) {
                     setChoosenUsers={(value) => setChoosenUsers(value)}
                 />
             </div>
-
+            
             <div className="flex justify-end gap-x-4 mt-8">
                 <Button onClick={close}>Cancel</Button>
                 <Button loading={processing} onClick={submit}>

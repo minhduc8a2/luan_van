@@ -19,12 +19,7 @@ export default function ChangeChannelNameForm({ channelName }) {
     const { channelId } = useParams();
     const { channel } = useChannel(channelId);
     const { permissions } = useChannelData(channelId);
-    const {
-        getValues,
-        setValues,
-        loading,
-        submit,
-    } = useCustomedForm(
+    const { getValues, setValues, loading, submit } = useCustomedForm(
         {
             name: channel.name,
         },
@@ -71,10 +66,11 @@ export default function ChangeChannelNameForm({ channelName }) {
                     value={getValues().name}
                     onChange={(e) => setValues("name", e.target.value)}
                 />
-                <div className="flex justify-end gap-x-4 mt-8">
-                    <Button onClick={() => setIsOpen(false)}>Close</Button>
-                    <Button onClick={onSubmit} loading={loading}>Save Changes</Button>
-                </div>
+                <CustomedDialog.ActionButtons
+                    btnName2={"Save Changes"}
+                    onClickBtn2={onSubmit}
+                    loading={loading}
+                />
             </CustomedDialog>
         </>
     );
