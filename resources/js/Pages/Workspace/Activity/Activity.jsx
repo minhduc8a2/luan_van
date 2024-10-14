@@ -21,7 +21,7 @@ import MentionNotification from "./MentionNotification";
 import ChannelNotification from "./ChannelNotification";
 import axios from "axios";
 import { InView } from "react-intersection-observer";
-import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
+import LoadingSpinner from "@/Components/LoadingSpinner";
 import { FaToggleOn } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 export default function Activity() {
@@ -116,7 +116,7 @@ export default function Activity() {
                 ref={notificationContainerRef}
             >
                 {loading && notifications.length == 0 && (
-                    <OverlayLoadingSpinner />
+                    <LoadingSpinner />
                 )}
                 {filteredNotifications.map((notification, index) => {
                     if (isHuddleInvitationNotificationType(notification.type)) {

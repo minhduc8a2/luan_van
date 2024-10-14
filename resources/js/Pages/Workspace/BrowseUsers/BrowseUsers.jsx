@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import SearchInput from "../../../Components/Input/SearchInput";
 import Layout from "../Layout";
 import InfiniteScroll from "@/Components/InfiniteScroll";
-import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
+import LoadingSpinner from "@/Components/LoadingSpinner";
 import FilterButton from "@/Components/FilterButton";
 import UserItem from "./UserItem";
 import { setProfile } from "@/Store/profileSlice";
@@ -149,7 +149,7 @@ export default function BrowseUsers() {
                         {filterLoading && (
                             <div className="flex gap-x-2 items-center  ">
                                 <div className="h-6 w-6 relative">
-                                    <OverlayLoadingSpinner />
+                                    <LoadingSpinner />
                                 </div>
                                 <div className="text-xs">Loading ...</div>
                             </div>

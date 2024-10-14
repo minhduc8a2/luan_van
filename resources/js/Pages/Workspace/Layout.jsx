@@ -9,7 +9,7 @@ import Event from "./Event";
 import { makeStore } from "@/Store/store";
 import { Provider, useDispatch, useSelector } from "react-redux";
 
-import OverlaySimpleNotification from "@/Components/Overlay/OverlaySimpleNotification";
+
 import { setNotificationPopup } from "@/Store/notificationPopupSlice";
 import { setMedia } from "@/Store/mediaSlice";
 import Image from "@/Components/Image";
@@ -25,6 +25,7 @@ import { setLeftWindowType } from "@/Store/windowTypeSlice";
 import InitData from "./InitData";
 import { Outlet, useParams } from "react-router-dom";
 import { setIsOnline } from "@/Store/isOnlineSlice";
+import CustomedDialog from "@/Components/CustomedDialog";
 export default function Layout() {
     const { channelId } = useParams();
 
@@ -156,7 +157,9 @@ function MainArea({ children }) {
     );
 }
 function NotificationPopup() {
-    const { type, messages } = useSelector((state) => state.notificationPopup);
+    const { type, messages, title } = useSelector(
+        (state) => state.notificationPopup
+    );
     const dispatch = useDispatch();
     let color;
     switch (type) {
@@ -171,21 +174,22 @@ function NotificationPopup() {
             break;
     }
     return (
-        <OverlaySimpleNotification
-            show={type}
+        <CustomedDialog
+            isOpen={!!type}
             onClose={() => dispatch(setNotificationPopup(null))}
         >
+            <CustomedDialog.Title>
+                {title ? title : "Notifications"}
+            </CustomedDialog.Title>
             <ul className="gap-y-2 flex  flex-col">
-                {messages.map((message,index) => (
-                    <li
-                        className={`${color} text-lg`}
-                        key={index}
-                    >
+                {messages.map((message, index) => (
+                    <li className={`${color} text-lg`} key={index}>
                         {message}
                     </li>
                 ))}
             </ul>
-        </OverlaySimpleNotification>
+            <CustomedDialog.CloseButton />
+        </CustomedDialog>
     );
 }
 const MediaModal = memo(function MediaModal() {

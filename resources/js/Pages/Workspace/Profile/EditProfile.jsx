@@ -1,14 +1,14 @@
 import Button from "@/Components/Button";
 import CustomedDialog from "@/Components/CustomedDialog";
 import TextInput from "@/Components/Input/TextInput";
-import OverlayConfirm from "@/Components/Overlay/OverlayConfirm";
+
 
 import { Link, router, useForm, usePage } from "@inertiajs/react";
 import { useEffect, useState } from "react";
 import RemovePhoto from "./RemovePhoto";
 import { useDispatch, useSelector } from "react-redux";
 import { setNotificationPopup } from "@/Store/notificationPopupSlice";
-import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
+import LoadingSpinner from "@/Components/LoadingSpinner";
 import Image from "@/Components/Image";
 
 export default function EditProfile({ user, triggerButton }) {
@@ -137,7 +137,7 @@ export default function EditProfile({ user, triggerButton }) {
                             className=" mt-4 text-center relative font-bold  block rounded-lg cursor-pointer border border-white/15 py-2 "
                             htmlFor="profile-choose-photo"
                         >
-                            {uploadingAvatarFile && <OverlayLoadingSpinner />}
+                            {uploadingAvatarFile && <LoadingSpinner />}
 
                             <span
                                 className={

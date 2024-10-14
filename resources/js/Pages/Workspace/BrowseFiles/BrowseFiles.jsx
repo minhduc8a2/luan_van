@@ -28,7 +28,7 @@ import {
 } from "@/helpers/dateTimeHelper";
 
 import Item from "./Item";
-import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
+import LoadingSpinner from "@/Components/LoadingSpinner";
 
 import DocumentInSearch from "./DocumentInSearch";
 import FileIcon from "@/Components/FileIcon";
@@ -309,7 +309,7 @@ export default function BrowseFiles() {
                         {filterLoading && (
                             <div className="flex gap-x-2 items-center  ">
                                 <div className="h-6 w-6 relative">
-                                    <OverlayLoadingSpinner />
+                                    <LoadingSpinner />
                                 </div>
                                 <div className="text-xs">Loading ...</div>
                             </div>

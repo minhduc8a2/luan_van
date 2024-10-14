@@ -1,8 +1,6 @@
 import "@/../css/app.css";
 import IconButton from "@/Components/IconButton";
-import OverlayPanel from "@/Components/Overlay/OverlayPanel";
-import SquareImage from "@/Components/SquareImage";
-import Tooltip from "@/Components/Tooltip";
+
 import { getChannelName } from "@/helpers/channelHelper";
 import {
     streamHasAudioTracks,
@@ -20,6 +18,7 @@ import Button from "@/Components/Button";
 import StreamVideo from "@/Components/StreamVideo";
 import { IoCloseCircle } from "react-icons/io5";
 import UserAvatar from "./UserAvatar";
+import CustomedDialog from "@/Components/CustomedDialog";
 
 export default function LargeScreen({
     channel,
@@ -49,6 +48,7 @@ export default function LargeScreen({
 }) {
     const [mainStream, setMainStream] = useState(null);
     const [isHover, setIsHover] = useState(false);
+    const [isOpen, setIsOpen] = useState(false);
     useEffect(() => {
         if (otherUserStreams.current.size > 0 && !mainStream) {
             const streamEntry = Array.from(
@@ -193,18 +193,25 @@ export default function LargeScreen({
                         >
                             <CgScreen />
                         </IconButton>
-                        <OverlayPanel
-                            buttonNode={
-                                <IconButton
-                                    description="Invite people"
-                                    activable={false}
-                                >
-                                    <IoMdPersonAdd />
-                                </IconButton>
-                            }
-                        >
-                            {({ close }) => <HuddleInvitation close={close} />}
-                        </OverlayPanel>
+                        <>
+                            <IconButton
+                                description="Invite people"
+                                activable={false}
+                                onClick={() => setIsOpen(true)}
+                            >
+                                <IoMdPersonAdd />
+                            </IconButton>
+                            <CustomedDialog
+                                isOpen={isOpen}
+                                onClose={() => setIsOpen(false)}
+                            >
+                                <HuddleInvitation
+                                    close={() => setIsOpen(false)}
+                                />
+                               
+                            </CustomedDialog>
+                        </>
+
                         <div className="flex items-center h-full">
                             <Settings
                                 zIndex="z-50"

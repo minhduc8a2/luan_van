@@ -16,7 +16,7 @@ import Message from "./Message/Message";
 import { router, usePage } from "@inertiajs/react";
 import { useEffect, useState, useRef } from "react";
 import TipTapEditor from "@/Components/TipTapEditor";
-import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
+import LoadingSpinner from "@/Components/LoadingSpinner";
 import { compareDateTime, differenceInSeconds } from "@/helpers/dateTimeHelper";
 import { getMentionsFromContent } from "@/helpers/tiptapHelper";
 import { setMention } from "@/Store/mentionSlice";
@@ -452,7 +452,7 @@ export default function Thread() {
                 </div>
             </div>
             {
-                !threadedMessage && <div className="h-full w-full"><OverlayLoadingSpinner/></div>
+                !threadedMessage && <div className="h-full w-full"><LoadingSpinner/></div>
             }
             {threadedMessage && (
                 <>
@@ -489,7 +489,7 @@ export default function Thread() {
                     {loadingMessages && (
                         <div className="flex justify-center items-center">
                             <div className="h-12 w-12 relative">
-                                <OverlayLoadingSpinner spinerStyle="border-link" />
+                                <LoadingSpinner spinerStyle="border-link" />
                             </div>
                             Loading messages ...
                         </div>

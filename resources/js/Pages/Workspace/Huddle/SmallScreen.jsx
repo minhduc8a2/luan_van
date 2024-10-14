@@ -1,13 +1,11 @@
 import IconButton from "@/Components/IconButton";
-import OverlayPanel from "@/Components/Overlay/OverlayPanel";
-import SquareImage from "@/Components/SquareImage";
-import Tooltip from "@/Components/Tooltip";
+
 import { getChannelName } from "@/helpers/channelHelper";
 import {
     streamHasAudioTracks,
     streamHasVideoTracks,
 } from "@/helpers/mediaHelper";
-import React from "react";
+import React, { useState } from "react";
 import { CgScreen } from "react-icons/cg";
 import { GrMicrophone } from "react-icons/gr";
 import { MdOutlineZoomOutMap } from "react-icons/md";
@@ -18,6 +16,7 @@ import { IoMdPersonAdd } from "react-icons/io";
 import Button from "@/Components/Button";
 import StreamVideo from "@/Components/StreamVideo";
 import UserAvatar from "./UserAvatar";
+import CustomedDialog from "@/Components/CustomedDialog";
 
 export default function SmallScreen({
     channel,
@@ -45,6 +44,8 @@ export default function SmallScreen({
     enableAudio,
     goFullScreen,
 }) {
+    const [isOpen, setIsOpen] = useState(false);
+
     return (
         <div
             className="bg-primary-400 w-96  text-white/85  fixed bottom-12 rounded-xl"
@@ -192,18 +193,25 @@ export default function SmallScreen({
                 >
                     <CgScreen />
                 </IconButton>
-                <OverlayPanel
-                    buttonNode={
-                        <IconButton
-                            description="Invite people"
-                            activable={false}
-                        >
-                            <IoMdPersonAdd />
-                        </IconButton>
-                    }
-                >
-                    {({ close }) => <HuddleInvitation close={close} />}
-                </OverlayPanel>
+                <>
+                            <IconButton
+                                description="Invite people"
+                                activable={false}
+                                onClick={() => setIsOpen(true)}
+                            >
+                                <IoMdPersonAdd />
+                            </IconButton>
+                            <CustomedDialog
+                                isOpen={isOpen}
+                                onClose={() => setIsOpen(false)}
+                            >
+                                <HuddleInvitation
+                                    close={() => setIsOpen(false)}
+                                />
+                              
+                            </CustomedDialog>
+                        </>
+
                 <div className="flex items-center h-full">
                     <Settings
                         audioDevices={audioDevices}

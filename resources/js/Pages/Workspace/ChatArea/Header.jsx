@@ -14,9 +14,9 @@ import {
     useChannelUsers,
 } from "@/helpers/customHooks";
 import { useParams } from "react-router-dom";
-import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
+import LoadingSpinner from "@/Components/LoadingSpinner";
 import CustomedDialog from "@/Components/CustomedDialog";
-import Button from "@/Components/Button";
+
 export default function Header({
     channelName,
     loaded,
@@ -63,7 +63,7 @@ export default function Header({
                     {(topLoading || bottomLoading) && (
                         <div className="flex  gap-x-2 items-center px-4 py-2 absolute left-full top-1/2 -translate-y-1/2">
                             <div className="h-6 w-6 relative">
-                                <OverlayLoadingSpinner />
+                                <LoadingSpinner />
                             </div>
                             <div className="text-xs text-nowrap">
                                 Loading ...

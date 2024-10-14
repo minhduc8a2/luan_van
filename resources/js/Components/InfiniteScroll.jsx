@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { IoReloadOutline } from "react-icons/io5";
 import { useInView } from "react-intersection-observer";
-import OverlayLoadingSpinner from "./Overlay/OverlayLoadingSpinner";
+import LoadingSpinner from "./LoadingSpinner";
 import { useDispatch } from "react-redux";
 import { setMention } from "@/Store/mentionSlice";
 
@@ -139,7 +139,7 @@ export default function InfiniteScroll({
                     {showLoadingMessage && topLoading && (
                         <div className="flex gap-x-2 items-center px-4 py-2">
                             <div className="h-6 w-6 relative">
-                                <OverlayLoadingSpinner />
+                                <LoadingSpinner />
                             </div>
                             <div className="text-xs">Loading ...</div>
                         </div>
@@ -174,7 +174,7 @@ export default function InfiniteScroll({
                     {showLoadingMessage && bottomLoading && (
                         <div className="flex gap-x-2 items-center px-4 py-2 mx-auto">
                             <div className="h-6 w-6 relative">
-                                <OverlayLoadingSpinner />
+                                <LoadingSpinner />
                             </div>
                             <div className="text-xs">Loading ...</div>
                         </div>

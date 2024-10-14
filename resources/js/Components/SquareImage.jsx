@@ -1,7 +1,7 @@
 import React from "react";
 import { useState, useRef, useEffect } from "react";
 import { IoMdCloseCircle } from "react-icons/io";
-import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
+import LoadingSpinner from "@/Components/LoadingSpinner";
 import { usePage } from "@inertiajs/react";
 import { useSelector } from "react-redux";
 
@@ -29,7 +29,7 @@ export default function SquareImage({
                 </button>
             )}
             {!uploaded && uploadable && percentage < 100 && (
-                <OverlayLoadingSpinner />
+                <LoadingSpinner />
             )}
             <div
                 className={`  relative overflow-hidden flex justify-center items-center rounded-lg group-hover:brightness-50 ${

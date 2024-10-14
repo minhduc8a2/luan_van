@@ -1,13 +1,14 @@
 import React, { memo, useState } from "react";
-import Overlay from "@/Components/Overlay/Overlay";
 import { IoMdCloudDownload } from "react-icons/io";
-import { usePage } from "@inertiajs/react";
 import { getDocumentType } from "@/helpers/fileHelpers";
 import { useSelector } from "react-redux";
-const DocumentInSearch = memo(function ({ file, Icon, className = "" })  {
+import CustomedDialog from "@/Components/CustomedDialog";
+import LoadingSpinner from "@/Components/LoadingSpinner";
+const DocumentInSearch = memo(function ({ file, Icon, className = "" }) {
     const { publicAppUrl } = useSelector((state) => state.workspace);
     const [openOverlay, setOpenOverlay] = useState(false);
-    console.log(file);
+    const [loading, setLoading] = useState(false);
+
     return (
         <div className={className} key={"attachment_" + file.id}>
             <button
@@ -25,30 +26,34 @@ const DocumentInSearch = memo(function ({ file, Icon, className = "" })  {
                 </div>
             </button>
 
-            <Overlay
-                show={openOverlay}
+            <CustomedDialog
+                isOpen={openOverlay}
                 onClose={() => setOpenOverlay(false)}
-                toolbars={
-                    <a href={file.url} download={true}>
-                        <IoMdCloudDownload className="text-3xl" />
-                    </a>
-                }
+                className="flex justify-center flex-col items-center max-h-[95vh] mt-4 w-fit p-0"
             >
-                <div className="flex justify-center flex-col items-center max-h-[95vh] mt-4 w-fit ">
-                    <iframe
-                        width={
-                            window.innerWidth > 900
-                                ? window.innerWidth / 2
-                                : window.innerWidth - 200
-                        }
-                        height={window.innerHeight - 100}
-                        src={`https://docs.google.com/gview?url=${
-                            publicAppUrl + file.url
-                        }&embedded=true `}
-                    ></iframe>
-                </div>
-                <button onClick={() => setOpenOverlay(false)}>close</button>
-            </Overlay>
+                <a
+                    href={file.url}
+                    download={true}
+                    className="absolute top-4 right-4"
+                >
+                    <IoMdCloudDownload className="text-3xl" />
+                </a>
+                {loading && <LoadingSpinner />}
+
+                <iframe
+                    className={`${loading ? "invisible" : ""}`}
+                    width={
+                        window.innerWidth > 900
+                            ? window.innerWidth / 2
+                            : window.innerWidth - 200
+                    }
+                    onLoad={() => setLoading(false)}
+                    height={window.innerHeight - 100}
+                    src={`https://docs.google.com/gview?url=${
+                        publicAppUrl + file.url
+                    }&embedded=true `}
+                ></iframe>
+            </CustomedDialog>
         </div>
     );
 }, arePropsEqual);

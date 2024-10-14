@@ -2,28 +2,20 @@ import { useState } from "react";
 import copy from "copy-to-clipboard";
 import TextArea from "@/Components/Input/TextArea";
 import { FaLink } from "react-icons/fa6";
-import Form1 from "@/Components/Form1";
-import { Link, router, usePage } from "@inertiajs/react";
 import { LuPlus } from "react-icons/lu";
 import { useCustomedForm } from "@/helpers/customHooks";
 import useErrorHandler from "@/helpers/useErrorHandler";
 import useSuccessHandler from "@/helpers/useSuccessHandler";
+import CustomedDialog from "@/Components/CustomedDialog";
 
 export function InvitationForm({ workspace }) {
-    const { flash } = usePage().props;
     const [invitationLink, setInvitationLink] = useState("");
     const [invitationSent, setInvitationSent] = useState("");
     const [refresh, setRefresh] = useState(0);
     const errorHandler = useErrorHandler();
     const successHandler = useSuccessHandler("Invitation sent successfully!");
-
-    const {
-        getValues,
-        setValues,
-        loading: processing,
-        submit,
-        reset,
-    } = useCustomedForm(
+    const [isOpen, setIsOpen] = useState(false);
+    const { getValues, setValues, loading, submit, reset } = useCustomedForm(
         {
             emailList: "",
             workspace_id: workspace.id,
@@ -70,25 +62,34 @@ export function InvitationForm({ workspace }) {
 
     return (
         <div className="">
-            <Form1
-                className="p-4"
-                success={invitationSent}
-                submit={onSubmit}
-                buttonName="Send"
-                submitting={processing}
-                activateButtonNode={
-                    <div
-                        className="grid-item mt-2 px-4 w-fit"
-                        onClick={() => reset()}
-                    >
-                        <div className="flex items-center ">
-                            <LuPlus className="text-sm" />
-                        </div>
-                        <div className="">Add coworkers</div>
-                    </div>
-                }
-                title={`Invite people to ${workspace.name}`}
-                sameButtonRow={
+            <button
+                className="grid-item mt-2 px-4 w-fit"
+                onClick={() => {
+                    reset();
+                    setIsOpen(true);
+                }}
+            >
+                <div className="flex items-center ">
+                    <LuPlus className="text-sm" />
+                </div>
+                <div className="">Add coworkers</div>
+            </button>
+            <CustomedDialog isOpen={isOpen} onClose={() => setIsOpen(false)}>
+                <CustomedDialog.Title>
+                    {`Invite people to ${workspace.name}`}
+                </CustomedDialog.Title>
+                <TextArea
+                    id="name"
+                    rows="2"
+                    label="To:"
+                    placeholder="name@gmail.com"
+                    value={getValues().emailList}
+                    onChange={(e) => {
+                        setRefresh((pre) => pre + 1);
+                        setValues("emailList", e.target.value);
+                    }}
+                />
+                <div className="flex justify-between">
                     <div className="flex gap-x-2 items-center">
                         <button
                             className="flex gap-x-2 items-center text-link font-bold"
@@ -102,21 +103,13 @@ export function InvitationForm({ workspace }) {
                             </div>
                         )}
                     </div>
-                }
-            >
-                {" "}
-                <TextArea
-                    id="name"
-                    rows="2"
-                    label="To:"
-                    placeholder="name@gmail.com"
-                    value={getValues().emailList}
-                    onChange={(e) => {
-                        setRefresh((pre) => pre + 1);
-                        setValues("emailList", e.target.value);
-                    }}
-                />
-            </Form1>
+                    <CustomedDialog.ActionButtons
+                        btnName2="Send Invitation"
+                        onClickBtn2={onSubmit}
+                        loading={loading}
+                    />
+                </div>
+            </CustomedDialog>
         </div>
     );
 }

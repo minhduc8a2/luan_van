@@ -1,5 +1,3 @@
-import OverlayPanel from "@/Components/Overlay/OverlayPanel";
-import { usePage } from "@inertiajs/react";
 
 import TextInput from "@/Components/Input/TextInput";
 import { IoPersonAddOutline } from "react-icons/io5";

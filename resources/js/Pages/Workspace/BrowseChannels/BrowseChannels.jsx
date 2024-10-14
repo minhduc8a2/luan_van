@@ -10,7 +10,7 @@ import { useDispatch, useSelector } from "react-redux";
 import SearchInput from "../../../Components/Input/SearchInput";
 import { loadRegularChannels } from "@/helpers/channelHelper";
 import InfiniteScroll from "@/Components/InfiniteScroll";
-import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
+import LoadingSpinner from "@/Components/LoadingSpinner";
 import useErrorHandler from "@/helpers/useErrorHandler";
 import useSuccessHandler from "@/helpers/useSuccessHandler";
 import {
@@ -286,7 +286,7 @@ export default function BrowseChannels() {
                         {filterLoading && (
                             <div className="flex gap-x-2 items-center  ">
                                 <div className="h-6 w-6 relative">
-                                    <OverlayLoadingSpinner />
+                                    <LoadingSpinner />
                                 </div>
                                 <div className="text-xs">Loading ...</div>
                             </div>

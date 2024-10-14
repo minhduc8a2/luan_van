@@ -21,7 +21,7 @@ import { editMessage as editMessageInStore } from "@/Store/channelsDataSlice";
 import { getMentionsFromContent } from "@/helpers/tiptapHelper";
 import Image from "@/Components/Image";
 import { setNotificationPopup } from "@/Store/notificationPopupSlice";
-import OverlayConfirm from "@/Components/Overlay/OverlayConfirm";
+
 import ForwardMessage from "./ForwardMessage/ForwardMessage";
 import { setMention } from "@/Store/mentionSlice";
 import { setProfile } from "@/Store/profileSlice";
@@ -30,6 +30,7 @@ import { Link, useParams } from "react-router-dom";
 import useGoToChannel from "@/helpers/useGoToChannel";
 import useGoToMessage from "@/helpers/useGoToMessage";
 import { MdError } from "react-icons/md";
+import CustomedDialog from "@/Components/CustomedDialog";
 export default function Message({
     message,
     user,
@@ -243,29 +244,29 @@ export default function Message({
                 show={forwardedMessage != null}
                 onClose={() => setForwardedMessage(null)}
             />
-            <OverlayConfirm
-                show={showConfirm}
+
+            <CustomedDialog
+                isOpen={!!showConfirm}
                 onClose={() => setShowConfirm(false)}
-                onConfirm={() => {
-                    deleteFile(showConfirm);
-                    setShowConfirm(null);
-                }}
-                title="Delete file"
-                message={
-                    <div className="flex flex-col gap-y-4">
-                        <h5>
-                            Are you sure you want to delete this file
-                            permanently?
-                        </h5>
-                        {showConfirm && (
-                            <FileItem
-                                file={showConfirm}
-                                maxWidth="max-w-full"
-                            />
-                        )}
-                    </div>
-                }
-            />
+            >
+                <CustomedDialog.Title>Delete file</CustomedDialog.Title>
+                <div className="flex flex-col gap-y-4">
+                    <h5>
+                        Are you sure you want to delete this file permanently?
+                    </h5>
+                    {showConfirm && (
+                        <FileItem file={showConfirm} maxWidth="max-w-full" />
+                    )}
+                </div>
+                <CustomedDialog.ActionButtons
+                    btnName2="Delete"
+                    onClickBtn2={() => {
+                        deleteFile(showConfirm);
+                        setShowConfirm(null);
+                    }}
+                />
+            </CustomedDialog>
+
             {!channel.is_archived && !message.deleted_at && !forwarded && (
                 <MessageToolbar
                     message={message}

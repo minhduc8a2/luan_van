@@ -1,7 +1,7 @@
 import { useForm } from "@inertiajs/react";
 
 import TextArea from "@/Components/Input/TextArea";
-import Form1 from "@/Components/Form1";
+
 
 import { useState, useEffect, useMemo } from "react";
 import { SettingsButton } from "./SettingsButton";

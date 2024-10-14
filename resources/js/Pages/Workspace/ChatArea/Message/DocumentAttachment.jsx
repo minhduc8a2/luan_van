@@ -1,8 +1,6 @@
-import React, { memo, useState } from "react";
-import Overlay from "@/Components/Overlay/Overlay";
+import React, { memo, useEffect, useState } from "react";
 import FileItem from "@/Components/FileItem";
 import { IoMdCloudDownload } from "react-icons/io";
-import { usePage } from "@inertiajs/react";
 import {
     Popover,
     PopoverButton,
@@ -13,6 +11,8 @@ import { IoCloudDownloadOutline } from "react-icons/io5";
 import { MdMoreVert } from "react-icons/md";
 import copy from "copy-to-clipboard";
 import { useSelector } from "react-redux";
+import CustomedDialog from "@/Components/CustomedDialog";
+import LoadingSpinner from "@/Components/LoadingSpinner";
 const DocumentAttachment = memo(function ({
     attachment,
     openOverlay,
@@ -23,8 +23,12 @@ const DocumentAttachment = memo(function ({
 }) {
     const { publicAppUrl } = useSelector((state) => state.workspace);
     const [isHovered, setIsHovered] = useState(false);
-    const close = useClose();
+    const [loading, setLoading] = useState(true);
 
+    const close = useClose();
+    useEffect(() => {
+        setLoading(true);
+    }, [openOverlay]);
     return (
         <div
             className={"group/document relative     " + className}
@@ -95,30 +99,37 @@ const DocumentAttachment = memo(function ({
                 <FileItem file={attachment} maxWidth="w-full" />
             </button>
 
-            <Overlay
-                show={openOverlay}
+            <CustomedDialog
+                isOpen={openOverlay}
                 onClose={() => setOpenOverlay(false)}
-                toolbars={
-                    <a href={attachment.url} download={true}>
-                        <IoMdCloudDownload className="text-3xl" />
-                    </a>
-                }
+                className="flex justify-center flex-col items-center max-h-[95vh] mt-4 w-fit p-0 relative"
             >
-                <div className="flex justify-center flex-col items-center max-h-[95vh] mt-4 w-fit ">
-                    <iframe
-                        width={
-                            window.innerWidth > 900
-                                ? window.innerWidth / 2
-                                : window.innerWidth - 200
-                        }
-                        height={window.innerHeight - 100}
-                        src={`https://docs.google.com/gview?url=${
-                            publicAppUrl + attachment.url
-                        }&embedded=true `}
-                    ></iframe>
-                </div>
-                <button onClick={() => setOpenOverlay(false)}>close</button>
-            </Overlay>
+                <a
+                    href={attachment.url}
+                    download={true}
+                    className="absolute top-4 left-4"
+                >
+                    <IoMdCloudDownload className="text-3xl" />
+                </a>
+                {loading && <LoadingSpinner />}
+
+                <iframe
+                    className={`${loading ? "invisible" : ""}`}
+                    width={
+                        window.innerWidth > 900
+                            ? window.innerWidth / 2
+                            : window.innerWidth - 200
+                    }
+                    height={window.innerHeight - 100}
+                    onLoad={() => {
+                        console.log("Iframe loaded");
+                        setLoading(false);
+                    }}
+                    src={`https://docs.google.com/gview?url=${
+                        publicAppUrl + attachment.url
+                    }&embedded=true `}
+                ></iframe>
+            </CustomedDialog>
         </div>
     );
 },

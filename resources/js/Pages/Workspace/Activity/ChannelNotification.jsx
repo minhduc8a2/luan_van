@@ -1,18 +1,16 @@
-import { router, usePage } from "@inertiajs/react";
+import { usePage } from "@inertiajs/react";
 import React, { useMemo } from "react";
-import { FiHeadphones } from "react-icons/fi";
+
 import Avatar from "@/Components/Avatar";
 import { UTCToDateTime } from "@/helpers/dateTimeHelper";
-import { VscMention } from "react-icons/vsc";
+
 import { useDispatch, useSelector } from "react-redux";
 import { isChannelsNotificationBroadcast } from "@/helpers/notificationTypeHelper";
 import { getChannelName } from "@/helpers/channelHelper";
-import { setMention } from "@/Store/mentionSlice";
+
 import { FaLock } from "react-icons/fa";
-import OverlaySimpleNotification from "@/Components/Overlay/OverlaySimpleNotification";
-import { useState } from "react";
-import { useChannelData } from "@/helpers/customHooks";
-import { useNavigate, useParams } from "react-router-dom";
+
+import { useParams } from "react-router-dom";
 import useGoToChannel from "@/helpers/useGoToChannel";
 import { setNotificationPopup } from "@/Store/notificationPopupSlice";
 export default function ChannelNotification({
@@ -20,7 +18,7 @@ export default function ChannelNotification({
     handleNotificationClick,
 }) {
     const { auth } = usePage().props;
-    const {workspaceId} = useParams()
+   
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
     // console.log(notification);
 
@@ -28,7 +26,7 @@ export default function ChannelNotification({
         isChannelsNotificationBroadcast(notification.type)
             ? notification
             : notification.data;
-   
+
     const read_at = notification.read_at;
     const created_at = notification.created_at;
     const view_at = notification.view_at;

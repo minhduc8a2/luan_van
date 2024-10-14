@@ -1,5 +1,5 @@
 import React from "react";
-import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
+import LoadingSpinner from "@/Components/LoadingSpinner";
 
 export default function Button({
     className = "",
@@ -35,7 +35,7 @@ export default function Button({
                 } ` + className
             }
         >
-            {loading && <OverlayLoadingSpinner />}
+            {loading && <LoadingSpinner />}
             <div className={loading ? "opacity-0" : ""}>{children}</div>
         </div>
     );

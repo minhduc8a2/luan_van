@@ -1,12 +1,8 @@
 import React, { useMemo } from "react";
-import Form1 from "@/Components/Form1";
-
-import { useForm, usePage } from "@inertiajs/react";
 import { useState } from "react";
 import TextInput from "@/Components/Input/TextInput";
 import { SettingsButton } from "./SettingsButton";
 import { FaLock } from "react-icons/fa";
-import { useSelector } from "react-redux";
 import {
     useChannel,
     useChannelData,
@@ -14,7 +10,7 @@ import {
 } from "@/helpers/customHooks";
 import { useParams } from "react-router-dom";
 import CustomedDialog from "@/Components/CustomedDialog";
-import Button from "@/Components/Button";
+
 export default function ChangeChannelNameForm({ channelName }) {
     const { channelId } = useParams();
     const { channel } = useChannel(channelId);

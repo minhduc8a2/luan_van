@@ -7,8 +7,8 @@ import { toggleHuddle } from "@/Store/huddleSlice";
 import { isHuddleInvitationNotificationBroadcast } from "@/helpers/notificationTypeHelper";
 import { useDispatch, useSelector } from "react-redux";
 import { getChannelName } from "@/helpers/channelHelper";
-import { useState, useMemo } from "react";
-import OverlaySimpleNotification from "@/Components/Overlay/OverlaySimpleNotification";
+import { useMemo } from "react";
+import { setNotificationPopup } from "@/Store/notificationPopupSlice";
 export default function HuddleNotification({
     notification,
     handleNotificationClick,
@@ -24,11 +24,10 @@ export default function HuddleNotification({
         isHuddleInvitationNotificationBroadcast(notification.type)
             ? notification
             : notification.data;
-  
+
     const read_at = notification.read_at;
     const created_at = notification.created_at;
     const view_at = notification.view_at;
-    const [errors, setErrors] = useState(null);
 
     function handleNotificationClickedPart() {
         axios
@@ -38,7 +37,13 @@ export default function HuddleNotification({
             .then((response) => {
                 let result = response?.data?.result;
                 if (!result) {
-                    setErrors(true);
+                    dispatch(
+                        setNotificationPopup({
+                            title: "Error",
+                            messages: ["Channel not found"],
+                            type: "error",
+                        })
+                    );
                     return;
                 }
                 if (huddleChannelId == channel.id) return;
@@ -110,12 +115,6 @@ export default function HuddleNotification({
     );
     return (
         <li>
-            <OverlaySimpleNotification
-                show={errors}
-                onClose={() => setErrors(null)}
-            >
-                <div className="text-red-500">Channel was deleted!</div>
-            </OverlaySimpleNotification>
             <button
                 className={`p-4 pl-8  hover:bg-white/15 border-t border-white/15 ${
                     read_at != null ? "" : "bg-primary-300/15"

@@ -4,7 +4,7 @@ import {
     PopoverPanel,
     useClose,
 } from "@headlessui/react";
-import React, { memo, useEffect, useRef, useState } from "react";
+import React, { memo,  useState } from "react";
 import { IoCloudDownloadOutline } from "react-icons/io5";
 import { MdMoreVert } from "react-icons/md";
 import DocumentAttachment from "../ChatArea/Message/DocumentAttachment";
@@ -14,11 +14,10 @@ import { isDocument, isImage, isVideo } from "@/helpers/fileHelpers";
 import VideoFile from "./VideoFile";
 import copy from "copy-to-clipboard";
 
-import OverlayConfirm from "@/Components/Overlay/OverlayConfirm";
 import FileItem from "@/Components/FileItem";
-import { usePage } from "@inertiajs/react";
 import { useDispatch, useSelector } from "react-redux";
 import { setNotificationPopup } from "@/Store/notificationPopupSlice";
+import CustomedDialog from "@/Components/CustomedDialog";
 
 const Item = memo(function ({ file }) {
     const { publicAppUrl } = useSelector((state) => state.workspace);
@@ -73,24 +72,26 @@ const Item = memo(function ({ file }) {
     }
     return (
         <div className="mt-4 relative group/file_item" key={file.id}>
-            <OverlayConfirm
-                show={showConfirm}
+            <CustomedDialog
+                isOpen={!!showConfirm}
                 onClose={() => setShowConfirm(false)}
-                onConfirm={() => {
-                    deleteFile();
-                    setShowConfirm(null);
-                }}
-                title="Delete file"
-                message={
-                    <div className="flex flex-col gap-y-4">
-                        <h5>
-                            Are you sure you want to delete this file
-                            permanently?
-                        </h5>
-                        {file && <FileItem file={file} maxWidth="max-w-full" />}
-                    </div>
-                }
-            />
+            >
+                <CustomedDialog.Title>Delete file</CustomedDialog.Title>
+                <div className="flex flex-col gap-y-4">
+                    <h5>
+                        Are you sure you want to delete this file permanently?
+                    </h5>
+                    {file && <FileItem file={file} maxWidth="max-w-full" />}
+                </div>
+                <CustomedDialog.ActionButtons
+                    btnName2="Yes"
+                    onClickBtn2={() => {
+                        deleteFile();
+                        setShowConfirm(null);
+                    }}
+                />
+            </CustomedDialog>
+
             <div
                 className={` border border-white/15 group-hover/file_item:flex ${
                     isHovered ? "flex" : "hidden"

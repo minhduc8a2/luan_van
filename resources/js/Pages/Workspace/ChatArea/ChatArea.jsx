@@ -32,7 +32,7 @@ import {
 import Editor from "./Editor";
 import { useParams } from "react-router-dom";
 import { setMention } from "@/Store/mentionSlice";
-import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
+import LoadingSpinner from "@/Components/LoadingSpinner";
 import MessagePlaceHolder from "./Message/MessagePlaceHolder";
 export default function ChatArea() {
     const { auth } = usePage().props;
@@ -313,7 +313,7 @@ export default function ChatArea() {
 
     return (
         <div className="flex-1 flex min-h-0 max-h-full w-full relative">
-            {!loaded && <OverlayLoadingSpinner />}
+            {!loaded && <LoadingSpinner />}
             <InitData loaded={loaded} setLoaded={(value) => setLoaded(value)} />
 
             <div className="bg-background  chat-area-container flex-1 ">

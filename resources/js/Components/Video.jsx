@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import { useState } from "react";
-import OverlayLoadingSpinner from "./Overlay/OverlayLoadingSpinner";
+import LoadingSpinner from "./LoadingSpinner";
 import { FaPlay } from "react-icons/fa";
 import { IoIosPause } from "react-icons/io";
 import { formatToMinuteSecond } from "@/helpers/dateTimeHelper";
@@ -138,7 +138,7 @@ export default function Video({
                     className="top-8 left-8 right-8 bottom-8 fixed bg-black/95 ring-[40px] ring-black/50  rounded-lg flex group/video justify-center z-50 "
                     onMouseMove={handleMouseMove}
                 >
-                    {!largeLoaded && <OverlayLoadingSpinner />}
+                    {!largeLoaded && <LoadingSpinner />}
                     <button
                         onClick={() => playVideo(largeVideoRef.current)}
                         className="h-ful"
@@ -288,7 +288,7 @@ export default function Video({
                     )}
                 </div>
             )}
-            {!smallLoaded && <OverlayLoadingSpinner />}
+            {!smallLoaded && <LoadingSpinner />}
             <button
                 onClick={() => playVideo(smallVideoRef.current)}
                 className="min-w-full min-h-full relative"

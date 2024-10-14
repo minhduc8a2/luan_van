@@ -36,7 +36,7 @@ export default function HuddleInvitation({ close }) {
         const invitedUsers = [...Object.values(choosenUsers)];
 
         return (
-            <div className="min-w-96 p-4 text-white/85 max-w-lg">
+            <div>
                 <h3 className="font-bold text-xl">
                     Invite people to your huddle
                 </h3>
@@ -66,7 +66,7 @@ export default function HuddleInvitation({ close }) {
         );
     }
     return (
-        <div className="min-w-96 p-4 text-white/85 max-w-lg">
+        <div>
             <h3 className="font-bold text-xl">Invite people to your huddle</h3>
 
             <p className="text-sm max-w-[90%]">

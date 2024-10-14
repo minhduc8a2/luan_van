@@ -2,7 +2,7 @@ import React, { memo } from "react";
 import { getDocumentType, isImage } from "@/helpers/fileHelpers";
 import { IoMdCloseCircle } from "react-icons/io";
 import { useState, useEffect } from "react";
-import OverlayLoadingSpinner from "@/Components/Overlay/OverlayLoadingSpinner";
+import LoadingSpinner from "@/Components/LoadingSpinner";
 import FileIcon from "./FileIcon";
 import { FaRegTrashAlt } from "react-icons/fa";
 
@@ -22,7 +22,7 @@ const FileItem = memo(function ({
     return (
         <div className="relative group">
             {!uploaded && uploadable && percentage < 100 && (
-                <OverlayLoadingSpinner />
+                <LoadingSpinner />
             )}
             {removable && (
                 <button

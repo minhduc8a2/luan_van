@@ -1,5 +1,5 @@
 import React, { memo, useEffect,  useRef, useState } from "react";
-import OverlayLoadingSpinner from "./Overlay/OverlayLoadingSpinner";
+import LoadingSpinner from "./LoadingSpinner";
 
 import { IoClose, IoCloudDownloadOutline } from "react-icons/io5";
 import {
@@ -131,10 +131,10 @@ const Image = memo(function Image({
                 loading ? "bg-background border border-white/15" : ""
             }  ${className}`}
         >
-            {loading && <OverlayLoadingSpinner />}
+            {loading && <LoadingSpinner />}
             {fullscreen && (
                 <div className="top-8 left-8 right-8 bottom-8 overflow-hidden fixed bg-black/95 ring-[40px] ring-black/50  rounded-lg flex group/image_fullscreen justify-center items-center z-50 ">
-                    {largeLoading && <OverlayLoadingSpinner />}
+                    {largeLoading && <LoadingSpinner />}
                     <div className="absolute top-2 right-2 hidden gap-x-2 group-hover/image_fullscreen:flex z-30">
                         <a
                             href={url}
