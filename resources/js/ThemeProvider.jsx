@@ -5,14 +5,14 @@ const ThemeContext = createContext();
 export const ThemeProvider = ({ children }) => {
     const [theme, setTheme] = useState({ mode: true, colorScheme: "purple" });
 
-    const toggleTheme = () => {
-        if (theme.mode) {
+    const toggleTheme = (mode) => {
+        if (!mode) {
             document.body.classList.remove("dark");
         } else {
             document.body.classList.add("dark");
         }
         setTheme((pre) => {
-            const newTheme = { ...pre, mode: !pre.mode };
+            const newTheme = { ...pre, mode: mode };
             localStorage.setItem("theme", JSON.stringify(newTheme));
             return newTheme;
         });

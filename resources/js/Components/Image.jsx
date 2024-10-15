@@ -145,7 +145,7 @@ const Image = memo(function Image({
                         </a>
 
                         <button
-                            className=" p-2  rounded-lg textwhite hover:text-white hover:bg-color/15  "
+                            className=" p-2  rounded-lg text-white hover:text-white hover:bg-color/15  "
                             onClick={toggleFullScreen}
                         >
                             <IoClose className="text-lg" />
