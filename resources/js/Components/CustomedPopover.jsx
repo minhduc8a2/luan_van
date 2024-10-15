@@ -46,7 +46,7 @@ function ListItem({ children, onClick, className }) {
     return (
         <div
             className={
-                "hover:bg-link text-color-high-emphasis px-4 py-1 cursor-pointer " +
+                "hover:bg-link text-color-high-emphasis hover:text-white px-4 py-1 cursor-pointer " +
                 className
             }
             onClick={() => {
