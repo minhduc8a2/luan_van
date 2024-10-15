@@ -126,7 +126,7 @@ export default function Editor({
             )}
             {!isChannelMember && permissions.join && (
                 <div className="">
-                    <div className="flex items-baseline gap-x-1 font-bold justify-center text-lg">
+                    <div className="flex items-baseline gap-x-1 font-bold justify-center text-lg text-color-high-emphasis">
                         {channel.type == "PUBLIC" ? (
                             <span className="text-xl">#</span>
                         ) : (
@@ -137,14 +137,10 @@ export default function Editor({
                     <div className="flex gap-x-4 justify-center my-4 ">
                         <ChannelSettings
                             channelName={channelName}
-                            buttonNode={
-                                <Button className="bg-black/15 border border-color/15">
-                                    Detail
-                                </Button>
-                            }
+                           
                         />
                         <Button
-                            className="bg-green-900"
+                           type="green"
                             onClick={() => joinChannel(channelId)}
                         >
                             Join Channel

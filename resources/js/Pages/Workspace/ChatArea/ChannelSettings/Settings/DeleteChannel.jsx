@@ -50,7 +50,7 @@ export default function DeleteChannel() {
                 onClick={() => setIsOpen(true)}
                 className="border-none !justify-start rounded-none"
             >
-                <div className="flex items-center gap-x-2 text-danger-500 py-2 ">
+                <div className="flex items-center gap-x-2  py-2 ">
                     <FaRegTrashCan className="" /> Delete this channel
                 </div>
             </Button>
@@ -76,7 +76,7 @@ export default function DeleteChannel() {
                     </ul>
                 </div>
                 <div className="flex items-center justify-between mt-8">
-                    <div className="flex gap-x-2 items-center">
+                    <div className="flex gap-x-2 items-center text-color-high-emphasis">
                         <input
                             type="checkbox"
                             name=""

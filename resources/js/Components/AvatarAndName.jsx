@@ -8,7 +8,7 @@ const AvatarAndName = memo(function ({ user, description, ...props }) {
             <div className="">
                 <Avatar src={user.avatar_url} {...props} />
             </div>
-            <div className="flex flex-col justify-between">
+            <div className="flex flex-col justify-between text-color-high-emphasis">
                 <div className="">
                     {user.display_name || user.name}{" "}
                     {user.id == auth.user.id ? (

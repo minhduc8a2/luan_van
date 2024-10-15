@@ -28,7 +28,7 @@ export default function ChannelSettings({ channelName }) {
                 className="flex items-center gap-x-2"
                 onClick={() => setIsOpen(true)}
             >
-                <div className="flex items-baseline gap-x-1">
+                <div className="flex items-baseline gap-x-1 text-color">
                     {channel?.type == "PUBLIC" ? (
                         <span className="text-xl">#</span>
                     ) : (
@@ -37,7 +37,7 @@ export default function ChannelSettings({ channelName }) {
                     {channelName}
                 </div>
 
-                <FaAngleDown className="text-sm" />
+                <FaAngleDown className="text-sm text-color-medium-emphasis" />
             </button>
             <CustomedDialog isOpen={isOpen} onClose={() => setIsOpen(false)}>
                 {channel && permissions && (

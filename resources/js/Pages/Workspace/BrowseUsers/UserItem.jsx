@@ -31,7 +31,7 @@ export default function UserItem({ user }) {
                 />
             )}
 
-            <div className="p-4 font-bold flex gap-x-2 items-center">
+            <div className="p-4 font-bold flex gap-x-2 items-center text-color-high-emphasis">
                 {user.is_hidden
                     ? "Name hidden"
                     : user.display_name || user.name}

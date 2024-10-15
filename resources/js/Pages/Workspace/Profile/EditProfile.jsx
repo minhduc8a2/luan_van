@@ -118,7 +118,7 @@ export default function EditProfile({ user, triggerButton }) {
                                 Cancel
                             </Button>
                             <Button
-                                className="!bg-dark-green"
+                                type="green"
                                 loading={processing}
                                 onClick={onSubmit}
                             >

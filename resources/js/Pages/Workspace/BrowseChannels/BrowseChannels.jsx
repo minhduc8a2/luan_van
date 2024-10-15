@@ -11,17 +11,11 @@ import SearchInput from "../../../Components/Input/SearchInput";
 import { loadRegularChannels } from "@/helpers/channelHelper";
 import InfiniteScroll from "@/Components/InfiniteScroll";
 import LoadingSpinner from "@/Components/LoadingSpinner";
-import useErrorHandler from "@/helpers/useErrorHandler";
-import useSuccessHandler from "@/helpers/useSuccessHandler";
-import {
-    addNewChannelToChannelsStore,
-    removeChannel,
-    removeChannelFromChannelsStore,
-} from "@/Store/channelsSlice";
+
 import useGoToChannel from "@/helpers/useGoToChannel";
 import useLeaveChannel from "@/helpers/useLeaveChannel";
 import useIsChannelMember from "@/helpers/useIsChannelMember";
-import { addJoinedChannelId } from "@/Store/joinedChannelIdsSlice";
+
 import useJoinChannel from "@/helpers/useJoinChannel";
 export default function BrowseChannels() {
     const { auth } = usePage().props;
@@ -35,7 +29,7 @@ export default function BrowseChannels() {
     const [bottomLoading, setBottomLoading] = useState(false);
     const [topHasMore, setTopHasMore] = useState();
     const [bottomHasMore, setBottomHasMore] = useState();
-   
+
     const goToChannel = useGoToChannel();
     const leaveChannelInHook = useLeaveChannel(workspace.id);
     const joinChannelInHook = useJoinChannel();
@@ -280,7 +274,7 @@ export default function BrowseChannels() {
             <div className="mx-auto w-1/2 py-4 flex flex-col max-h-full">
                 <div className="flex justify-between items-center">
                     <div className="flex gap-x-4 items-center">
-                        <h3 className="text-xl font-bold text-white">
+                        <h3 className="text-xl font-bold text-color-high-emphasis">
                             All Channels
                         </h3>
                         {filterLoading && (
@@ -295,7 +289,7 @@ export default function BrowseChannels() {
                     <CreateChannelForm
                         callback={() => search(searchValue)}
                         activateButtonNode={
-                            <Button className="text-white/100 font-bold border border-color/15 !bg-background">
+                            <Button className=" font-bold border border-color/15 !bg-background">
                                 Create Channel
                             </Button>
                         }
@@ -323,7 +317,7 @@ export default function BrowseChannels() {
                                 onClick={() => {
                                     changeChannel(item);
                                 }}
-                                className="flex items-baseline gap-x-2 w-full"
+                                className="flex p-2 px-4 items-baseline gap-x-2 w-full"
                             >
                                 {item.type == "PUBLIC" ? (
                                     <span className="text-xl">#</span>
@@ -381,7 +375,7 @@ function ChannelItem({ channel, changeChannel, joinChannel, leaveChannel }) {
 
     return (
         <div className="p-4 relative group/browse_channel_item">
-            <div className="flex items-baseline gap-x-1">
+            <div className="flex items-baseline gap-x-1 text-color-high-emphasis">
                 {channel.type == "PUBLIC" ? (
                     <span className="text-xl">#</span>
                 ) : (
@@ -389,7 +383,7 @@ function ChannelItem({ channel, changeChannel, joinChannel, leaveChannel }) {
                 )}{" "}
                 {channel.name}
             </div>
-            <ul className="flex items-center gap-x-[2px] mt-1">
+            <ul className="flex items-center gap-x-[2px] mt-1 text-color-medium-emphasis">
                 {isChannelMember && (
                     <>
                         <li className="flex gap-x-1 items-center text-xs text-green-800 font-semibold">

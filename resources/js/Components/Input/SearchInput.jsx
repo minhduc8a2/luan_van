@@ -59,7 +59,7 @@ export default function SearchInput({
                     placeholder={placeholder}
                     onFocus={() => setFocused(true)}
                     onBlur={() => setFocused(false)}
-                    className="w-full bg-transparent focus:ring-0 focus:border-none border-none"
+                    className="w-full bg-transparent text-color-high-emphasis focus:ring-0 focus:border-none border-none"
                     onChange={(e) => {
                         setIsOpen(true);
                         onChange(e);
@@ -71,7 +71,7 @@ export default function SearchInput({
             {searchValue && isOpen && (
                 <ul
                     ref={panelRef}
-                    className="absolute z-10 w-[104%] left-1/2 -translate-x-1/2 bg-foreground  border border-color/15 max-h-96 overflow-y-auto scrollbar text-white rounded-lg shadow-lg mt-1"
+                    className="absolute z-10 w-[104%] left-1/2 -translate-x-1/2 bg-foreground  border border-color/15 max-h-96 overflow-y-auto scrollbar text-color-high-emphasis rounded-lg shadow-lg mt-1"
                 >
                     <li>
                         <button

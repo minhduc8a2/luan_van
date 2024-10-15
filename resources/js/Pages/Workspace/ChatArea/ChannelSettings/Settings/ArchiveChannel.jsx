@@ -50,7 +50,8 @@ export default function ArchiveChannel() {
         return (
             <>
                 <Button
-                    className=" !hover:text-danger-500  bg-transparent w-full py-4 !rounded-none border-none flex !justify-start"
+                    type="danger-text"
+                    className="   w-full py-4 !rounded-none border-none flex !justify-start"
                     loading={processing}
                     onClick={submit}
                 >
@@ -72,7 +73,8 @@ export default function ArchiveChannel() {
     return (
         <>
             <Button
-                className=" !hover:text-danger-500  bg-transparent w-full py-4 !rounded-none border-none !justify-start"
+                type="danger-text"
+                className="   w-full py-4 !rounded-none border-none flex !justify-start"
                 onClick={() => {
                     setIsOpen(true);
                 }}
@@ -83,7 +85,7 @@ export default function ArchiveChannel() {
                         channel
                     </div>
                 ) : (
-                    <div className="flex items-center gap-x-2 text-danger-500 ">
+                    <div className="flex items-center gap-x-2 ">
                         <FiArchive className="" /> Archive channel for everyone
                     </div>
                 )}

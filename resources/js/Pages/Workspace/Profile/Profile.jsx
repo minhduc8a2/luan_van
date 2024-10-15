@@ -67,7 +67,7 @@ export default function Profile() {
                     className="rounded-full p-2 hover:bg-color/15"
                     onClick={() => dispatch(setProfile(null))}
                 >
-                    <IoClose />
+                    <IoClose className="text-color-medium-emphasis" />
                 </button>
             </div>
             {user.is_hidden ? (
@@ -147,10 +147,10 @@ export default function Profile() {
                 </div>
                 <div className="flex gap-x-4 text-white/75 items-center mt-4">
                     <div className="h-10 w-10 flex items-center justify-center bg-foreground rounded-lg">
-                        <MdOutlineMail className="text-2xl" />
+                        <MdOutlineMail className="text-2xl text-color-medium-emphasis" />
                     </div>
                     <div className="flex flex-col justify-between">
-                        <h5 className="font-bold text-sm ">Email Address</h5>
+                        <h5 className="font-bold text-sm text-color-high-emphasis">Email Address</h5>
                         <a
                             href={"mailto:" + user.email}
                             className="text-link hover:underline text-sm"
@@ -163,10 +163,10 @@ export default function Profile() {
                     ? hasOwnership && (
                           <div className="flex gap-x-4 text-white/75 items-center mt-4">
                               <div className="h-10 w-10 flex items-center justify-center bg-foreground rounded-lg">
-                                  <FaPhoneAlt className="text-" />
+                                  <FaPhoneAlt className=" text-color-medium-emphasis" />
                               </div>
                               <div className="flex flex-col justify-between">
-                                  <h5 className="font-bold text-sm ">Phone</h5>
+                                  <h5 className="font-bold text-sm text-color-high-emphasis">Phone</h5>
                                   <a
                                       href={"tel:" + user.phone}
                                       className="text-link hover:underline text-sm"

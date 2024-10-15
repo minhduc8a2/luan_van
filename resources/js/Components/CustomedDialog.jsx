@@ -21,7 +21,7 @@ function CustomedDialog({ children, isOpen, onClose, className = "" }) {
 
 function Title({ children }) {
     return (
-        <DialogTitle className="font-bold text-2xl mb-6">
+        <DialogTitle className="font-bold text-2xl mb-6 text-color-high-emphasis">
             {children}
         </DialogTitle>
     );

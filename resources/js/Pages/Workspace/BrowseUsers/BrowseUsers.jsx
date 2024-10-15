@@ -143,7 +143,7 @@ export default function BrowseUsers() {
             <div className="mx-auto w-1/2 py-4 flex flex-col max-h-full">
                 <div className="flex justify-between items-center">
                     <div className="flex gap-x-4 items-center">
-                        <h3 className="text-xl font-bold text-white">
+                        <h3 className="text-xl font-bold text-color-high-emphasis">
                             All people
                         </h3>
                         {filterLoading && (
@@ -157,14 +157,14 @@ export default function BrowseUsers() {
                     </div>
                     <CreateChannelForm
                         activateButtonNode={
-                            <Button className="text-white/100 font-bold border border-color/15 !bg-background">
+                            <Button className=" font-bold border border-color/15 !bg-background">
                                 Create Channel
                             </Button>
                         }
                     />
                 </div>
                 <SearchInput
-                    placeholder="Search for channels"
+                    placeholder="Search for users"
                     onSearch={(searchValue) => setSearchValue(searchValue)}
                     list={filteredUsers}
                     // onItemClick={changeChannel}
@@ -185,7 +185,7 @@ export default function BrowseUsers() {
                                     closePanel();
                                     clearInput();
                                 }}
-                                className="w-full h-full p-4 text-left"
+                                className="w-full h-full p-4 text-left text-color-high-emphasis"
                             >
                                 {item.displayName || item.name}
                             </button>

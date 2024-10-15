@@ -60,7 +60,7 @@ export default function ChangeToPrivateConfirm({ channelName }) {
                     {channel.type == "PUBLIC" ? "private" : "public"} channel
                 </div>
             </Button>
-            <CustomedDialog isOpen={isOpen} onClose={() => setIsOpen(false)}>
+            <CustomedDialog isOpen={isOpen} onClose={() => setIsOpen(false)} className="text-color-high-emphasis">
                 <CustomedDialog.Title>
                     {`Change to a ${
                         channel.type == "PUBLIC" ? "private" : "public"

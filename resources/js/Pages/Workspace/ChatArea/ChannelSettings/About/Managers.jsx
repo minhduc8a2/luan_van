@@ -119,7 +119,7 @@ export default function Managers() {
                     {permissions.addManagers && (
                         <>
                             <button
-                                className="flex gap-x-4 p-4 px-6 items-center mt-6 hover:bg-color/15 w-full"
+                                className="flex gap-x-4 p-4 px-6 text-color-high-emphasis items-center mt-6 hover:bg-color/15 w-full"
                                 onClick={() => setIsOpenAddManager(true)}
                             >
                                 <div className=" rounded p-2 bg-link/15">

@@ -2,14 +2,14 @@ import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
 import React, { useState } from "react";
 import { FaCheck, FaChevronDown } from "react-icons/fa";
 
-export default function FilterButton({ list, action }) {
-    const [selectedValue, setSelectedValue] = useState(list[0]);
+export default function FilterButton({ list, action, initialValue }) {
+    const [selectedValue, setSelectedValue] = useState(initialValue || list[0]);
 
     return (
         <Popover className="relative ">
             <PopoverButton
-                className={`border flex items-center gap-x-2 rounded font-bold text-sm border-color/15 px-2 py-1 bg-background ${
-                    selectedValue.value == list[0].value ? "" : "bg-link"
+                className={`border flex items-center gap-x-2 rounded font-bold text-sm border-color/15 px-2 py-1 bg-background text-color-high-emphasis ${
+                    selectedValue.value == list[0].value ? "" : "bg-link text-white"
                 }`}
             >
                 {selectedValue.title} <FaChevronDown className="text-xs" />
@@ -43,7 +43,7 @@ export default function FilterButton({ list, action }) {
                                     }`}
                                 />
                                 <div
-                                    className={`group-hover:text-white ${
+                                    className={`group-hover:text-white text-color-high-emphasis ${
                                         item.value == selectedValue.value
                                             ? "group-hover:font-bold"
                                             : ""

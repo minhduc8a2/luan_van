@@ -23,7 +23,7 @@ export default forwardRef(function TextInput(
     return (
         <div className="">
             {label && (
-                <label htmlFor={id} className="mb-2 block">
+                <label htmlFor={id} className="mb-2 block text-color-medium-emphasis">
                     {label}
                 </label>
             )}
@@ -33,7 +33,7 @@ export default forwardRef(function TextInput(
                 type={type}
                 id={id}
                 className={
-                    "border-white/25 bg-transparent focus:border-slate-200 focus:ring-white/15 rounded-xl shadow-sm w-full" +
+                    "border-color/15 bg-transparent text-color-high-emphasis focus:border-color-medium-emphasis focus:ring-color/15 rounded-xl shadow-sm w-full" +
                     className
                 }
                 ref={input}

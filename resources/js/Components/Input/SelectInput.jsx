@@ -35,9 +35,9 @@ export default function SelectInput({
 
     return (
         <div className="relative">
-            <label className="block mb-2 ">{label}</label>
+            <label className="block mb-2 text-color-medium-emphasis">{label}</label>
             <div
-                className={`border border-white/25 bg-transparent block w-full p-2.5 rounded-lg text-sm text-color-high-emphasis  ${className}`}
+                className={`border border-color/15 bg-transparent block w-full p-2.5 rounded-lg text-sm text-color-high-emphasis  ${className}`}
                 onClick={() => {
                     if (disabled) return;
                     setIsOpen(!isOpen);
@@ -55,7 +55,7 @@ export default function SelectInput({
                         <li
                             key={index}
                             onClick={() => handleSelect(item)}
-                            className="cursor-pointer p-2 hover:bg-color/15 "
+                            className="cursor-pointer text-color-high-emphasis p-2 hover:bg-color/15 "
                         >
                             {item.label}
                         </li>

@@ -21,7 +21,7 @@ export default function Button({
             type = "bg-dark-green text-white hover:bg-dark-green/85";
             break;
         default:
-            type = "bg-color/10 text-color-high-emphasis";
+            type = "bg-color/10 text-color-high-emphasis hover:bg-color/5";
             break;
     }
     return (
@@ -29,9 +29,7 @@ export default function Button({
             {...props}
             className={
                 ` rounded-lg font-semibold border flex items-center justify-center border-color/15 relative  transition  py-2 px-3 ${type}  ${
-                    disabled
-                        ? "cursor-default  opacity-50"
-                        : "cursor-pointer hover:bg-color/5 hover:text-color"
+                    disabled ? "cursor-default  opacity-50" : "cursor-pointer  "
                 } ` + className
             }
         >
