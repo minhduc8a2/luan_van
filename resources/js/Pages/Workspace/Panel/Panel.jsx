@@ -16,6 +16,7 @@ import { useContext, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import useGoToChannel from "@/helpers/useGoToChannel";
 import ThemeContext from "@/ThemeProvider";
+import WorkspaceOptions from "./WorkspaceOptions";
 
 export default function Panel({}) {
     const { auth } = usePage().props;
@@ -44,11 +45,9 @@ export default function Panel({}) {
     return (
         <div className={`${theme.mode?"bg-black/35":"bg-white/15"} h-full  rounded-l-lg rounded-s-lg border-r border-r-white/15`}>
             <div className="flex justify-between items-center p-4">
-                <div className="flex gap-x-1 items-center">
-                    <h3 className="text-xl font-semibold">{workspace.name}</h3>
-                    <IoIosArrowDown className="text-lg" />
-                </div>
-                <HiOutlinePencilAlt className="text-xl opacity-75" />
+
+               <WorkspaceOptions workspace={workspace}/>
+                {/* <HiOutlinePencilAlt className="text-xl opacity-75" /> */}
             </div>
             <hr className=" opacity-10" />
             <div className="opacity-85 pl-4 pr-4 pt-4">

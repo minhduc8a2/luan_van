@@ -5,8 +5,7 @@ import { useCustomedForm } from "@/helpers/customHooks";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CustomedDialog from "@/Components/CustomedDialog";
-export function AddWorkspace() {
-    const [isOpen, setIsOpen] = useState(false);
+export function AddWorkspace({isOpen,setIsOpen}) {
     const { submit, loading, getValues, setValues } = useCustomedForm(
         { name: "", channel: "" },
         {
@@ -27,42 +26,31 @@ export function AddWorkspace() {
         });
     }
     return (
-        <>
-            <button
-                className="flex gap-x-2 items-center p-4 hover:bg-white/10 w-full text-color-high-emphasis"
-                onClick={() => {
-                    setIsOpen(true);
+        <CustomedDialog isOpen={isOpen} onClose={() => setIsOpen(false)}>
+            <CustomedDialog.Title>Add workspace</CustomedDialog.Title>
+            <TextArea
+                required
+                placeholder=""
+                label="Workspace name:"
+                value={getValues().name}
+                onChange={(e) => {
+                    setValues("name", e.target.value);
                 }}
-            >
-                <IoIosAdd className="text-xl" />
-                Add workspace
-            </button>
-            <CustomedDialog isOpen={isOpen} onClose={() => setIsOpen(false)}>
-                <CustomedDialog.Title>Add workspace</CustomedDialog.Title>
-                <TextArea
-                    required
-                    placeholder=""
-                    label="Workspace name:"
-                    value={getValues().name}
-                    onChange={(e) => {
-                        setValues("name", e.target.value);
-                    }}
-                />
-                <TextArea
-                    required
-                    placeholder=""
-                    label="What project are you working on?"
-                    value={getValues().channel}
-                    onChange={(e) => {
-                        setValues("channel", e.target.value);
-                    }}
-                />
-                <CustomedDialog.ActionButtons
-                    btnName2="Add"
-                    onClickBtn2={onSubmit}
-                    loading={loading}
-                />
-            </CustomedDialog>
-        </>
+            />
+            <TextArea
+                required
+                placeholder=""
+                label="What project are you working on?"
+                value={getValues().channel}
+                onChange={(e) => {
+                    setValues("channel", e.target.value);
+                }}
+            />
+            <CustomedDialog.ActionButtons
+                btnName2="Add"
+                onClickBtn2={onSubmit}
+                loading={loading}
+            />
+        </CustomedDialog>
     );
 }

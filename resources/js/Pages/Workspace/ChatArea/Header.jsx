@@ -52,7 +52,7 @@ export default function Header({
     }
     return (
         <div
-            className={`p-4 border-b border-b-color/10 text-color-high-emphasis z-10 ${
+            className={`p-4 border-b border-b-color/10 text-color-high-emphasis  ${
                 loaded ? "" : "animate-pulse"
             }`}
         >

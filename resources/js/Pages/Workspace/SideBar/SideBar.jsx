@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 
 import { PiHouseLineBold, PiHouseLineFill } from "react-icons/pi";
 import { FaRegBell } from "react-icons/fa6";
@@ -21,29 +21,34 @@ import { setLeftWindowType } from "@/Store/windowTypeSlice";
 import { Link } from "react-router-dom";
 
 import CustomedPopover from "@/Components/CustomedPopover";
+import { IoIosAdd } from "react-icons/io";
 export default function SideBar({}) {
     const { workspace } = useSelector((state) => state.workspace);
     const { workspaces } = useSelector((state) => state.workspace);
     const { leftWindowType } = useSelector((state) => state.windowType);
-
+    const [isOpen, setIsOpen] = useState(false);
     const { new_count } = useSelector((state) => state.activity);
 
     const dispatch = useDispatch();
     const boxRef = useRef(null);
     const itemStyle = "flex flex-col items-center gap-y-2 group";
+
     useEffect(() => {
         dispatch(setSideBarWidth(boxRef.current.offsetWidth));
     }, []);
 
     return (
         <div className="flex flex-col justify-between h-full pb-8" ref={boxRef}>
+            <AddWorkspace isOpen={isOpen} setIsOpen={setIsOpen}/>
             <div className="flex flex-col items-center gap-y-8 ">
                 <CustomedPopover
                     triggerNode={<WorkspaceAvatar name={workspace.name} />}
                     anchor="bottom start"
                     className="mt-4"
                 >
-                    <h2 className="text-lg p-4 pb-2 font-bold text-color-high-emphasis">Workspace</h2>
+                    <h2 className="text-lg p-4 pb-2 font-bold text-color-high-emphasis">
+                        Workspace
+                    </h2>
                     <hr className="opacity-10" />
                     <div className="max-h-[50vh] overflow-y-auto scrollbar">
                         {workspaces.map((wsp) => (
@@ -59,7 +64,15 @@ export default function SideBar({}) {
                     </div>
                     <hr className="opacity-10" />
 
-                    <AddWorkspace />
+                    <button
+                        className="flex gap-x-2 items-center p-4 hover:bg-white/10 w-full text-color-high-emphasis"
+                        onClick={() => {
+                            setIsOpen(true);
+                        }}
+                    >
+                        <IoIosAdd className="text-xl" />
+                        Add workspace
+                    </button>
                 </CustomedPopover>
                 {/* <Dropdown>
                     <Dropdown.Trigger></Dropdown.Trigger>
