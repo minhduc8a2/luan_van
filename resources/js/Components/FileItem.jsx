@@ -64,7 +64,7 @@ const FileItem = memo(function ({
                         "This file was deleted."
                     ) : (
                         <>
-                            <div className={`truncate   `}>{file.name}</div>
+                            <div className={`truncate   font-semibold`}>{file.name}</div>
                             <p className="">{getDocumentType(file.type)}</p>
                         </>
                     )}

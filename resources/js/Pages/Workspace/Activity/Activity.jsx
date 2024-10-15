@@ -1,5 +1,5 @@
 import { router, usePage } from "@inertiajs/react";
-import React, { useMemo, useRef } from "react";
+import React, { useContext, useMemo, useRef } from "react";
 import { FaToggleOff } from "react-icons/fa6";
 import { useEffect } from "react";
 import {
@@ -24,8 +24,10 @@ import { InView } from "react-intersection-observer";
 import LoadingSpinner from "@/Components/LoadingSpinner";
 import { FaToggleOn } from "react-icons/fa";
 import { useParams } from "react-router-dom";
+import ThemeContext from "@/ThemeProvider";
 export default function Activity() {
     const { workspaceId } = useParams();
+    const {theme} = useContext(ThemeContext)
     const { leftWindowType } = useSelector((state) => state.windowType);
     const nextPageUrlRef = useRef(null);
     const dispatch = useDispatch();
@@ -92,7 +94,7 @@ export default function Activity() {
         });
     }, [notifications, onlyUnread]);
     return (
-        <div className="bg-black/35 flex flex-col h-full rounded-l-lg rounded-s-lg pb-4">
+        <div className={`${theme.mode?"bg-black/35":"bg-white/15"} bg-black/35 flex flex-col h-full rounded-l-lg rounded-s-lg pb-4` }>
             <div className="flex justify-between items-end p-4">
                 <h3 className="text-xl font-semibold">Activity</h3>
 
@@ -116,7 +118,7 @@ export default function Activity() {
                 ref={notificationContainerRef}
             >
                 {loading && notifications.length == 0 && (
-                    <LoadingSpinner />
+                    <LoadingSpinner spinerStyle="border-white"/>
                 )}
                 {filteredNotifications.map((notification, index) => {
                     if (isHuddleInvitationNotificationType(notification.type)) {

@@ -1,6 +1,6 @@
-import React, { memo, useEffect, useState } from "react";
+import React, { memo,  useState } from "react";
 import FileItem from "@/Components/FileItem";
-import { IoMdCloudDownload } from "react-icons/io";
+
 import {
     Popover,
     PopoverButton,
@@ -10,25 +10,22 @@ import {
 import { IoCloudDownloadOutline } from "react-icons/io5";
 import { MdMoreVert } from "react-icons/md";
 import copy from "copy-to-clipboard";
-import { useSelector } from "react-redux";
-import CustomedDialog from "@/Components/CustomedDialog";
-import LoadingSpinner from "@/Components/LoadingSpinner";
+import { useDispatch, useSelector } from "react-redux";
+
+import { setMedia } from "@/Store/mediaSlice";
 const DocumentAttachment = memo(function ({
     attachment,
-    openOverlay,
-    setOpenOverlay,
+
     deleteFn = () => {},
     className = "",
     noToolbar = false,
 }) {
     const { publicAppUrl } = useSelector((state) => state.workspace);
     const [isHovered, setIsHovered] = useState(false);
-    const [loading, setLoading] = useState(true);
+    const dispatch = useDispatch();
 
     const close = useClose();
-    useEffect(() => {
-        setLoading(true);
-    }, [openOverlay]);
+
     return (
         <div
             className={"group/document relative     " + className}
@@ -95,45 +92,23 @@ const DocumentAttachment = memo(function ({
                     </Popover>
                 </div>
             )}
-            <button onClick={() => setOpenOverlay(true)} className="w-full ">
+            <button
+                onClick={() =>
+                    dispatch(
+                        setMedia({
+                            type: "document",
+                            url: attachment.url,
+                            name: attachment.name,
+                        })
+                    )
+                }
+                className="w-full "
+            >
                 <FileItem file={attachment} maxWidth="w-full" />
             </button>
-
-            <CustomedDialog
-                isOpen={openOverlay}
-                onClose={() => setOpenOverlay(false)}
-                className="flex justify-center flex-col items-center max-h-[95vh] mt-4 w-fit p-0 relative"
-            >
-                <a
-                    href={attachment.url}
-                    download={true}
-                    className="absolute top-4 left-4"
-                >
-                    <IoMdCloudDownload className="text-3xl" />
-                </a>
-                {loading && <LoadingSpinner />}
-
-                <iframe
-                    className={`${loading ? "invisible" : ""}`}
-                    width={
-                        window.innerWidth > 900
-                            ? window.innerWidth / 2
-                            : window.innerWidth - 200
-                    }
-                    height={window.innerHeight - 100}
-                    onLoad={() => {
-                        console.log("Iframe loaded");
-                        setLoading(false);
-                    }}
-                    src={`https://docs.google.com/gview?url=${
-                        publicAppUrl + attachment.url
-                    }&embedded=true `}
-                ></iframe>
-            </CustomedDialog>
         </div>
     );
-},
-arePropsEqual);
+}, arePropsEqual);
 function arePropsEqual(oldProps, newProps) {
     return (
         oldProps.attachment.id === newProps.attachment.id &&

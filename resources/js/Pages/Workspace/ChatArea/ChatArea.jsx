@@ -14,7 +14,7 @@ import axios from "axios";
 import { findMinMaxId, getChannelName } from "@/helpers/channelHelper";
 import ForwardedMessage from "./Message/ForwardedMessage";
 import { isHiddenUser } from "@/helpers/userHelper";
-import Layout from "../Layout";
+
 import Header from "./Header";
 import { resetMessageCountForChannel } from "@/Store/channelsSlice";
 import InitData from "./InitData";
@@ -322,8 +322,7 @@ export default function ChatArea() {
                     channelName={channelName}
                     channelUsers={channelUsers}
                     loaded={loaded}
-                    topLoading={topLoading}
-                    bottomLoading={bottomLoading}
+                   
                 />
                 {loaded && channel && (
                     <InfiniteScroll

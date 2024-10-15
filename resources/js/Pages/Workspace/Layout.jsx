@@ -9,7 +9,6 @@ import Event from "./Event";
 import { makeStore } from "@/Store/store";
 import { Provider, useDispatch, useSelector } from "react-redux";
 
-
 import { setNotificationPopup } from "@/Store/notificationPopupSlice";
 import { setMedia } from "@/Store/mediaSlice";
 import Image from "@/Components/Image";
@@ -26,6 +25,8 @@ import InitData from "./InitData";
 import { Outlet, useParams } from "react-router-dom";
 import { setIsOnline } from "@/Store/isOnlineSlice";
 import CustomedDialog from "@/Components/CustomedDialog";
+import LoadingSpinner from "@/Components/LoadingSpinner";
+import { IoMdCloudDownload } from "react-icons/io";
 export default function Layout() {
     const { channelId } = useParams();
 
@@ -194,7 +195,14 @@ function NotificationPopup() {
 }
 const MediaModal = memo(function MediaModal() {
     const { url, type, name } = useSelector((state) => state.media);
+    const { publicAppUrl } = useSelector((state) => state.workspace);
+    const [loading, setLoading] = useState(true);
     const dispatch = useDispatch();
+    useEffect(() => {
+        if (url) {
+            setLoading(true);
+        }
+    }, [url]);
     switch (type) {
         case "image": {
             return (
@@ -221,6 +229,38 @@ const MediaModal = memo(function MediaModal() {
                         />
                     )}
                 </div>
+            );
+        }
+        case "document": {
+            return (
+                <CustomedDialog
+                    isOpen={url != null}
+                    onClose={() => dispatch(setMedia({}))}
+                    className="flex justify-center flex-col items-center max-h-[95vh] mt-4 w-fit p-0 relative"
+                >
+                    <a
+                        href={url}
+                        download={name}
+                        className="absolute top-0 -right-16 bg-white/50 p-1 rounded-full"
+                    >
+                        <IoMdCloudDownload className="text-2xl" />
+                    </a>
+                    {loading && <LoadingSpinner />}
+
+                    <iframe
+                        className={`${loading ? "invisible" : ""}`}
+                        width={
+                            window.innerWidth > 900
+                                ? window.innerWidth / 2
+                                : window.innerWidth - 200
+                        }
+                        onLoad={() => setLoading(false)}
+                        height={window.innerHeight - 100}
+                        src={`https://docs.google.com/gview?url=${
+                            publicAppUrl + url
+                        }&embedded=true `}
+                    ></iframe>
+                </CustomedDialog>
             );
         }
         default:

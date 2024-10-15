@@ -88,7 +88,7 @@ export default function More() {
 function MoreButton({ title, description, iconNode, ...props }) {
     return (
         <button
-            className="w-full px-4 py-2 flex flex-nowrap items-center gap-x-4 group/more_button transition hover:bg-white/10"
+            className="w-full px-4 py-2 flex flex-nowrap items-center gap-x-4 group/more_button transition hover:bg-color/10"
             {...props}
         >
             <div className="h-10 w-10 bg-primary-400 group-hover/more_button:bg-primary-300 transition rounded-lg text-lg p-1 flex items-center justify-center ">

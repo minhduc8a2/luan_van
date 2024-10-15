@@ -2,6 +2,7 @@ import Button from "@/Components/Button";
 import React, {
     memo,
     useCallback,
+    useContext,
     useEffect,
     useMemo,
     useRef,
@@ -34,10 +35,12 @@ import DocumentInSearch from "./DocumentInSearch";
 import FileIcon from "@/Components/FileIcon";
 import { useDispatch, useSelector } from "react-redux";
 import { setMedia } from "@/Store/mediaSlice";
-import Layout from "../Layout";
+
 import InfiniteScroll from "@/Components/InfiniteScroll";
+import ThemeContext from "@/ThemeProvider";
 export default function BrowseFiles() {
     const { auth } = usePage().props;
+    const { theme } = useContext(ThemeContext);
 
     const dispatch = useDispatch();
     const [files, setFiles] = useState([]);
@@ -191,8 +194,7 @@ export default function BrowseFiles() {
                         } else {
                             if (response.data.length > 0) {
                                 setBottomHasMore(
-                                    response.data[response.data.length - 1]
-                                        .id
+                                    response.data[response.data.length - 1].id
                                 );
                             } else {
                                 setBottomHasMore(null);
@@ -250,7 +252,11 @@ export default function BrowseFiles() {
     }
     return (
         <div className=" w-full h-full grid grid-cols-5">
-            <div className="h-full col-span-1 bg-black/35 px-2">
+            <div
+                className={`h-full col-span-1 ${
+                    theme.mode ? "bg-black/35" : "bg-white/15"
+                }  px-2`}
+            >
                 <h3 className="text-xl font-semibold p-4">Files</h3>
                 <div className="">
                     <Button
@@ -261,7 +267,7 @@ export default function BrowseFiles() {
                             setFilter("shared");
                         }}
                     >
-                        <div className="flex gap-x-2 items-center">
+                        <div className="flex gap-x-2 items-center text-white/85">
                             <PiShareFat />
                             Share with you
                         </div>
@@ -274,7 +280,7 @@ export default function BrowseFiles() {
                             setFilter("self");
                         }}
                     >
-                        <div className="flex gap-x-2 items-center">
+                        <div className="flex gap-x-2 items-center text-white/85">
                             <FaRegUser />
                             Created by you
                         </div>
@@ -289,7 +295,7 @@ export default function BrowseFiles() {
                             setFilter("all");
                         }}
                     >
-                        <div className="flex gap-x-2 items-center">
+                        <div className="flex gap-x-2 items-center text-white/85">
                             <TbStack2 />
                             All files
                         </div>
@@ -311,7 +317,7 @@ export default function BrowseFiles() {
                                 <div className="h-6 w-6 relative">
                                     <LoadingSpinner />
                                 </div>
-                                <div className="text-xs">Loading ...</div>
+                                <div className="text-xs text-color-medium-emphasis">Loading ...</div>
                             </div>
                         )}
                     </div>
@@ -336,7 +342,7 @@ export default function BrowseFiles() {
                             if (isImage(item.type)) {
                                 return (
                                     <button
-                                        className="flex items-center gap-x-4 w-full  "
+                                        className="flex items-center gap-x-4 w-full  p-2"
                                         onClick={() =>
                                             dispatch(
                                                 setMedia({
@@ -355,7 +361,7 @@ export default function BrowseFiles() {
                                                 {item.name}
                                             </div>
                                         </div>
-                                        <div className="text-xs text-white/75">
+                                        <div className="text-xs text-color-medium-emphasis">
                                             {getDocumentType(item.type)}
                                         </div>
                                     </button>
@@ -417,7 +423,7 @@ export default function BrowseFiles() {
                             if (!fis) return "";
                             return (
                                 <li key={date}>
-                                    <div className="font-bold text-white/75">
+                                    <div className="font-bold text-color-medium-emphasis">
                                         {date}
                                     </div>
                                     {fis.map((file, cIndex) => (

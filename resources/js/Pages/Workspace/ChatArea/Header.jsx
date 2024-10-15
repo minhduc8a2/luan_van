@@ -20,8 +20,7 @@ import CustomedDialog from "@/Components/CustomedDialog";
 export default function Header({
     channelName,
     loaded,
-    topLoading,
-    bottomLoading,
+   
 }) {
     const { auth } = usePage().props;
     const { channelId } = useParams();
@@ -60,7 +59,7 @@ export default function Header({
             <div className="flex justify-between font-bold text-lg opacity-75">
                 <div className="relative">
                     <ChannelSettings channelName={channelName} />
-                    {(topLoading || bottomLoading) && (
+                    {/* {(topLoading || bottomLoading) && (
                         <div className="flex  gap-x-2 items-center px-4 py-2 absolute left-full top-1/2 -translate-y-1/2">
                             <div className="h-6 w-6 relative">
                                 <LoadingSpinner />
@@ -69,7 +68,7 @@ export default function Header({
                                 Loading ...
                             </div>
                         </div>
-                    )}
+                    )} */}
                 </div>
                 <div className="">
                     {!channel?.is_archived && (
@@ -106,7 +105,7 @@ export default function Header({
                                         onClick={handleHuddleButtonClicked}
                                     >
                                         <FiHeadphones className="text-xl" />
-                                        <div className={`text-sm `}>Huddle</div>
+                                        <div className={`text-sm font-bold`}>Huddle</div>
                                     </button>
                                 ) : (
                                     <>

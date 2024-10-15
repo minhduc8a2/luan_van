@@ -1,19 +1,25 @@
-import React, { memo, useState } from "react";
-import { IoMdCloudDownload } from "react-icons/io";
+import React, { memo } from "react";
+
 import { getDocumentType } from "@/helpers/fileHelpers";
-import { useSelector } from "react-redux";
-import CustomedDialog from "@/Components/CustomedDialog";
-import LoadingSpinner from "@/Components/LoadingSpinner";
+import { useDispatch } from "react-redux";
+import { setMedia } from "@/Store/mediaSlice";
+
 const DocumentInSearch = memo(function ({ file, Icon, className = "" }) {
-    const { publicAppUrl } = useSelector((state) => state.workspace);
-    const [openOverlay, setOpenOverlay] = useState(false);
-    const [loading, setLoading] = useState(false);
+    const dispatch = useDispatch();
 
     return (
         <div className={className} key={"attachment_" + file.id}>
             <button
-                onClick={() => setOpenOverlay(true)}
-                className="flex items-center gap-x-4 w-full  "
+                onClick={() =>
+                    dispatch(
+                        setMedia({
+                            type: "document",
+                            url: file.url,
+                            name: file.name,
+                        })
+                    )
+                }
+                className="flex items-center gap-x-4 w-full p-2 "
             >
                 <div className="flex-1 items-center flex gap-x-4 min-w-0 max-w-full overflow-hidden">
                     <div className="text-link">{Icon}</div>
@@ -21,39 +27,10 @@ const DocumentInSearch = memo(function ({ file, Icon, className = "" }) {
                         {file.name}
                     </div>
                 </div>
-                <div className="text-xs text-white/75">
+                <div className="text-xs text-color-medium-emphasis">
                     {getDocumentType(file.type)}
                 </div>
             </button>
-
-            <CustomedDialog
-                isOpen={openOverlay}
-                onClose={() => setOpenOverlay(false)}
-                className="flex justify-center flex-col items-center max-h-[95vh] mt-4 w-fit p-0"
-            >
-                <a
-                    href={file.url}
-                    download={true}
-                    className="absolute top-4 right-4"
-                >
-                    <IoMdCloudDownload className="text-3xl" />
-                </a>
-                {loading && <LoadingSpinner />}
-
-                <iframe
-                    className={`${loading ? "invisible" : ""}`}
-                    width={
-                        window.innerWidth > 900
-                            ? window.innerWidth / 2
-                            : window.innerWidth - 200
-                    }
-                    onLoad={() => setLoading(false)}
-                    height={window.innerHeight - 100}
-                    src={`https://docs.google.com/gview?url=${
-                        publicAppUrl + file.url
-                    }&embedded=true `}
-                ></iframe>
-            </CustomedDialog>
         </div>
     );
 }, arePropsEqual);

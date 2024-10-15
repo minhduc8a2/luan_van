@@ -282,7 +282,7 @@ export default function BrowseChannels() {
                                 <div className="h-6 w-6 relative">
                                     <LoadingSpinner />
                                 </div>
-                                <div className="text-xs">Loading ...</div>
+                                <div className="text-xs text-color-medium-emphasis">Loading ...</div>
                             </div>
                         )}
                     </div>

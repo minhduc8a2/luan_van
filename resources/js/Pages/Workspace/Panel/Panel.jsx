@@ -12,15 +12,16 @@ import { useDispatch, useSelector } from "react-redux";
 import { CreateChannelForm } from "./createChannelForm";
 import { FiArchive } from "react-icons/fi";
 
-import { useMemo } from "react";
+import { useContext, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import useGoToChannel from "@/helpers/useGoToChannel";
+import ThemeContext from "@/ThemeProvider";
 
 export default function Panel({}) {
     const { auth } = usePage().props;
     const { workspace } = useSelector((state) => state.workspace);
     const { channelId, workspaceId } = useParams();
-
+    const {theme} = useContext(ThemeContext)
     const { channels } = useSelector((state) => state.channels);
 
     const currentChannel = useMemo(
@@ -41,7 +42,7 @@ export default function Panel({}) {
         return channels.find((cn) => cn.type == "SELF");
     }, [channels]);
     return (
-        <div className="bg-black/35 h-full  rounded-l-lg rounded-s-lg border-r border-r-white/15">
+        <div className={`${theme.mode?"bg-black/35":"bg-white/15"} h-full  rounded-l-lg rounded-s-lg border-r border-r-white/15`}>
             <div className="flex justify-between items-center p-4">
                 <div className="flex gap-x-1 items-center">
                     <h3 className="text-xl font-semibold">{workspace.name}</h3>

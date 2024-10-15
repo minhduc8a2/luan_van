@@ -45,8 +45,8 @@ export default function Message({
     forwarded = false,
 }) {
     const { auth } = usePage().props;
-    const {theme} = useContext(ThemeContext)
-    const { channelId, workspaceId } = useParams();
+    const { theme } = useContext(ThemeContext);
+    const { channelId } = useParams();
     const { channel } = useChannel(channelId);
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
     const dispatch = useDispatch();
@@ -68,7 +68,6 @@ export default function Message({
         else otherFiles.push(file);
     });
 
-    const [openOverlay, setOpenOverlay] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [showConfirm, setShowConfirm] = useState(null);
@@ -269,7 +268,7 @@ export default function Message({
                 />
             </CustomedDialog>
 
-            {!channel.is_archived && !message.deleted_at && !forwarded && (
+            {!channel?.is_archived && !message?.deleted_at && !forwarded && (
                 <MessageToolbar
                     message={message}
                     threadStyle={threadStyle}
@@ -328,7 +327,9 @@ export default function Message({
                 ) : (
                     <>
                         <div
-                            className={`prose ${theme.mode?"prose-invert":""} select-text`}
+                            className={`prose ${
+                                theme.mode ? "prose-invert" : ""
+                            } select-text`}
                             dangerouslySetInnerHTML={{
                                 __html: message.deleted_at
                                     ? '<p class="italic text-color/50">Deleted message</p>'
@@ -385,10 +386,6 @@ export default function Message({
                                     className="max-w-96"
                                     key={file.id}
                                     attachment={file}
-                                    openOverlay={openOverlay}
-                                    setOpenOverlay={(status) =>
-                                        setOpenOverlay(status)
-                                    }
                                     deleteFn={() => setShowConfirm(file)}
                                 />
                             );

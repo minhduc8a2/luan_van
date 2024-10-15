@@ -36,6 +36,7 @@ import {
     subtractThreadMessagesCount,
 } from "@/Store/channelsDataSlice";
 import { useParams } from "react-router-dom";
+import MessagePlaceHolder from "./Message/MessagePlaceHolder";
 export default function Thread() {
     const { auth } = usePage().props;
     const dispatch = useDispatch();
@@ -451,9 +452,11 @@ export default function Thread() {
                     </button>
                 </div>
             </div>
-            {
-                !threadedMessage && <div className="h-full w-full"><LoadingSpinner/></div>
-            }
+            {!threadedMessage && (
+                <div className="h-full w-full">
+                    <LoadingSpinner />
+                </div>
+            )}
             {threadedMessage && (
                 <>
                     <div className="max-h-[30%] overflow-y-auto scrollbar py-8">
@@ -529,6 +532,12 @@ export default function Thread() {
                                 scrollToItem={hasMention}
                                 className="overflow-y-auto max-w-full flex-1 scrollbar"
                             >
+                                {bottomHasMore && (
+                                    <div className="my-4 flex flex-col gap-y-4">
+                                        <MessagePlaceHolder />
+                                        <MessagePlaceHolder />
+                                    </div>
+                                )}
                                 {sortedMessages.map((msg, index) => {
                                     let user = channelUsers.find(
                                         (mem) => mem.id === msg.user_id

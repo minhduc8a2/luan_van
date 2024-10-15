@@ -101,7 +101,7 @@ export default function Managers() {
                             {channel.name}
                         </div>
                     </div>
-                    <div className="text-sm font-semibold text-white/50 pl-6">
+                    <div className="text-sm font-semibold text-color-medium-emphasis pl-6">
                         {managers.length} Channel Managers
                     </div>
                     <div className="my-4 mx-6">
