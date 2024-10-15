@@ -276,7 +276,7 @@ export default function BrowseChannels() {
         });
     }, [filter.ownType, filter.privacyType]);
     return (
-        <div className="bg-foreground w-full h-full border border-white/15 ">
+        <div className="bg-foreground w-full h-full border border-color/15 ">
             <div className="mx-auto w-1/2 py-4 flex flex-col max-h-full">
                 <div className="flex justify-between items-center">
                     <div className="flex gap-x-4 items-center">
@@ -295,7 +295,7 @@ export default function BrowseChannels() {
                     <CreateChannelForm
                         callback={() => search(searchValue)}
                         activateButtonNode={
-                            <Button className="text-white/100 font-bold border border-white/15 !bg-background">
+                            <Button className="text-white/100 font-bold border border-color/15 !bg-background">
                                 Create Channel
                             </Button>
                         }
@@ -348,7 +348,7 @@ export default function BrowseChannels() {
                     bottomHasMore={bottomHasMore}
                     topLoading={topLoading}
                     bottomLoading={bottomLoading}
-                    className="mt-4 bg-background flex-1 max-h-full overflow-y-auto scrollbar rounded-lg border border-white/15"
+                    className="mt-4 bg-background flex-1 max-h-full overflow-y-auto scrollbar rounded-lg border border-color/15"
                 >
                     {filteredChannels.length == 0 && (
                         <p className="text-center p-4">No results found</p>
@@ -419,7 +419,7 @@ function ChannelItem({ channel, changeChannel, joinChannel, leaveChannel }) {
             </ul>
             <div className="hidden gap-x-4 group-hover/browse_channel_item:flex absolute top-1/2 right-2 -translate-y-1/2 ">
                 <Button
-                    className="!bg-background hover:!bg-foreground border border-white/15"
+                    className="!bg-background hover:!bg-foreground border border-color/15"
                     onClick={() => {
                         changeChannel(channel);
                     }}
@@ -430,7 +430,7 @@ function ChannelItem({ channel, changeChannel, joinChannel, leaveChannel }) {
                     !channel.is_main_channel && (
                         <Button
                             loading={leaveProcessing}
-                            className="!bg-background hover:!bg-foreground border border-white/15"
+                            className="!bg-background hover:!bg-foreground border border-color/15"
                             onClick={() =>
                                 leaveChannel(channel, {
                                     onBefore: () => {
@@ -448,7 +448,7 @@ function ChannelItem({ channel, changeChannel, joinChannel, leaveChannel }) {
                 ) : (
                     <Button
                         loading={joinProcessing}
-                        className="!bg-background hover:!bg-foreground border border-white/15"
+                        className="!bg-background hover:!bg-foreground border border-color/15"
                         onClick={() =>
                             joinChannel(channel, {
                                 onBefore: () => {

@@ -18,10 +18,10 @@ export default function Button({
                 "bg-transparent text-danger-500 hover:bg-danger-500 hover:text-color";
             break;
         case "green":
-            type = "bg-dark-green text-color hover:bg-dark-green/85";
+            type = "bg-dark-green text-white hover:bg-dark-green/85";
             break;
         default:
-            type = "bg-color/10 text-color/85";
+            type = "bg-color/10 text-color-high-emphasis";
             break;
     }
     return (

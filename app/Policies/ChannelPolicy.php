@@ -100,6 +100,7 @@ class ChannelPolicy
 
     public function leave(User $user, Channel $channel): bool
     {
+        if($channel->is_main_channel) return false;
         if ($channel->type == ChannelTypes::PUBLIC->name) {
             if ($user->workspacePermissionCheck($channel->workspace, PermissionTypes::WORKSPACE_ALL->name) && $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_VIEW->name))
                 return true;

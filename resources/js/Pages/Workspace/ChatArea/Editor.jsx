@@ -110,7 +110,7 @@ export default function Editor({
             });
     }
     return (
-        <div className="m-6 border border-white/15 pt-4 px-2 rounded-lg ">
+        <div className="m-6 border border-color/15 pt-4 px-2 rounded-lg ">
             {permissions.chat && (
                 <TipTapEditor
                     onSubmit={onSubmit}
@@ -138,7 +138,7 @@ export default function Editor({
                         <ChannelSettings
                             channelName={channelName}
                             buttonNode={
-                                <Button className="bg-black/15 border border-white/15">
+                                <Button className="bg-black/15 border border-color/15">
                                     Detail
                                 </Button>
                             }
@@ -153,7 +153,7 @@ export default function Editor({
                 </div>
             )}
             {channel?.is_archived == true && (
-                <div className="mb-4 justify-center flex ml-4 items-baseline gap-x-1 text-white/75">
+                <div className="mb-4 justify-center flex ml-4 items-baseline gap-x-1 text-color/75">
                     You are viewing{" "}
                     <div className="flex items-baseline gap-x-1">
                         {channel.type == "PUBLIC" ? (

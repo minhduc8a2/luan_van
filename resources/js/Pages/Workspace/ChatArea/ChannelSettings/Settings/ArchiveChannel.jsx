@@ -99,7 +99,7 @@ export default function ArchiveChannel() {
                             : "Archive this channel?"}
                     </div>
                 </CustomedDialog.Title>
-                <div className=" text-white/85 pb-4">
+                <div className=" text-color-high-emphasis pb-4">
                     {!errors && (
                         <>
                             <div className=" ">

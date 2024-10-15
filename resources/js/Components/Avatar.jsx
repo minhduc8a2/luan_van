@@ -1,5 +1,6 @@
 
-import React, { memo } from "react";
+import ThemeContext from "@/ThemeProvider";
+import React, { memo, useContext } from "react";
 import { useSelector } from "react-redux";
 
 const Avatar = memo(function ({
@@ -12,8 +13,9 @@ const Avatar = memo(function ({
     roundedClassName = "rounded-lg ",
 }) {
     const { default_avatar_url } = useSelector(state=>state.workspace);
+    const {theme} = useContext(ThemeContext)
     return (
-        <div className={"relative  " + className}>
+        <div className={`relative ${theme.mode?"":"shadow rounded-lg"} ` + className}>
             <img
                 src={src || default_avatar_url}
                 className={`${roundedClassName} w-full h-full object-cover absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 `}
@@ -23,14 +25,14 @@ const Avatar = memo(function ({
             ) : isOnline ? (
                 <div
                     className={
-                        "absolute -bottom-1 -right-1 h-3 w-3 rounded-full bg-green-600  border-2 border-primary-500 " +
+                        "absolute -bottom-1 -right-1 h-3 w-3 rounded-full bg-green-600  border-2 border-color/50 " +
                         onlineClassName
                     }
                 ></div>
             ) : (
                 <div
                     className={
-                        "absolute -bottom-1 -right-1 h-3 w-3 rounded-full   border-2 border-white/75 bg-primary-500 " +
+                        "absolute -bottom-1 -right-1 h-3 w-3 rounded-full   border-2 border-color/25 bg-primary-500 " +
                         offlineClassName
                     }
                 ></div>

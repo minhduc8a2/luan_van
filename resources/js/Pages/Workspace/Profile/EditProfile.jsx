@@ -134,7 +134,7 @@ export default function EditProfile({ user, triggerButton }) {
                             dimensions="w-48 h-48"
                         />
                         <label
-                            className=" mt-4 text-center relative font-bold  block rounded-lg cursor-pointer border border-white/15 py-2 "
+                            className=" mt-4 text-center relative font-bold  block rounded-lg cursor-pointer border border-color/15 py-2 "
                             htmlFor="profile-choose-photo"
                         >
                             {uploadingAvatarFile && <LoadingSpinner />}

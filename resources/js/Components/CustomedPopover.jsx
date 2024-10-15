@@ -21,7 +21,7 @@ function CustomedPopover({
             </PopoverButton>
             <PopoverPanel
                 anchor={anchor}
-                className={`flex flex-col  ${width} border border-white/15 rounded-lg bg-background py-3 ${className}`}
+                className={`flex flex-col  ${width} border border-color/15 rounded-lg bg-background py-3 ${className}`}
             >
                 {({ close }) => (
                     <>
@@ -50,7 +50,7 @@ function ListItem({ children, onClick, className }) {
     return (
         <div
             className={
-                "hover:bg-link text-white/85 px-4 py-1 cursor-pointer " +
+                "hover:bg-link text-color-high-emphasis px-4 py-1 cursor-pointer " +
                 className
             }
             onClick={() => {

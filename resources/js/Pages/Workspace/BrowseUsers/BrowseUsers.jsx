@@ -139,7 +139,7 @@ export default function BrowseUsers() {
 
     
     return (
-        <div className="bg-foreground w-full h-full border border-white/15 ">
+        <div className="bg-foreground w-full h-full border border-color/15 ">
             <div className="mx-auto w-1/2 py-4 flex flex-col max-h-full">
                 <div className="flex justify-between items-center">
                     <div className="flex gap-x-4 items-center">
@@ -157,7 +157,7 @@ export default function BrowseUsers() {
                     </div>
                     <CreateChannelForm
                         activateButtonNode={
-                            <Button className="text-white/100 font-bold border border-white/15 !bg-background">
+                            <Button className="text-white/100 font-bold border border-color/15 !bg-background">
                                 Create Channel
                             </Button>
                         }

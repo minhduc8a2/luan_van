@@ -25,7 +25,7 @@ export default function LeaveChannel({ channel }) {
         });
     }
 
-    if (channel.is_main_channel) return "";
+   
     if (channel.type === "PUBLIC")
         return (
             <div>

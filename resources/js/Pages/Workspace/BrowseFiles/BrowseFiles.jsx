@@ -299,7 +299,7 @@ export default function BrowseFiles() {
             <div className=" col-span-4 bg-background  max-h-full min-h-0">
                 <div className="w-[67%] mx-auto flex flex-col max-h-full min-h-0  pb-4">
                     <div className="flex gap-x-4 my-4 items-center">
-                        <h1 className="text-xl font-bold  text-white/85">
+                        <h1 className="text-xl font-bold  text-color-high-emphasis">
                             {filter == "shared"
                                 ? "Share with you"
                                 : filter == "self"

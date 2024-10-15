@@ -35,7 +35,7 @@ export default function More() {
             >
                 {({ close }) => (
                     <>
-                        <h5 className="text-lg text-white font-bold p-4 pb-0">
+                        <h5 className="text-lg text-color-high-emphasis font-bold p-4 pb-0">
                             More
                         </h5>
                         <ul className="pb-4">
@@ -48,7 +48,7 @@ export default function More() {
                                     }}
                                     title="Files"
                                     description="Documents, clips, attachments"
-                                    iconNode={<TbStack2 />}
+                                    iconNode={<TbStack2 className="text-white"/>}
                                 />
                             </li>
                             <li>
@@ -59,7 +59,7 @@ export default function More() {
                                     }}
                                     title="Channels"
                                     description="Browse your team's conversations"
-                                    iconNode={<IoSearch />}
+                                    iconNode={<IoSearch className="text-white"/>}
                                 />
                             </li>
                             <li>
@@ -71,7 +71,7 @@ export default function More() {
                                     }}
                                     title="People"
                                     description="Your team and user groups"
-                                    iconNode={<RiContactsBook3Line />}
+                                    iconNode={<RiContactsBook3Line className="text-white"/>}
                                 />
                             </li>
                             <li>
@@ -94,9 +94,9 @@ function MoreButton({ title, description, iconNode, ...props }) {
             <div className="h-10 w-10 bg-primary-400 group-hover/more_button:bg-primary-300 transition rounded-lg text-lg p-1 flex items-center justify-center ">
                 {iconNode}
             </div>
-            <div className="flex flex-col justify-between text-left">
-                <div className="font-semibold">{title}</div>
-                <div className="text-sm">{description}</div>
+            <div className="flex flex-col justify-between text-left ">
+                <div className="font-semibold text-color-high-emphasis">{title}</div>
+                <div className="text-sm text-color-medium-emphasis">{description}</div>
             </div>
         </button>
     );

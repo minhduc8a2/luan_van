@@ -1,7 +1,6 @@
 import React, { useMemo } from "react";
 import ChangeChannelNameForm from "./ChangeChannelNameForm";
 import { EditDescriptionForm } from "./EditDescriptionForm";
-import Button from "@/Components/Button";
 
 import { SettingsButton } from "./SettingsButton";
 import { UTCToDateTime } from "@/helpers/dateTimeHelper";
@@ -37,7 +36,7 @@ export default function About({ channelName, onClose }) {
         [channel, auth, workspaceUsers]
     );
     return (
-        <div className="border border-white/15 rounded-lg ">
+        <div className="border border-color/15 rounded-lg ">
             <ChangeChannelNameForm channelName={channelName} />
             {channel.type != "DIRECT" && channel.type != "SELF" && (
                 <>
@@ -69,16 +68,16 @@ export default function About({ channelName, onClose }) {
                     <Managers />
                 </>
             )}
-            {channel.type != "DIRECT" &&
-                channel.type != "SELF" &&
-                permissions.leave && <>
+            {permissions.leave && (
+                <>
                     <hr />
-                
-                <LeaveChannel channel={channel} />
-                </>}
+
+                    <LeaveChannel channel={channel} />
+                </>
+            )}
             {channel.type == "DIRECT" && (
-                <div className="border border-white/15 rounded-br-lg rounded-bl-lg p-4 border-t-0">
-                    <h5 className="font-bold text-white/85 text-sm">
+                <div className="border border-color/15 rounded-br-lg rounded-bl-lg p-4 border-t-0">
+                    <h5 className="font-bold text-color-high-emphasis text-sm">
                         Contact information
                     </h5>
                     <div className="flex mt-2 items-center gap-x-3">
@@ -86,7 +85,7 @@ export default function About({ channelName, onClose }) {
                             <MdOutlineEmail className="text-2xl" />
                         </div>
                         <div className="flex flex-col justify-between items-start">
-                            <div className="text-sm font-semibold text-white/85">
+                            <div className="text-sm font-semibold text-color-high-emphasis">
                                 Email Address
                             </div>
                             <div className="text-sm text-link">
@@ -100,7 +99,7 @@ export default function About({ channelName, onClose }) {
                                 <FaPhone className="text-lg -scale-x-100 " />
                             </div>
                             <div className="flex flex-col justify-between items-start">
-                                <div className="text-sm font-semibold text-white/85">
+                                <div className="text-sm font-semibold text-color-high-emphasis">
                                     Phone
                                 </div>
                                 <div className="text-sm text-link">

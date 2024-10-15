@@ -69,13 +69,13 @@ export default function LargeScreen({
         }
     }, [otherUserStreams, showUserVideo, showShareScreen]);
     return (
-        <div className="bg-primary-600 ring-black/50 ring-[40px] flex flex-col  text-white/85 z-50   rounded-xl top-8 left-8 right-8 bottom-8 fixed">
+        <div className="bg-primary-600 ring-black/50 ring-[40px] flex flex-col  text-color-high-emphasis z-50   rounded-xl top-8 left-8 right-8 bottom-8 fixed">
             <div className="flex justify-between p-4 items-center">
                 <div className="text-sm">
                     {getChannelName(channel, workspaceUsers, auth.user)}
                 </div>
                 <button
-                    className="hover:bg-white/15 rounded-full p-2"
+                    className="hover:bg-color/15 rounded-full p-2"
                     onClick={exitFullScreen}
                 >
                     <MdOutlineZoomInMap />

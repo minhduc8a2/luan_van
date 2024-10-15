@@ -33,7 +33,7 @@ const FileItem = memo(function ({
                 </button>
             )}
             <div
-                className={`flex gap-x-4 items-center ${maxWidth} p-2 border border-white/15 rounded-xl ${
+                className={`flex gap-x-4 items-center ${maxWidth} p-2 border border-color/15 rounded-xl ${
                     uploadable ? "group-hover:brightness-50" : ""
                 }  ${
                     !uploaded && uploadable && percentage < 100
@@ -59,7 +59,7 @@ const FileItem = memo(function ({
                         </div>
                     )}
                 </div>
-                <div className="text-left max-w-full min-w-0 ">
+                <div className="text-left max-w-full min-w-0 text-color-medium-emphasis">
                     {file.deleted_at ? (
                         "This file was deleted."
                     ) : (

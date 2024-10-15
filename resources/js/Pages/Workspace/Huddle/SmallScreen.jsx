@@ -48,7 +48,7 @@ export default function SmallScreen({
 
     return (
         <div
-            className="bg-primary-400 w-96  text-white/85  fixed bottom-12 rounded-xl"
+            className="bg-primary-400 w-96  text-color-high-emphasis  fixed bottom-12 rounded-xl"
             style={{ left: sideBarWidth + 16 }}
         >
             <div className="flex justify-between p-4 items-center">
@@ -56,7 +56,7 @@ export default function SmallScreen({
                     {getChannelName(channel, workspaceUsers, auth.user)}
                 </div>
                 <button
-                    className="hover:bg-white/15 rounded-full p-2"
+                    className="hover:bg-color/15 rounded-full p-2"
                     onClick={goFullScreen}
                 >
                     <MdOutlineZoomOutMap />

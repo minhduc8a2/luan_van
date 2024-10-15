@@ -32,19 +32,19 @@ export default function MessageToolbar({
 
     return (
         <div
-            className={`absolute bg-background  -top-6 h-12 w-fit right-12 group-hover:flex items-center justify-between  border rounded-lg border-white/15 p-2 ${
+            className={`absolute bg-foreground  -top-6 h-12 w-fit right-12 group-hover:flex items-center justify-between  border rounded-lg border-color/15 p-2 ${
                 showEmojiPicker || showMore ? "flex" : "hidden"
             }`}
         >
             <Tooltip
                 content={
-                    <div className="whitespace-nowrap p-1 text-center text-sm ">
+                    <div className="text-color-high-emphasis whitespace-nowrap p-1 text-center text-sm ">
                         Completed
                     </div>
                 }
             >
                 <button
-                    className="rounded p-2 hover:bg-white/15"
+                    className="rounded p-2 hover:bg-color/15"
                     onClick={() => reactToMessage("white_check_mark")}
                 >
                     ✅
@@ -52,13 +52,13 @@ export default function MessageToolbar({
             </Tooltip>
             <Tooltip
                 content={
-                    <div className="whitespace-nowrap p-1 text-center text-sm ">
+                    <div className="text-color-high-emphasis whitespace-nowrap p-1 text-center text-sm ">
                         Take a look
                     </div>
                 }
             >
                 <button
-                    className="rounded p-2 hover:bg-white/15"
+                    className="rounded p-2 hover:bg-color/15"
                     onClick={() => reactToMessage("eyes")}
                 >
                     👀
@@ -66,13 +66,13 @@ export default function MessageToolbar({
             </Tooltip>
             <Tooltip
                 content={
-                    <div className="whitespace-nowrap p-1 text-center text-sm ">
+                    <div className="text-color-high-emphasis whitespace-nowrap p-1 text-center text-sm ">
                         Nicely done
                     </div>
                 }
             >
                 <button
-                    className="rounded p-2 hover:bg-white/15"
+                    className="rounded p-2 hover:bg-color/15"
                     onClick={() => reactToMessage("open_hands")}
                 >
                     🤲
@@ -81,60 +81,61 @@ export default function MessageToolbar({
             {!threadStyle && !message.is_auto_generated && (
                 <Tooltip
                     content={
-                        <div className="whitespace-nowrap p-1 text-center text-sm ">
+                        <div className="text-color-high-emphasis whitespace-nowrap p-1 text-center text-sm ">
                             Reply in thread
                         </div>
                     }
                 >
                     <button
-                        className="rounded p-2 hover:bg-white/15"
+                        className="rounded p-2 hover:bg-color/15"
                         onClick={() =>
                             dispatch(setThreadedMessageId(message.id))
                         }
                     >
-                        <BiMessageRoundedDetail className="text-lg" />
+                        <BiMessageRoundedDetail className="text-lg text-color/85" />
                     </button>
                 </Tooltip>
             )}
             <Tooltip
                 content={
-                    <div className="whitespace-nowrap p-1 text-center text-sm ">
+                    <div className="text-color-high-emphasis whitespace-nowrap p-1 text-center text-sm ">
                         Save for later
                     </div>
                 }
             >
-                <div className="rounded p-2 hover:bg-white/15">
-                    <FaRegBookmark className="text-lg" />
+                <div className="rounded p-2 hover:bg-color/15">
+                    <FaRegBookmark className="text-lg text-color/85" />
                 </div>
             </Tooltip>
             <Tooltip
                 content={
-                    <div className="whitespace-nowrap p-1 text-center text-sm ">
+                    <div className="text-color-high-emphasis whitespace-nowrap p-1 text-center text-sm ">
                         Share message
                     </div>
                 }
             >
                 <button
-                    className="rounded p-2 hover:bg-white/15"
+                    className="rounded p-2 hover:bg-color/15"
                     onClick={forwardFn}
                 >
-                    <PiShareFat className="text-lg" />
+                    <PiShareFat className="text-lg text-color/85" />
                 </button>
             </Tooltip>
             <Tooltip
                 content={
-                    <div className="whitespace-nowrap p-1 text-center text-sm ">
+                    <div className="text-color-high-emphasis whitespace-nowrap p-1 text-center text-sm ">
                         Find a reaction
                     </div>
                 }
             >
-                <div className="rounded p-2 hover:bg-white/15">
+                <div className="rounded p-2 hover:bg-color/15">
                     <Popover className="relative flex items-center">
                         {({ open }) => {
                             return (
                                 <>
                                     <PopoverButton>
                                         <LuSmilePlus
+                                            className="text-color/85"
                                             onClick={() => {
                                                 setIsHovered(true);
                                                 setShowEmojiPicker(true);
@@ -186,12 +187,12 @@ export default function MessageToolbar({
             {/* More */}
             <Tooltip
                 content={
-                    <div className="whitespace-nowrap p-1 text-center text-sm ">
+                    <div className="text-color-high-emphasis whitespace-nowrap p-1 text-center text-sm ">
                         More actions
                     </div>
                 }
             >
-                <div className="rounded p-2 hover:bg-white/15">
+                <div className="rounded p-2 hover:bg-color/15">
                     <Popover className="relative flex items-center">
                         {({ open }) => {
                             if (open !== showMore) {
@@ -201,6 +202,7 @@ export default function MessageToolbar({
                                 <>
                                     <PopoverButton>
                                         <IoMdMore
+                                            className="text-color-medium-emphasis"
                                             onClick={() => {
                                                 setShowMore(true);
                                                 setIsHovered(true);
@@ -213,8 +215,8 @@ export default function MessageToolbar({
                                     >
                                         {({ close }) => (
                                             <div className="">
-                                                <div className=" rounded-lg border border-white/15 mt-2  bg-foreground w-48 z-20 relative overflow-hidden text-sm">
-                                                    <button className="hover:bg-blue-500 hover:text-white px-4  py-2 w-full text-left">
+                                                <div className=" rounded-lg border border-color/15 mt-2  bg-foreground w-48 z-20 relative overflow-hidden text-sm">
+                                                    <button className="hover:bg-blue-500 hover:text-color px-4  py-2 w-full text-left">
                                                         Pin to channel
                                                     </button>
 
@@ -224,7 +226,7 @@ export default function MessageToolbar({
                                                             <hr />
                                                             {!message.is_auto_generated && (
                                                                 <button
-                                                                    className="hover:bg-blue-500 hover:text-white px-4  py-2 w-full text-left"
+                                                                    className="hover:bg-blue-500 hover:text-color px-4  py-2 w-full text-left"
                                                                     onClick={() => {
                                                                         setIsEditing(
                                                                             true

@@ -11,7 +11,7 @@ export function SettingsButton({
             className={
                 `${
                     disabled ? "cursor-default hover:bg-transparent" : ""
-                } flex hover:bg-white/10 transition-all justify-between items-start p-4   ` +
+                } flex hover:bg-color/10 transition-all justify-between items-start p-4   ` +
                 className
             }
             onClick={() => {

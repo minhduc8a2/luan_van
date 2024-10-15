@@ -17,7 +17,7 @@ export default function AutocompleInput({
 
     const [inputValue, setInputValue] = useState("");
     return (
-        <div className="border border-white/15 rounded-xl p-2 relative">
+        <div className="border border-color/15 rounded-xl p-2 relative">
             <div className="flex gap-x-2">
                 {Object.values(choosenUsers).map((user) => {
                     return (
@@ -64,7 +64,7 @@ export default function AutocompleInput({
                         user.name.toLowerCase().includes(lowerCaseValue))
                 );
             }).length > 0 && (
-                <ul className="flex flex-col gap-y-2 absolute w-[100%] p-2 border border-white/15 top-full mt-2 left-1/2 -translate-x-1/2 bg-background rounded-xl z-20">
+                <ul className="flex flex-col gap-y-2 absolute w-[100%] p-2 border border-color/15 top-full mt-2 left-1/2 -translate-x-1/2 bg-background rounded-xl z-20">
                     {users
                         .filter((user) => {
                             const lowerCaseValue = inputValue.toLowerCase();

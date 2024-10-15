@@ -38,11 +38,11 @@ const MenuBar = ({ editor }) => {
                     disabled={!editor.can().chain().focus().toggleBold().run()}
                     className={
                         editor.isActive("bold")
-                            ? "bg-white/10 p-1 rounded"
+                            ? "bg-color/10 p-1 rounded"
                             : "p-1"
                     }
                 >
-                    <GoBold />
+                    <GoBold className="text-color-high-emphasis"/>
                 </button>
                 <button
                     onClick={() => editor.chain().focus().toggleItalic().run()}
@@ -51,11 +51,11 @@ const MenuBar = ({ editor }) => {
                     }
                     className={
                         editor.isActive("italic")
-                            ? "bg-white/10 p-1 rounded"
+                            ? "bg-color/10 p-1 rounded"
                             : "p-1"
                     }
                 >
-                    <FaItalic />
+                    <FaItalic className="text-color-high-emphasis"/>
                 </button>
                 <button
                     onClick={() => editor.chain().focus().toggleStrike().run()}
@@ -64,11 +64,11 @@ const MenuBar = ({ editor }) => {
                     }
                     className={
                         editor.isActive("strike")
-                            ? "bg-white/10 p-1 rounded"
+                            ? "bg-color/10 p-1 rounded"
                             : "p-1"
                     }
                 >
-                    <FaStrikethrough />
+                    <FaStrikethrough className="text-color-high-emphasis"/>
                 </button>
 
                 <button
@@ -77,11 +77,11 @@ const MenuBar = ({ editor }) => {
                     }
                     className={
                         editor.isActive("orderedList")
-                            ? "bg-white/10 p-1 rounded"
+                            ? "bg-color/10 p-1 rounded"
                             : "p-1"
                     }
                 >
-                    <LuListOrdered />
+                    <LuListOrdered className="text-color-high-emphasis"/>
                 </button>
 
                 <button
@@ -90,11 +90,11 @@ const MenuBar = ({ editor }) => {
                     }
                     className={
                         editor.isActive("bulletList")
-                            ? "bg-white/10 p-1 rounded"
+                            ? "bg-color/10 p-1 rounded"
                             : "p-1"
                     }
                 >
-                    <MdOutlineFormatListBulleted />
+                    <MdOutlineFormatListBulleted className="text-color-high-emphasis"/>
                 </button>
                 <button
                     onClick={() =>
@@ -102,22 +102,22 @@ const MenuBar = ({ editor }) => {
                     }
                     className={
                         editor.isActive("blockquote")
-                            ? "bg-white/10 p-1 rounded"
+                            ? "bg-color/10 p-1 rounded"
                             : "p-1"
                     }
                 >
-                    <TbBlockquote />
+                    <TbBlockquote className="text-color-high-emphasis"/>
                 </button>
                 <button
                     onClick={() => editor.chain().focus().toggleCode().run()}
                     disabled={!editor.can().chain().focus().toggleCode().run()}
                     className={
                         editor.isActive("code")
-                            ? "bg-white/10 p-1 rounded"
+                            ? "bg-color/10 p-1 rounded"
                             : "p-1"
                     }
                 >
-                    <FaCode />
+                    <FaCode className="text-color-high-emphasis"/>
                 </button>
                 <button
                     onClick={() =>
@@ -125,18 +125,18 @@ const MenuBar = ({ editor }) => {
                     }
                     className={
                         editor.isActive("codeBlock")
-                            ? "bg-white/10 p-1 rounded"
+                            ? "bg-color/10 p-1 rounded"
                             : "p-1"
                     }
                 >
-                    <PiCodeBlock />
+                    <PiCodeBlock className="text-color-high-emphasis"/>
                 </button>
 
                 <Popover className="relative flex items-center">
                     <PopoverButton>
-                        <CiFaceSmile />
+                        <CiFaceSmile className="text-color-high-emphasis"/>
                     </PopoverButton>
-                    <PopoverPanel anchor="bottom" className="flex flex-col">
+                    <PopoverPanel anchor="bottom" className="flex flex-col ">
                         <EmojiPicker
                             data={data}
                             onEmojiSelect={(emoji) =>
@@ -405,7 +405,7 @@ export default function TipTapEditor({
     const content = message?.content && isEditMessage ? message.content : ``;
     const editorProps = {
         attributes: {
-            class: "prose prose-invert  text-white/85  focus:outline-none  ",
+            class: "prose prose-invert  text-color-high-emphasis  focus:outline-none  ",
         },
         handleKeyDown: () => {},
     };
@@ -479,11 +479,11 @@ export default function TipTapEditor({
                             {!onlyText && (
                                 <div className="">
                                     <label
-                                        className="bg-white/10 rounded-full w-fit p-2 block"
+                                        className="bg-color/10 rounded-full w-fit p-2 block"
                                         htmlFor={inputId}
                                     >
                                         {" "}
-                                        <FaPlus className="text-sm opacity-75" />
+                                        <FaPlus className="text-sm opacity-75 text-color-medium-emphasis" />
                                     </label>
                                     <input
                                         ref={inputFileRef}
@@ -497,18 +497,18 @@ export default function TipTapEditor({
                                 </div>
                             )}
                             <button
-                                className="hover:bg-white/15 rounded w-fit p-1"
+                                className="hover:bg-color/15 rounded w-fit p-1"
                                 onClick={() =>
                                     editor.commands.insertContent("@")
                                 }
                             >
-                                <VscMention className="text-2xl opacity-75" />
+                                <VscMention className="text-2xl opacity-75 text-color-high-emphasis" />
                             </button>
                             {!onlyText && (
-                                <PiVideoCamera className="text-xl opacity-75" />
+                                <PiVideoCamera className="text-xl opacity-75 text-color-high-emphasis" />
                             )}
                             {!onlyText && (
-                                <TiMicrophoneOutline className="text-xl opacity-75" />
+                                <TiMicrophoneOutline className="text-xl opacity-75 text-color-high-emphasis" />
                             )}
 
                             {uploadAllProgress > 0 &&

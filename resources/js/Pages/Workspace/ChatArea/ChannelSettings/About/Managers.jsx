@@ -90,7 +90,7 @@ export default function Managers() {
                 className="px-0 w-fit"
             >
                 <div className="w-[500px] pb-4  rounded-lg bg-background">
-                    <div className="text-xl flex items-baseline gap-x-2 p-6 pb-0 font-bold text-white/85">
+                    <div className="text-xl flex items-baseline gap-x-2 p-6 pb-0 font-bold text-color-high-emphasis">
                         People who can manage{" "}
                         <div className="flex items-center gap-x-1">
                             {channel.type != "PUBLIC" ? (
@@ -119,7 +119,7 @@ export default function Managers() {
                     {permissions.addManagers && (
                         <>
                             <button
-                                className="flex gap-x-4 p-4 px-6 items-center mt-6 hover:bg-white/15 w-full"
+                                className="flex gap-x-4 p-4 px-6 items-center mt-6 hover:bg-color/15 w-full"
                                 onClick={() => setIsOpenAddManager(true)}
                             >
                                 <div className=" rounded p-2 bg-link/15">
@@ -155,7 +155,7 @@ export default function Managers() {
                             })
                             .map((user) => (
                                 <div
-                                    className="px-6 py-4 flex justify-between items-center group hover:bg-white/15"
+                                    className="px-6 py-4 flex justify-between items-center group hover:bg-color/15"
                                     key={"manager_" + user.id}
                                 >
                                     <AvatarAndName

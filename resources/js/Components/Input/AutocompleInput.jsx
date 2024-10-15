@@ -12,7 +12,7 @@ function AutocompleInput({
 
     const items = renderDropListFn(inputValue);
     return (
-        <div className="border border-white/15 rounded-xl p-2 relative">
+        <div className="border border-color/15 rounded-xl p-2 relative">
             <div className="flex gap-x-2">{renderChoosenList()}</div>
             {!isLimitReached && (
                 <input
@@ -28,7 +28,7 @@ function AutocompleInput({
             )}
 
             {items && (
-                <ul className="flex flex-col gap-y-2 absolute w-[100%] py-4 border border-white/15 top-full mt-2 left-1/2 -translate-x-1/2 bg-background rounded-xl z-20">
+                <ul className="flex flex-col gap-y-2 absolute w-[100%] py-4 border border-color/15 top-full mt-2 left-1/2 -translate-x-1/2 bg-background rounded-xl z-20">
                     {items}
                 </ul>
             )}
@@ -42,7 +42,7 @@ function InputItem({ children, onRemove }) {
             {children}
             <button
                 onClick={onRemove}
-                className="h-6 w-6 flex justify-center items-center rounded hover:bg-white/15"
+                className="h-6 w-6 flex justify-center items-center rounded hover:bg-color/15"
             >
                 <IoClose />
             </button>

@@ -17,6 +17,9 @@ export default {
             },
             colors: {
                 color: `rgb(var(--color) / <alpha-value>)`,
+                "color-high-emphasis": `rgb(var(--color-high-emphasis) / <alpha-value>)`,
+                "color-medium-emphasis": `rgb(var(--color-medium-emphasis) / <alpha-value>)`,
+                "color-disabled": `rgb(var(--color-disabled) / <alpha-value>)`,
 
                 primary: {
                     300: `rgb(var(--primary-300) / <alpha-value>)`,
@@ -27,7 +30,7 @@ export default {
 
                 background: `rgb(var(--background) / <alpha-value>)`,
                 foreground: `rgb(var(--foreground) / <alpha-value>)`,
-                link: "#1d9bd1",
+                link: `rgb(var(--link) / <alpha-value>)`,
                 "dark-green": "#00553d",
                 danger: {
                     400: `rgb(var(--danger-400) / <alpha-value>)`,

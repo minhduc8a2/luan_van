@@ -30,8 +30,8 @@ export default function AddManagers({ close, setErrors }) {
             .catch(errorHandler);
     }
     return (
-        <div className="min-w-96 p-4 text-white/85 max-w-lg">
-            <div className="text-2xl flex items-baseline gap-x-2 p-2 pb-0 font-bold text-white/85">
+        <div className="min-w-96 p-4 text-color-high-emphasis max-w-lg">
+            <div className="text-2xl flex items-baseline gap-x-2 p-2 pb-0 font-bold text-color-high-emphasis">
                 Add Channel Managers for{" "}
                 <div className="flex items-center gap-x-1">
                     {channel.type == "PUBLIC" ? (

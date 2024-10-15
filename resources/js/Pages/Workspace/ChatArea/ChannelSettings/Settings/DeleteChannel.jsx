@@ -58,7 +58,7 @@ export default function DeleteChannel() {
                 <CustomedDialog.Title>
                     <div className=" ">Delete this channel?</div>
                 </CustomedDialog.Title>
-                <div className=" text-white/85 pb-4">
+                <div className=" text-color-high-emphasis pb-4">
                     <div className=" ">
                         When you delete a channel, all messages from this
                         channel will be removed from Slack immediately.{" "}

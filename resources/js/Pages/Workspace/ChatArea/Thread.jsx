@@ -442,12 +442,12 @@ export default function Thread() {
         <>
             <div className="p-4 z-10">
                 <div className="flex justify-between font-bold text-lg opacity-75 items-center">
-                    <div className="">Thread</div>
+                    <div className="text-color-high-emphasis">Thread</div>
                     <button
                         onClick={() => dispatch(setThreadedMessageId(null))}
-                        className="hover:bg-white/15 rounded-lg p-2"
+                        className="hover:bg-color/15 rounded-lg p-2"
                     >
-                        <IoClose className="text-xl" />
+                        <IoClose className="text-xl text-color-medium-emphasis" />
                     </button>
                 </div>
             </div>
@@ -480,11 +480,11 @@ export default function Thread() {
                     </div>
 
                     <div className="flex items-center gap-x-4 pl-4 my-4">
-                        <h3 className="text-sm text-white/75">
+                        <h3 className="text-sm text-color/75">
                             {thread_messages_count}{" "}
                             {thread_messages_count > 1 ? "replies" : "reply"}
                         </h3>{" "}
-                        <hr className="border-white/15 flex-1" />
+                        <hr className="border-color/15 flex-1" />
                     </div>
                     {loadingMessages && (
                         <div className="flex justify-center items-center">
@@ -577,7 +577,7 @@ export default function Thread() {
                             </InfiniteScroll>
                         )}
 
-                    <div className="m-6 border border-white/15 pt-4 px-2 rounded-lg">
+                    <div className="m-6 border border-color/15 pt-4 px-2 rounded-lg">
                         {permissions.thread && threadedMessage && (
                             <TipTapEditor
                                 onSubmit={onSubmit}

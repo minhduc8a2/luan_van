@@ -20,7 +20,7 @@ import { usePage } from "@inertiajs/react";
 import { useSelector } from "react-redux";
 export default function Video({
     className = "",
-    loadingClassname = " border border-white/15",
+    loadingClassname = " border border-color/15",
     name = "",
     src = "",
     fullScreenMode = false,
@@ -173,13 +173,13 @@ export default function Video({
                         <a
                             href={src}
                             download={name}
-                            className=" p-2  rounded-lg text-white/85 hover:text-white hover:bg-white/15  "
+                            className=" p-2  rounded-lg text-color-high-emphasis hover:text-white hover:bg-color/15  "
                         >
                             <MdDownload className="text-lg" />
                         </a>
 
                         <button
-                            className=" p-2  rounded-lg text-white/85 hover:text-white hover:bg-white/15  "
+                            className=" p-2  rounded-lg text-color-high-emphasis hover:text-white hover:bg-color/15  "
                             onClick={toggleFullScreen}
                         >
                             <IoClose className="text-lg" />
@@ -325,13 +325,13 @@ export default function Video({
                     }`}
                 >
                     <button
-                        className=" p-2 bg-black/75 rounded-lg text-white/85 hover:text-white hover:bg-black/85  "
+                        className=" p-2 bg-black/75 rounded-lg text-color-high-emphasis hover:text-white hover:bg-black/85  "
                         onClick={toggleFullScreen}
                     >
                         <RiExpandDiagonalFill className="text-lg" />
                     </button>
                     <Popover className="relative">
-                        <PopoverButton className=" p-2 bg-black/75 rounded-lg text-white/85 hover:text-white hover:bg-black/85">
+                        <PopoverButton className=" p-2 bg-black/75 rounded-lg text-color-high-emphasis hover:text-white hover:bg-black/85">
                             <div
                                 onClick={() => {
                                     setIsHovered(true);
@@ -341,16 +341,16 @@ export default function Video({
                             </div>
                         </PopoverButton>
                         <PopoverPanel anchor="bottom" className="">
-                            <div className="w-64 flex flex-col z-20 relative rounded-lg mt-4 border border-white/15 py-2 bg-background ">
+                            <div className="w-64 flex flex-col z-20 relative rounded-lg mt-4 border border-color/15 py-2 bg-background ">
                                 <a
                                     href={src}
                                     target="_blank"
-                                    className=" hover:bg-white/15 py-1 text-left px-4"
+                                    className=" hover:bg-color/15 py-1 text-left px-4"
                                 >
                                     Open in new tab
                                 </a>
                                 <button
-                                    className=" hover:bg-white/15 py-1 text-left px-4"
+                                    className=" hover:bg-color/15 py-1 text-left px-4"
                                     onClick={() => {
                                         copy(publicAppUrl + src);
                                         close();
@@ -361,7 +361,7 @@ export default function Video({
                                 </button>
                                 <button
                                     onClick={() => deleteFn()}
-                                    className="text-danger-500 hover:bg-white/15 py-1 text-left px-4"
+                                    className="text-danger-500 hover:bg-color/15 py-1 text-left px-4"
                                 >
                                     Delete
                                 </button>

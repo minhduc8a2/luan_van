@@ -156,7 +156,7 @@ export default function MentionNotification({
     return (
         <li>
             <button
-                className={`p-4 pl-8 w-full hover:bg-white/15 border-t border-white/15 ${
+                className={`p-4 pl-8 w-full hover:bg-color/15 border-t border-color/15 ${
                     read_at != null ? "" : "bg-primary-300/15"
                 }`}
                 onClick={() => {

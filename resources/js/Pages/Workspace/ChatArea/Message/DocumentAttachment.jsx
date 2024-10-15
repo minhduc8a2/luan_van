@@ -36,38 +36,38 @@ const DocumentAttachment = memo(function ({
         >
             {!noToolbar && (
                 <div
-                    className={` border border-white/15 group-hover/document:flex ${
+                    className={` border border-color/15 group-hover/document:flex ${
                         isHovered ? "flex" : "hidden"
                     }  transition z-20 gap-x-2 rounded bg-background p-1 absolute right-2 top-2 `}
                 >
                     <a
-                        className="p-1 rounded hover:bg-white/15 transition"
+                        className="p-1 rounded hover:bg-color/15 transition"
                         download
                         href={attachment.url}
                     >
-                        <IoCloudDownloadOutline className="text-xl" />
+                        <IoCloudDownloadOutline className="text-xl text-color-medium-emphasis" />
                     </a>
                     <Popover className="relative">
-                        <PopoverButton className="p-1 rounded hover:bg-white/15 transition">
+                        <PopoverButton className="p-1 rounded hover:bg-color/15 transition">
                             <div
                                 onClick={() => {
                                     setIsHovered(true);
                                 }}
                             >
-                                <MdMoreVert className="text-xl" />
+                                <MdMoreVert className="text-xl text-color-medium-emphasis" />
                             </div>
                         </PopoverButton>
                         <PopoverPanel anchor="bottom" className="">
-                            <div className="w-64 flex flex-col z-20 relative rounded-lg mt-4 border border-white/15 py-2 bg-background ">
+                            <div className="w-64 flex flex-col z-20 relative rounded-lg mt-4 border border-color/15 py-2 bg-background ">
                                 <a
                                     href={attachment.url}
                                     target="_blank"
-                                    className=" hover:bg-white/15 py-1 text-left px-4"
+                                    className=" hover:bg-color/15 py-1 text-left px-4"
                                 >
                                     Open in new tab
                                 </a>
                                 <button
-                                    className=" hover:bg-white/15 py-1 text-left px-4"
+                                    className=" hover:bg-color/15 py-1 text-left px-4"
                                     onClick={() => {
                                         copy(publicAppUrl + attachment.url);
                                         close();
@@ -78,7 +78,7 @@ const DocumentAttachment = memo(function ({
                                 </button>
                                 <button
                                     onClick={() => deleteFn()}
-                                    className="text-danger-500 hover:bg-white/15 py-1 text-left px-4"
+                                    className="text-danger-500 hover:bg-color/15 py-1 text-left px-4"
                                 >
                                     Delete
                                 </button>

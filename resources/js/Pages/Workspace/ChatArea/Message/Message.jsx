@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useContext, useMemo } from "react";
 import { UTCToDateTime, UTCToTime } from "@/helpers/dateTimeHelper";
 import Avatar from "@/Components/Avatar";
 import { isDocument, isImage, isVideo } from "@/helpers/fileHelpers";
@@ -31,6 +31,7 @@ import useGoToChannel from "@/helpers/useGoToChannel";
 import useGoToMessage from "@/helpers/useGoToMessage";
 import { MdError } from "react-icons/md";
 import CustomedDialog from "@/Components/CustomedDialog";
+import ThemeContext from "@/ThemeProvider";
 export default function Message({
     message,
     user,
@@ -44,6 +45,7 @@ export default function Message({
     forwarded = false,
 }) {
     const { auth } = usePage().props;
+    const {theme} = useContext(ThemeContext)
     const { channelId, workspaceId } = useParams();
     const { channel } = useChannel(channelId);
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
@@ -230,8 +232,8 @@ export default function Message({
     // if (!channel) return "";
     return (
         <div
-            className={`message-container transition-all pl-8 pt-1 pr-4 pb-2 relative break-all group hover:bg-white/10 ${
-                isHovered && !message.deleted_at ? "bg-white/10" : ""
+            className={`message-container transition-all  pl-8 pt-1 pr-4 pb-2 relative break-all group hover:bg-color/10 ${
+                isHovered && !message.deleted_at ? "bg-color/10" : ""
             } ${hasChanged || index == 0 ? "pt-4" : "mt-0"}`}
             id={
                 forwarded
@@ -289,9 +291,9 @@ export default function Message({
             )}
             <div className="mx-3 ">
                 {hasChanged || index == 0 ? (
-                    <div className="flex gap-x-2 items-baseline">
+                    <div className="flex gap-x-2 items-baseline text-color/85">
                         <button
-                            className={`text-base hover:underline font-bold leading-tight ${
+                            className={`text-base  hover:underline font-bold leading-tight ${
                                 user.notMember ? "line-through" : ""
                             }`}
                             onClick={() => dispatch(setProfile(user.id))}
@@ -299,11 +301,11 @@ export default function Message({
                             {user.display_name || user.name}
                         </button>
                         {user.notMember && (
-                            <span className="text-xs leading-tight text-white/75 font-extralight">
+                            <span className="text-xs leading-tight text-color/75 font-extralight">
                                 (Removed User)
                             </span>
                         )}
-                        <span className="text-xs leading-tight text-white/75 font-extralight">
+                        <span className="text-xs leading-tight text-color/75 font-extralight">
                             {threadStyle
                                 ? UTCToDateTime(message.created_at)
                                 : UTCToTime(message.created_at)}
@@ -314,7 +316,7 @@ export default function Message({
                 )}
 
                 {isEditing ? (
-                    <div className="border rounded-lg border-white/15 p-2 mt-2">
+                    <div className="border rounded-lg border-color/15 p-2 mt-2">
                         <TipTapEditor
                             channel={channel}
                             message={message}
@@ -326,15 +328,15 @@ export default function Message({
                 ) : (
                     <>
                         <div
-                            className="prose prose-invert select-text"
+                            className={`prose ${theme.mode?"prose-invert":""} select-text`}
                             dangerouslySetInnerHTML={{
                                 __html: message.deleted_at
-                                    ? '<p class="italic text-white/50">Deleted message</p>'
+                                    ? '<p class="italic text-color/50">Deleted message</p>'
                                     : message.content,
                             }}
                         ></div>
                         {message.is_edited == true && (
-                            <span className="text-xs text-white/50">
+                            <span className="text-xs text-color/50">
                                 (edited)
                             </span>
                         )}
@@ -419,7 +421,7 @@ export default function Message({
                     removeMessageReaction={removeMessageReaction}
                 />
                 {forwarded && forwardedMessageChannel && (
-                    <div className="text-sm flex items-baseline gap-x-1 mt-4">
+                    <div className="text-sm flex items-baseline gap-x-1 mt-4 text-color-medium-emphasis">
                         Posted in{" "}
                         <div
                             className="text-link hover:underline cursor-pointer"
@@ -444,7 +446,7 @@ export default function Message({
                                 "Direct channel"
                             )}
                         </div>
-                        <span className="text-white/85 mx-2">|</span>
+                        <span className="text-color/85 mx-2">|</span>
                         <button
                             className="text-link text-sm"
                             onClick={() => goToMessage()}
@@ -457,7 +459,7 @@ export default function Message({
                     !threadStyle &&
                     !forwarded && (
                         <button
-                            className="border hover:bg-black/25 flex justify-between items-center border-white/15 w-96 rounded-lg mt-4 py-1 px-4"
+                            className="border hover:bg-color/15 flex justify-between items-center border-color/15 w-96 rounded-lg mt-4 py-1 px-4"
                             onClick={() =>
                                 dispatch(setThreadedMessageId(message.id))
                             }
@@ -466,11 +468,11 @@ export default function Message({
                                 <span className="text-link text-sm">
                                     {message.thread_messages_count} replies
                                 </span>
-                                <span className="text-sm ml-2">
+                                <span className="text-sm ml-2 text-color-medium-emphasis font-semibold">
                                     View thread
                                 </span>
                             </div>
-                            <FaAngleRight className="text-sm text-white/50" />
+                            <FaAngleRight className="text-sm text-color/50" />
                         </button>
                     )}
             </div>

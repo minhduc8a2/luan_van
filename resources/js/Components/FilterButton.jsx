@@ -8,7 +8,7 @@ export default function FilterButton({ list, action }) {
     return (
         <Popover className="relative ">
             <PopoverButton
-                className={`border flex items-center gap-x-2 rounded font-bold text-sm border-white/15 px-2 py-1 bg-background ${
+                className={`border flex items-center gap-x-2 rounded font-bold text-sm border-color/15 px-2 py-1 bg-background ${
                     selectedValue.value == list[0].value ? "" : "bg-link"
                 }`}
             >
@@ -16,7 +16,7 @@ export default function FilterButton({ list, action }) {
             </PopoverButton>
             <PopoverPanel
                 anchor="bottom"
-                className="flex flex-col py-2 rounded-lg bg-foreground w-64 border border-white/15  "
+                className="flex flex-col py-2 rounded-lg bg-foreground w-64 border border-color/15  "
             >
                 {({ close }) => (
                     <>

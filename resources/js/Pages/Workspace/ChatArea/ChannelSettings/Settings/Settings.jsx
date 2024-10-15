@@ -14,7 +14,7 @@ export default function Settings({ channel, channelName, workspace }) {
 
     return (
         <div className=" ">
-            <div className="border border-white/15 rounded-lg overflow-hidden">
+            <div className="border border-color/15 rounded-lg overflow-hidden">
                 {permissions.updatePermissions && <ChannelPermissions />}
 
                 {permissions.changeType && (

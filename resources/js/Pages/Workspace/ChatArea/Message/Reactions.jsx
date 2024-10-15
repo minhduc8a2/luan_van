@@ -22,7 +22,7 @@ export default function Reactions({
                 <Tooltip
                     key={reaction.emoji_id}
                     content={
-                        <ul className="whitespace-nowrap p-1">
+                        <ul className="whitespace-nowrap p-1 text-color-medium-emphasis">
                             {reaction.users.map((user) => (
                                 <li key={user.id} className="text-xs">
                                     {user.display_name || user.name}
@@ -48,13 +48,13 @@ export default function Reactions({
                         className={`${
                             reaction.hasReacted
                                 ? "bg-blue-500/25"
-                                : "bg-white/15"
+                                : "bg-color/15"
                         } rounded-full px-[6px] flex items-center gap-x-1 py-[2px] ${
                             permissions.deleteReaction ? "" : "cursor-default"
                         }`}
                     >
                         <div className="text-sm">{reaction.nativeEmoji}</div>
-                        <div className="text-sm w-2 font-semibold">
+                        <div className="text-sm w-2 font-semibold text-color-medium-emphasis">
                             {reaction.users.length}
                         </div>
                     </button>

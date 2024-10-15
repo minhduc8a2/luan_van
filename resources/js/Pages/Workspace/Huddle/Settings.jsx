@@ -36,7 +36,7 @@ export default function Settings({
             width="w-80 "
             className={`${zIndex}`}
         >
-            <div className="flex flex-col z-20 relative rounded-lg text-white/85  ">
+            <div className="flex flex-col z-20 relative rounded-lg text-color-high-emphasis  ">
                 <h5 className="text-lg px-4 font-bold">Audio devices</h5>
                 {audioDevices.map((au) => (
                     <CloseButton

@@ -61,7 +61,7 @@ export default function AutocompleInput({
                         user.name.toLowerCase().includes(lowerCaseValue))
                 );
             }).length > 0 && (
-                <ul className="flex flex-col gap-y-2 absolute w-[105%] p-2 border border-white/15 top-full mt-2 left-1/2 -translate-x-1/2 bg-background rounded-xl z-20">
+                <ul className="flex flex-col gap-y-2 absolute w-[105%] p-2 border border-color/15 top-full mt-2 left-1/2 -translate-x-1/2 bg-background rounded-xl z-20">
                     {users
                         .filter((user) => {
                             const lowerCaseValue = inputValue.toLowerCase();

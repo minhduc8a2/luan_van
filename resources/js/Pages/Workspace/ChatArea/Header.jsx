@@ -53,7 +53,7 @@ export default function Header({
     }
     return (
         <div
-            className={`p-4 border-b border-b-white/10 z-10 ${
+            className={`p-4 border-b border-b-color/10 text-color-high-emphasis z-10 ${
                 loaded ? "" : "animate-pulse"
             }`}
         >
@@ -74,7 +74,7 @@ export default function Header({
                 <div className="">
                     {!channel?.is_archived && (
                         <div className="flex items-center gap-x-4 ">
-                            <div className="flex items-center p-1 border  border-white/15 rounded-lg px-2">
+                            <div className="flex items-center p-1 border  border-color/15 rounded-lg px-2">
                                 <ul className="flex">
                                     {channelUsers.map((user) => (
                                         <li
@@ -96,8 +96,8 @@ export default function Header({
                                 </div>
                             </div>
                             <div
-                                className={`flex items-center p-1 border border-white/15 rounded-lg px-2 gap-x-3 font-normal  ${
-                                    huddleChannelId ? "bg-green-700 " : ""
+                                className={`flex items-center p-1 border border-color/15 rounded-lg px-2 gap-x-3 font-normal  ${
+                                    huddleChannelId ? "bg-green-700 text-white" : " "
                                 }`}
                             >
                                 {permissions?.huddle ? (
@@ -139,7 +139,7 @@ export default function Header({
           </div> */}
                             </div>
 
-                            <div className="p-1 border border-white/15 rounded-lg ">
+                            <div className="p-1 border border-color/15 rounded-lg ">
                                 <CgFileDocument className="text-xl" />
                             </div>
                         </div>

@@ -170,7 +170,7 @@ export default function ForwardMessage({ message, show, onClose }) {
                                 return (
                                     <button
                                         key={item.id}
-                                        className="hover:bg-white/15 p-2 px-4"
+                                        className="hover:bg-color/15 p-2 px-4"
                                         onClick={() =>
                                             handleChooseChannel(item)
                                         }
@@ -186,7 +186,7 @@ export default function ForwardMessage({ message, show, onClose }) {
                                 return (
                                     <button
                                         key={item.id}
-                                        className="hover:bg-white/15 p-2 px-4"
+                                        className="hover:bg-color/15 p-2 px-4"
                                         onClick={() =>
                                             handleChooseChannel(item)
                                         }
@@ -201,7 +201,7 @@ export default function ForwardMessage({ message, show, onClose }) {
                             } else
                                 return (
                                     <button
-                                        className="flex items-baseline gap-x-1 hover:bg-white/15 px-4 py-1"
+                                        className="flex items-baseline gap-x-1 hover:bg-color/15 px-4 py-1"
                                         key={item.id}
                                         onClick={() =>
                                             handleChooseChannel(item)
@@ -219,7 +219,7 @@ export default function ForwardMessage({ message, show, onClose }) {
                 }}
             />
             {choosenChannelsList.length > 0 && (
-                <div className="border border-white/15 p-4 pb-2 mt-4 rounded-lg ">
+                <div className="border border-color/15 p-4 pb-2 mt-4 rounded-lg ">
                     <TipTapEditor
                         onSubmit={onSubmit}
                         onlyText

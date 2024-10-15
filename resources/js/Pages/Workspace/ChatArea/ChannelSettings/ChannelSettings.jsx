@@ -41,7 +41,7 @@ export default function ChannelSettings({ channelName }) {
             </button>
             <CustomedDialog isOpen={isOpen} onClose={() => setIsOpen(false)}>
                 {channel && permissions && (
-                    <div className="  text-white/85">
+                    <div className="  text-color-high-emphasis">
                         <CustomedDialog.Title>
                             <div className="flex items-baseline gap-x-2">
                                 {channel.type == "PUBLIC" ? (
@@ -57,7 +57,7 @@ export default function ChannelSettings({ channelName }) {
                                 onClick={() => setTabIndex(0)}
                                 className={`${
                                     tabIndex == 0 ? " " : "border-b-transparent"
-                                } border-b-2`}
+                                } border-b-2 border-link`}
                             >
                                 About
                             </button>
@@ -69,7 +69,7 @@ export default function ChannelSettings({ channelName }) {
                                             tabIndex == 1
                                                 ? " "
                                                 : "border-b-transparent"
-                                        } border-b-2`}
+                                        } border-b-2 border-link`}
                                     >
                                         Members
                                     </button>
@@ -86,7 +86,7 @@ export default function ChannelSettings({ channelName }) {
                                             tabIndex == 2
                                                 ? " "
                                                 : "border-b-transparent"
-                                        } border-b-2`}
+                                        } border-b-2 border-link`}
                                     >
                                         Settings
                                     </button>

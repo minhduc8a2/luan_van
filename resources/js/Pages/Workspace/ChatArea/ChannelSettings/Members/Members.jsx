@@ -60,7 +60,7 @@ export default function Members() {
             {permissions.addUsersToChannel && (
                 <>
                     <button
-                        className="flex gap-x-4 p-4 px-6 items-center mt-6 hover:bg-white/15 w-full"
+                        className="flex gap-x-4 p-4 px-6 items-center mt-6 hover:bg-color/15 w-full"
                         onClick={() => setIsOpen(true)}
                     >
                         <div className=" rounded p-2 bg-link/15">

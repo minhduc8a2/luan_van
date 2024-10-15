@@ -42,7 +42,7 @@ export default function SearchInput({
     return (
         <div className="relative mt-4">
             <form
-                className={`flex bg-background border-white/15 items-center px-2 border rounded-lg ${
+                className={`flex bg-background border-color/15 items-center px-2 border rounded-lg ${
                     focused ? " ring-link/15 ring-4  !border-link" : ""
                 }  `}
                 onSubmit={(e) => {
@@ -52,7 +52,7 @@ export default function SearchInput({
                     setIsOpen(false);
                 }}
             >
-                <IoIosSearch className="text-2xl text-white/85" />
+                <IoIosSearch className="text-2xl text-color-high-emphasis" />
                 <input
                     ref={inputRef}
                     type="text"
@@ -71,11 +71,11 @@ export default function SearchInput({
             {searchValue && isOpen && (
                 <ul
                     ref={panelRef}
-                    className="absolute z-10 w-[104%] left-1/2 -translate-x-1/2 bg-foreground  border border-white/15 max-h-96 overflow-y-auto scrollbar text-white rounded-lg shadow-lg mt-1"
+                    className="absolute z-10 w-[104%] left-1/2 -translate-x-1/2 bg-foreground  border border-color/15 max-h-96 overflow-y-auto scrollbar text-white rounded-lg shadow-lg mt-1"
                 >
                     <li>
                         <button
-                            className="cursor-pointer p-4 flex gap-x-4 items-center hover:bg-white/15 w-full "
+                            className="cursor-pointer p-4 flex gap-x-4 items-center hover:bg-color/15 w-full "
                             onClick={() => {
                                 onSearch(searchValue);
                                 setIsOpen(false);
@@ -87,7 +87,7 @@ export default function SearchInput({
                     {resultList.map((item, index) => (
                         <li
                             key={index}
-                            className="cursor-pointer hover:bg-white/15 "
+                            className="cursor-pointer hover:bg-color/15 "
                         >
                             {renderItemNode(item, closePanel, clearInput)}
                         </li>

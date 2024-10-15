@@ -206,7 +206,7 @@ export default function ChatArea() {
             })
             .map((key) => {
                 const formatedDate = formatDDMMYYY(new Date(key));
-                
+
                 return {
                     date: formatedDate == currentDate ? "Today" : formatedDate,
                     mgs: gMessages[key],
@@ -355,19 +355,21 @@ export default function ChatArea() {
                         scrollToItem={hasMention}
                         className="overflow-y-auto max-w-full scrollbar"
                     >
-                       {!bottomHasMore&& <div className="p-8">
-                            <h1 className="text-3xl font-extrabold text-white/85">
-                                {" "}
-                                {welcomeMessage}
-                            </h1>
+                        {!bottomHasMore && (
+                            <div className="p-8">
+                                <h1 className="text-3xl font-extrabold text-color/85">
+                                    {" "}
+                                    {welcomeMessage}
+                                </h1>
 
-                            <div className="text-white/85 mt-2">
-                                {channel?.description}{" "}
-                                <div className="inline-block">
-                                    <EditDescriptionForm />
+                                <div className="text-color/85 mt-2">
+                                    {channel?.description}{" "}
+                                    <div className="inline-block">
+                                        <EditDescriptionForm />
+                                    </div>
                                 </div>
                             </div>
-                        </div>}
+                        )}
                         {bottomHasMore && (
                             <div className="my-4 flex flex-col gap-y-4">
                                 <MessagePlaceHolder />
@@ -377,8 +379,8 @@ export default function ChatArea() {
                         {groupedMessages.map(({ date, mgs }, pIndex) => {
                             return (
                                 <div className="relative pb-4" key={date}>
-                                    <div className="border-t border-white/15 translate-y-3"></div>
-                                    <div className="text-xs border border-white/15 rounded-full h-6 flex items-center px-4 sticky top-0 left-1/2 -translate-x-1/2  w-fit bg-background z-20">
+                                    <div className="border-t border-color/15 translate-y-3"></div>
+                                    <div className="text-xs text-color-medium-emphasis font-bold border border-color/15 rounded-full h-6 flex items-center px-4 sticky top-0 left-1/2 -translate-x-1/2  w-fit bg-background z-20">
                                         {date}
                                     </div>
 

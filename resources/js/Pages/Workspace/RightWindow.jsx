@@ -52,7 +52,7 @@ export default function RightWindow({ children }) {
 
     return (
         <div
-            className=" bg-background flex flex-col relative border-l border-white/15"
+            className=" bg-background flex flex-col relative border-l border-color/15"
             style={{ width:  rightWindowWidth  }}
             ref={containerRef}
         >

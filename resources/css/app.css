@@ -3,11 +3,14 @@
 @tailwind utilities;
 
 @layer base {
-    :root{
-        --background: 255 255 255;
-        --foreground: 245 245 245;
+    :root {
+        --background: 235 235 235;
+        --foreground: 220 220 220;
         --color: 0 0 0;
-       
+        --color-high-emphasis: 35 35 35;
+        --color-medium-emphasis: 72 72 72;
+        --color-disabled: 158 158 158;
+        --link: 22 123 165;
     }
 
     .purple {
@@ -22,10 +25,11 @@
         --background: 26 29 33;
         --foreground: 34 37 41;
         --color: 255 255 255;
-        
+        --color-high-emphasis: 220 220 220;
+        --color-medium-emphasis: 183 183 183;
+        --color-disabled: 97 97 97;
+        --link: 29 155 209;
     }
-
-   
 }
 @layer utilities {
     .scrollbar::-webkit-scrollbar {
@@ -39,12 +43,12 @@
     }
 
     .scrollbar::-webkit-scrollbar-thumb {
-        @apply bg-white/15;
+        @apply bg-color/15;
         border-radius: 100vh;
     }
 
     .scrollbar::-webkit-scrollbar-thumb:hover {
-        @apply bg-white/25;
+        @apply bg-color/25;
     }
 }
 .client-container {
@@ -125,7 +129,7 @@
 }
 
 .tiptap-dropdown-menu {
-    @apply bg-background text-white/85 py-2 w-64 border border-white/15 rounded-xl gap-y-2 flex flex-col overflow-y-auto;
+    @apply bg-background text-color-high-emphasis py-2 w-64 border border-color/15 rounded-xl gap-y-2 flex flex-col overflow-y-auto;
 }
 
 .tiptap-dropdown-menu button {
@@ -144,16 +148,12 @@
     @apply bg-link/15 text-link p-1 rounded;
 }
 
-body {
-    @apply text-color;
-}
-
 input[type="radio"] {
-    @apply bg-white/15 h-[0.85rem] w-[0.85rem];
+    @apply bg-color/15 h-[0.85rem] w-[0.85rem];
 }
 
 input[type="checkbox"] {
-    @apply bg-white/15 h-[0.85rem] w-[0.85rem] rounded;
+    @apply bg-color/15 h-[0.85rem] w-[0.85rem] rounded;
 }
 
 hr {

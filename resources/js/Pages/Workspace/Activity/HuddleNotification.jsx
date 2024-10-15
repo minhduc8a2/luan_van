@@ -116,7 +116,7 @@ export default function HuddleNotification({
     return (
         <li>
             <button
-                className={`p-4 pl-8  hover:bg-white/15 border-t border-white/15 ${
+                className={`p-4 pl-8  hover:bg-color/15 border-t border-color/15 ${
                     read_at != null ? "" : "bg-primary-300/15"
                 }`}
                 onClick={() => {

@@ -34,7 +34,7 @@ export default function Member({
 
     return (
         <div
-            className={`px-6 py-4 flex justify-between relative items-center group hover:bg-white/15 ${
+            className={`px-6 py-4 flex justify-between relative items-center group hover:bg-color/15 ${
                 showOptions ? "bg-white/15" : ""
             }`}
         >
@@ -62,7 +62,7 @@ export default function Member({
                                     } group-hover:block`}
                                 >
                                     <div
-                                        className=" p-1 bg-background border border-white/50 rounded-lg"
+                                        className=" p-1 bg-background border border-color/15 rounded-lg"
                                         onClick={() => setShowOptions(true)}
                                     >
                                         <IoMdMore className="text-xl" />
@@ -70,12 +70,12 @@ export default function Member({
                                 </PopoverButton>
                                 <PopoverPanel
                                     anchor="bottom end"
-                                    className="flex flex-col bg-background border border-white/25 py-2 rounded-lg text-white/85"
+                                    className="flex flex-col bg-background border border-color/15 py-2 rounded-lg text-color-high-emphasis"
                                 >
                                     {isManager
                                         ? permissions.removeManager && (
                                               <CloseButton
-                                                  className="p-2 px-4 text-start hover:bg-white/15"
+                                                  className="p-2 px-4 text-start hover:bg-color/15"
                                                   onClick={() =>
                                                       removeChannelManager(user)
                                                   }
@@ -85,7 +85,7 @@ export default function Member({
                                           )
                                         : permissions.addManagers && (
                                               <CloseButton
-                                                  className="p-2 px-4 text-start hover:bg-white/15"
+                                                  className="p-2 px-4 text-start hover:bg-color/15"
                                                   onClick={() =>
                                                       makeChannelManager(user)
                                                   }

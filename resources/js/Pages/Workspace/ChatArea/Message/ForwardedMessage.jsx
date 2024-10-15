@@ -204,8 +204,8 @@ export default function ForwardedMessage({
 
     return (
         <div
-            className={`message-container transition-all pl-8 pt-1 pr-4 pb-2 relative break-all group hover:bg-white/10 ${
-                isHovered && !message.deleted_at ? "bg-white/10" : ""
+            className={`message-container transition-all pl-8 pt-1 pr-4 pb-2 relative break-all group hover:bg-color/10 ${
+                isHovered && !message.deleted_at ? "bg-color/10" : ""
             } ${hasChanged || index == 0 ? "pt-4" : "mt-0"}`}
             id={`message-${message.id}`}
         >
@@ -238,18 +238,18 @@ export default function ForwardedMessage({
                 {hasChanged || index == 0 ? (
                     <div className="flex gap-x-2 items-baseline">
                         <div
-                            className={`text-base font-bold leading-tight ${
+                            className={`text-base font-bold leading-tight text-color-high-emphasis ${
                                 user.notMember ? "line-through" : ""
                             }`}
                         >
                             {user.display_name || user.name}
                         </div>
                         {user.notMember && (
-                            <span className="text-xs leading-tight text-white/75 font-extralight">
+                            <span className="text-xs leading-tight text-color/75 font-extralight">
                                 (Removed User)
                             </span>
                         )}
-                        <span className="text-xs leading-tight text-white/75 font-extralight">
+                        <span className="text-xs leading-tight text-color/75 font-extralight">
                             {threadStyle
                                 ? UTCToDateTime(message.created_at)
                                 : UTCToTime(message.created_at)}
@@ -260,7 +260,7 @@ export default function ForwardedMessage({
                 )}
 
                 {isEditing ? (
-                    <div className="border rounded-lg border-white/15 p-2 mt-2">
+                    <div className="border rounded-lg border-color/15 p-2 mt-2">
                         <TipTapEditor
                             message={message}
                             onSubmit={editMessage}
@@ -274,18 +274,18 @@ export default function ForwardedMessage({
                             className="prose prose-invert "
                             dangerouslySetInnerHTML={{
                                 __html: message.deleted_at
-                                    ? '<p class="italic text-white/50">Deleted message</p>'
+                                    ? '<p class="italic text-color/50">Deleted message</p>'
                                     : message.content,
                             }}
                         ></div>
                         {message.is_edited == true && (
-                            <span className="text-xs text-white/50">
+                            <span className="text-xs text-color/50">
                                 (edited)
                             </span>
                         )}
                     </>
                 )}
-                <div className="border-l-4 border-l-white/15">
+                <div className="border-l-4 border-l-color/15">
                     <Message
                         forwarded
                         threadStyle={true}
@@ -304,7 +304,7 @@ export default function ForwardedMessage({
 
                 {message.thread_messages_count > 0 && !threadStyle && (
                     <button
-                        className="border hover:bg-black/25 flex justify-between items-center border-white/15 w-96 rounded-lg mt-4 py-1 px-4"
+                        className="border hover:bg-black/25 flex justify-between items-center border-color/15 w-96 rounded-lg mt-4 py-1 px-4"
                         onClick={() =>
                             dispatch(setThreadedMessageId(message.id))
                         }
@@ -315,7 +315,7 @@ export default function ForwardedMessage({
                             </span>
                             <span className="text-sm ml-2">View thread</span>
                         </div>
-                        <FaAngleRight className="text-sm text-white/50" />
+                        <FaAngleRight className="text-sm text-color/50" />
                     </button>
                 )}
             </div>

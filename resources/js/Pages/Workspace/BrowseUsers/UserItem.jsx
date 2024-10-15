@@ -13,7 +13,7 @@ export default function UserItem({ user }) {
     const dispatch = useDispatch();
     return (
         <div
-            className="w-48 aspect-[2/3] bg-background rounded-lg border border-white/15 cursor-pointer"
+            className="w-48 aspect-[2/3] bg-background rounded-lg border border-color/15 cursor-pointer"
             onClick={() => {
                 dispatch(setProfile(user.id));
             }}

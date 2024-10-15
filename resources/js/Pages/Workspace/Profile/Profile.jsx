@@ -62,9 +62,9 @@ export default function Profile() {
     return (
         <div className="p-4">
             <div className="flex justify-between">
-                <h1 className="font-bold text-xl text-white/85">Profile</h1>
+                <h1 className="font-bold text-xl text-color-high-emphasis">Profile</h1>
                 <button
-                    className="rounded-full p-2 hover:bg-white/15"
+                    className="rounded-full p-2 hover:bg-color/15"
                     onClick={() => dispatch(setProfile(null))}
                 >
                     <IoClose />
@@ -83,7 +83,7 @@ export default function Profile() {
             )}
 
             <div className="flex justify-between mt-6">
-                <h3 className="text-2xl font-bold text-white/85">
+                <h3 className="text-2xl font-bold text-color-high-emphasis">
                     {user.is_hidden
                         ? "Name hidden"
                         : user.display_name || user.name}
@@ -99,12 +99,12 @@ export default function Profile() {
                     />
                 )}
             </div>
-            <div className="flex gap-x-2 items-center mt-4 text-white/85">
+            <div className="flex gap-x-2 items-center mt-4 text-color-high-emphasis">
                 <div
                     className={`h-2 w-2 rounded-full ${
                         isOnline
                             ? "bg-green-600"
-                            : "bg-transparent border border-white/15"
+                            : "bg-transparent border border-color/15"
                     } `}
                 ></div>
                 {isOnline ? "Active" : "Away"}
@@ -131,7 +131,7 @@ export default function Profile() {
             <hr className="my-4" />
             <div>
                 <div className="flex justify-between mt-6">
-                    <h4 className=" font-bold text-white/85">
+                    <h4 className=" font-bold text-color-high-emphasis">
                         Contact information
                     </h4>
                     {hasOwnership && (
