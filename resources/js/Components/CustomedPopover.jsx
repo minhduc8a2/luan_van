@@ -12,7 +12,7 @@ function CustomedPopover({
     anchor = "",
     className = "",
     setIsHovered = () => {},
-    zIndex = "z-20"
+    zIndex = "z-20",
 }) {
     return (
         <Popover className="relative flex items-center">
@@ -25,11 +25,7 @@ function CustomedPopover({
             >
                 {({ close }) => (
                     <>
-                        <div className={zIndex}>
-
-
-                        {children}
-                        </div>
+                        <div className={zIndex}>{children}</div>
                         <div
                             className="fixed top-0 bottom-0 right-0 left-0 bg-transparent overflow-hidden z-10"
                             onClick={() => {
@@ -63,5 +59,11 @@ function ListItem({ children, onClick, className }) {
     );
 }
 
+function CloseButton({ children }) {
+    const close = useClose();
+    return <div className="" onClick={close}>{children}</div>;
+}
+
 CustomedPopover.ListItem = ListItem;
+CustomedPopover.CloseButton = CloseButton;
 export default CustomedPopover;

@@ -29,7 +29,7 @@ export function AddWorkspace() {
     return (
         <>
             <button
-                className="flex gap-x-2 items-center p-4 hover:bg-white/10 w-full"
+                className="flex gap-x-2 items-center p-4 hover:bg-white/10 w-full text-color-high-emphasis"
                 onClick={() => {
                     setIsOpen(true);
                 }}

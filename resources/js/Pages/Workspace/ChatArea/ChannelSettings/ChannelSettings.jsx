@@ -57,7 +57,7 @@ export default function ChannelSettings({ channelName }) {
                                 onClick={() => setTabIndex(0)}
                                 className={`${
                                     tabIndex == 0 ? " " : "border-b-transparent"
-                                } border-b-2 border-primary-500`}
+                                } border-b-2 border-primary-500 font-semibold`}
                             >
                                 About
                             </button>
@@ -69,7 +69,7 @@ export default function ChannelSettings({ channelName }) {
                                             tabIndex == 1
                                                 ? " "
                                                 : "border-b-transparent"
-                                        } border-b-2 border-primary-500`}
+                                        } border-b-2 border-primary-500 font-semibold`}
                                     >
                                         Members
                                     </button>
@@ -86,7 +86,7 @@ export default function ChannelSettings({ channelName }) {
                                             tabIndex == 2
                                                 ? " "
                                                 : "border-b-transparent"
-                                        } border-b-2 border-primary-500`}
+                                        } border-b-2 border-primary-500 font-semibold`}
                                     >
                                         Settings
                                     </button>
@@ -116,6 +116,7 @@ export default function ChannelSettings({ channelName }) {
                         </div>
                     </div>
                 )}
+                <CustomedDialog.CloseButton/>
             </CustomedDialog>
         </ChannelSettingsContext.Provider>
     );

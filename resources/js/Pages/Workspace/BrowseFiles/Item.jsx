@@ -102,7 +102,7 @@ const Item = memo(function ({ file }) {
                     href={file.url}
                     download={file.name}
                 >
-                    <IoCloudDownloadOutline className="text-xl" />
+                    <IoCloudDownloadOutline className="text-xl text-color-medium-emphasis" />
                 </a>
                 <Popover className="relative">
                     <PopoverButton className="p-1 rounded hover:bg-color/15 transition">
@@ -111,7 +111,7 @@ const Item = memo(function ({ file }) {
                                 setIsHovered(true);
                             }}
                         >
-                            <MdMoreVert className="text-xl" />
+                            <MdMoreVert className="text-xl text-color-medium-emphasis" />
                         </div>
                     </PopoverButton>
                     <PopoverPanel anchor="bottom" className="">

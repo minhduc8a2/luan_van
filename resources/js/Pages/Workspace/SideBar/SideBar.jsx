@@ -3,8 +3,6 @@ import React, { useMemo } from "react";
 import { PiHouseLineBold, PiHouseLineFill } from "react-icons/pi";
 import { FaRegBell } from "react-icons/fa6";
 
-
-
 import Dropdown from "@/Components/Dropdown";
 import WorkspaceAvatar from "@/Components/WorkspaceAvatar";
 import WorkspaceListItem from "@/Components/WorkspaceListItem";
@@ -21,11 +19,13 @@ import UserOptions from "./UserOptions";
 import { setSideBarWidth } from "@/Store/sizeSlice";
 import { setLeftWindowType } from "@/Store/windowTypeSlice";
 import { Link } from "react-router-dom";
+
+import CustomedPopover from "@/Components/CustomedPopover";
 export default function SideBar({}) {
     const { workspace } = useSelector((state) => state.workspace);
     const { workspaces } = useSelector((state) => state.workspace);
     const { leftWindowType } = useSelector((state) => state.windowType);
-    const { name: pageName } = useSelector((state) => state.page);
+
     const { new_count } = useSelector((state) => state.activity);
 
     const dispatch = useDispatch();
@@ -38,35 +38,37 @@ export default function SideBar({}) {
     return (
         <div className="flex flex-col justify-between h-full pb-8" ref={boxRef}>
             <div className="flex flex-col items-center gap-y-8 ">
-                <Dropdown>
-                    <Dropdown.Trigger>
-                        <WorkspaceAvatar name={workspace.name} />
-                    </Dropdown.Trigger>
-
-                    <Dropdown.Content
-                        align="left"
-                        contentClasses="bg-background w-96 pb-4 "
-                    >
-                        <h2 className="text-lg p-4 pb-2 font-bold">
-                            Workspace
-                        </h2>
-                        <hr className="opacity-10" />
-                        <div className="max-h-[50vh] overflow-y-auto scrollbar">
-                            {workspaces.map((wsp) => (
-                                <Link to={`/workspaces/${wsp.id}` } key={wsp.id}
-                                >
+                <CustomedPopover
+                    triggerNode={<WorkspaceAvatar name={workspace.name} />}
+                    anchor="bottom start"
+                    className="mt-4"
+                >
+                    <h2 className="text-lg p-4 pb-2 font-bold text-color-high-emphasis">Workspace</h2>
+                    <hr className="opacity-10" />
+                    <div className="max-h-[50vh] overflow-y-auto scrollbar">
+                        {workspaces.map((wsp) => (
+                            <CustomedPopover.CloseButton key={wsp.id}>
+                                <Link to={`/workspaces/${wsp.id}`}>
                                     <WorkspaceListItem
                                         workspace={wsp}
                                         current={wsp.id == workspace.id}
                                     />
                                 </Link>
-                            ))}
-                        </div>
-                        <hr className="opacity-10" />
+                            </CustomedPopover.CloseButton>
+                        ))}
+                    </div>
+                    <hr className="opacity-10" />
 
-                        <AddWorkspace />
-                    </Dropdown.Content>
-                </Dropdown>
+                    <AddWorkspace />
+                </CustomedPopover>
+                {/* <Dropdown>
+                    <Dropdown.Trigger></Dropdown.Trigger>
+
+                    <Dropdown.Content
+                        align="left"
+                        contentClasses="bg-background w-96 pb-4 "
+                    ></Dropdown.Content>
+                </Dropdown> */}
 
                 <button
                     onClick={() => {
