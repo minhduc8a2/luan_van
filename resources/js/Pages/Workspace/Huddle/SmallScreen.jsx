@@ -52,14 +52,14 @@ export default function SmallScreen({
             style={{ left: sideBarWidth + 16 }}
         >
             <div className="flex justify-between p-4 items-center">
-                <div className="text-sm">
+                <div className="text-sm text-white/85">
                     {getChannelName(channel, workspaceUsers, auth.user)}
                 </div>
                 <button
                     className="hover:bg-color/15 rounded-full p-2"
                     onClick={goFullScreen}
                 >
-                    <MdOutlineZoomOutMap />
+                    <MdOutlineZoomOutMap className="text-white/85"/>
                 </button>
             </div>
             <div className="p-4 flex justify-center gap-2 bg-white/10 mx-4 rounded-lg flex-wrap">
@@ -236,7 +236,7 @@ export default function SmallScreen({
 
                 <li>
                     <Button
-                        className="bg-pink-600 text-sm"
+                        className="bg-pink-600 text-sm text-white/85 border-none hover:bg-pink-800"
                         onClick={() => {
                             leaveHuddle();
                             dispatch(toggleHuddle());

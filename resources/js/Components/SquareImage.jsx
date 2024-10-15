@@ -2,8 +2,7 @@ import React from "react";
 import { useState, useRef, useEffect } from "react";
 import { IoMdCloseCircle } from "react-icons/io";
 import LoadingSpinner from "@/Components/LoadingSpinner";
-import { usePage } from "@inertiajs/react";
-import { useSelector } from "react-redux";
+import defaultAvatar from "@/../images/default_avatar.png"
 
 export default function SquareImage({
     size = "h-20 w-20",
@@ -14,7 +13,7 @@ export default function SquareImage({
     percentage = 0,
 }) {
     const [uploaded, setUploaded] = useState(false);
-    const { default_avatar_url } = useSelector(state=>state.workspace);
+   
     useEffect(() => {
         if (percentage == 100) setUploaded(true);
     }, [percentage]);
@@ -39,7 +38,7 @@ export default function SquareImage({
                 }  ${size}`}
             >
                 <img
-                    src={url || default_avatar_url}
+                    src={url || defaultAvatar}
                     alt=""
                     className="object-cover w-full h-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
                 />

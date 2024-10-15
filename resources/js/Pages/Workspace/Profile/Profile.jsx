@@ -17,9 +17,10 @@ import { toggleHuddle } from "@/Store/huddleSlice";
 import MoreOptions from "./MoreOptions";
 import { LiaUserMinusSolid } from "react-icons/lia";
 import useGoToChannel from "@/helpers/useGoToChannel";
+import defaultAvatar from "@/../images/default_avatar.png"
 export default function Profile() {
     const { auth, workspace } = usePage().props;
-    const { default_avatar_url } = useSelector((state) => state.workspace);
+    
 
     const { userId } = useSelector((state) => state.profile);
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
@@ -76,7 +77,7 @@ export default function Profile() {
                 </div>
             ) : (
                 <Image
-                    url={user.avatar_url || default_avatar_url}
+                    url={user.avatar_url || defaultAvatar}
                     dimensions="w-64 h-64"
                     className="mt-4 mx-auto"
                 />

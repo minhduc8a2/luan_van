@@ -6,7 +6,7 @@ import {
     streamHasAudioTracks,
     streamHasVideoTracks,
 } from "@/helpers/mediaHelper";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { CgScreen } from "react-icons/cg";
 import { GrMicrophone } from "react-icons/gr";
 import { MdOutlineZoomInMap, MdOutlineZoomOutMap } from "react-icons/md";
@@ -19,6 +19,7 @@ import StreamVideo from "@/Components/StreamVideo";
 import { IoCloseCircle } from "react-icons/io5";
 import UserAvatar from "./UserAvatar";
 import CustomedDialog from "@/Components/CustomedDialog";
+import ThemeContext from "@/ThemeProvider";
 
 export default function LargeScreen({
     channel,
@@ -49,6 +50,7 @@ export default function LargeScreen({
     const [mainStream, setMainStream] = useState(null);
     const [isHover, setIsHover] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
+    const {theme} = useContext(ThemeContext)
     useEffect(() => {
         if (otherUserStreams.current.size > 0 && !mainStream) {
             const streamEntry = Array.from(
@@ -71,14 +73,14 @@ export default function LargeScreen({
     return (
         <div className="bg-primary-600 ring-black/50 ring-[40px] flex flex-col  text-color-high-emphasis z-50   rounded-xl top-8 left-8 right-8 bottom-8 fixed">
             <div className="flex justify-between p-4 items-center">
-                <div className="text-sm">
+                <div className="text-sm text-white/85">
                     {getChannelName(channel, workspaceUsers, auth.user)}
                 </div>
                 <button
                     className="hover:bg-color/15 rounded-full p-2"
                     onClick={exitFullScreen}
                 >
-                    <MdOutlineZoomInMap />
+                    <MdOutlineZoomInMap className="text-white/85" />
                 </button>
             </div>
             <div className=" flex justify-center gap-2 pb-4 mx-4 rounded-lg flex-wrap flex-1">
@@ -208,7 +210,6 @@ export default function LargeScreen({
                                 <HuddleInvitation
                                     close={() => setIsOpen(false)}
                                 />
-                               
                             </CustomedDialog>
                         </>
 
@@ -238,7 +239,7 @@ export default function LargeScreen({
 
                         <li>
                             <Button
-                                className="bg-pink-600 text-sm"
+                                className="bg-pink-600 text-sm text-white/85 border-none hover:bg-pink-800"
                                 onClick={() => {
                                     leaveHuddle();
                                     exitFullScreen();
@@ -251,62 +252,70 @@ export default function LargeScreen({
                     </ul>
                 </div>
 
-                <div className="grid grid-cols-2 gap-x-2 p-3  bg-black/15">
-                    {(showUserVideo || showShareScreen) && (
-                        <button
-                            onClick={() =>
-                                setMainStream(currentStreamRef.current)
+                <div className={` p-4 rounded-lg   ${theme.mode?"bg-black/15":"bg-white/10"}`}>
+                    <h2 className="text-white/85 mb-4">Joined Users</h2>
+                    
+                    <div className="grid grid-cols-2 gap-x-2">
+                        {(showUserVideo || showShareScreen) && (
+                            <button
+                                onClick={() =>
+                                    setMainStream(currentStreamRef.current)
+                                }
+                                className="w-min h-min"
+                            >
+                                <StreamVideo
+                                    size="w-36 h-36"
+                                    ref={(videoElement) => {
+                                        if (videoElement) {
+                                            videoElement.srcObject =
+                                                currentStreamRef.current;
+                                        }
+                                    }}
+                                    autoPlay
+                                    muted
+                                />
+                            </button>
+                        )}
+                        {Array.from(otherUserStreams.current.entries()).map(
+                            ([userId, stream]) => {
+                                if (streamHasVideoTracks(stream))
+                                    return (
+                                        <button
+                                            className="w-min h-min"
+                                            onClick={() =>
+                                                setMainStream(stream)
+                                            }
+                                            key={userId}
+                                        >
+                                            <StreamVideo
+                                                size="w-36 h-36"
+                                                ref={(videoElement) => {
+                                                    if (videoElement) {
+                                                        videoElement.srcObject =
+                                                            stream;
+                                                    }
+                                                }}
+                                                autoPlay
+                                            />
+                                        </button>
+                                    );
+                                else return "";
                             }
-                            className="w-min h-min"
-                        >
-                            <StreamVideo
-                                size="w-36 h-36"
-                                ref={(videoElement) => {
-                                    if (videoElement) {
-                                        videoElement.srcObject =
-                                            currentStreamRef.current;
-                                    }
-                                }}
-                                autoPlay
-                                muted
-                            />
-                        </button>
-                    )}
-                    {Array.from(otherUserStreams.current.entries()).map(
-                        ([userId, stream]) => {
-                            if (streamHasVideoTracks(stream))
-                                return (
-                                    <button
-                                        className="w-min h-min"
-                                        onClick={() => setMainStream(stream)}
-                                        key={userId}
-                                    >
-                                        <StreamVideo
-                                            size="w-36 h-36"
-                                            ref={(videoElement) => {
-                                                if (videoElement) {
-                                                    videoElement.srcObject =
-                                                        stream;
-                                                }
-                                            }}
-                                            autoPlay
-                                        />
-                                    </button>
-                                );
-                            else return "";
-                        }
-                    )}
-                    {users.map((user) => {
-                        if (user.id == auth.user.id)
-                            if (showUserVideo || showShareScreen) return "";
-                            else
-                                return <UserAvatar user={user} key={user.id} />;
-                        return (
-                            !streamHasVideoTracks(
-                                otherUserStreams.current.get(user.id)
-                            ) && <UserAvatar user={user} key={user.id} />
-                        );
-                    })}
+                        )}
+                        {users.map((user) => {
+                            if (user.id == auth.user.id)
+                                if (showUserVideo || showShareScreen) return "";
+                                else
+                                    return (
+                                        <UserAvatar user={user} key={user.id} />
+                                    );
+                            return (
+                                !streamHasVideoTracks(
+                                    otherUserStreams.current.get(user.id)
+                                ) && <UserAvatar user={user} key={user.id} />
+                            );
+                        })}
+                    </div>
                 </div>
             </div>
         </div>

@@ -56,7 +56,7 @@ export default function Header({
                 loaded ? "" : "animate-pulse"
             }`}
         >
-            <div className="flex justify-between font-bold text-lg opacity-75">
+            <div className="flex justify-between font-bold text-lg ">
                 <div className="relative">
                     <ChannelSettings channelName={channelName} />
                     {/* {(topLoading || bottomLoading) && (

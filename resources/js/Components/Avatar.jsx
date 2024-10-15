@@ -1,7 +1,7 @@
 
 import ThemeContext from "@/ThemeProvider";
 import React, { memo, useContext } from "react";
-import { useSelector } from "react-redux";
+import defaultAvatar from "@/../images/default_avatar.png"
 
 const Avatar = memo(function ({
     src = "",
@@ -12,12 +12,12 @@ const Avatar = memo(function ({
     noStatus = false,
     roundedClassName = "rounded-lg ",
 }) {
-    const { default_avatar_url } = useSelector(state=>state.workspace);
+  
     const {theme} = useContext(ThemeContext)
     return (
         <div className={`relative ${theme.mode?"":"shadow rounded-lg"} ` + className}>
             <img
-                src={src || default_avatar_url}
+                src={src || defaultAvatar}
                 className={`${roundedClassName} w-full h-full object-cover absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 `}
             />
             {noStatus ? (

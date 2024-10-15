@@ -10,10 +10,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { setNotificationPopup } from "@/Store/notificationPopupSlice";
 import LoadingSpinner from "@/Components/LoadingSpinner";
 import Image from "@/Components/Image";
-
+import defaultAvatar from "@/../images/default_avatar.png"
 export default function EditProfile({ user, triggerButton }) {
     const { workspace } = usePage().props;
-    const { default_avatar_url } = useSelector((state) => state.workspace);
+   
     let [isOpen, setIsOpen] = useState(false);
 
     const [avatarFile, setAvatarFile] = useState(null);
@@ -130,7 +130,7 @@ export default function EditProfile({ user, triggerButton }) {
                         <h3 className="font-bold mb-4">Profile photo</h3>
 
                         <Image
-                            url={user.avatar_url || default_avatar_url}
+                            url={user.avatar_url || defaultAvatar}
                             dimensions="w-48 h-48"
                         />
                         <label

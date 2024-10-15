@@ -1,13 +1,12 @@
 import Button from "@/Components/Button";
 import CustomedDialog from "@/Components/CustomedDialog";
 
-import { router, usePage } from "@inertiajs/react";
+import { router } from "@inertiajs/react";
 import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 
 export default function RemovePhoto({ user }) {
-    const { default_avatar_url } = useSelector((state) => state.workspace);
-
+  
     const [show, setShow] = useState(false);
     const dispatch = useDispatch();
     function removePhoto() {
@@ -48,7 +47,7 @@ export default function RemovePhoto({ user }) {
                 <div className="">
                     <div className="h-48 w-48 relative overflow-hidden mt-4 rounded-lg mx-auto">
                         <img
-                            src={user.avatar_url || default_avatar_url}
+                            src={user.avatar_url || defaultAvatar}
                             alt={user.display_name || user.name}
                             className="object-cover object-center"
                         />

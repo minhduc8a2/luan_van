@@ -5,9 +5,9 @@ import { usePage } from "@inertiajs/react";
 import React from "react";
 import { LiaUserMinusSolid } from "react-icons/lia";
 import { useDispatch, useSelector } from "react-redux";
-
+import defaultAvatar from "@/../images/default_avatar.png"
 export default function UserItem({ user }) {
-    const { default_avatar_url } = useSelector(state=>state.workspace);
+    
     const onlineStatusMap = useSelector((state) => state.onlineStatus);
     const isOnline = onlineStatusMap[user.id];
     const dispatch = useDispatch();
@@ -25,7 +25,7 @@ export default function UserItem({ user }) {
             ) : (
                 <Image
                     clickAble={false}
-                    url={user.avatar_url || default_avatar_url}
+                    url={user.avatar_url || defaultAvatar}
                     dimensions="w-full aspect-square"
                     noToolbar
                 />

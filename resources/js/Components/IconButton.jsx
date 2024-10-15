@@ -36,7 +36,7 @@ export default function IconButton({
                     if (selfActive) setActive((pre) => !pre);
                     onClick();
                 }}
-                className={`p-3 rounded-full bg-white/10  ${
+                className={`p-3 rounded-full bg-white/10 text-white/85 ${
                     (selfActive ? active : show) && activable
                         ? "bg-white/50"
                         : "hover:bg-white/25"

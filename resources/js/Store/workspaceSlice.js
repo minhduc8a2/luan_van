@@ -6,9 +6,9 @@ export const workspaceSlice = createSlice({
         workspaces: [],
         newNotificationsCount: 0,
         workspacePermissions: [],
-        default_avatar_url: "",
+
         publicAppUrl: "",
-        workspace:null,
+        workspace: null,
     },
     reducers: {
         setWorkspaceData(state, action) {
