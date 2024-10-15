@@ -45,14 +45,14 @@ export default function Login({ status, canResetPassword }) {
                 <a
                     href="/auth/google/redirect"
                     type="button"
-                    className="border-2 border-border p-3 rounded-full  w-full flex justify-center font-bold gap-x-4"
+                    className="border-2 border-color/15 p-3 rounded-full  w-full flex justify-center font-bold gap-x-4"
                 >
                     <img src={google} className="w-6 h-6" /> Sign in with Google
                 </a>
                 <a
                     href="/auth/facebook/redirect"
                     type="button"
-                    className="mt-4 border-2 border-border p-3 rounded-full  w-full flex justify-center font-bold gap-x-4"
+                    className="mt-4 border-2 border-color/15 p-3 rounded-full  w-full flex justify-center font-bold gap-x-4"
                 >
                     <FaFacebook className="text-blue-600 text-2xl" /> Sign in
                     with Facebook
@@ -91,6 +91,12 @@ export default function Login({ status, canResetPassword }) {
                             onChange={(e) =>
                                 setData("password", e.target.value)
                             }
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                    e.preventDefault();
+                                    submit(e);
+                                }
+                            }}
                         />
 
                         <InputError
@@ -108,12 +114,10 @@ export default function Login({ status, canResetPassword }) {
                                     setData("remember", e.target.checked)
                                 }
                             />
-                            <span className="ms-2 text-sm ">
-                                Remember me
-                            </span>
+                            <span className="ms-2 text-sm ">Remember me</span>
                         </label>
                     </div>
-                    <Button className="mt-4" disabled={processing} onClick={submit}>
+                    <Button className="mt-4" loading={processing} type="submit">
                         Log in
                     </Button>
                     <div className=" mt-4">

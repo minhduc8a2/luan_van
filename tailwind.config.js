@@ -16,22 +16,22 @@ export default {
                 sans: ["Figtree", ...defaultTheme.fontFamily.sans],
             },
             colors: {
-                "color": `var(--color)`,
-                "border": `var(--border-color)`,
+                color: `rgb(var(--color) / <alpha-value>)`,
+
                 primary: {
-                    300: `var(--primary-300)`,
-                    400: `var(--primary-400)`,
-                    500: `var(--primary-500)`,
-                    600: `var(--primary-600)`,
+                    300: `rgb(var(--primary-300) / <alpha-value>)`,
+                    400: `rgb(var(--primary-400) / <alpha-value>)`,
+                    500: `rgb(var(--primary-500) / <alpha-value>)`,
+                    600: `rgb(var(--primary-600) / <alpha-value>)`,
                 },
 
-                background: `var(--background)`,
-                foreground: `var(--foreground)`,
+                background: `rgb(var(--background) / <alpha-value>)`,
+                foreground: `rgb(var(--foreground) / <alpha-value>)`,
                 link: "#1d9bd1",
                 "dark-green": "#00553d",
                 danger: {
-                    400: `var(--danger-400)`,
-                    500: `var(--danger-500)`,
+                    400: `rgb(var(--danger-400) / <alpha-value>)`,
+                    500: `rgb(var(--danger-500) / <alpha-value>)`,
                 },
             },
         },

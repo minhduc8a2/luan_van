@@ -1,10 +1,4 @@
-
-import {
-    Popover,
-    PopoverButton,
-    PopoverPanel,
- 
-} from "@headlessui/react";
+import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
 import { IoIosMore } from "react-icons/io";
 
 import { IoSearch } from "react-icons/io5";
@@ -15,14 +9,15 @@ import { setLeftWindowType, setRightWindowType } from "@/Store/windowTypeSlice";
 import { router, usePage } from "@inertiajs/react";
 import { RiContactsBook3Line } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
+import ThemePicker from "./ThemePicker";
 export default function More() {
     const { workspace } = usePage().props;
     const dispatch = useDispatch();
-    const navigate = useNavigate()
+    const navigate = useNavigate();
     function switchPage(url) {
         dispatch(setLeftWindowType(null));
         dispatch(setRightWindowType(null));
-        navigate(url)
+        navigate(url);
     }
     return (
         <Popover className="relative group">
@@ -48,7 +43,7 @@ export default function More() {
                                 <MoreButton
                                     onClick={() => {
                                         switchPage("browse_files");
-                                        
+
                                         close();
                                     }}
                                     title="Files"
@@ -71,13 +66,16 @@ export default function More() {
                                 <MoreButton
                                     onClick={() => {
                                         switchPage("browse_users");
-                                        
+
                                         close();
                                     }}
                                     title="People"
                                     description="Your team and user groups"
                                     iconNode={<RiContactsBook3Line />}
                                 />
+                            </li>
+                            <li>
+                                <ThemePicker />
                             </li>
                         </ul>
                     </>

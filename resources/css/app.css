@@ -4,39 +4,28 @@
 
 @layer base {
     :root{
-        --background: #ebebeb;
-        --foreground: #fcfcfc;
-        --color: #585858;
-        --border-color: #585858;
+        --background: 255 255 255;
+        --foreground: 245 245 245;
+        --color: 0 0 0;
+       
     }
 
     .purple {
-        --primary-300: #7d3986;
-        --primary-400: #431248;
-        --primary-500: #340b37;
-        --primary-600: #28092b;
-        --danger-400: #de678a;
-        --danger-500: #b41541;
+        --primary-300: 125 57 134;
+        --primary-400: 67 18 72;
+        --primary-500: 52 11 55;
+        --primary-600: 40 9 43;
+        --danger-400: 222 103 138;
+        --danger-500: 180 21 65;
     }
     .dark {
-        --background: #1a1d21;
-        --foreground: #222529;
-        --color: #e3e3e3;
-        --border-color: #656565;
+        --background: 26 29 33;
+        --foreground: 34 37 41;
+        --color: 255 255 255;
+        
     }
 
-    .blue {
-        --primary-300: #3131b4;
-        --primary-400: #1f1d98;
-        --primary-500: #12126d;
-        --primary-600: #0b113d;
-
-        --background: #1a1d21;
-        --foreground: #222529;
-
-        --danger-400: #de678a;
-        --danger-500: #b41541;
-    }
+   
 }
 @layer utilities {
     .scrollbar::-webkit-scrollbar {
@@ -168,7 +157,7 @@ input[type="checkbox"] {
 }
 
 hr {
-    @apply border-border;
+    @apply border-color/15;
 }
 
 div,
@@ -184,7 +173,7 @@ h6 {
 input[type="range"] {
     -webkit-appearance: none; /* Removes default Chrome/Safari style */
     appearance: none;
-    @apply bg-white/50 rounded cursor-pointer;
+    @apply bg-color/50 rounded cursor-pointer;
 
     outline: none;
 }

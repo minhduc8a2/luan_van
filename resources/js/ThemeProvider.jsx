@@ -11,26 +11,35 @@ export const ThemeProvider = ({ children }) => {
         } else {
             document.body.classList.add("dark");
         }
-        setTheme((pre) => ({ ...pre, mode: !pre.mode }));
+        setTheme((pre) => {
+            const newTheme = { ...pre, mode: !pre.mode };
+            localStorage.setItem("theme", JSON.stringify(newTheme));
+            return newTheme;
+        });
     };
 
     const setColorScheme = (colorName) => {
         document.body.classList.remove(theme.colorScheme);
         document.body.classList.add(colorName);
-        setTheme((pre) => ({ ...pre, colorScheme: colorName }));
+        setTheme((pre) => {
+            const newTheme = { ...pre, colorScheme: colorName };
+            localStorage.setItem("theme", JSON.stringify(newTheme));
+            return newTheme;
+        });
     };
 
     useEffect(() => {
-        const savedTheme = localStorage.getItem("theme");
+        let savedTheme = localStorage.getItem("theme");
         if (savedTheme) {
             try {
                 savedTheme = JSON.parse(savedTheme);
-                if (theme.mode) {
+                if (savedTheme.mode) {
                     document.body.classList.add("dark");
                 }
                 document.body.classList.add(savedTheme.colorScheme);
                 setTheme(savedTheme);
             } catch (error) {
+                console.log(error);
                 document.body.classList.add("dark");
                 document.body.classList.add("purple");
                 setTheme({ colorScheme: "purple", mode: true });
@@ -41,10 +50,6 @@ export const ThemeProvider = ({ children }) => {
             setTheme({ colorScheme: "purple", mode: true });
         }
     }, []);
-
-    useEffect(() => {
-        localStorage.setItem("theme", JSON.stringify(theme));
-    }, [theme]);
 
     return (
         <ThemeContext.Provider value={{ theme, toggleTheme, setColorScheme }}>
