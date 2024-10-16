@@ -20,15 +20,15 @@ use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Auth\ProviderController;
 
-Route::get('/auth/redirect', function () {
-    return Socialite::driver('github')->redirect();
-});
+// Route::get('/auth/redirect', function () {
+//     return Socialite::driver('github')->redirect();
+// });
 
-Route::get('/auth/callback', function () {
-    $user = Socialite::driver('github')->user();
+// Route::get('/auth/callback', function () {
+//     $user = Socialite::driver('github')->user();
 
-    // $user->token
-});
+//     // $user->token
+// });
 Route::get('/', function (Request $request) {
     return Inertia::render('Welcome', [
         "workspaces" => $request->user()->workspaces
@@ -109,9 +109,7 @@ Route::middleware('auth')->group(function () {
     });
 });
 
-Route::get('/auth/{provider}/redirect', [ProviderController::class, 'redirect']);
 
-Route::get('/auth/{provider}/callback', [ProviderController::class, 'callback']);
 require __DIR__ . '/auth.php';
 
 Route::post("/{workspace}/invitation_link", [InvitationController::class, 'store'])->name('invitation.store');

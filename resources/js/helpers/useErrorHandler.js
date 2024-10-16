@@ -7,6 +7,7 @@ const useErrorHandler = () => {
     const dispatch = useDispatch();
 
     return (error) => {
+        console.error(error);
         if (error.response) {
        
             const message = error.response.data.message || "An error occurred.";

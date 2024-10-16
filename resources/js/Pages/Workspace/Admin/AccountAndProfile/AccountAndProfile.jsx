@@ -1,9 +1,25 @@
 import React, { createContext, useContext, useState } from "react";
 import { LuUser2 } from "react-icons/lu";
-import UpdateProfileInformation from "./UpdateProfileInformationForm";
+import UpdateEmailForm from "./UpdateEmailForm";
+import SettingsTabs from "../SettingsTabs";
+import UpdatePasswordForm from "./UpdatePasswordForm";
+import UpdateProfileForm from "./UpdateProfileForm";
 const AccountAndProfileContext = createContext(null);
 export default function AccountAndProfile() {
     const [tabIndex, setTabIndex] = useState(0);
+    const tabs = ["Settings", "Profile"];
+    const contents = [
+        <>
+            <UpdateEmailForm />
+            <hr className="my-4" />
+            <UpdatePasswordForm />
+            <hr className="my-4" />
+        </>,
+        <>
+            <UpdateProfileForm />
+            <hr className="my-4" />
+        </>,
+    ];
     return (
         <AccountAndProfileContext.Provider
             value={{ currentTabIndex: tabIndex, setTabIndex }}
@@ -15,31 +31,8 @@ export default function AccountAndProfile() {
                         Account
                     </h1>
                 </div>
-                <div className="flex mt-4">
-                    <TabItem tabIndex={0}>Settings</TabItem>
-                    <TabItem tabIndex={1}>Profile</TabItem>
-                </div>
-                <div className="bg-color-contrast w-3/4  border border-color/15">
-                    <UpdateProfileInformation/>
-                </div>
+                <SettingsTabs tabs={tabs} contents={contents} />
             </div>
         </AccountAndProfileContext.Provider>
-    );
-}
-function TabItem({ tabIndex, children }) {
-    const { currentTabIndex, setTabIndex } = useContext(
-        AccountAndProfileContext
-    );
-    return (
-        <button
-            onClick={() => setTabIndex(tabIndex)}
-            className={`${
-                tabIndex == currentTabIndex
-                    ? "text-color-high-emphasis border border-color/15 border-b-color-contrast bg-color-contrast "
-                    : "text-link"
-            } font-semibold p-4 text-lg relative -mb-[1px]`}
-        >
-            {children}
-        </button>
     );
 }

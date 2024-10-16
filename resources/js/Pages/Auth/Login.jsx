@@ -117,18 +117,30 @@ export default function Login({ status, canResetPassword }) {
                             <span className="ms-2 text-sm ">Remember me</span>
                         </label>
                     </div>
-                    <Button className="mt-4" loading={processing} type="submit" onClick={submit}>
+                    <Button
+                        className="mt-4"
+                        loading={processing}
+                        type="submit"
+                        onClick={submit}
+                    >
                         Log in
                     </Button>
-                    <div className=" mt-4">
+                    <div className="flex  justify-between mt-8">
                         {canResetPassword && (
                             <Link
                                 href={route("password.request")}
-                                className="underline text-sm   rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 text-color-medium-emphasis"
+                                className="underline text-sm text-link   rounded-md  "
                             >
                                 Forgot your password?
                             </Link>
                         )}
+
+                        <Link
+                            href={route("register")}
+                            className="underline text-sm text-link   rounded-md  "
+                        >
+                            Create an account
+                        </Link>
                     </div>
                 </form>
             </div>

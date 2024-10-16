@@ -2,14 +2,17 @@ import React, { useRef, useState } from "react";
 import { IoHomeOutline, IoSettingsOutline } from "react-icons/io5";
 import { Provider, useSelector } from "react-redux";
 import { Link, Outlet } from "react-router-dom";
+
 import InitData from "./InitData";
 import { makeStore } from "@/Store/store";
 import { GoHome } from "react-icons/go";
-import { usePage } from "@inertiajs/react";
+import { usePage, Link as InertiaLink } from "@inertiajs/react";
 
 import Avatar from "@/Components/Avatar";
 import { LuUser2 } from "react-icons/lu";
 import { PiAddressBookTabs } from "react-icons/pi";
+import { MdLogout } from "react-icons/md";
+import NotificationPopup from "@/Components/NotificationPopup";
 
 export default function Admin() {
     const [loaded, setLoaded] = useState(false);
@@ -25,6 +28,7 @@ export default function Admin() {
             {loaded && (
                 <Wrapper>
                     <Outlet />
+                    <NotificationPopup />
                 </Wrapper>
             )}
         </Provider>
@@ -37,7 +41,10 @@ function Wrapper({ children }) {
     return (
         <div className="flex flex-col min-h-screen">
             <nav className="h-20 shadow flex px-8 bg-color-contrast">
-                <Link to="home" className="flex gap-x-4 items-center text-color-high-emphasis">
+                <Link
+                    to="home"
+                    className="flex gap-x-4 items-center text-color-high-emphasis"
+                >
                     <GoHome className="text-3xl " />
                     <h3 className="text-2xl font-bold capitalize">
                         {workspace.name}
@@ -91,6 +98,22 @@ function Wrapper({ children }) {
                                 title="Manage members"
                                 to="manage_members"
                             />
+                        </ul>
+                    </div>
+                    <div className=" mt-8">
+                        <h5 className="uppercase text-sm text-color-medium-emphasis mb-4">
+                            Other
+                        </h5>
+                        <ul className="flex flex-col gap-y-2">
+                            <InertiaLink
+                                className="flex items-center gap-x-2 text-color-medium-emphasis"
+                                href={route("logout")}
+                                method="post"
+                                as="button"
+                                type="button"
+                            >
+                                Signout <MdLogout />
+                            </InertiaLink>
                         </ul>
                     </div>
                 </div>

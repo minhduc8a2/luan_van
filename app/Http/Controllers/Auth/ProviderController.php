@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Models\User;
-use Illuminate\Http\Request;
+
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
@@ -43,7 +43,6 @@ class ProviderController extends Controller
             }
 
             Auth::login($user);
-
             return redirect('/');
         } catch (\Throwable $th) {
             return redirect('/login')->withErrors(['fail' => "Failed to login with {$provider}"]);

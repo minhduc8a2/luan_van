@@ -26,10 +26,11 @@ export default function Button({
     }
     return (
         <div
+            role="button"
             {...props}
             className={
                 ` rounded-lg font-semibold border flex items-center justify-center border-color/15 relative  transition  py-2 px-3 ${type}  ${
-                    disabled ? "cursor-default  opacity-50" : "cursor-pointer  "
+                    (disabled || loading) ? "cursor-default  opacity-50" : "cursor-pointer  "
                 } ` + className
             }
         >
