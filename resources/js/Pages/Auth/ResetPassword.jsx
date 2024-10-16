@@ -1,4 +1,3 @@
-import GuestLayout from '@/Layouts/GuestLayout';
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import Button from '@/Components/Button';
@@ -22,7 +21,7 @@ export default function ResetPassword({ token, email }) {
     };
 
     return (
-        <GuestLayout>
+        <div className="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-color-contrast ">
             <Head title="Reset Password" />
 
             <form onSubmit={submit}>
@@ -81,6 +80,6 @@ export default function ResetPassword({ token, email }) {
                     </Button>
                 </div>
             </form>
-        </GuestLayout>
+        </div>
     );
 }

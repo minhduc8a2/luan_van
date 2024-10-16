@@ -1,4 +1,3 @@
-import GuestLayout from '@/Layouts/GuestLayout';
 import InputError from '@/Components/InputError';
 import Button from '@/Components/Button';
 import TextInput from '@/Components/Input/TextInput';
@@ -16,7 +15,7 @@ export default function ForgotPassword({ status }) {
     };
 
     return (
-        <GuestLayout>
+        <div className="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-color-contrast ">
             <Head title="Forgot Password" />
 
             <div className="mb-4 text-sm text-gray-600">
@@ -45,6 +44,6 @@ export default function ForgotPassword({ status }) {
                     </Button>
                 </div>
             </form>
-        </GuestLayout>
+        </div>
     );
 }
