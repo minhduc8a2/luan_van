@@ -32,6 +32,12 @@ class WorkspaceController extends Controller
             'workspace' => $workspace
         ];
     }
+    public function settings(Request $request, Workspace $workspace)
+    {
+        if ($request->user()->cannot('view', [Workspace::class, $workspace])) abort(403);
+
+        return Inertia::render("Workspace/Index");
+    }
     public function index()
     {
         //

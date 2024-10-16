@@ -27,9 +27,9 @@ export default function Login({ status, canResetPassword }) {
 
     return (
         <div className="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-background ">
-            <div className="flex items-baseline gap-x-2 mb-8">
+            <div className="flex items-baseline gap-x-2 mb-8 text-color-high-emphasis">
                 <GrGroup className=" text-xl" />{" "}
-                <Link href="/" className=" font-bold text-3xl">
+                <Link href="/" className=" font-bold text-3xl ">
                     Snack
                 </Link>
             </div>
@@ -45,19 +45,19 @@ export default function Login({ status, canResetPassword }) {
                 <a
                     href="/auth/google/redirect"
                     type="button"
-                    className="border-2 border-color/15 p-3 rounded-full  w-full flex justify-center font-bold gap-x-4"
+                    className="border-2 border-color/15 p-3 rounded-full  w-full flex justify-center font-bold gap-x-4 text-color-medium-emphasis"
                 >
                     <img src={google} className="w-6 h-6" /> Sign in with Google
                 </a>
                 <a
                     href="/auth/facebook/redirect"
                     type="button"
-                    className="mt-4 border-2 border-color/15 p-3 rounded-full  w-full flex justify-center font-bold gap-x-4"
+                    className="mt-4 border-2 border-color/15 p-3 rounded-full  w-full flex justify-center font-bold gap-x-4 text-color-medium-emphasis"
                 >
                     <FaFacebook className="text-blue-600 text-2xl" /> Sign in
                     with Facebook
                 </a>
-                <div className="flex  items-center gap-x-4 mt-4">
+                <div className="flex  items-center gap-x-4 mt-4 text-color-medium-emphasis">
                     <hr className="w-full " />
                     OR
                     <hr className="w-full " />
@@ -106,7 +106,7 @@ export default function Login({ status, canResetPassword }) {
                     </div>
 
                     <div className="block mt-4">
-                        <label className="flex items-center">
+                        <label className="flex items-center text-color-medium-emphasis">
                             <Checkbox
                                 name="remember"
                                 checked={data.remember}
@@ -124,7 +124,7 @@ export default function Login({ status, canResetPassword }) {
                         {canResetPassword && (
                             <Link
                                 href={route("password.request")}
-                                className="underline text-sm   rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                className="underline text-sm   rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 text-color-medium-emphasis"
                             >
                                 Forgot your password?
                             </Link>

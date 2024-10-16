@@ -41,7 +41,7 @@ function CustomedPopover({
     );
 }
 
-function ListItem({ children, onClick, className }) {
+function ListItem({ children, onClick=()=>{}, className }) {
     const close = useClose();
     return (
         <div

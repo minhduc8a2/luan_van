@@ -19,7 +19,7 @@ import { setLeftWindowWidth, setRightWindowWidth } from "@/Store/sizeSlice";
 import LeftWindow from "./LeftWindow";
 import Profile from "./Profile/Profile";
 import Activity from "./Activity/Activity";
-import { usePage } from "@inertiajs/react";
+
 import { setLeftWindowType } from "@/Store/windowTypeSlice";
 import InitData from "./InitData";
 import { Outlet, useParams } from "react-router-dom";

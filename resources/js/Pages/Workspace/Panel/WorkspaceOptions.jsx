@@ -2,12 +2,13 @@ import CustomedPopover from "@/Components/CustomedPopover";
 import WorkspaceAvatar from "@/Components/WorkspaceAvatar";
 import React from "react";
 import { IoIosArrowDown } from "react-icons/io";
+import { Link } from "react-router-dom";
 
 export default function WorkspaceOptions({ workspace }) {
     return (
         <CustomedPopover
             triggerNode={
-                <div className="flex gap-x-1 items-center">
+                <div className="flex gap-x-1 items-center hover:bg-color/10 cursor-pointer p-2 rounded-lg">
                     <h3 className="text-xl font-semibold">{workspace.name}</h3>
                     <IoIosArrowDown className="text-lg" />
                 </div>
@@ -31,7 +32,9 @@ export default function WorkspaceOptions({ workspace }) {
                         Edit workspace details
                     </CustomedPopover.ListItem>
                     <CustomedPopover.ListItem>
-                        Workspace settings
+                        <Link to={`/workspaces/${workspace.id}/admin/settings`}>
+                            Workspace settings
+                        </Link>
                     </CustomedPopover.ListItem>
                 </div>
 
@@ -41,7 +44,11 @@ export default function WorkspaceOptions({ workspace }) {
                         Adminstration
                     </h3>
                     <CustomedPopover.ListItem>
-                        Manage members
+                        <Link
+                            to={`/workspaces/${workspace.id}/admin/manage_members`}
+                        >
+                            Manage members
+                        </Link>
                     </CustomedPopover.ListItem>
                 </div>
             </div>
