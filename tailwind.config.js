@@ -17,6 +17,7 @@ export default {
             },
             colors: {
                 color: `rgb(var(--color) / <alpha-value>)`,
+                "color-contrast": `rgb(var(--color-contrast) / <alpha-value>)`,
                 "color-high-emphasis": `rgb(var(--color-high-emphasis) / <alpha-value>)`,
                 "color-medium-emphasis": `rgb(var(--color-medium-emphasis) / <alpha-value>)`,
                 "color-disabled": `rgb(var(--color-disabled) / <alpha-value>)`,

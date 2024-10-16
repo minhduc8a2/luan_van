@@ -35,16 +35,16 @@ function Wrapper({ children }) {
     const { auth } = usePage().props;
     const { workspace } = useSelector((state) => state.workspace);
     return (
-        <>
-            <nav className="h-20 shadow flex px-8 bg-background">
-                <Link to="home" className="flex gap-x-4 items-center">
+        <div className="flex flex-col min-h-screen">
+            <nav className="h-20 shadow flex px-8 bg-color-contrast">
+                <Link to="home" className="flex gap-x-4 items-center text-color-high-emphasis">
                     <GoHome className="text-3xl " />
                     <h3 className="text-2xl font-bold capitalize">
                         {workspace.name}
                     </h3>
                 </Link>
             </nav>
-            <div className="grid grid-cols-5 mt-8">
+            <div className="grid grid-cols-4 pt-8 bg-background   flex-1 ">
                 <div className="ml-8">
                     <div className="flex gap-x-4">
                         <Avatar
@@ -94,9 +94,9 @@ function Wrapper({ children }) {
                         </ul>
                     </div>
                 </div>
-                <div className="col-span-4">{children}</div>
+                <div className="col-span-3">{children}</div>
             </div>
-        </>
+        </div>
     );
 }
 function PanelItem({ icon, title, to }) {

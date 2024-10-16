@@ -46,6 +46,9 @@ Route::middleware('auth')->group(function () {
     Route::post("/workspaces", [WorkspaceController::class, 'store'])->name('workspaces.store');
     Route::get("/workspaces/{workspace}", [WorkspaceController::class, 'show'])->name('workspace.show');
     Route::get("/workspaces/{workspace}/admin/settings", [WorkspaceController::class, 'settings'])->name('workspaces.settings');
+    Route::get("/workspaces/{workspace}/admin/account_profile", [WorkspaceController::class, 'accountAndProfile'])->name('workspaces.accountAndProfile');
+    Route::get("/workspaces/{workspace}/admin/home", [WorkspaceController::class, 'settingsHome'])->name('workspaces.settingsHome');
+    Route::get("/workspaces/{workspace}/admin/manage_members", [WorkspaceController::class, 'manageMembers'])->name('workspaces.manageMembers');
     Route::get("/workspaces/{workspace}/channels/{channel}", [ChannelController::class, 'show'])->name('channels.show');
     Route::get("/workspaces/{workspace}/init_workspace_data", [WorkspaceController::class, 'initWorkspaceData'])->name('workspaces.initWorkspaceData');
     Route::get('/workspaces/{workspace}/browse_users', [UserController::class, 'browseUsers'])->name("users.browseUsers");
@@ -56,7 +59,7 @@ Route::middleware('auth')->group(function () {
     Route::get("channels/{channel}/init_channel_data", [ChannelController::class, 'initChannelData'])->name('channels.initChannelData');
     Route::get("channels/{channel}/messages/infinite_messages", [MessageController::class, 'infiniteMessages'])->name('messages.infiniteMessages');
     Route::get("channels/{channel}/messages/specific_messages", [MessageController::class, 'getSpecificMessagesById'])->name('messages.getSpecificMessagesById');
-   
+
     Route::get("workspaces/{workspace}/browse_channels", [ChannelController::class, 'browseChannels'])->name('channels.browseChannels');
     Route::post("workspaces/{workspace}/channels", [ChannelController::class, 'store'])->name('channel.store');
     Route::get("/channels/check_exists", [ChannelController::class, 'checkChannelExists'])->name('channel.checkExists');

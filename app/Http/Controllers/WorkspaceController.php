@@ -17,6 +17,13 @@ class WorkspaceController extends Controller
     /**
      * Display a listing of the resource.
      */
+
+    function clientRouting(Request $request, Workspace $workspace)
+    {
+        if ($request->user()->cannot('view', [Workspace::class, $workspace])) abort(403);
+
+        return Inertia::render("Workspace/Index");
+    }
     public function initWorkspaceData(Request $request, Workspace $workspace)
     {
         $user = $request->user();
@@ -32,12 +39,7 @@ class WorkspaceController extends Controller
             'workspace' => $workspace
         ];
     }
-    public function settings(Request $request, Workspace $workspace)
-    {
-        if ($request->user()->cannot('view', [Workspace::class, $workspace])) abort(403);
 
-        return Inertia::render("Workspace/Index");
-    }
     public function index()
     {
         //
@@ -91,10 +93,25 @@ class WorkspaceController extends Controller
     public function show(Request $request, Workspace $workspace)
     {
 
-        if ($request->user()->cannot('view', [Workspace::class, $workspace])) abort(403);
-
-        return Inertia::render("Workspace/Index");
+        return $this->clientRouting($request, $workspace);
     }
+    public function settings(Request $request, Workspace $workspace)
+    {
+        return $this->clientRouting($request, $workspace);
+    }
+    public function accountAndProfile(Request $request, Workspace $workspace)
+    {
+        return $this->clientRouting($request, $workspace);
+    }
+    public function settingsHome(Request $request, Workspace $workspace)
+    {
+        return $this->clientRouting($request, $workspace);
+    }
+    public function manageMembers(Request $request, Workspace $workspace)
+    {
+        return $this->clientRouting($request, $workspace);
+    }
+
 
 
     /**

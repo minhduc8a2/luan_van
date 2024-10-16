@@ -4,9 +4,11 @@
 
 @layer base {
     :root {
+
         --background: 235 235 235;
         --foreground: 220 220 220;
         --color: 0 0 0;
+        --color-contrast:255 255 255;
         --color-high-emphasis: 35 35 35;
         --color-medium-emphasis: 72 72 72;
         --color-disabled: 158 158 158;
@@ -44,6 +46,8 @@
         --background: 26 29 33;
         --foreground: 34 37 41;
         --color: 255 255 255;
+        --color-contrast:0 0 0;
+
         --color-high-emphasis: 220 220 220;
         --color-medium-emphasis: 183 183 183;
         --color-disabled: 97 97 97;

@@ -26,7 +26,7 @@ export default function Login({ status, canResetPassword }) {
     };
 
     return (
-        <div className="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-background ">
+        <div className="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-color-contrast ">
             <div className="flex items-baseline gap-x-2 mb-8 text-color-high-emphasis">
                 <GrGroup className=" text-xl" />{" "}
                 <Link href="/" className=" font-bold text-3xl ">
@@ -117,7 +117,7 @@ export default function Login({ status, canResetPassword }) {
                             <span className="ms-2 text-sm ">Remember me</span>
                         </label>
                     </div>
-                    <Button className="mt-4" loading={processing} type="submit">
+                    <Button className="mt-4" loading={processing} type="submit" onClick={submit}>
                         Log in
                     </Button>
                     <div className=" mt-4">

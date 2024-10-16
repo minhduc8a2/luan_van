@@ -10,7 +10,7 @@ import Admin from "./Admin/Admin";
 import Settings from "./Admin/Settings";
 import ManageMembers from "./Admin/ManageMembers";
 import Home from "./Admin/Home";
-import AccountAndProfile from "./Admin/AccountAndProfile";
+import AccountAndProfile from "./Admin/AccountAndProfile/AccountAndProfile";
 export default function Index() {
     return (
         <Router>
