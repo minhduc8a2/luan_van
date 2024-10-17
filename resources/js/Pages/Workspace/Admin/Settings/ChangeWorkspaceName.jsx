@@ -14,6 +14,7 @@ export default function ChangeWorkspaceName() {
         { name: workspace.name },
         {
             url: route("workspaces.update", workspace.id),
+            method:"patch"
         }
     );
     const dispatch = useDispatch();
