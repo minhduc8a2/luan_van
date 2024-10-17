@@ -16,10 +16,11 @@ export const workspaceSlice = createSlice({
                 state[key] = action.payload[key];
             });
         },
-        updateWorkspaceName(state, action) {
-            if (state.workspace) {
-                state.workspace.name = action.payload.name;
-            }
+        updateWorkspace(state, action) {
+            if (!state.workspace) state.workspace = {};
+            Object.keys(action.payload).forEach((key) => {
+                state.workspace[key] = action.payload[key];
+            });
         },
         setWorkspaces(state, action) {
             if (action.payload.workspaces) {
@@ -30,6 +31,7 @@ export const workspaceSlice = createSlice({
 });
 
 // Action creators are generated for each case reducer function
-export const { setWorkspaceData, updateWorkspaceName, setWorkspaces } = workspaceSlice.actions;
+export const { setWorkspaceData, updateWorkspace, setWorkspaces } =
+    workspaceSlice.actions;
 
 export default workspaceSlice.reducer;

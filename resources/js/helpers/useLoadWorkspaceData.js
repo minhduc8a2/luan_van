@@ -7,7 +7,7 @@ const useLoadWorkspaceData = () => {
     const dispatch = useDispatch();
     const { workspaceId } = useParams();
     const tokenRef = useRef(null);
-    return () => {
+    return (only) => {
         if (tokenRef.current) {
             tokenRef.current.abort();
         }
@@ -15,6 +15,7 @@ const useLoadWorkspaceData = () => {
 
         return axios
             .get(route("workspaces.initWorkspaceData", workspaceId), {
+                params: { only },
                 signal: tokenRef.current.signal,
             })
             .then((response) => {

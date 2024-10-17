@@ -35,21 +35,31 @@ class WorkspaceController extends Controller
     }
     public function initWorkspaceData(Request $request, Workspace $workspace)
     {
+        $only = $request->query('only');
         $user = $request->user();
-        $workspaces =  $user->workspaces;
-        $newNotificationsCount =  $user->notifications()->where("read_at", null)->count();
-        $workspacePermissions =  [
+        $workspaces = fn() => $user->workspaces;
+        $newNotificationsCount = fn() =>  $user->notifications()->where("read_at", null)->count();
+        $workspacePermissions = fn() =>  [
             'createChannel' => $user->can('create', [Channel::class, $workspace]),
             'updateInvitationPermission' => $user->can('updateInvitationPermission', [Workspace::class, $workspace]),
             'inviteToWorkspace' => $user->can('create', [Invitation::class, $workspace]),
             'isInvitationToWorkspaceWithAdminApprovalRequired' => $workspace->permissions()->where('permission_type', PermissionTypes::WORKSPACE_INVITATION_WITH_ADMIN_APPROVAL_REQUIRED->name)->exists()
         ];
-
+        switch ($only) {
+            case 'workspacePermissions':
+                return ['workspacePermissions' => $workspacePermissions(),];
+            case 'workspaces':
+                return ['workspaces' => $workspaces(),];
+            case 'newNotificationsCount':
+                return ['newNotificationsCount' => $newNotificationsCount(),];
+            case 'workspace':
+                return ['workspace' => $workspace];
+        }
         return [
             'publicAppUrl' => env('PUBLIC_APP_URL', ''),
-            'workspaces' => $workspaces,
-            'newNotificationsCount' => $newNotificationsCount,
-            'workspacePermissions' => $workspacePermissions,
+            'workspaces' => $workspaces(),
+            'newNotificationsCount' => $newNotificationsCount(),
+            'workspacePermissions' => $workspacePermissions(),
             'workspace' => $workspace
         ];
     }

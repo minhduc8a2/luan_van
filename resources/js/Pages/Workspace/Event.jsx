@@ -40,11 +40,12 @@ import useReloadPermissions from "@/helpers/useReloadPermissions";
 
 import useGoToChannel from "@/helpers/useGoToChannel";
 import useLoadWorkspaceData from "@/helpers/useLoadWorkspaceData";
+import { updateWorkspace } from "@/Store/workspaceSlice";
 
 export default function Event() {
     const { auth } = usePage().props;
     const { channelId, workspaceId } = useParams();
-    const { workspace } = useSelector((state) => state.workspace);
+    const { workspace, workspaces } = useSelector((state) => state.workspace);
     const dispatch = useDispatch();
     const { channels } = useSelector((state) => state.channels);
     const channelsData = useSelector((state) => state.channelsData);
@@ -62,6 +63,7 @@ export default function Event() {
     const channelIdRef = useRef(null);
     const huddleChannelIdRef = useRef(null);
     const mainChannelRef = useRef(null);
+
     useEffect(() => {
         channelsDataRef.current = channelsData;
     }, [channelsData]);
@@ -154,7 +156,7 @@ export default function Event() {
 
     function workspaceListener() {
         console.log("init worksapce listener");
-        connectionRef.current = Echo.join(`workspaces.${workspace.id}`);
+        connectionRef.current = Echo.join(`workspaces.${workspaceId}`);
         connectionRef.current
             .here((users) => {
                 dispatch(setManyOnline(users));
@@ -334,19 +336,21 @@ export default function Event() {
 
         return () => {
             connectionRef.current = null;
-            Echo.leave(`workspaces.${workspace.id}`);
+            Echo.leave(`workspaces.${workspaceId}`);
         };
-    }, [workspace.id]);
+    }, [workspaceId]);
 
     useEffect(() => {
-        Echo.private(`private_workspaces.${workspace.id}`).listen(
+        Echo.private(`private_workspaces.${workspaceId}`).listen(
             "WorkspaceEvent",
             (e) => {
                 console.log("workspaceEvent", e);
                 switch (e.type) {
                     case "WorkspaceObserver_updated":
+                        dispatch(updateWorkspace(e.data));
+                        break;
                     case "InvitationPermission_updated":
-                        loadWorkspaceData();
+                        loadWorkspaceData("workspacePermissions");
                         break;
                     case "ChannelObserver_storeChannel":
                         const newChannel = e.data;
@@ -410,7 +414,7 @@ export default function Event() {
             }
         );
         return () => {
-            Echo.leave(`private_workspaces.${workspace.id}`);
+            Echo.leave(`private_workspaces.${workspaceId}`);
         };
     }, [workspaceId, auth.user.id]);
 
@@ -423,7 +427,7 @@ export default function Event() {
                 .leaving((user) => {
                     dispatch(setOnlineStatus({ user, onlineStatus: false }));
                 });
-    }, [workspace.id]);
+    }, [workspaceId]);
 
     return <></>;
 }
