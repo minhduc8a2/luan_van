@@ -1,10 +1,10 @@
-import React, { useRef, useState } from "react";
-import { IoHomeOutline, IoSettingsOutline } from "react-icons/io5";
-import { Provider, useSelector } from "react-redux";
+import React, { useState } from "react";
+import { IoSettingsOutline } from "react-icons/io5";
+import { useSelector } from "react-redux";
 import { Link, Outlet } from "react-router-dom";
 
 import InitData from "./InitData";
-import { makeStore } from "@/Store/store";
+
 import { GoHome } from "react-icons/go";
 import { usePage, Link as InertiaLink } from "@inertiajs/react";
 
@@ -17,14 +17,9 @@ import NotificationPopup from "@/Components/NotificationPopup";
 
 export default function Admin() {
     const [loaded, setLoaded] = useState(false);
-    const storeRef = useRef();
-    if (!storeRef.current) {
-        console.log("store created");
-        storeRef.current = makeStore();
-    }
 
     return (
-        <Provider store={storeRef.current}>
+        <>
             <InitData loaded={loaded} setLoaded={setLoaded} />
             {loaded && (
                 <Wrapper>
@@ -32,14 +27,16 @@ export default function Admin() {
                     <NotificationPopup />
                 </Wrapper>
             )}
-        </Provider>
+        </>
     );
 }
 
 function Wrapper({ children }) {
     const { auth } = usePage().props;
-    const { workspace, main_channel_id} = useSelector((state) => state.workspace);
-    
+    const { workspace, main_channel_id } = useSelector(
+        (state) => state.workspace
+    );
+
     return (
         <div className="flex flex-col min-h-screen">
             <nav className="h-20 shadow flex px-8 bg-color-contrast justify-between items-center">

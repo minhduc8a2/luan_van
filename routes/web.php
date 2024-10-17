@@ -8,6 +8,7 @@ use App\Jobs\DeleteTemporaryFiles;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\UserController;
+use Illuminate\Support\Facades\Redirect;
 use Laravel\Socialite\Facades\Socialite;
 use App\Http\Controllers\HuddleController;
 use App\Http\Controllers\ThreadController;
@@ -19,6 +20,7 @@ use App\Http\Controllers\WorkspaceController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Auth\ProviderController;
+use App\Models\Workspace;
 
 // Route::get('/auth/redirect', function () {
 //     return Socialite::driver('github')->redirect();
@@ -29,11 +31,10 @@ use App\Http\Controllers\Auth\ProviderController;
 
 //     // $user->token
 // });
-Route::get('/', function (Request $request) {
-    return Inertia::render('Welcome', [
-        "workspaces" => $request->user()->workspaces
-    ]);
-})->middleware('auth')->name('home');
+Route::get("/", function () {
+    return "homepage";
+})->name('home');
+Route::get('/workspaces', [WorkspaceController::class, 'index'])->middleware('auth')->name('workspaces');
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
@@ -44,14 +45,18 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::post("/workspaces", [WorkspaceController::class, 'store'])->name('workspaces.store');
-    Route::get("/workspaces/{workspace}", [WorkspaceController::class, 'show'])->name('workspace.show');
+    Route::get("/workspaces/{workspace}", [WorkspaceController::class, 'show'])->name('workspace.show')->missing(function () {
+        return Redirect::route('workspaces');
+    });
     Route::patch("/workspaces/{workspace}", [WorkspaceController::class, 'update'])->name('workspaces.update');
     Route::delete("/workspaces/{workspace}", [WorkspaceController::class, 'destroy'])->name('workspaces.delete')->middleware('throttle');
     Route::get("/workspaces/{workspace}/admin/settings", [WorkspaceController::class, 'settings'])->name('workspaces.settings');
     Route::get("/workspaces/{workspace}/admin/account_profile", [WorkspaceController::class, 'accountAndProfile'])->name('workspaces.accountAndProfile');
     Route::get("/workspaces/{workspace}/admin/home", [WorkspaceController::class, 'settingsHome'])->name('workspaces.settingsHome');
     Route::get("/workspaces/{workspace}/admin/manage_members", [WorkspaceController::class, 'manageMembers'])->name('workspaces.manageMembers');
-    Route::get("/workspaces/{workspace}/channels/{channel}", [ChannelController::class, 'show'])->name('channels.show');
+    Route::get("/workspaces/{workspace}/channels/{channel}", [ChannelController::class, 'show'])->name('channels.show')->missing(function (Workspace $workspace) {
+        return Redirect::route('/workspaces/{workspace}/channels/' . $workspace->mainChannel()->id);
+    });
     Route::get("/workspaces/{workspace}/init_workspace_data", [WorkspaceController::class, 'initWorkspaceData'])->name('workspaces.initWorkspaceData');
     Route::get('/workspaces/{workspace}/browse_users', [UserController::class, 'browseUsers'])->name("users.browseUsers");
 

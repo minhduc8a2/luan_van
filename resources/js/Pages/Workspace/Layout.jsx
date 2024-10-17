@@ -6,10 +6,8 @@ import Panel from "./Panel/Panel";
 import { useRef } from "react";
 import Huddle from "./Huddle/Huddle";
 import Event from "./Event";
-import { makeStore } from "@/Store/store";
-import { Provider, useDispatch, useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
-import { setNotificationPopup } from "@/Store/notificationPopupSlice";
 import { setMedia } from "@/Store/mediaSlice";
 import Image from "@/Components/Image";
 import Video from "@/Components/Video";
@@ -30,46 +28,39 @@ import { IoMdCloudDownload } from "react-icons/io";
 import NotificationPopup from "@/Components/NotificationPopup";
 export default function Layout() {
     const { channelId } = useParams();
-
+    const dispatch = useDispatch();
     const storeRef = useRef();
-    if (!storeRef.current) {
-        console.log("store created");
-        // Create the store instance the first time this renders
-        storeRef.current = makeStore();
 
-        //update panel width in localStorage
-        try {
-            const leftWindowWidth = parseInt(
-                localStorage.getItem("leftWindowWidth")
-            );
-            console.log(typeof leftWindowWidth);
-            if (Number.isInteger(leftWindowWidth))
-                storeRef.current.dispatch(setLeftWindowWidth(leftWindowWidth));
-        } catch (error) {}
+    try {
+        const leftWindowWidth = parseInt(
+            localStorage.getItem("leftWindowWidth")
+        );
+        console.log(typeof leftWindowWidth);
+        if (Number.isInteger(leftWindowWidth))
+            dispatch(setLeftWindowWidth(leftWindowWidth));
+    } catch (error) {}
 
-        try {
-            const rightWindowWidth = parseInt(
-                localStorage.getItem("rightWindowWidth")
-            );
-            console.log(typeof rightWindowWidth);
-            if (Number.isInteger(rightWindowWidth))
-                storeRef.current.dispatch(
-                    setRightWindowWidth(rightWindowWidth)
-                );
-        } catch (error) {}
+    try {
+        const rightWindowWidth = parseInt(
+            localStorage.getItem("rightWindowWidth")
+        );
+        console.log(typeof rightWindowWidth);
+        if (Number.isInteger(rightWindowWidth))
+            dispatch(setRightWindowWidth(rightWindowWidth));
+    } catch (error) {}
 
-        if (channelId) {
-            storeRef.current.dispatch(setLeftWindowType("panel"));
-        }
+    if (channelId) {
+        dispatch(setLeftWindowType("panel"));
     }
+
     useEffect(() => {
         const handleOnline = () => {
             console.log("You are online");
-            storeRef.current.dispatch(setIsOnline({ isOnline: true }));
+            dispatch(setIsOnline({ isOnline: true }));
         };
         const handleOffline = () => {
             console.log("You are offline");
-            storeRef.current.dispatch(setIsOnline({ isOnline: false }));
+            dispatch(setIsOnline({ isOnline: false }));
         };
 
         Echo.connector.pusher.connection.bind("connected", handleOnline);
@@ -94,11 +85,9 @@ export default function Layout() {
         };
     }, []);
     return (
-        <Provider store={storeRef.current}>
-            <Wrapper>
-                <Outlet />
-            </Wrapper>
-        </Provider>
+        <Wrapper>
+            <Outlet />
+        </Wrapper>
     );
 }
 

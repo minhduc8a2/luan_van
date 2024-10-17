@@ -41,14 +41,16 @@ class WorkspaceController extends Controller
             'workspaces' => $workspaces,
             'newNotificationsCount' => $newNotificationsCount,
             'workspacePermissions' => $workspacePermissions,
-            'main_channel_id' => $workspace->mainChannel()->id,
             'workspace' => $workspace
         ];
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        //
+        if ($request->expectsJson()) {
+            return ['workspaces' => $request->user()->workspaces];
+        }
+        return Inertia::render("Workspace/Index");
     }
 
     /**

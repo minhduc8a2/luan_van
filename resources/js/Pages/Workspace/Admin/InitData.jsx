@@ -8,7 +8,6 @@ import { useParams } from "react-router-dom";
 
 export default function InitData({ loaded, setLoaded }) {
     const { workspaceId } = useParams();
-    console.log(workspaceId);
     const dispatch = useDispatch();
     function loadWorkspaceRelatedData() {
         return Promise.all([loadWorkspaceData()]);

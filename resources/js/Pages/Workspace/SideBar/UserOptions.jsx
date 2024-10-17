@@ -5,12 +5,14 @@ import { setProfile } from "@/Store/profileSlice";
 
 import { usePage } from "@inertiajs/react";
 import React from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 
 export default function UserOptions() {
     const { auth } = usePage().props;
+    const { workspace } = useSelector((state) => state.workspace);
     const dispatch = useDispatch();
-   
+
     return (
         <CustomedPopover
             anchor="top start"
@@ -38,13 +40,17 @@ export default function UserOptions() {
             <CustomedPopover.ListItem
                 onClick={() => {
                     dispatch(setProfile(auth.user.id));
-                    
                 }}
             >
                 Profile
             </CustomedPopover.ListItem>
             <CustomedPopover.ListItem>
-                Sign out of Main
+                <Link to="/workspaces">
+                    Sign out of{" "}
+                    <span className="font-bold capitalize">
+                        {workspace.name}
+                    </span>
+                </Link>
             </CustomedPopover.ListItem>
         </CustomedPopover>
     );

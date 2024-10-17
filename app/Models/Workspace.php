@@ -6,6 +6,7 @@ use App\Helpers\BaseRoles;
 use App\Helpers\ChannelTypes;
 use App\Helpers\PermissionTypes;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -20,6 +21,13 @@ class Workspace extends Model
         'name',
         'user_id'
     ];
+    protected $appends = ['main_channel_id'];
+    protected function mainChannelId(): Attribute
+    {
+        return new Attribute(
+            get: fn() => $this->mainChannel()->id,
+        );
+    }
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -40,7 +48,7 @@ class Workspace extends Model
         return $this->morphMany(Permission::class, 'permissionable');
     }
 
-    public function mainChannel():Channel
+    public function mainChannel(): Channel
     {
         return $this->channels()->where('is_main_channel', true)->first();
     }

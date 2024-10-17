@@ -6,6 +6,7 @@ import InputLabel from "@/Components/InputLabel";
 import TextInput from "@/Components/Input/TextInput";
 import { useCustomedForm } from "@/helpers/customHooks";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 export default function DeleteWorkspace() {
     const [isOpen, setIsOpen] = useState(false);
@@ -17,10 +18,13 @@ export default function DeleteWorkspace() {
         { url: route("workspaces.delete", workspace.id), method: "delete" }
     );
     const [isConfirmed, setIsConfirmed] = useState(false);
+    const navigate = useNavigate();
     function onSubmit(e) {
         e.preventDefault();
         if (!isConfirmed) return;
-        submit();
+        submit().then(() => {
+            navigate("/workspaces");
+        });
     }
     return (
         <ExpandableItem

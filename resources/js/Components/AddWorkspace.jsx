@@ -1,11 +1,9 @@
-import { IoIosAdd } from "react-icons/io";
-
 import TextArea from "@/Components/Input/TextArea";
 import { useCustomedForm } from "@/helpers/customHooks";
-import { useState } from "react";
+
 import { useNavigate } from "react-router-dom";
 import CustomedDialog from "@/Components/CustomedDialog";
-export function AddWorkspace({isOpen,setIsOpen}) {
+export function AddWorkspace({ isOpen, setIsOpen }) {
     const { submit, loading, getValues, setValues } = useCustomedForm(
         { name: "", channel: "" },
         {

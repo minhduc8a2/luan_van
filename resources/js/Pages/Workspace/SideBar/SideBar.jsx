@@ -1,18 +1,17 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 
 import { PiHouseLineBold, PiHouseLineFill } from "react-icons/pi";
 import { FaRegBell } from "react-icons/fa6";
 
-import Dropdown from "@/Components/Dropdown";
 import WorkspaceAvatar from "@/Components/WorkspaceAvatar";
 import WorkspaceListItem from "@/Components/WorkspaceListItem";
 
-import { AddWorkspace } from "./AddWorkspace";
+import { AddWorkspace } from "@/Components/AddWorkspace";
 import { useRef, useEffect } from "react";
 import { FaBell } from "react-icons/fa6";
 import { useDispatch, useSelector } from "react-redux";
 
-import { usePage } from "@inertiajs/react";
+
 import More from "./More";
 
 import UserOptions from "./UserOptions";

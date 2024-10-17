@@ -6,7 +6,7 @@ import { TbStack2 } from "react-icons/tb";
 
 import { useDispatch } from "react-redux";
 import { setLeftWindowType, setRightWindowType } from "@/Store/windowTypeSlice";
-import { router, usePage } from "@inertiajs/react";
+import {  usePage } from "@inertiajs/react";
 import { RiContactsBook3Line } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
 import ThemePicker from "./ThemePicker";

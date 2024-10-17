@@ -37,7 +37,7 @@ import {
 import { useParams } from "react-router-dom";
 
 import useReloadPermissions from "@/helpers/useReloadPermissions";
-import { useMainChannel } from "@/helpers/customHooks";
+
 import useGoToChannel from "@/helpers/useGoToChannel";
 
 export default function Event() {
@@ -53,7 +53,7 @@ export default function Event() {
     const { channelId: huddleChannelId } = useSelector((state) => state.huddle);
     const reloadPermissions = useReloadPermissions();
     const goToChannel = useGoToChannel();
-    const { mainChannel } = useMainChannel(workspaceId);
+
     const channelsDataRef = useRef(null);
     const channelsRef = useRef(null);
     const workspaceUsersRef = useRef(null);
@@ -85,17 +85,15 @@ export default function Event() {
     }, [huddleChannelId]);
 
     useEffect(() => {
-        mainChannelRef.current = mainChannel;
-    }, [mainChannel]);
+        mainChannelRef.current = { id: workspace.main_channel_id };
+    }, [workspace]);
 
     const userListener = useCallback(() => {
         Echo.private("App.Models.User." + auth.user.id).notification(
             (notification) => {
                 console.log(notification);
-                const { workspace: notificationWorkspace } =
-                    isBroadcastNotification(notification.type)
-                        ? notification
-                        : notification.data;
+                const { workspace: notificationWorkspace } = notification;
+
                 if (workspaceId != notificationWorkspace.id) return;
                 dispatch(addNotificationCount());
                 if (isChannelsNotificationBroadcast(notification.type)) {
@@ -323,7 +321,7 @@ export default function Event() {
     }
     useEffect(() => {
         listenChannels();
-        //If leave channel, will not receive events 
+        //If leave channel, will not receive events
         // return () => {
         //     channels.forEach((cn) => {
         //         Echo.leave(`private_channels.${cn.id}`);
