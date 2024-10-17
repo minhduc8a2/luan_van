@@ -2,9 +2,10 @@
 
 namespace App\Policies;
 
-use App\Models\Invitation;
 use App\Models\User;
 use App\Models\Workspace;
+use App\Models\Invitation;
+use App\Helpers\PermissionTypes;
 use Illuminate\Auth\Access\Response;
 
 class InvitationPolicy
@@ -30,8 +31,16 @@ class InvitationPolicy
      */
     public function create(User $user, Workspace $workspace): bool
     {
-        return $user->isWorkspaceMember($workspace);
+        return
+            $user->workspacePermissionCheck($workspace, PermissionTypes::WORKSPACE_ALL->name)
+            ||
+            $user->workspacePermissionCheck($workspace, PermissionTypes::WORKSPACE_INVITATION->name)
+            ||
+            $user->workspacePermissionCheck($workspace, PermissionTypes::WORKSPACE_INVITATION_WITH_ADMIN_APPROVAL_REQUIRED->name);
     }
+
+
+
 
     /**
      * Determine whether the user can update the model.

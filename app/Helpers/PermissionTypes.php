@@ -15,6 +15,7 @@ enum PermissionTypes
     //workspace permissions
     case WORKSPACE_ALL;
     case WORKSPACE_INVITATION;
+    case WORKSPACE_INVITATION_WITH_ADMIN_APPROVAL_REQUIRED;
     case CREATE_CHANNEL;
     case SEARCH_CHANNEL;
 }

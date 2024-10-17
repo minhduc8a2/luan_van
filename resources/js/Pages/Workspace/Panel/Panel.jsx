@@ -20,9 +20,11 @@ import WorkspaceOptions from "./WorkspaceOptions";
 
 export default function Panel({}) {
     const { auth } = usePage().props;
-    const { workspace } = useSelector((state) => state.workspace);
+    const { workspace, workspacePermissions } = useSelector(
+        (state) => state.workspace
+    );
     const { channelId, workspaceId } = useParams();
-    const {theme} = useContext(ThemeContext)
+    const { theme } = useContext(ThemeContext);
     const { channels } = useSelector((state) => state.channels);
 
     const currentChannel = useMemo(
@@ -32,7 +34,6 @@ export default function Panel({}) {
     const goToChannel = useGoToChannel();
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
 
-   
     function changeChannel(channel) {
         goToChannel(channel.workspace_id, channel.id);
     }
@@ -43,10 +44,13 @@ export default function Panel({}) {
         return channels.find((cn) => cn.type == "SELF");
     }, [channels]);
     return (
-        <div className={`${theme.mode?"bg-black/35":"bg-white/15"} h-full  rounded-l-lg rounded-s-lg border-r border-r-white/15`}>
+        <div
+            className={`${
+                theme.mode ? "bg-black/35" : "bg-white/15"
+            } h-full  rounded-l-lg rounded-s-lg border-r border-r-white/15`}
+        >
             <div className="flex justify-between items-center p-4">
-
-               <WorkspaceOptions workspace={workspace}/>
+                <WorkspaceOptions workspace={workspace} />
                 {/* <HiOutlinePencilAlt className="text-xl opacity-75" /> */}
             </div>
             <hr className=" opacity-10" />
@@ -73,7 +77,9 @@ export default function Panel({}) {
                                             }
                                             className={`flex items-center mt-2 w-full px-4 justify-between rounded-lg ${
                                                 channel.id == currentChannel?.id
-                                                    ? (theme.mode?"bg-primary-300":"bg-primary-600")
+                                                    ? theme.mode
+                                                        ? "bg-primary-300"
+                                                        : "bg-primary-600"
                                                     : "hover:bg-white/10"
                                             }`}
                                         >
@@ -185,7 +191,9 @@ export default function Panel({}) {
                             channel={selfChannel}
                         />
                     </ul>
-                    <InvitationForm workspace={workspace} />
+                    {workspacePermissions?.inviteToWorkspace && (
+                        <InvitationForm workspace={workspace} />
+                    )}
                 </div>
             </div>
         </div>

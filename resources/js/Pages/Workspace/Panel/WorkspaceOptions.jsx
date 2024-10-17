@@ -32,7 +32,7 @@ export default function WorkspaceOptions({ workspace }) {
                         Edit workspace details
                     </CustomedPopover.ListItem>
                     <CustomedPopover.ListItem>
-                        <Link to={`/workspaces/${workspace.id}/admin/settings`}>
+                        <Link to={`/workspaces/${workspace.id}/admin/settings`} className="w-full h-full block">
                             Workspace settings
                         </Link>
                     </CustomedPopover.ListItem>
@@ -45,7 +45,7 @@ export default function WorkspaceOptions({ workspace }) {
                     </h3>
                     <CustomedPopover.ListItem>
                         <Link
-                            to={`/workspaces/${workspace.id}/admin/manage_members`}
+                            to={`/workspaces/${workspace.id}/admin/manage_members`} className="w-full h-full block"
                         >
                             Manage members
                         </Link>

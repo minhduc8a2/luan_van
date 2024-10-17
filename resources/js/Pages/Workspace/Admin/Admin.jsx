@@ -13,7 +13,7 @@ import { LuUser2 } from "react-icons/lu";
 import { PiAddressBookTabs } from "react-icons/pi";
 import { MdLogout, MdOutlineRocketLaunch } from "react-icons/md";
 import NotificationPopup from "@/Components/NotificationPopup";
-
+import Event from "./Event";
 
 export default function Admin() {
     const [loaded, setLoaded] = useState(false);
@@ -23,6 +23,7 @@ export default function Admin() {
             <InitData loaded={loaded} setLoaded={setLoaded} />
             {loaded && (
                 <Wrapper>
+                    <Event />
                     <Outlet />
                     <NotificationPopup />
                 </Wrapper>

@@ -1,30 +1,14 @@
 import LoadingSpinner from "@/Components/LoadingSpinner";
-
-import { setWorkspaceData } from "@/Store/workspaceSlice";
-
+import useLoadWorkspaceData from "@/helpers/useLoadWorkspaceData";
 import { useEffect } from "react";
-import { useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
-
 export default function InitData({ loaded, setLoaded }) {
     const { workspaceId } = useParams();
-    const dispatch = useDispatch();
-    function loadWorkspaceRelatedData() {
-        return Promise.all([loadWorkspaceData()]);
-    }
-
-    function loadWorkspaceData() {
-        return axios
-            .get(route("workspaces.initWorkspaceData", workspaceId))
-            .then((response) => {
-                dispatch(setWorkspaceData(response.data));
-            });
-    }
-
+    const loadWorkspaceData = useLoadWorkspaceData();
     useEffect(() => {
         if (!workspaceId) return;
         setLoaded(false);
-        loadWorkspaceRelatedData()
+        loadWorkspaceData()
             .then(() => {
                 setLoaded(true);
             })

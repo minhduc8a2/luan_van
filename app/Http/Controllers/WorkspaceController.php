@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\WorkspaceEvent;
+use App\Helpers\BaseRoles;
 use App\Models\Role;
 use Inertia\Inertia;
 use App\Helpers\Helper;
+use App\Helpers\PermissionTypes;
 use App\Models\Channel;
+use App\Models\Invitation;
 use App\Models\Workspace;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
@@ -34,7 +38,12 @@ class WorkspaceController extends Controller
         $user = $request->user();
         $workspaces =  $user->workspaces;
         $newNotificationsCount =  $user->notifications()->where("read_at", null)->count();
-        $workspacePermissions =  ['createChannel' => $user->can('create', [Channel::class, $workspace]),];
+        $workspacePermissions =  [
+            'createChannel' => $user->can('create', [Channel::class, $workspace]),
+            'updateInvitationPermission' => $user->can('updateInvitationPermission', [Workspace::class, $workspace]),
+            'inviteToWorkspace' => $user->can('create', [Invitation::class, $workspace]),
+            'isInvitationToWorkspaceWithAdminApprovalRequired' => $workspace->permissions()->where('permission_type', PermissionTypes::WORKSPACE_INVITATION_WITH_ADMIN_APPROVAL_REQUIRED->name)->exists()
+        ];
 
         return [
             'publicAppUrl' => env('PUBLIC_APP_URL', ''),
@@ -130,11 +139,42 @@ class WorkspaceController extends Controller
         //
     }
 
+    public function updateInvitationPermission(Request $request, Workspace $workspace)
+    {
+        if ($request->user()->cannot('updateInvitationPermission', [Workspace::class, $workspace])) abort(401);
+        $validated = $request->validate(['requiredAdminApproval' => 'boolean|required']);
+
+        $requiredAdminApproval = $validated['requiredAdminApproval'];
+        try {
+            DB::beginTransaction();
+            $permissionType = $requiredAdminApproval
+                ? PermissionTypes::WORKSPACE_INVITATION_WITH_ADMIN_APPROVAL_REQUIRED->name
+                : PermissionTypes::WORKSPACE_INVITATION->name;
+
+            $workspace->permissions()->whereIn('permission_type', [
+                PermissionTypes::WORKSPACE_INVITATION->name,
+                PermissionTypes::WORKSPACE_INVITATION_WITH_ADMIN_APPROVAL_REQUIRED->name
+            ])->delete();
+
+            $memberRoleId = Role::getRoleIdByName(BaseRoles::MEMBER->name);
+            $workspace->permissions()->create(['permission_type' => $permissionType, 'role_id' => $memberRoleId]);
+
+            broadcast(new WorkspaceEvent(workspace: $workspace, type: "InvitationPermission_updated", fromUserId: "", data: $workspace));
+
+            DB::commit();
+            return Helper::createSuccessResponse();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            // dd($th);
+            Helper::createErrorResponse();
+        }
+    }
     /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, Workspace $workspace)
     {
+        if ($request->user()->cannot('update', [Workspace::class, $workspace])) abort(401);
         $validated = $request->validate(["name" => "required|string|max:255"]);
         $workspace->fill($validated);
         $workspace->save();

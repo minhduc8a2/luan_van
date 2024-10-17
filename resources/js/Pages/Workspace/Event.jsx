@@ -39,6 +39,7 @@ import { useParams } from "react-router-dom";
 import useReloadPermissions from "@/helpers/useReloadPermissions";
 
 import useGoToChannel from "@/helpers/useGoToChannel";
+import useLoadWorkspaceData from "@/helpers/useLoadWorkspaceData";
 
 export default function Event() {
     const { auth } = usePage().props;
@@ -53,7 +54,7 @@ export default function Event() {
     const { channelId: huddleChannelId } = useSelector((state) => state.huddle);
     const reloadPermissions = useReloadPermissions();
     const goToChannel = useGoToChannel();
-
+    const loadWorkspaceData = useLoadWorkspaceData();
     const channelsDataRef = useRef(null);
     const channelsRef = useRef(null);
     const workspaceUsersRef = useRef(null);
@@ -343,6 +344,10 @@ export default function Event() {
             (e) => {
                 console.log("workspaceEvent", e);
                 switch (e.type) {
+                    case "WorkspaceObserver_updated":
+                    case "InvitationPermission_updated":
+                        loadWorkspaceData();
+                        break;
                     case "ChannelObserver_storeChannel":
                         const newChannel = e.data;
                         if (

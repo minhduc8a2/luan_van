@@ -2,6 +2,7 @@ import SettingsTabs from "../SettingsTabs";
 import { IoMdSettings } from "react-icons/io";
 import ChangeWorkspaceName from "./ChangeWorkspaceName";
 import DeleteWorkspace from "./DeleteWorkspace";
+import InvitationPermissions from "./InvitationPermissions";
 
 export default function AccountAndProfile() {
     const tabs = ["Settings", "Permissions"];
@@ -11,7 +12,9 @@ export default function AccountAndProfile() {
             <hr className="my-4" />
             <DeleteWorkspace />
         </>,
-        <></>,
+        <>
+            <InvitationPermissions />
+        </>,
     ];
     return (
         <div>

@@ -35,6 +35,10 @@ class WorkspacePolicy
         return true;
     }
 
+    public function updateInvitationPermission(User $user, Workspace $workspace)
+    {
+        return $user->workspacePermissionCheck($workspace, PermissionTypes::WORKSPACE_ALL->name);
+    }
     /**
      * Determine whether the user can update the model.
      */
@@ -42,6 +46,8 @@ class WorkspacePolicy
     {
         return $user->workspacePermissionCheck($workspace, PermissionTypes::WORKSPACE_ALL->name);
     }
+
+    
 
     /**
      * Determine whether the user can delete the model.
