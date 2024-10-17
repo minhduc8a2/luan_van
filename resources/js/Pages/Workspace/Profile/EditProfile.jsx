@@ -1,78 +1,68 @@
 import Button from "@/Components/Button";
 import CustomedDialog from "@/Components/CustomedDialog";
 import TextInput from "@/Components/Input/TextInput";
-
-
-import { Link, router, useForm, usePage } from "@inertiajs/react";
 import { useEffect, useState } from "react";
 import RemovePhoto from "./RemovePhoto";
-import { useDispatch, useSelector } from "react-redux";
-import { setNotificationPopup } from "@/Store/notificationPopupSlice";
+import { useDispatch } from "react-redux";
 import LoadingSpinner from "@/Components/LoadingSpinner";
 import Image from "@/Components/Image";
-import defaultAvatar from "@/../images/default_avatar.png"
+import defaultAvatar from "@/../images/default_avatar.png";
+import { useCustomedForm } from "@/helpers/customHooks";
+import useErrorHandler from "@/helpers/useErrorHandler";
+import { useParams } from "react-router-dom";
+import useSuccessHandler from "@/helpers/useSuccessHandler";
 export default function EditProfile({ user, triggerButton }) {
-    const { workspace } = usePage().props;
-   
+    const { workspaceId } = useParams();
+
     let [isOpen, setIsOpen] = useState(false);
 
     const [avatarFile, setAvatarFile] = useState(null);
     const [uploadingAvatarFile, setUploadingAvatarFile] = useState(false);
-    const dispatch = useDispatch();
-    const { data, setData, patch, processing, reset } = useForm({
-        name: user.name,
-        display_name: user.display_name || "",
-    });
+    const successHandler = useSuccessHandler("Update profile successfully!");
+    const errorHandler = useErrorHandler();
+    const { getValues, setValues, submit, loading, reset } = useCustomedForm(
+        {
+            email: user.email,
+            name: user.name,
+            phone: user.phone,
+            display_name: user.display_name || "",
+        },
+        { url: route("profile.update"), method: "patch" }
+    );
+
     useEffect(() => {
         if (!avatarFile) return;
 
-        router.post(
-            route("users.updateAvatar", user.id),
-            { avatarFile, workspaceId: workspace.id },
-            {
-                only: [],
-                preserveState: true,
-                onStart: () => {
-                    setUploadingAvatarFile(true);
-                },
-                onError: (errors) =>
-                    dispatch(
-                        setNotificationPopup({
-                            type: "error",
-                            message: errors.server,
-                        })
-                    ),
-
-                onFinish: () => {
-                    setUploadingAvatarFile(false);
-                },
-            }
-        );
-    }, [avatarFile, data]);
+        setUploadingAvatarFile(true);
+        console.log(avatarFile);
+        axios
+            .postForm(route("users.updateAvatar", user.id), {
+                avatarFile,
+                workspaceId: workspaceId,
+            })
+            .catch(errorHandler)
+            .finally(() => {
+                setUploadingAvatarFile(false);
+            });
+    }, [avatarFile]);
     function onSubmit(e) {
         e.preventDefault();
-        patch(route("users.update", user.id), {
-            preserveState: true,
-            only: [],
-            onError: (errors) =>
-                dispatch(
-                    setNotificationPopup({
-                        type: "error",
-                        messages: Object.values(errors),
-                    })
-                ),
-
-            onSuccess: () => {
+        submit()
+            .then(successHandler)
+            .then(() => {
                 setIsOpen(false);
-            },
-        });
+            });
     }
     return (
         <>
-            <div onClick={() => {
-                setIsOpen(true)
-                reset()
-            }}>{triggerButton}</div>
+            <div
+                onClick={() => {
+                    setIsOpen(true);
+                    reset();
+                }}
+            >
+                {triggerButton}
+            </div>
             <CustomedDialog
                 isOpen={isOpen}
                 onClose={() => setIsOpen(false)}
@@ -90,10 +80,10 @@ export default function EditProfile({ user, triggerButton }) {
                             </label>
                             <TextInput
                                 id="profile-fullname"
-                                value={data.name}
+                                value={getValues().name}
                                 placeholder="Full name"
                                 onChange={(e) =>
-                                    setData("name", e.target.value)
+                                    setValues("name", e.target.value)
                                 }
                             />
                         </div>
@@ -106,10 +96,10 @@ export default function EditProfile({ user, triggerButton }) {
                             </label>
                             <TextInput
                                 id="profile-display-name"
-                                value={data.display_name}
+                                value={getValues().display_name}
                                 placeholder="Display name"
                                 onChange={(e) =>
-                                    setData("display_name", e.target.value)
+                                    setValues("display_name", e.target.value)
                                 }
                             />
                         </div>
@@ -119,7 +109,7 @@ export default function EditProfile({ user, triggerButton }) {
                             </Button>
                             <Button
                                 type="green"
-                                loading={processing}
+                                loading={loading}
                                 onClick={onSubmit}
                             >
                                 Save Changes

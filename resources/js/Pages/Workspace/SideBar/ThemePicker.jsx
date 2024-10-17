@@ -1,11 +1,11 @@
-import Button from "@/Components/Button";
+
 import CustomedDialog from "@/Components/CustomedDialog";
 import React, { useContext, useState } from "react";
 import ThemeContext from "@/ThemeProvider";
 import { MdOutlineDarkMode, MdOutlineLightMode } from "react-icons/md";
-export default function ThemePicker() {
+export default function ThemePicker({isOpen,setIsOpen}) {
     const { theme, toggleTheme, setColorScheme } = useContext(ThemeContext);
-    const [isOpen, setIsOpen] = useState(false);
+   
     const themes = [
         {
             title: "Purple",
@@ -25,7 +25,7 @@ export default function ThemePicker() {
     ];
     return (
         <>
-            <Button onClick={() => setIsOpen(true)}>Theme</Button>
+            
             <CustomedDialog isOpen={isOpen} onClose={() => setIsOpen(false)}>
                 <CustomedDialog.Title>Theme</CustomedDialog.Title>
                 <div className=" my-4">

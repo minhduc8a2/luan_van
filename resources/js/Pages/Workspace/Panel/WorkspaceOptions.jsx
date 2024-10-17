@@ -9,7 +9,7 @@ export default function WorkspaceOptions({ workspace }) {
         <CustomedPopover
             triggerNode={
                 <div className="flex gap-x-1 items-center hover:bg-color/10 cursor-pointer p-2 rounded-lg">
-                    <h3 className="text-xl font-semibold">{workspace.name}</h3>
+                    <h3 className="text-xl font-semibold capitalize">{workspace.name}</h3>
                     <IoIosArrowDown className="text-lg" />
                 </div>
             }

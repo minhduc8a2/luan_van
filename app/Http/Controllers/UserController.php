@@ -75,33 +75,7 @@ class UserController extends Controller
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(ProfileUpdateRequest $request, User $user)
-    {
-
-        if ($request->user()->id !== $user->id) return abort(403);
-        $name = $request->validated('name');
-        $display_name = $request->validated('display_name');
-        $email = $request->validated('email');
-        $phone = $request->validated('phone');
-        try {
-            DB::beginTransaction();
-
-            if ($name) $user->name = $name;
-            if ($display_name) $user->display_name = $display_name;
-            if ($email) $user->email = $email;
-            if ($phone) $user->phone = $phone;
-
-            $user->save();
-            DB::commit();
-            return Helper::createSuccessResponse();
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            return Helper::createErrorResponse();
-        }
-    }
+  
     public function updateAvatar(Request $request, User $user)
     {
         if ($request->user()->id !== $user->id) return abort(403);
@@ -112,6 +86,7 @@ class UserController extends Controller
         ]);
 
         $avatarFile = $validated['avatarFile'];
+        
         $path = $avatarFile->store('public/users_' . $user->id);
         $url = Storage::url($path);
         $oldAvatarFilePath = null;
@@ -131,12 +106,12 @@ class UserController extends Controller
         } catch (\Throwable $th) {
             DB::rollBack();
             Storage::delete($path);
-            return back()->withErrors(['server' => "Something went wrong! Please try later."]);
+            Helper::createErrorResponse();
         }
         if ($oldAvatarFilePath) {
             Storage::delete($oldAvatarFilePath);
         }
-        return back();
+        return Helper::createSuccessResponse();
     }
     public function deleteAvatar(Request $request, User $user)
     {

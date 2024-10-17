@@ -38,6 +38,7 @@ export default function SideBar({}) {
 
     return (
         <div className="flex flex-col justify-between h-full pb-8" ref={boxRef}>
+            
             <AddWorkspace isOpen={isOpen} setIsOpen={setIsOpen}/>
             <div className="flex flex-col items-center gap-y-8 ">
                 <CustomedPopover

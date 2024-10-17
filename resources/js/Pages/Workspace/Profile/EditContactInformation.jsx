@@ -17,11 +17,13 @@ export default function EditContactInformation({ user, triggerButton }) {
         submit,
     } = useCustomedForm(
         {
+            email: user.email,
+            name: user.name,
             phone: user.phone || "",
         },
         {
             method: "patch",
-            url: route("users.update", user.id),
+            url: route("profile.update"),
             hasEchoHeader: true,
         }
     );
@@ -72,7 +74,7 @@ export default function EditContactInformation({ user, triggerButton }) {
                     <div className="flex gap-x-4 mt-4">
                         <Button onClick={() => setIsOpen(false)}>Cancel</Button>
                         <Button
-                            className="!bg-dark-green"
+                            type="green"
                             loading={processing}
                             onClick={onSubmit}
                         >

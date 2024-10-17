@@ -73,7 +73,7 @@ export default function Panel({}) {
                                             }
                                             className={`flex items-center mt-2 w-full px-4 justify-between rounded-lg ${
                                                 channel.id == currentChannel?.id
-                                                    ? "bg-primary-300"
+                                                    ? (theme.mode?"bg-primary-300":"bg-primary-600")
                                                     : "hover:bg-white/10"
                                             }`}
                                         >

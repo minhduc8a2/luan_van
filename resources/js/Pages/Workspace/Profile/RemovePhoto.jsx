@@ -61,7 +61,7 @@ export default function RemovePhoto({ user }) {
                     <div className="flex justify-end gap-x-4 mt-8">
                         <Button onClick={() => setShow(false)}>Cancel</Button>
                         <Button
-                            className="!bg-danger-500"
+                            type="danger"
                             onClick={removePhoto}
                         >
                             Yes, Remove Photo

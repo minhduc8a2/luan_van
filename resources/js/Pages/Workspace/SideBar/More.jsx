@@ -9,7 +9,6 @@ import { setLeftWindowType, setRightWindowType } from "@/Store/windowTypeSlice";
 import {  usePage } from "@inertiajs/react";
 import { RiContactsBook3Line } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
-import ThemePicker from "./ThemePicker";
 export default function More() {
     const { workspace } = usePage().props;
     const dispatch = useDispatch();
@@ -74,9 +73,7 @@ export default function More() {
                                     iconNode={<RiContactsBook3Line className="text-white"/>}
                                 />
                             </li>
-                            <li>
-                                <ThemePicker />
-                            </li>
+                           
                         </ul>
                     </>
                 )}
