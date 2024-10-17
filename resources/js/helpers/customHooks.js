@@ -138,11 +138,11 @@ const useCustomedForm = (
                 setSuccess(true);
                 return reponse;
             })
-
+            .catch(errorHandler)
             .finally(() => {
                 setLoading(false);
             })
-            .catch(errorHandler);
+            
     }
 
     return {

@@ -3,6 +3,7 @@ import InputLabel from "@/Components/InputLabel";
 import Button from "@/Components/Button";
 import TextInput from "@/Components/Input/TextInput";
 import { Head, Link, useForm } from "@inertiajs/react";
+import { GrGroup } from "react-icons/gr";
 
 export default function Register() {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -21,16 +22,23 @@ export default function Register() {
     };
 
     return (
-        <div className="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-color-contrast ">
+        <div className="min-h-screen flex flex-col justify-center items-center bg-color-contrast ">
             <Head title="Register" />
-
-            <form onSubmit={submit}>
+            <div className="flex items-baseline gap-x-2 mb-8 text-color-high-emphasis">
+                <GrGroup className=" text-xl" />{" "}
+                <Link href="/" className=" font-bold text-3xl ">
+                    Create new account
+                </Link>
+            </div>
+            <form
+                onSubmit={submit}
+                className="w-full sm:max-w-md mt-6 px-6 py-4   overflow-hidden sm:rounded-lg"
+            >
                 <div>
-                    <InputLabel htmlFor="name" value="Name" />
-
                     <TextInput
                         id="name"
                         name="name"
+                        placeHolder="Name"
                         value={data.name}
                         className="mt-1 block w-full"
                         autoComplete="name"
@@ -43,10 +51,9 @@ export default function Register() {
                 </div>
 
                 <div className="mt-4">
-                    <InputLabel htmlFor="email" value="Email" />
-
                     <TextInput
                         id="email"
+                        placeHolder="example@gmail.com"
                         type="email"
                         name="email"
                         value={data.email}
@@ -60,10 +67,9 @@ export default function Register() {
                 </div>
 
                 <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Password" />
-
                     <TextInput
                         id="password"
+                        placeHolder="Password"
                         type="password"
                         name="password"
                         value={data.password}
@@ -77,12 +83,8 @@ export default function Register() {
                 </div>
 
                 <div className="mt-4">
-                    <InputLabel
-                        htmlFor="password_confirmation"
-                        value="Confirm Password"
-                    />
-
                     <TextInput
+                        placeHolder="Confirm password"
                         id="password_confirmation"
                         type="password"
                         name="password_confirmation"
@@ -101,18 +103,15 @@ export default function Register() {
                     />
                 </div>
 
-                <div className="flex items-center justify-end mt-4">
-                    <Link
-                        href={route("login")}
-                        className="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
-                        Already registered?
-                    </Link>
-
-                    <Button className="ms-4" disabled={processing} onClick={submit}>
-                        Register
-                    </Button>
-                </div>
+                <Button className="mt-8" disabled={processing} onClick={submit}>
+                    Register
+                </Button>
+                <Link
+                    href={route("login")}
+                    className="mt-8 block underline text-sm text-link   rounded-md  "
+                >
+                    Already registered?
+                </Link>
             </form>
         </div>
     );

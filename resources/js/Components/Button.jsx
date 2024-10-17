@@ -11,7 +11,7 @@ export default function Button({
 }) {
     switch (type) {
         case "danger":
-            type = "bg-danger-500 text-color hover:bg-danger-400";
+            type = "bg-danger-500 text-white hover:bg-danger-400";
             break;
         case "danger-text":
             type =

@@ -30,11 +30,11 @@ export default function UpdatePasswordForm() {
         <ExpandableItem
             header={
                 <header>
-                    <h2 className="text-lg font-medium text-gray-900">
+                    <h2 className="text-lg font-medium text-color-high-emphasis">
                         Update Password
                     </h2>
 
-                    <p className="mt-1 text-sm text-gray-600">
+                    <p className="mt-1 text-sm text-color-medium-emphasis">
                         Ensure your account is using a long, random password to
                         stay secure.
                     </p>
@@ -51,7 +51,7 @@ export default function UpdatePasswordForm() {
                     <TextInput
                         id="current_password"
                         ref={currentPasswordInput}
-                        value={getValues.current_password}
+                        value={getValues().current_password}
                         onChange={(e) =>
                             setValues("current_password", e.target.value)
                         }
@@ -67,7 +67,7 @@ export default function UpdatePasswordForm() {
                     <TextInput
                         id="password"
                         ref={passwordInput}
-                        value={getValues.password}
+                        value={getValues().password}
                         onChange={(e) => setValues("password", e.target.value)}
                         type="password"
                         className="mt-1 block w-full"
@@ -83,7 +83,7 @@ export default function UpdatePasswordForm() {
 
                     <TextInput
                         id="password_confirmation"
-                        value={getValues.password_confirmation}
+                        value={getValues().password_confirmation}
                         onChange={(e) =>
                             setValues("password_confirmation", e.target.value)
                         }

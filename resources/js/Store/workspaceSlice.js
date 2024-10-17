@@ -16,10 +16,15 @@ export const workspaceSlice = createSlice({
                 state[key] = action.payload[key];
             });
         },
+        updateWorkspaceName(state, action) {
+            if (state.workspace) {
+                state.workspace.name = action.payload.name;
+            }
+        },
     },
 });
 
 // Action creators are generated for each case reducer function
-export const { setWorkspaceData } = workspaceSlice.actions;
+export const { setWorkspaceData,updateWorkspaceName } = workspaceSlice.actions;
 
 export default workspaceSlice.reducer;

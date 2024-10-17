@@ -30,11 +30,11 @@ export default function UpdateProfileForm() {
         <ExpandableItem
             header={
                 <header>
-                    <h3 className="text-lg font-medium text-gray-900">
+                    <h3 className="text-lg font-medium text-color-high-emphasis">
                         Profile Information
                     </h3>
 
-                    <p className="mt-1 text-sm text-gray-600">
+                    <p className="mt-1 text-sm text-color-medium-emphasis">
                         Update your account's information.
                     </p>
                 </header>

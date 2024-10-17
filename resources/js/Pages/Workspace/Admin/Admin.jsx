@@ -11,8 +11,9 @@ import { usePage, Link as InertiaLink } from "@inertiajs/react";
 import Avatar from "@/Components/Avatar";
 import { LuUser2 } from "react-icons/lu";
 import { PiAddressBookTabs } from "react-icons/pi";
-import { MdLogout } from "react-icons/md";
+import { MdLogout, MdOutlineRocketLaunch } from "react-icons/md";
 import NotificationPopup from "@/Components/NotificationPopup";
+
 
 export default function Admin() {
     const [loaded, setLoaded] = useState(false);
@@ -37,10 +38,11 @@ export default function Admin() {
 
 function Wrapper({ children }) {
     const { auth } = usePage().props;
-    const { workspace } = useSelector((state) => state.workspace);
+    const { workspace, main_channel_id} = useSelector((state) => state.workspace);
+    
     return (
         <div className="flex flex-col min-h-screen">
-            <nav className="h-20 shadow flex px-8 bg-color-contrast">
+            <nav className="h-20 shadow flex px-8 bg-color-contrast justify-between items-center">
                 <Link
                     to="home"
                     className="flex gap-x-4 items-center text-color-high-emphasis"
@@ -49,6 +51,12 @@ function Wrapper({ children }) {
                     <h3 className="text-2xl font-bold capitalize">
                         {workspace.name}
                     </h3>
+                </Link>
+                <Link
+                    to={`/workspaces/${workspace.id}/channels/${main_channel_id}`}
+                    className="flex  text-color-high-emphasis items-center font-bold gap-x-2 hover:underline"
+                >
+                    Launch <MdOutlineRocketLaunch className="text-xl" />
                 </Link>
             </nav>
             <div className="grid grid-cols-4 pt-8 bg-background   flex-1 ">
@@ -60,8 +68,10 @@ function Wrapper({ children }) {
                             noStatus
                         />
                         <div className="">
-                            <p className=" uppercase">Sign In As</p>
-                            <p className="text-lg capitalize font-semibold">
+                            <p className=" uppercase text-color-medium-emphasis">
+                                Sign In As
+                            </p>
+                            <p className="text-lg capitalize font-semibold text-color-high-emphasis">
                                 {auth.user.display_name || auth.user.name}
                             </p>
                         </div>

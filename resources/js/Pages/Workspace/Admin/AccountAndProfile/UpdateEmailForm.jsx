@@ -41,11 +41,11 @@ export default function UpdateEmailForm() {
         <ExpandableItem
             header={
                 <header>
-                    <h3 className="text-lg font-medium text-gray-900">
+                    <h3 className="text-lg font-medium text-color-high-emphasis">
                         Email Address
                     </h3>
 
-                    <p className="mt-1 text-sm text-gray-600">
+                    <p className="mt-1 text-sm text-color-medium-emphasis">
                         Update your account's email address.
                     </p>
                 </header>

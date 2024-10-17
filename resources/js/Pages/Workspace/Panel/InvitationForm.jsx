@@ -98,7 +98,7 @@ export function InvitationForm({ workspace }) {
                             <FaLink className="text-lg" /> Copy invite link
                         </button>
                         {invitationLink && (
-                            <div className="text-sm text-white/50">
+                            <div className="text-sm text-color-medium-emphasis">
                                 Link copied
                             </div>
                         )}

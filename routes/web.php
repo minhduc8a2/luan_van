@@ -45,6 +45,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::post("/workspaces", [WorkspaceController::class, 'store'])->name('workspaces.store');
     Route::get("/workspaces/{workspace}", [WorkspaceController::class, 'show'])->name('workspace.show');
+    Route::patch("/workspaces/{workspace}", [WorkspaceController::class, 'update'])->name('workspaces.update');
+    Route::delete("/workspaces/{workspace}", [WorkspaceController::class, 'destroy'])->name('workspaces.delete')->middleware('throttle');
     Route::get("/workspaces/{workspace}/admin/settings", [WorkspaceController::class, 'settings'])->name('workspaces.settings');
     Route::get("/workspaces/{workspace}/admin/account_profile", [WorkspaceController::class, 'accountAndProfile'])->name('workspaces.accountAndProfile');
     Route::get("/workspaces/{workspace}/admin/home", [WorkspaceController::class, 'settingsHome'])->name('workspaces.settingsHome');

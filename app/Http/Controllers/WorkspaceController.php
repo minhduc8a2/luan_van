@@ -4,13 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Models\Role;
 use Inertia\Inertia;
+use App\Helpers\Helper;
 use App\Models\Channel;
 use App\Models\Workspace;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\Builder;
-
-
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Validation\ValidationException;
 
 class WorkspaceController extends Controller
 {
@@ -36,6 +41,7 @@ class WorkspaceController extends Controller
             'workspaces' => $workspaces,
             'newNotificationsCount' => $newNotificationsCount,
             'workspacePermissions' => $workspacePermissions,
+            'main_channel_id' => $workspace->mainChannel()->id,
             'workspace' => $workspace
         ];
     }
@@ -127,14 +133,59 @@ class WorkspaceController extends Controller
      */
     public function update(Request $request, Workspace $workspace)
     {
-        //
+        $validated = $request->validate(["name" => "required|string|max:255"]);
+        $workspace->fill($validated);
+        $workspace->save();
+        return Helper::createSuccessResponse();
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Workspace $workspace)
+    public function destroy(Request $request, Workspace $workspace)
     {
-        //
+
+        if ($request->user()->id != $workspace->user_id) abort(401, "Unauthorized actions");
+        $validated = $request->validate([
+            'current_password' => ['required', 'string', 'max:255', 'min:8'],
+
+        ]);
+        $attemptKey = 'delete-workspace-attempts-' . $request->user()->id;
+        $maxAttempts = 3;
+
+
+        if (RateLimiter::tooManyAttempts($attemptKey, $maxAttempts)) {
+            $seconds = RateLimiter::availableIn($attemptKey);
+
+
+            abort(429, 'Too many failed attempts. Please try again in ' . $seconds . ' ' . Str::plural('second', $seconds) . '.');
+        }
+
+
+        if (Hash::check($validated['current_password'], $request->user()->password)) {
+            RateLimiter::clear($attemptKey);
+            try {
+                DB::beginTransaction();
+                //delete user notifications belongs to workspace
+                $request->user()->notifications()->whereJsonContains('data->workspace->id', $workspace->id)->delete();
+                //
+                //delete permissions because not cascading on delete
+                $channelIds = $workspace->channels()->pluck('id');
+
+                DB::table('permissions')->where('permissionable_type', Channel::class)->whereIn('permissionable_id', $channelIds)->delete();
+                $workspace->permissions()->delete();
+                //
+                $workspace->delete();
+                DB::commit();
+            } catch (\Throwable $th) {
+                DB::rollBack();
+                Helper::createErrorResponse();
+            }
+        } else {
+            RateLimiter::increment($attemptKey);
+            throw ValidationException::withMessages([
+                'current_password' => 'Password is incorrect.',
+            ]);
+        }
     }
 }

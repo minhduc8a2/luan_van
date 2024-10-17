@@ -33,7 +33,7 @@ export default forwardRef(function TextInput(
                 type={type}
                 id={id}
                 className={
-                    "border-color/15 bg-transparent text-color-high-emphasis focus:border-color-medium-emphasis focus:ring-color/15 rounded-xl shadow-sm w-full" +
+                    "border-color/15 bg-transparent  text-color-high-emphasis px-3 py-2 border focus:border-color-medium-emphasis focus:ring-color/15 rounded-xl shadow-sm w-full" +
                     className
                 }
                 ref={input}
