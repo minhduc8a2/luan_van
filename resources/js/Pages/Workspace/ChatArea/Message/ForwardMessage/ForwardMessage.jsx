@@ -15,21 +15,21 @@ import { getMentionsFromContent } from "@/helpers/tiptapHelper";
 import { useChannel, useChannelUsers } from "@/helpers/customHooks";
 import { useParams } from "react-router-dom";
 import useGoToChannel from "@/helpers/useGoToChannel";
-import { loadChannelData } from "@/helpers/channelDataLoader";
-import { setChannelData } from "@/Store/channelsDataSlice";
 import useErrorHandler from "@/helpers/useErrorHandler";
 import CustomedDialog from "@/Components/CustomedDialog";
+import useLoadChannelData from "@/helpers/useLoadChannelData";
 
 export default function ForwardMessage({ message, show, onClose }) {
     const dispatch = useDispatch();
     const { auth } = usePage().props;
-    const { channelId } = useParams();
+    const { channelId, workspaceId } = useParams();
     const { channel } = useChannel(channelId);
     const channelsData = useSelector((state) => state.channelsData);
     const { channelUsers } = useChannelUsers(channelId);
     const { channels } = useSelector((state) => state.channels);
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
     const goToChannel = useGoToChannel();
+    const loadChannelData = useLoadChannelData(workspaceId);
     const [choosenChannelsList, setChoosenChannelsList] = useState([]);
     const [loadingChannelUserIds, setLoadingChannelUserIds] = useState(false);
     const errorHandler = useErrorHandler();
@@ -69,13 +69,7 @@ export default function ForwardMessage({ message, show, onClose }) {
         if (channelsData.hasOwnProperty(cn.id)) return;
         setLoadingChannelUserIds(true);
 
-        loadChannelData(
-            "channelUserIds",
-            cn.id,
-            dispatch,
-            setChannelData,
-            null
-        ).then(() => {
+        loadChannelData(cn.id).then(() => {
             setLoadingChannelUserIds(false);
         });
     }

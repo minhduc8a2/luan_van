@@ -53,7 +53,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'social_provider_token',
         'social_provider_refresh_token',
     ];
-    
+
     public function sendEmailVerificationNotification()
     {
         $this->notify(new \App\Notifications\VerifyEmailQueuedNotification);
@@ -78,7 +78,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function workspaces(): BelongsToMany
     {
-        return $this->belongsToMany(Workspace::class)->withPivot(['role_id','is_approved'])->withTimestamps();
+        return $this->belongsToMany(Workspace::class)->withPivot(['role_id', 'is_approved', 'is_deactivated'])->withTimestamps();
     }
 
     public function ownChannels(): HasMany
@@ -165,5 +165,10 @@ class User extends Authenticatable implements MustVerifyEmail
             // dd($th);
             return false;
         }
+    }
+
+    public function isDeactivated(Workspace $workspace): bool
+    {
+        return $workspace->users()->wherePivot('is_deactivated', true)->where('users.id', $this->id)->exists();
     }
 }

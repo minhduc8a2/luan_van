@@ -21,8 +21,9 @@ class WorkspacePolicy
      */
     public function view(User $user, Workspace $workspace): bool
     {
+        
         $channel = $workspace->mainChannel();
-        return $user->workspacePermissionCheck($channel->workspace, PermissionTypes::WORKSPACE_ALL->name)
+        return $user->workspacePermissionCheck($workspace, PermissionTypes::WORKSPACE_ALL->name)
             || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name)
             || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_VIEW->name);
     }
@@ -38,6 +39,10 @@ class WorkspacePolicy
     public function changeMemberRole(User $user, Workspace $workspace): bool
     {
         return $user->id == $workspace->user_id;
+    }
+    public function deactivateUser(User $user, Workspace $workspace): bool
+    {
+        return $user->workspacePermissionCheck($workspace, PermissionTypes::WORKSPACE_ALL->name);
     }
     /**
      * Determine whether the user can update the model.

@@ -1,25 +1,17 @@
-import { useRef } from "react";
-import { loadChannelRelatedData } from "./channelDataLoader";
-import { setChannelData } from "@/Store/channelsDataSlice";
-import { addNewChannelToChannelsStore } from "@/Store/channelsSlice";
-import { useSelector } from "react-redux";
-const useLoadRelatedChannelData = () => {
-    const loadChannelRelatedDataToken = useRef();
-    const { channels } = useSelector((state) => state.channels);
-    const channelsData = useSelector((state) => state.channelsData);
+import useLoadChannelData from "./useLoadChannelData";
+import useLoadChannelIfNotExists from "./useLoadChannelIfNotExists";
+import useLoadChannelMessages from "./useLoadChannelMessage";
+
+const useLoadRelatedChannelData = (workspaceId) => {
+    const loadChannelData = useLoadChannelData(workspaceId);
+    const loadChannelIfNotExists = useLoadChannelIfNotExists(workspaceId);
+    const loadChannelMessages = useLoadChannelMessages(workspaceId);
     return (channelId) => {
-        if (loadChannelRelatedDataToken.current)
-            loadChannelRelatedDataToken.current.abort();
-        loadChannelRelatedDataToken.current = new AbortController();
-        return loadChannelRelatedData(
-            channelId,
-            dispatch,
-            setChannelData,
-            addNewChannelToChannelsStore,
-            channels,
-            channelsData,
-            loadChannelRelatedDataToken.current
-        );
+        return Promise.all([
+            loadChannelData(channelId),
+            loadChannelMessages(channelId),
+            loadChannelIfNotExists(channelId),
+        ]);
     };
 };
 export default useLoadRelatedChannelData;

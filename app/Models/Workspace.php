@@ -38,7 +38,7 @@ class Workspace extends Model
 
     public function users(): BelongsToMany
     {
-        return $this->belongsToMany(User::class)->withPivot(['role_id', 'is_approved'])->withTimestamps();
+        return $this->belongsToMany(User::class)->withPivot(['role_id', 'is_approved','is_deactivated'])->withTimestamps();
     }
 
     public function channels(): HasMany

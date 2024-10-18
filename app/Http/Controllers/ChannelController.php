@@ -28,7 +28,7 @@ class ChannelController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function initChannelData(Request $request, Channel $channel)
+    public function initChannelData(Request $request, Workspace $workspace, Channel $channel)
     {
         if ($request->user()->cannot('view', $channel)) {
             return  abort(403, "You are not allowed to view this channel");
@@ -610,7 +610,7 @@ class ChannelController extends Controller
             Helper::createErrorResponse();
         }
     }
-    public function lastRead(Request $request, Channel $channel)
+    public function lastRead(Request $request,Workspace $workspace, Channel $channel)
     {
 
 

@@ -1,6 +1,4 @@
-import { router, usePage } from "@inertiajs/react";
-import React, { useMemo, useRef } from "react";
-import { FiHeadphones } from "react-icons/fi";
+import { usePage } from "@inertiajs/react";
 import Avatar from "@/Components/Avatar";
 import { UTCToDateTime } from "@/helpers/dateTimeHelper";
 import { VscMention } from "react-icons/vsc";
@@ -11,36 +9,32 @@ import { setMention } from "@/Store/mentionSlice";
 
 import { setThreadedMessageId, setThreadMessages } from "@/Store/threadSlice";
 
-import { useState } from "react";
-import { useChannel, useChannelData } from "@/helpers/customHooks";
+import { useChannelData } from "@/helpers/customHooks";
 import { setChannelData } from "@/Store/channelsDataSlice";
-import { loadChannelRelatedData } from "@/helpers/channelDataLoader";
+
 import { loadSpecificMessagesById } from "@/helpers/loadSpecificMessagesById";
 import { useNavigate, useParams } from "react-router-dom";
-import { addNewChannelToChannelsStore } from "@/Store/channelsSlice";
+
+import useLoadChannelRelatedData from "@/helpers/useLoadRelatedChannelData";
 export default function MentionNotification({
     notification,
     handleNotificationClick,
 }) {
     const { auth } = usePage().props;
     const channelsData = useSelector((state) => state.channelsData);
-    const { channelId } = useParams();
+    const { channelId, workspaceId } = useParams();
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
-
-    const { channels } = useSelector((state) => state.channels);
     const { messages } = useChannelData(channelId);
-    const [errors, setErrors] = useState(null);
     const { fromUser, channel, workspace, message, threadMessage } =
         isMentionNotificationBroadcast(notification.type)
             ? notification
             : notification.data;
-
+    const loadChannelRelatedData = useLoadChannelRelatedData(workspaceId);
     const read_at = notification.read_at;
     const created_at = notification.created_at;
     const view_at = notification.view_at;
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const loadChannelRelatedDataToken = useRef(null);
     function handleNotificationClickedPart() {
         //check channel is available
         axios
@@ -61,19 +55,7 @@ export default function MentionNotification({
                 }
                 if (threadMessage) {
                     if (!channelsData.hasOwnProperty(channel.id)) {
-                        if (loadChannelRelatedDataToken.current)
-                            loadChannelRelatedDataToken.current.abort();
-                        loadChannelRelatedDataToken.current =
-                            new AbortController();
-                        loadChannelRelatedData(
-                            channel.id,
-                            dispatch,
-                            setChannelData,
-                            addNewChannelToChannelsStore,
-                            channels,
-                            channelsData,
-                            loadChannelRelatedDataToken.current
-                        ).then(() => {
+                        loadChannelRelatedData(channel.id).then(() => {
                             loadSpecificMessagesById(
                                 threadMessage.id,
                                 channel.id,

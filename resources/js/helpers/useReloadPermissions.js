@@ -1,25 +1,12 @@
-import { setChannelData } from "@/Store/channelsDataSlice";
-import { useDispatch } from "react-redux";
-import { loadSomeChannelData } from "./channelDataLoader";
-import { useRef } from "react";
+import useLoadSomeChannelData from "./useLoadSomeChannelData";
 
-const useReloadPermissions = () => {
-    const dispatch = useDispatch();
-    const loadSomeChannelDataToken = useRef([]);
+const useReloadPermissions = (workspaceId) => {
+    const loadSomeChannelData = useLoadSomeChannelData(workspaceId);
     return (channelId) => {
-        if (loadSomeChannelDataToken.current.length > 0)
-            loadSomeChannelDataToken.current.forEach((token) => token.abort());
-        loadSomeChannelDataToken.current = Array.from(
-            { length: 2 },
-            () => new AbortController()
-        );
-        return loadSomeChannelData(
-            ["permissions", "channelPermissions"],
-            channelId,
-            dispatch,
-            setChannelData,
-            loadSomeChannelDataToken.current
-        );
+        return loadSomeChannelData(channelId, [
+            "permissions",
+            "channelPermissions",
+        ]);
     };
 };
 export default useReloadPermissions;

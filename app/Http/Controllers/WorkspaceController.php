@@ -211,7 +211,35 @@ class WorkspaceController extends Controller
             return Helper::createSuccessResponse();
         } catch (\Throwable $th) {
             DB::rollBack();
-            dd($th);
+
+            Helper::createErrorResponse();
+        }
+    }
+
+    public function deactivateUser(Request $request, Workspace $workspace)
+    {
+        if ($request->user()->cannot('deactivateUser', [Workspace::class, $workspace])) abort(401);
+
+        $validated = $request->validate(['userId' => 'required|integer', 'wantDeactivate' => "required|boolean"]);
+
+        $userId = $validated['userId'];
+        $wantDeactivate = $validated['wantDeactivate'];
+        if ($userId == $workspace->user_id) {
+            return Helper::createErrorResponse();
+        }
+        try {
+            DB::beginTransaction();
+            $exists = $workspace->users()->where('users.id', $userId)->first();
+            
+            if ($exists) {
+                $workspace->users()->updateExistingPivot($userId, ['is_deactivated' => $wantDeactivate]);
+                broadcast(new WorkspaceEvent(workspace: $workspace, type: "DeactivateUser_updated", fromUserId: "", data: $workspace->users()->where('users.id', $userId)->first()));
+            }
+            DB::commit();
+            return Helper::createSuccessResponse();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+
             Helper::createErrorResponse();
         }
     }

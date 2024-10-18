@@ -36,6 +36,9 @@ export default function ManageMembers() {
                                 Account type
                             </div>
                             <div className="w-48 text-left py-2">
+                                Status
+                            </div>
+                            <div className="w-48 text-left py-2">
                                 Date joined
                             </div>
                         </div>

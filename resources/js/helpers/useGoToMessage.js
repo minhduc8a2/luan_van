@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from "react-redux";
-import useLoadRelatedChannelData from "./useLoadRelatedChannelData";
+
 import { loadSpecificMessagesById } from "./loadSpecificMessagesById";
 import { useParams } from "react-router-dom";
 import { useChannelData } from "./customHooks";
@@ -7,6 +7,7 @@ import { setMention } from "@/Store/mentionSlice";
 import { setThreadedMessageId, setThreadMessages } from "@/Store/threadSlice";
 import { setChannelData } from "@/Store/channelsDataSlice";
 import useGoToChannel from "./useGoToChannel";
+import useLoadRelatedChannelData from "./useLoadRelatedChannelData";
 
 const useGoToMessage = () => {
     const { channelId, workspaceId } = useParams();
@@ -15,7 +16,7 @@ const useGoToMessage = () => {
     const { messages } = useChannelData(channelId);
     const dispatch = useDispatch();
     const goToChannel = useGoToChannel();
-    const loadRelatedChannelData = useLoadRelatedChannelData();
+    const loadRelatedChannelData = useLoadRelatedChannelData(workspaceId);
     return (message) => {
         const isThreadMessage = message.threaded_message_id != null;
         const channel = channels.find((cn) => cn.id == message.channel_id);

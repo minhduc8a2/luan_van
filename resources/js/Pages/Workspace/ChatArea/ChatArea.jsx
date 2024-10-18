@@ -36,7 +36,7 @@ import LoadingSpinner from "@/Components/LoadingSpinner";
 import MessagePlaceHolder from "./Message/MessagePlaceHolder";
 export default function ChatArea() {
     const { auth } = usePage().props;
-    const { channelId } = useParams();
+    const { channelId, workspaceId } = useParams();
     // console.log(channelId);
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
     const { permissions, messages } = useChannelData(channelId);
@@ -182,9 +182,9 @@ export default function ChatArea() {
         if (!channel) return;
         if (!messageId) setNewMessageReceived(true);
         dispatch(resetMessageCountForChannel(channel));
-        axios.post(route("channel.last_read", channelId), {});
+        axios.post(route("channel.last_read", {workspace:workspaceId, channel:channelId}), {});
         return () => {
-            axios.post(route("channel.last_read", channelId), {});
+            axios.post(route("channel.last_read", {workspace:workspaceId, channel:channelId}), {});
         };
     }, [channelId]);
     useEffect(() => {

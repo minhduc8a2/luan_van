@@ -352,6 +352,28 @@ export default function Event() {
                     case "InvitationPermission_updated":
                         loadWorkspaceData("workspacePermissions");
                         break;
+                    case "DeactivateUser_updated":
+                        dispatch(
+                            updateWorkspaceUserInformation({
+                                id: e.data?.id,
+                                data: e.data,
+                            })
+                        );
+                        if (
+                            e.data?.id == auth.user.id &&
+                            !!e.data?.pivot?.is_deactivated
+                        ) {
+                            router.get(route("workspaces"));
+                        }
+                        break;
+                    case "UserRole_updated":
+                        dispatch(
+                            updateWorkspaceUserInformation({
+                                id: e.data?.id,
+                                data: e.data,
+                            })
+                        );
+                        break;
                     case "ChannelObserver_storeChannel":
                         const newChannel = e.data;
                         if (

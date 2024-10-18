@@ -1,49 +1,22 @@
-import { loadChannelRelatedData } from "@/helpers/channelDataLoader";
-import { setChannelData } from "@/Store/channelsDataSlice";
-import { addNewChannelToChannelsStore } from "@/Store/channelsSlice";
-
-import { useEffect, useRef } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import useLoadChannelIfNotExists from "@/helpers/useLoadChannelIfNotExists";
+import useLoadChannelRelatedData from "@/helpers/useLoadRelatedChannelData";
+import { useEffect } from "react";
+import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 
 export default function InitData({ loaded, setLoaded }) {
-    const { channelId } = useParams();
-    const { channels } = useSelector((state) => state.channels);
+    const { channelId, workspaceId } = useParams();
+    const loadChannelRelatedData = useLoadChannelRelatedData(workspaceId);
+    const loadChannelIfNotExists = useLoadChannelIfNotExists(workspaceId);
     const channelsData = useSelector((state) => state.channelsData);
-    const loadChannelDataToken = useRef(null);
-    const loadChannelMessagesToken = useRef(null);
-    const loadChannelIfNotExistsToken = useRef(null);
-
-    const dispatch = useDispatch();
-
+    const makePromise = () => {
+        if (channelsData.hasOwnProperty(channelId))
+            return loadChannelIfNotExists(channelId);
+        else return loadChannelRelatedData(channelId);
+    };
     function init() {
         setLoaded(false);
-
-        if (loadChannelDataToken.current) {
-            loadChannelDataToken.current.abort();
-        }
-        if (loadChannelMessagesToken.current) {
-            loadChannelMessagesToken.current.abort();
-        }
-        if (loadChannelIfNotExistsToken.current) {
-            loadChannelIfNotExistsToken.current.abort();
-        }
-        loadChannelDataToken.current = new AbortController();
-        loadChannelMessagesToken.current = new AbortController();
-        loadChannelIfNotExistsToken.current = new AbortController();
-        loadChannelRelatedData(
-            channelId,
-            dispatch,
-            setChannelData,
-            addNewChannelToChannelsStore,
-            channels,
-            channelsData,
-            [
-                loadChannelDataToken.current,
-                loadChannelMessagesToken.current,
-                loadChannelIfNotExistsToken.current,
-            ]
-        )
+        makePromise()
             .then(() => {
                 setLoaded(true);
             })

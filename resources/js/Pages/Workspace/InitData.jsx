@@ -1,12 +1,8 @@
 import LoadingSpinner from "@/Components/LoadingSpinner";
+import useLoadChannels from "@/helpers/useLoadChannels";
 import useLoadWorkspaceData from "@/helpers/useLoadWorkspaceData";
 import useLoadWorkspaceUsers from "@/helpers/useLoadWorkspaceUsers";
 import { setNotificationsCount } from "@/Store/activitySlice";
-import { setChannels } from "@/Store/channelsSlice";
-import { setJoinedChannelIds } from "@/Store/joinedChannelIdsSlice";
-import { setWorkspaceData } from "@/Store/workspaceSlice";
-import { setWorkspaceUsers } from "@/Store/workspaceUsersSlice";
-
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
@@ -16,8 +12,9 @@ export default function InitData({ loaded, setLoaded }) {
 
     const { newNotificationsCount } = useSelector((state) => state.workspace);
     const dispatch = useDispatch();
-    const loadWorkspaceData = useLoadWorkspaceData()
-    const loadWorkspaceUsers = useLoadWorkspaceUsers()
+    const loadWorkspaceData = useLoadWorkspaceData();
+    const loadWorkspaceUsers = useLoadWorkspaceUsers();
+    const loadChannels = useLoadChannels(workspaceId);
     function loadWorkspaceRelatedData() {
         return Promise.all([
             loadWorkspaceUsers(),
@@ -25,21 +22,6 @@ export default function InitData({ loaded, setLoaded }) {
             loadWorkspaceData(),
         ]);
     }
-
-   
-    function loadChannels() {
-        return axios
-            .get(route("workspaces.getChannels", workspaceId))
-            .then((response) => {
-                dispatch(setChannels(response.data));
-                const channelIds = response.data.reduce(
-                    (pre, cn) => [...pre, cn.id],
-                    []
-                );
-                dispatch(setJoinedChannelIds({ data: channelIds }));
-            });
-    }
-   
 
     useEffect(() => {
         setLoaded(false);
@@ -80,7 +62,10 @@ export default function InitData({ loaded, setLoaded }) {
             <div className="fixed top-0 bottom-0 left-0 right-0 flex items-center justify-center bg-background">
                 <div className=" ">
                     <div className="relative h-48 w-48">
-                        <LoadingSpinner spinerStyle=" border-4  " size="w-24 h-24"/>
+                        <LoadingSpinner
+                            spinerStyle=" border-4  "
+                            size="w-24 h-24"
+                        />
                     </div>
                     <p className="animate-bounce text-color-high-emphasis">
                         Loading workspace data ...

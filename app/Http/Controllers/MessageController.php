@@ -26,7 +26,7 @@ class MessageController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function infiniteMessages(Request $request,  Channel $channel)
+    public function infiniteMessages(Request $request, Workspace $workspace,  Channel $channel)
     {
         $perPage = 10;
 
@@ -38,7 +38,7 @@ class MessageController extends Controller
 
         // $page = 2;
         $user = $request->user();
-        $hiddenUserIds =  $user->hiddenUsers()->wherePivot('workspace_id', $channel->workspace->id)->pluck('hidden_user_id')->toArray();
+        $hiddenUserIds =  $user->hiddenUsers()->wherePivot('workspace_id', $workspace->id)->pluck('hidden_user_id')->toArray();
         $messagesQuery = $channel->messages()->whereNotIn('user_id', $hiddenUserIds)->withTrashed()->with([
             'files' => function ($query) {
                 $query->withTrashed();
