@@ -129,14 +129,20 @@ export default function Thread() {
             }
 
             return axios
-                .get(route("messages.infiniteMessages", channelId), {
-                    params: {
-                        last_id,
-                        direction: position,
-                        threaded_message_id: threadedMessageId,
-                    },
-                    signal: token.signal,
-                })
+                .get(
+                    route("messages.infiniteMessages", {
+                        workspace: workspaceId,
+                        channel: channelId,
+                    }),
+                    {
+                        params: {
+                            last_id,
+                            direction: position,
+                            threaded_message_id: threadedMessageId,
+                        },
+                        signal: token.signal,
+                    }
+                )
                 .then((response) => {
                     if (response.status == 200) {
                         console.log(position, response.data);
@@ -238,6 +244,7 @@ export default function Thread() {
         axios
             .post(
                 route("thread_message.store", {
+                    workspace:workspaceId,
                     channel: channel.id,
                     message: threadedMessageId,
                 }),
@@ -290,11 +297,16 @@ export default function Thread() {
 
         if (threadedMessage && threadedMessage.id == threadedMessageId) return;
         axios
-            .get(route("messages.getMessage"), {
-                params: {
-                    messageId: threadedMessageId,
-                },
-            })
+            .get(
+                route("messages.getMessage", {
+                    workspace: workspaceId,
+                }),
+                {
+                    params: {
+                        messageId: threadedMessageId,
+                    },
+                }
+            )
             .then((response) => {
                 console.log("", response);
 
@@ -352,7 +364,10 @@ export default function Thread() {
         // );
         axios
             .get(
-                route("messages.infiniteMessages", threadedMessage.channel_id),
+                route("messages.infiniteMessages", {
+                    workspace: workspaceId,
+                    channel: threadedMessage.channel_id,
+                }),
                 {
                     params: {
                         threaded_message_id: threadedMessageId,

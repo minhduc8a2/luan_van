@@ -1,9 +1,5 @@
-import { useForm } from "@inertiajs/react";
-
 import TextArea from "@/Components/Input/TextArea";
-
-
-import { useState, useEffect, useMemo } from "react";
+import { useState } from "react";
 import { SettingsButton } from "./SettingsButton";
 import {
     useChannel,
@@ -12,9 +8,9 @@ import {
 } from "@/helpers/customHooks";
 import { useParams } from "react-router-dom";
 import CustomedDialog from "@/Components/CustomedDialog";
-import Button from "@/Components/Button";
+
 export function EditDescriptionForm() {
-    const { channelId } = useParams();
+    const { channelId, workspaceId } = useParams();
     const { channel } = useChannel(channelId);
     const { permissions } = useChannelData(channelId);
     const [isOpen, setIsOpen] = useState(false);
@@ -23,7 +19,10 @@ export function EditDescriptionForm() {
             description: channel.description,
         },
         {
-            url: route("channel.edit_description", channel.id),
+            url: route("channel.edit_description", {
+                workspace: workspaceId,
+                channel: channelId,
+            }),
             hasEchoHeader: true,
         }
     );

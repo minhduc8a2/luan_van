@@ -12,7 +12,7 @@ import { useParams } from "react-router-dom";
 import CustomedDialog from "@/Components/CustomedDialog";
 
 export default function ChangeChannelNameForm({ channelName }) {
-    const { channelId } = useParams();
+    const { channelId, workspaceId } = useParams();
     const { channel } = useChannel(channelId);
     const { permissions } = useChannelData(channelId);
     const { getValues, setValues, loading, submit } = useCustomedForm(
@@ -20,7 +20,7 @@ export default function ChangeChannelNameForm({ channelName }) {
             name: channel.name,
         },
         {
-            url: route("channel.edit_name", channel.id),
+            url: route("channel.edit_name", {workspace:workspaceId, channel:channelId}),
         }
     );
     const [isOpen, setIsOpen] = useState(false);

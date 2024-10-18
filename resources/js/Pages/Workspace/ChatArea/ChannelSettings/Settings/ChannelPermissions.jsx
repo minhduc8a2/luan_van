@@ -14,8 +14,8 @@ import CustomedDialog from "@/Components/CustomedDialog";
 
 export default function ChannelPermissions() {
     const [isOpen, setIsOpen] = useState(false);
-    const { channelId } = useParams();
-    const { channel } = useChannel(channelId);
+    const { channelId, workspaceId } = useParams();
+   
     const { permissions } = useChannelData(channelId);
 
     const whoes = [
@@ -49,7 +49,10 @@ export default function ChannelPermissions() {
         },
         {
             method: "post",
-            url: route("channel.update_permissions", channel.id),
+            url: route("channel.update_permissions", {
+                workspace: workspaceId,
+                channel: channelId,
+            }),
             hasEchoHeader: true,
         }
     );

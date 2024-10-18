@@ -351,7 +351,7 @@ class ChannelController extends Controller
         //
     }
 
-    public function editDescription(Request $request, Channel $channel)
+    public function editDescription(Request $request, Workspace $workspace, Channel $channel)
     {
         if ($request->user()->cannot('updateDescription', $channel)) {
             return  abort(403);
@@ -364,7 +364,7 @@ class ChannelController extends Controller
 
             $channel->description = $validated['description'] ?? "";
             $channel->save();
-            broadcast(new ChannelEvent($channel, "editDescription"));
+
             DB::commit();
 
             return Helper::createSuccessResponse();
@@ -374,7 +374,7 @@ class ChannelController extends Controller
             Helper::createErrorResponse();
         }
     }
-    public function editName(Request $request, Channel $channel)
+    public function editName(Request $request,Workspace $workspace, Channel $channel)
     {
         if ($request->user()->cannot('updateName', $channel)) {
             return  abort(403);
@@ -385,7 +385,7 @@ class ChannelController extends Controller
 
             $channel->name = $validated['name'];
             $channel->save();
-            broadcast(new ChannelEvent($channel, "editName"));
+
             DB::commit();
 
             return Helper::createSuccessResponse();
@@ -396,7 +396,7 @@ class ChannelController extends Controller
         }
     }
 
-    public function changeType(Request $request, Channel $channel)
+    public function changeType(Request $request,Workspace $workspace, Channel $channel)
     {
         if ($request->user()->cannot('changeType', $channel)) {
             return  abort(403);
@@ -433,7 +433,7 @@ class ChannelController extends Controller
         }
     }
 
-    public function leave(Request $request, Channel $channel)
+    public function leave(Request $request,Workspace $workspace, Channel $channel)
     {
         if ($request->user()->cannot('leave', $channel)) {
             return  abort(403);
@@ -456,7 +456,7 @@ class ChannelController extends Controller
             Helper::createErrorResponse();
         }
     }
-    public function join(Request $request, Channel $channel)
+    public function join(Request $request,Workspace $workspace, Channel $channel)
     {
 
         if ($request->user()->cannot('join', $channel)) {
@@ -479,7 +479,7 @@ class ChannelController extends Controller
             Helper::createErrorResponse();
         }
     }
-    public function removeUserFromChannel(Request $request, Channel $channel)
+    public function removeUserFromChannel(Request $request,Workspace $workspace, Channel $channel)
     {
         if ($request->user()->cannot('removeUserFromChannel', $channel)) {
             return  abort(403);
@@ -514,7 +514,7 @@ class ChannelController extends Controller
             Helper::createErrorResponse();
         }
     }
-    public function addUsersToChannel(Request $request, Channel $channel)
+    public function addUsersToChannel(Request $request,Workspace $workspace, Channel $channel)
     {
 
         if ($request->user()->cannot('addUsersToChannel', $channel)) {
@@ -546,7 +546,7 @@ class ChannelController extends Controller
         }
     }
 
-    public function addManagers(Request $request, Channel $channel)
+    public function addManagers(Request $request,Workspace $workspace, Channel $channel)
     {
 
         if ($request->user()->cannot('addManagers', $channel)) abort(403);
@@ -576,7 +576,7 @@ class ChannelController extends Controller
             Helper::createErrorResponse();
         }
     }
-    public function removeManager(Request $request, Channel $channel)
+    public function removeManager(Request $request,Workspace $workspace, Channel $channel)
     {
 
 
@@ -610,7 +610,7 @@ class ChannelController extends Controller
             Helper::createErrorResponse();
         }
     }
-    public function lastRead(Request $request,Workspace $workspace, Channel $channel)
+    public function lastRead(Request $request, Workspace $workspace, Channel $channel)
     {
 
 
@@ -631,7 +631,7 @@ class ChannelController extends Controller
         }
     }
 
-    public function updatePermissions(Request $request, Channel $channel)
+    public function updatePermissions(Request $request,Workspace $workspace, Channel $channel)
     {
 
 
@@ -703,7 +703,7 @@ class ChannelController extends Controller
     }
 
 
-    public function archive(Request $request, Channel $channel)
+    public function archive(Request $request,Workspace $workspace, Channel $channel)
     {
 
 
@@ -734,7 +734,7 @@ class ChannelController extends Controller
         }
     }
 
-    function checkChannelExists(Request $request)
+    function checkChannelExists(Request $request, Workspace $workspace)
     {
         $channelId = $request->query("channelId");
         $user = $request->user();
@@ -765,7 +765,7 @@ class ChannelController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request, Channel $channel)
+    public function destroy(Request $request,Workspace $workspace, Channel $channel)
     {
         if ($request->user()->cannot('delete', $channel)) abort(403);
         try {

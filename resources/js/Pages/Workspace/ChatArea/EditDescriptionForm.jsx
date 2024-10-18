@@ -11,7 +11,7 @@ import { useParams } from "react-router-dom";
 import CustomedDialog from "@/Components/CustomedDialog";
 
 export function EditDescriptionForm() {
-    const { channelId } = useParams();
+    const { channelId, workspaceId } = useParams();
     const { channel } = useChannel(channelId);
     const { permissions } = useChannelData(channelId);
     const [isOpen, setIsOpen] = useState(false);
@@ -20,7 +20,10 @@ export function EditDescriptionForm() {
             description: channel.description,
         },
         {
-            url: route("channel.edit_description", channel.id),
+            url: route("channel.edit_description", {
+                workspace: workspaceId,
+                channel: channelId,
+            }),
             hasEchoHeader: true,
         }
     );

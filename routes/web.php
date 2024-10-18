@@ -33,6 +33,9 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 Route::post("/workspaces", [WorkspaceController::class, 'store'])->name('workspaces.store');
 Route::middleware(['auth', HandleWorkspaceRequests::class])->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::get('/workspaces', [WorkspaceController::class, 'index'])->name('workspaces');
 
     Route::prefix('workspaces/{workspace}')->group(function () {
@@ -72,14 +75,14 @@ Route::middleware(['auth', HandleWorkspaceRequests::class])->group(function () {
         // });
         Route::get('/browse_files', [FileController::class, 'index'])->name('files.index');
         Route::delete('/files/{file}', [FileController::class, 'destroy'])->name('files.delete');
-       
+
 
 
         Route::post('/users/hide', [UserController::class, 'hide'])->name("users.hide");
         Route::patch('/users/{user}', [UserController::class, 'update'])->name("users.update");
         Route::post('/users/{user}/updateAvatar', [UserController::class, 'updateAvatar'])->name("users.updateAvatar");
         Route::delete('users/{user}/deleteAvatar', [UserController::class, 'deleteAvatar'])->name("users.deleteAvatar");
-        Route::post("/upload_file/{user}", function (Request $request, User $user) {
+        Route::post("/upload_file/{user}", function (Request $request, Workspace $workspace, User $user) {
 
             $validated = $request->validate([
                 'file' => "max:" . (200 * 1024),
@@ -92,11 +95,9 @@ Route::middleware(['auth', HandleWorkspaceRequests::class])->group(function () {
 
             DeleteTemporaryFiles::dispatch($temporaryFileObjects)->delay(now()->addMinutes(30));
             return response()->json($temporaryFileObjects);
-        });
-        Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-        Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-        Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-        
+        })->name('upload_files');
+
+
         Route::get("", [WorkspaceController::class, 'show'])->name('workspace.show')->missing(function () {
             return Redirect::route('workspaces');
         });

@@ -10,7 +10,6 @@ import {
 import Message from "./Message/Message";
 import { useSelector, useDispatch } from "react-redux";
 import { EditDescriptionForm } from "./EditDescriptionForm";
-import axios from "axios";
 import { findMinMaxId, getChannelName } from "@/helpers/channelHelper";
 import ForwardedMessage from "./Message/ForwardedMessage";
 import { isHiddenUser } from "@/helpers/userHelper";
@@ -111,13 +110,19 @@ export default function ChatArea() {
             }
 
             return axios
-                .get(route("messages.infiniteMessages", channel.id), {
-                    params: {
-                        last_id,
-                        direction: position,
-                    },
-                    signal: token.signal,
-                })
+                .get(
+                    route("messages.infiniteMessages", {
+                        workspace: workspaceId,
+                        channel: channel.id,
+                    }),
+                    {
+                        params: {
+                            last_id,
+                            direction: position,
+                        },
+                        signal: token.signal,
+                    }
+                )
                 .then((response) => {
                     if (response.status == 200) {
                         // console.log(position, response.data);
@@ -182,9 +187,21 @@ export default function ChatArea() {
         if (!channel) return;
         if (!messageId) setNewMessageReceived(true);
         dispatch(resetMessageCountForChannel(channel));
-        axios.post(route("channel.last_read", {workspace:workspaceId, channel:channelId}), {});
+        axios.post(
+            route("channel.last_read", {
+                workspace: workspaceId,
+                channel: channelId,
+            }),
+            {}
+        );
         return () => {
-            axios.post(route("channel.last_read", {workspace:workspaceId, channel:channelId}), {});
+            axios.post(
+                route("channel.last_read", {
+                    workspace: workspaceId,
+                    channel: channelId,
+                }),
+                {}
+            );
         };
     }, [channelId]);
     useEffect(() => {
@@ -322,7 +339,6 @@ export default function ChatArea() {
                     channelName={channelName}
                     channelUsers={channelUsers}
                     loaded={loaded}
-                   
                 />
                 {loaded && channel && (
                     <InfiniteScroll

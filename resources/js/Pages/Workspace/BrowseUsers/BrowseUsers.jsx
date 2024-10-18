@@ -111,9 +111,7 @@ export default function BrowseUsers() {
                 break;
             case "MEMBER":
                 tempUsers = tempUsers.filter(
-                    (u) =>
-                        u.workspaceRole.name == "ADMIN" ||
-                        u.workspaceRole.name == "MEMBER"
+                    (u) => u.workspaceRole.name == "MEMBER"
                 );
 
                 break;
@@ -137,7 +135,6 @@ export default function BrowseUsers() {
         );
     }, [filter, workspaceUsers, searchValue]);
 
-    
     return (
         <div className="bg-foreground w-full h-full border border-color/15 ">
             <div className="mx-auto w-1/2 py-4 flex flex-col max-h-full">
@@ -229,4 +226,3 @@ export default function BrowseUsers() {
         </div>
     );
 }
-

@@ -158,7 +158,7 @@ class MessageController extends Controller
         return $messages;
     }
 
-    public function getMessage(Request $request)
+    public function getMessage(Request $request, Workspace $workspace)
     {
 
         $messageId = $request->query('messageId');
@@ -252,7 +252,7 @@ class MessageController extends Controller
         }
         return $files;
     }
-    public function store(Request $request,  Channel $channel)
+    public function store(Request $request, Workspace $workspace, Channel $channel)
     {
         if ($request->user()->cannot('create', [Message::class, $channel])) return abort(403);
         $forwardMode = false;
@@ -358,7 +358,7 @@ class MessageController extends Controller
         }
     }
 
-    public function storeThreadMessage(Request $request, Channel $channel, Message $message)
+    public function storeThreadMessage(Request $request, Workspace $workspace, Channel $channel, Message $message)
     {
         if ($request->user()->cannot('createThread', [Message::class, $channel])) return abort(403);
         if ($message->is_auto_generated) return abort(403);

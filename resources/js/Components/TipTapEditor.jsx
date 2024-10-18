@@ -42,7 +42,7 @@ const MenuBar = ({ editor }) => {
                             : "p-1"
                     }
                 >
-                    <GoBold className="text-color-high-emphasis"/>
+                    <GoBold className="text-color-high-emphasis" />
                 </button>
                 <button
                     onClick={() => editor.chain().focus().toggleItalic().run()}
@@ -55,7 +55,7 @@ const MenuBar = ({ editor }) => {
                             : "p-1"
                     }
                 >
-                    <FaItalic className="text-color-high-emphasis"/>
+                    <FaItalic className="text-color-high-emphasis" />
                 </button>
                 <button
                     onClick={() => editor.chain().focus().toggleStrike().run()}
@@ -68,7 +68,7 @@ const MenuBar = ({ editor }) => {
                             : "p-1"
                     }
                 >
-                    <FaStrikethrough className="text-color-high-emphasis"/>
+                    <FaStrikethrough className="text-color-high-emphasis" />
                 </button>
 
                 <button
@@ -81,7 +81,7 @@ const MenuBar = ({ editor }) => {
                             : "p-1"
                     }
                 >
-                    <LuListOrdered className="text-color-high-emphasis"/>
+                    <LuListOrdered className="text-color-high-emphasis" />
                 </button>
 
                 <button
@@ -94,7 +94,7 @@ const MenuBar = ({ editor }) => {
                             : "p-1"
                     }
                 >
-                    <MdOutlineFormatListBulleted className="text-color-high-emphasis"/>
+                    <MdOutlineFormatListBulleted className="text-color-high-emphasis" />
                 </button>
                 <button
                     onClick={() =>
@@ -106,7 +106,7 @@ const MenuBar = ({ editor }) => {
                             : "p-1"
                     }
                 >
-                    <TbBlockquote className="text-color-high-emphasis"/>
+                    <TbBlockquote className="text-color-high-emphasis" />
                 </button>
                 <button
                     onClick={() => editor.chain().focus().toggleCode().run()}
@@ -117,7 +117,7 @@ const MenuBar = ({ editor }) => {
                             : "p-1"
                     }
                 >
-                    <FaCode className="text-color-high-emphasis"/>
+                    <FaCode className="text-color-high-emphasis" />
                 </button>
                 <button
                     onClick={() =>
@@ -129,12 +129,12 @@ const MenuBar = ({ editor }) => {
                             : "p-1"
                     }
                 >
-                    <PiCodeBlock className="text-color-high-emphasis"/>
+                    <PiCodeBlock className="text-color-high-emphasis" />
                 </button>
 
                 <Popover className="relative flex items-center">
                     <PopoverButton>
-                        <CiFaceSmile className="text-color-high-emphasis"/>
+                        <CiFaceSmile className="text-color-high-emphasis" />
                     </PopoverButton>
                     <PopoverPanel anchor="bottom" className="flex flex-col ">
                         <EmojiPicker
@@ -169,11 +169,11 @@ import tippy from "tippy.js";
 import Mention from "@tiptap/extension-mention";
 import { MentionList } from "./MentionList.jsx";
 import Button from "./Button";
-
+import { useParams } from "react-router-dom";
 
 export default function TipTapEditor({
     onSubmit,
-    
+
     message = null,
     focus = 1,
     isEditMessage = false,
@@ -183,7 +183,7 @@ export default function TipTapEditor({
     channelUsers,
 }) {
     const { auth } = usePage().props;
-
+    const { workspaceId } = useParams();
     const inputId = useId();
     const serverResponseFileList = useRef([]);
     const [fileList, setFileList] = useState([]);
@@ -245,7 +245,10 @@ export default function TipTapEditor({
                 uploadingRef.current = true;
                 return axios
                     .postForm(
-                        `/upload_file/${auth.user.id}`,
+                        route("upload_files", {
+                            workspace: workspaceId,
+                            user: auth.user.id,
+                        }),
                         { file },
                         {
                             signal: controller.signal,
@@ -327,7 +330,6 @@ export default function TipTapEditor({
 
             suggestion: {
                 items: ({ query }) => {
-                    
                     return channelUsers
                         .filter(
                             (item) =>
