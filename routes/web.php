@@ -49,6 +49,7 @@ Route::middleware('auth')->group(function () {
         return Redirect::route('workspaces');
     });
     Route::patch("/workspaces/{workspace}", [WorkspaceController::class, 'update'])->name('workspaces.update');
+    Route::patch("/workspaces/{workspace}/change_member_role", [WorkspaceController::class, 'changeMemberRole'])->name('workspaces.changeMemberRole');
     Route::patch("/workspaces/{workspace}/invitation_permission", [WorkspaceController::class, 'updateInvitationPermission'])->name('workspaces.updateInvitationPermission');
     Route::delete("/workspaces/{workspace}", [WorkspaceController::class, 'destroy'])->name('workspaces.delete')->middleware('throttle');
     Route::get("/workspaces/{workspace}/admin/settings", [WorkspaceController::class, 'settings'])->name('workspaces.settings');

@@ -8,7 +8,7 @@ import Layout from "./Layout";
 import Admin from "./Admin/Admin";
 
 import Settings from "./Admin/Settings/Settings";
-import ManageMembers from "./Admin/ManageMembers";
+import ManageMembers from "./Admin/ManageMember/ManageMembers";
 import Home from "./Admin/Home";
 import AccountAndProfile from "./Admin/AccountAndProfile/AccountAndProfile";
 import HomePage from "./HomePage/HomePage";

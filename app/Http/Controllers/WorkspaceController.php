@@ -183,6 +183,38 @@ class WorkspaceController extends Controller
             Helper::createErrorResponse();
         }
     }
+
+    public function changeMemberRole(Request $request, Workspace $workspace)
+    {
+        if ($request->user()->cannot('changeMemberRole', [Workspace::class, $workspace])) abort(401);
+
+        $validated = $request->validate(['userId' => 'required|integer', 'role' => 'required|string|in:OWNER,ADMIN,MEMBER']);
+        $role = $validated['role'];
+        $userId = $validated['userId'];
+        if ($userId == $workspace->user_id) {
+            return Helper::createErrorResponse();
+        }
+        try {
+            DB::beginTransaction();
+            if ($role == "OWNER") {
+                $workspace->users()->updateExistingPivot($userId, ['role_id' => Role::getRoleIdByName(BaseRoles::ADMIN->name)]);
+                $workspace->user_id = $userId;
+                $workspace->save();
+            } else {
+                $workspace->users()->updateExistingPivot($userId, ['role_id' => Role::getRoleIdByName($role)]);
+            }
+
+            $user = $workspace->users()->where('users.id', $userId)->first();
+            $user->workspaceRole = Role::find($user->pivot->role_id)->setVisible(["name"]);
+            broadcast(new WorkspaceEvent(workspace: $workspace, type: "UserRole_updated", fromUserId: "", data: $user));
+            DB::commit();
+            return Helper::createSuccessResponse();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            dd($th);
+            Helper::createErrorResponse();
+        }
+    }
     /**
      * Update the specified resource in storage.
      */
@@ -190,9 +222,17 @@ class WorkspaceController extends Controller
     {
         if ($request->user()->cannot('update', [Workspace::class, $workspace])) abort(401);
         $validated = $request->validate(["name" => "required|string|max:255"]);
-        $workspace->fill($validated);
-        $workspace->save();
-        return Helper::createSuccessResponse();
+        try {
+            DB::beginTransaction();
+            $workspace->fill($validated);
+            $workspace->save();
+            DB::commit();
+            return Helper::createSuccessResponse();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            // dd($th);
+            Helper::createErrorResponse();
+        }
     }
 
     /**

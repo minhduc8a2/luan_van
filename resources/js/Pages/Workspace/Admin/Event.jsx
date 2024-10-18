@@ -1,5 +1,6 @@
 import useLoadWorkspaceData from "@/helpers/useLoadWorkspaceData";
 import { updateWorkspace } from "@/Store/workspaceSlice";
+import { updateWorkspaceUserInformation } from "@/Store/workspaceUsersSlice";
 import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
@@ -20,6 +21,13 @@ export default function Event() {
                     case "InvitationPermission_updated":
                         loadWorkspaceData("workspacePermissions");
                         break;
+                    case "UserRole_updated":
+                        dispatch(
+                            updateWorkspaceUserInformation({
+                                id: e.data?.id,
+                                data: e.data,
+                            })
+                        );
                 }
             }
         );
