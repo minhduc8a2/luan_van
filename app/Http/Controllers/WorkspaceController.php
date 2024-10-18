@@ -41,7 +41,7 @@ class WorkspaceController extends Controller
         $newNotificationsCount = fn() =>  $user->notifications()->where("read_at", null)->count();
         $workspacePermissions = fn() =>  [
             'createChannel' => $user->can('create', [Channel::class, $workspace]),
-            'updateInvitationPermission' => $user->can('updateInvitationPermission', [Workspace::class, $workspace]),
+            'update' => $user->can('update', [Workspace::class, $workspace]),
             'inviteToWorkspace' => $user->can('create', [Invitation::class, $workspace]),
             'isInvitationToWorkspaceWithAdminApprovalRequired' => $workspace->isInvitationToWorkspaceWithAdminApprovalRequired()
         ];
@@ -138,6 +138,10 @@ class WorkspaceController extends Controller
     {
         return $this->clientRouting($request, $workspace);
     }
+    public function aboutWorkspace(Request $request, Workspace $workspace)
+    {
+        return $this->clientRouting($request, $workspace);
+    }
 
 
 
@@ -151,7 +155,7 @@ class WorkspaceController extends Controller
 
     public function updateInvitationPermission(Request $request, Workspace $workspace)
     {
-        if ($request->user()->cannot('updateInvitationPermission', [Workspace::class, $workspace])) abort(401);
+        if ($request->user()->cannot('update', [Workspace::class, $workspace])) abort(401);
         $validated = $request->validate(['requiredAdminApproval' => 'boolean|required']);
 
         $requiredAdminApproval = $validated['requiredAdminApproval'];

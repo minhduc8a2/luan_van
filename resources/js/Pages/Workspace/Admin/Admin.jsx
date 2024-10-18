@@ -14,6 +14,7 @@ import { PiAddressBookTabs } from "react-icons/pi";
 import { MdLogout, MdOutlineRocketLaunch } from "react-icons/md";
 import NotificationPopup from "@/Components/NotificationPopup";
 import Event from "./Event";
+import { IoMdInformationCircleOutline } from "react-icons/io";
 
 export default function Admin() {
     const [loaded, setLoaded] = useState(false);
@@ -34,13 +35,11 @@ export default function Admin() {
 
 function Wrapper({ children }) {
     const { auth } = usePage().props;
-    const { workspace } = useSelector(
-        (state) => state.workspace
-    );
+    const { workspace } = useSelector((state) => state.workspace);
 
     return (
         <div className="flex flex-col min-h-screen">
-            <nav className="h-20 shadow flex px-8 bg-color-contrast justify-between items-center">
+            <nav className="h-20 drop-shadow flex px-8 bg-color-contrast justify-between items-center ">
                 <Link
                     to="home"
                     className="flex gap-x-4 items-center text-color-high-emphasis"
@@ -57,8 +56,8 @@ function Wrapper({ children }) {
                     Launch <MdOutlineRocketLaunch className="text-xl" />
                 </Link>
             </nav>
-            <div className="grid grid-cols-4 pt-8 bg-background   flex-1 ">
-                <div className="ml-8">
+            <div className="grid grid-cols-5  bg-background   flex-1 ">
+                <div className="ml-8 pt-8 border-r border-r-color/15">
                     <div className="flex gap-x-4">
                         <Avatar
                             src={auth.user.avatar_url}
@@ -89,6 +88,11 @@ function Wrapper({ children }) {
                                 title="Account & profile"
                                 to="account_profile"
                             />
+                              <PanelItem
+                                icon={<IoMdInformationCircleOutline />}
+                                title="About this workspace"
+                                to="about_workspace"
+                            />
                         </ul>
                     </div>
                     <div className=" mt-8">
@@ -113,6 +117,7 @@ function Wrapper({ children }) {
                             Other
                         </h5>
                         <ul className="flex flex-col gap-y-2">
+                          
                             <InertiaLink
                                 className="flex items-center gap-x-2 text-color-medium-emphasis"
                                 href={route("logout")}
@@ -125,7 +130,7 @@ function Wrapper({ children }) {
                         </ul>
                     </div>
                 </div>
-                <div className="col-span-3">{children}</div>
+                <div className="col-span-4">{children}</div>
             </div>
         </div>
     );

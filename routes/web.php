@@ -52,6 +52,7 @@ Route::middleware('auth')->group(function () {
     Route::patch("/workspaces/{workspace}/invitation_permission", [WorkspaceController::class, 'updateInvitationPermission'])->name('workspaces.updateInvitationPermission');
     Route::delete("/workspaces/{workspace}", [WorkspaceController::class, 'destroy'])->name('workspaces.delete')->middleware('throttle');
     Route::get("/workspaces/{workspace}/admin/settings", [WorkspaceController::class, 'settings'])->name('workspaces.settings');
+    Route::get("/workspaces/{workspace}/admin/about_workspace", [WorkspaceController::class, 'aboutWorkspace'])->name('workspaces.aboutWorkspace');
     Route::get("/workspaces/{workspace}/admin/account_profile", [WorkspaceController::class, 'accountAndProfile'])->name('workspaces.accountAndProfile');
     Route::get("/workspaces/{workspace}/admin/home", [WorkspaceController::class, 'settingsHome'])->name('workspaces.settingsHome');
     Route::get("/workspaces/{workspace}/admin/manage_members", [WorkspaceController::class, 'manageMembers'])->name('workspaces.manageMembers');

@@ -14,7 +14,7 @@ export default function InvitationRequest() {
             setIsOpen(true);
         }
     }, [request, workspaceId]);
-    if (!workspace) return <></>;
+    if (!workspace || workspace.pivot?.is_approved) return <></>;
     return (
         <CustomedDialog isOpen={isOpen} onClose={() => setIsOpen(false)}>
             <CustomedDialog.Title>Welcome 🎉</CustomedDialog.Title>

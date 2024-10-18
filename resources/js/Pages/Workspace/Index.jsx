@@ -13,6 +13,7 @@ import Home from "./Admin/Home";
 import AccountAndProfile from "./Admin/AccountAndProfile/AccountAndProfile";
 import HomePage from "./HomePage/HomePage";
 import ReduxProvider from "@/Components/ReduxProvider";
+import AboutWorkspace from "./Admin/AboutWorkspace";
 
 export default function Index() {
     return (
@@ -22,6 +23,10 @@ export default function Index() {
                     <Route path="" element={<HomePage />} />
                     <Route path=":workspaceId/admin" element={<Admin />}>
                         <Route path="home" element={<Home />} />
+                        <Route
+                            path="about_workspace"
+                            element={<AboutWorkspace />}
+                        />
                         <Route
                             path="account_profile"
                             element={<AccountAndProfile />}

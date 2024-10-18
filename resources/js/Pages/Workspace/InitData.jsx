@@ -1,4 +1,6 @@
 import LoadingSpinner from "@/Components/LoadingSpinner";
+import useLoadWorkspaceData from "@/helpers/useLoadWorkspaceData";
+import useLoadWorkspaceUsers from "@/helpers/useLoadWorkspaceUsers";
 import { setNotificationsCount } from "@/Store/activitySlice";
 import { setChannels } from "@/Store/channelsSlice";
 import { setJoinedChannelIds } from "@/Store/joinedChannelIdsSlice";
@@ -14,6 +16,8 @@ export default function InitData({ loaded, setLoaded }) {
 
     const { newNotificationsCount } = useSelector((state) => state.workspace);
     const dispatch = useDispatch();
+    const loadWorkspaceData = useLoadWorkspaceData()
+    const loadWorkspaceUsers = useLoadWorkspaceUsers()
     function loadWorkspaceRelatedData() {
         return Promise.all([
             loadWorkspaceUsers(),
@@ -22,17 +26,7 @@ export default function InitData({ loaded, setLoaded }) {
         ]);
     }
 
-    function loadWorkspaceUsers() {
-        return axios
-            .get(route("users.browseUsers", workspaceId), {
-                params: {
-                    mode: "all",
-                },
-            })
-            .then((response) => {
-                dispatch(setWorkspaceUsers(response.data));
-            });
-    }
+   
     function loadChannels() {
         return axios
             .get(route("workspaces.getChannels", workspaceId))
@@ -45,13 +39,7 @@ export default function InitData({ loaded, setLoaded }) {
                 dispatch(setJoinedChannelIds({ data: channelIds }));
             });
     }
-    function loadWorkspaceData() {
-        return axios
-            .get(route("workspaces.initWorkspaceData", workspaceId))
-            .then((response) => {
-                dispatch(setWorkspaceData(response.data));
-            });
-    }
+   
 
     useEffect(() => {
         setLoaded(false);
