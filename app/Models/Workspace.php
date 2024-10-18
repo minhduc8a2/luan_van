@@ -38,7 +38,7 @@ class Workspace extends Model
 
     public function users(): BelongsToMany
     {
-        return $this->belongsToMany(User::class)->withPivot('role_id')->withTimestamps();
+        return $this->belongsToMany(User::class)->withPivot(['role_id', 'is_approved'])->withTimestamps();
     }
 
     public function channels(): HasMany
@@ -77,7 +77,7 @@ class Workspace extends Model
         if ($user->isWorkspaceMember($this)) return;
         $roleId = Role::getRoleByName(BaseRoles::MEMBER->name)->id;
         $otherUsers = $this->users->pluck('name', 'id');
-        $user->workspaces()->attach($this->id, ['role_id' => $roleId]);
+        $user->workspaces()->attach($this->id, ['role_id' => $roleId, 'is_approved' => true]);
         $this->assignUserToMainChannel($user, Role::getRoleByName(BaseRoles::MEMBER->name));
 
         //create private channels
@@ -137,7 +137,7 @@ class Workspace extends Model
         $adminRole = Role::getRoleByName(BaseRoles::ADMIN->name);
 
         //assign admin role for user
-        $user->workspaces()->attach($this->id, ['role_id' => $adminRole->id]);
+        $user->workspaces()->attach($this->id, ['role_id' => $adminRole->id, 'is_approved' => true]);
 
         $this->permissions()->create(
             [
@@ -183,5 +183,10 @@ class Workspace extends Model
             $channel->assignManagerRoleAndManagerPermissions($user);
             $channel->initChannelPermissions();
         }
+    }
+
+    public function isInvitationToWorkspaceWithAdminApprovalRequired()
+    {
+        return $this->permissions()->where('permission_type', PermissionTypes::WORKSPACE_INVITATION_WITH_ADMIN_APPROVAL_REQUIRED->name)->exists();
     }
 }

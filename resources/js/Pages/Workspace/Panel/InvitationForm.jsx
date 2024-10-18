@@ -7,11 +7,12 @@ import { useCustomedForm } from "@/helpers/customHooks";
 import useErrorHandler from "@/helpers/useErrorHandler";
 import useSuccessHandler from "@/helpers/useSuccessHandler";
 import CustomedDialog from "@/Components/CustomedDialog";
+import LoadingSpinner from "@/Components/LoadingSpinner";
 
 export function InvitationForm({ workspace }) {
     const [invitationLink, setInvitationLink] = useState("");
     const [invitationSent, setInvitationSent] = useState("");
-    const [refresh, setRefresh] = useState(0);
+    const [generatingLink, setGeneratingLink] = useState(false);
     const errorHandler = useErrorHandler();
     const successHandler = useSuccessHandler("Invitation sent successfully!");
     const [isOpen, setIsOpen] = useState(false);
@@ -48,7 +49,7 @@ export function InvitationForm({ workspace }) {
             copy(invitationLink);
             return;
         }
-
+        setGeneratingLink(true);
         axios
             .post(route("invitation.store", workspace.id), {
                 workspace_id: workspace.id,
@@ -57,7 +58,10 @@ export function InvitationForm({ workspace }) {
                 copy(response.data.invitation_link);
                 setInvitationLink(response.data.invitation_link);
             })
-            .catch(errorHandler);
+            .catch(errorHandler)
+            .finally(() => {
+                setGeneratingLink(false);
+            });
     }
 
     return (
@@ -69,7 +73,7 @@ export function InvitationForm({ workspace }) {
                     setIsOpen(true);
                 }}
             >
-                <div className="flex items-center ">
+                <div className="flex items-center w-full h-full">
                     <LuPlus className="text-sm" />
                 </div>
                 <div className="">Add coworkers</div>
@@ -85,11 +89,10 @@ export function InvitationForm({ workspace }) {
                     placeholder="name@gmail.com"
                     value={getValues().emailList}
                     onChange={(e) => {
-                        setRefresh((pre) => pre + 1);
                         setValues("emailList", e.target.value);
                     }}
                 />
-                <div className="flex justify-between">
+                <div className="flex justify-between items-end">
                     <div className="flex gap-x-2 items-center">
                         <button
                             className="flex gap-x-2 items-center text-link font-bold"
@@ -97,6 +100,11 @@ export function InvitationForm({ workspace }) {
                         >
                             <FaLink className="text-lg" /> Copy invite link
                         </button>
+                        {generatingLink && (
+                            <div className="ml-4 relative">
+                                <LoadingSpinner />
+                            </div>
+                        )}
                         {invitationLink && (
                             <div className="text-sm text-color-medium-emphasis">
                                 Link copied

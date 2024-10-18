@@ -43,6 +43,9 @@ class DatabaseSeeder extends Seeder
         $user = User::find(1);
 
 
+        /**
+         * @var Workspace
+         */
 
         $workspace = $user->ownWorkspaces()->create(['name' => 'project']);
         $workspace->assignAdminRoleAndAdminPermissions($user);

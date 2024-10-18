@@ -10,6 +10,9 @@ import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { setWorkspaces } from "@/Store/workspaceSlice";
 import { Link } from "react-router-dom";
+import WorkspaceItem from "./WorkspaceItem";
+import InvitationRequest from "./InvitationRequest";
+import SnackLogo from "@/Components/SnackLogo";
 
 export default function HomePage() {
     const { auth } = usePage().props;
@@ -31,12 +34,12 @@ export default function HomePage() {
     //     );
     // }, []);
     return (
-        <div className="min-h-screen ">
+        <div className="min-h-screen bg-color-contrast">
+            <InvitationRequest />
             <AddWorkspace isOpen={isOpen} setIsOpen={setIsOpen} />
             <div className="bg-background ">
-                <div className="text-3xl pt-16 font-extrabold  flex justify-center items-center gap-x-2">
-                    {" "}
-                    <img src={icon} alt="icon" className="h-8 w-8" />
+                <div className="text-3xl pt-16 font-extrabold  flex justify-center items-center gap-x-2 text-color-high-emphasis">
+                    <SnackLogo />
                     Snack
                 </div>
                 <div className="bg-color-contrast py-2 px-4 rounded-full w-fit mx-auto mt-4 text-color-medium-emphasis flex items-center text-sm gap-x-2">
@@ -56,7 +59,7 @@ export default function HomePage() {
                 </div>
                 <div className="mx-auto w-1/2 grid grid-cols-2 mt-24 gap-x-8">
                     <div className="">
-                        <h1 className="font-bold text-5xl">
+                        <h1 className="font-bold text-5xl text-color-high-emphasis">
                             Create new a workspace
                         </h1>
                         <p className="text-lg text-color-high-emphasis mt-4">
@@ -82,9 +85,11 @@ export default function HomePage() {
                     Open a workspace
                 </h2>
                 <div className="border rounded border-color/15 pt-4  flex flex-col w-[600px] max-w-full mt-6 mx-auto ">
-                    <div className="px-4">
+                    <div className="px-4 text-color-medium-emphasis">
                         Workspaces for{" "}
-                        <span className="font-bold">{auth.user.email}</span>
+                        <span className="font-bold text-color-high-emphasis">
+                            {auth.user.email}
+                        </span>
                     </div>
                     <hr className="mt-4" />
                     <ul>
@@ -100,34 +105,14 @@ export default function HomePage() {
                             </div>
                         )}
                         {workspaces.map((workspace, index) => (
-                            <>
-                                <WorkspaceItem
-                                    workspace={workspace}
-                                    key={workspace.id}
-                                />
+                            <div key={workspace.id}>
+                                <WorkspaceItem workspace={workspace} />
                                 {index != workspaces.length - 1 && <hr />}
-                            </>
+                            </div>
                         ))}
                     </ul>
                 </div>
             </div>
         </div>
-    );
-}
-
-function WorkspaceItem({ workspace }) {
-    return (
-        <Link
-            to={`/workspaces/${workspace.id}/channels/${workspace.main_channel_id}`}
-            className="flex justify-between py-4 items-center hover:bg-foreground px-4"
-        >
-            <div className="flex gap-x-4 items-center">
-                <WorkspaceAvatar name={workspace.name} />
-                <h5 className="text-xl font-bold text-color-high-emphasis">
-                    {workspace.name}
-                </h5>
-            </div>
-            <FaArrowRight className="text-color-medium-emphasis" />
-        </Link>
     );
 }

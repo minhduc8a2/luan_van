@@ -9,6 +9,7 @@ import google from "@/../images/google.png";
 
 import { GrGroup } from "react-icons/gr";
 import { FaFacebook } from "react-icons/fa";
+import SnackLogo from "@/Components/SnackLogo";
 export default function Login({ status, canResetPassword }) {
     const { flash } = usePage().props;
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -28,7 +29,7 @@ export default function Login({ status, canResetPassword }) {
     return (
         <div className="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-color-contrast ">
             <div className="flex items-baseline gap-x-2 mb-8 text-color-high-emphasis">
-                <GrGroup className=" text-xl" />{" "}
+                <SnackLogo />
                 <Link href="/" className=" font-bold text-3xl ">
                     Snack
                 </Link>

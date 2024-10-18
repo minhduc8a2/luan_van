@@ -34,7 +34,7 @@ export default function Admin() {
 
 function Wrapper({ children }) {
     const { auth } = usePage().props;
-    const { workspace, main_channel_id } = useSelector(
+    const { workspace } = useSelector(
         (state) => state.workspace
     );
 
@@ -51,7 +51,7 @@ function Wrapper({ children }) {
                     </h3>
                 </Link>
                 <Link
-                    to={`/workspaces/${workspace.id}/channels/${main_channel_id}`}
+                    to={`/workspaces/${workspace.id}/channels/${workspace.main_channel_id}`}
                     className="flex  text-color-high-emphasis items-center font-bold gap-x-2 hover:underline"
                 >
                     Launch <MdOutlineRocketLaunch className="text-xl" />

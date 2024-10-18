@@ -43,7 +43,7 @@ class ProviderController extends Controller
             }
 
             Auth::login($user);
-            return redirect('/');
+            return redirect('/workspaces');
         } catch (\Throwable $th) {
             return redirect('/login')->withErrors(['fail' => "Failed to login with {$provider}"]);
         }

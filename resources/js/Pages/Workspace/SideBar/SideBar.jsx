@@ -42,7 +42,7 @@ export default function SideBar({}) {
             <AddWorkspace isOpen={isOpen} setIsOpen={setIsOpen}/>
             <div className="flex flex-col items-center gap-y-8 ">
                 <CustomedPopover
-                    triggerNode={<WorkspaceAvatar name={workspace.name} />}
+                    triggerNode={<WorkspaceAvatar name={workspace.name} color="bg-gray-300"/>}
                     anchor="bottom start"
                     className="mt-4"
                 >

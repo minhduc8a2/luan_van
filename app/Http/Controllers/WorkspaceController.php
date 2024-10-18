@@ -43,7 +43,7 @@ class WorkspaceController extends Controller
             'createChannel' => $user->can('create', [Channel::class, $workspace]),
             'updateInvitationPermission' => $user->can('updateInvitationPermission', [Workspace::class, $workspace]),
             'inviteToWorkspace' => $user->can('create', [Invitation::class, $workspace]),
-            'isInvitationToWorkspaceWithAdminApprovalRequired' => $workspace->permissions()->where('permission_type', PermissionTypes::WORKSPACE_INVITATION_WITH_ADMIN_APPROVAL_REQUIRED->name)->exists()
+            'isInvitationToWorkspaceWithAdminApprovalRequired' => $workspace->isInvitationToWorkspaceWithAdminApprovalRequired()
         ];
         switch ($only) {
             case 'workspacePermissions':

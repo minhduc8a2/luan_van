@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Role;
 use App\Helpers\Helper;
 use App\Models\Workspace;
+use App\Helpers\BaseRoles;
 use App\Models\Invitation;
 use Illuminate\Support\Str;
 use App\Mail\InvitationMail;
@@ -12,6 +14,9 @@ use App\Events\WorkspaceEvent;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use function PHPUnit\Framework\throwException;
+
+use Illuminate\Validation\ValidationException;
 use Illuminate\Routing\Controllers\HasMiddleware;
 
 class InvitationController extends Controller implements HasMiddleware
@@ -38,18 +43,41 @@ class InvitationController extends Controller implements HasMiddleware
             }
             //add user to workspace
             $user = $request->user();
+
+
+
+
             /**
              * @var Workspace $workspace
              */
             $workspace = Workspace::find($invitation->workspace_id);
-            $workspace->addUserToWorkspace($user);
+            if (!$workspace) throw ValidationException::withMessages([
+                'message' => 'Invalid link',
+            ]);
 
-            broadcast(new WorkspaceEvent(workspace: $workspace, type: "newUserJoinWorkspace", fromUserId: $request->user()->id, data: $user));
-            DB::commit();
+            //check already memebers or requested
+            if ($user->workspaces()->where('workspaces.id', $workspace->id)->exists()) {
+                return redirect(route('workspace.show', $workspace->id));
+            }
+
+
+            if ($workspace->isInvitationToWorkspaceWithAdminApprovalRequired()) {
+                $user->workspaces()->attach($workspace->id, ['role_id' => Role::getRoleIdByName(BaseRoles::MEMBER->name)]);
+                DB::commit();
+                return redirect(route('workspaces', ['request' => true, 'workspaceId' => $workspace->id]));
+            } else {
+
+                $workspace->addUserToWorkspace($user);
+
+                broadcast(new WorkspaceEvent(workspace: $workspace, type: "newUserJoinWorkspace", fromUserId: $request->user()->id, data: $user));
+                DB::commit();
+                return redirect(route('workspace.show', $workspace->id));
+            }
+
             //
-            return redirect(route('workspace.show', $workspace->id));
         } catch (\Throwable $th) {
             DB::rollBack();
+            dd($th);
             return abort(403, 'Invalid link');
         }
     }
