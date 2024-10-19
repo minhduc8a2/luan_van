@@ -34,6 +34,7 @@ export default function MemberRow({ user }) {
                 <AvatarAndName user={user} className="h-6 w-6" noStatus />
                 {user.id != workspace.user_id && (
                     <CustomedPopover
+                        width="w-64"
                         anchor="left end"
                         triggerNode={
                             <div>

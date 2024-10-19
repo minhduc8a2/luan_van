@@ -19,19 +19,27 @@ export default function AdminsAndOwners() {
             value: "z_to_a",
         },
     ];
+   
     const [sortTypes, setSortTypes] = useState(sortList[0].value);
+   
     const [searchValue, setSearchValue] = useState("");
     const adminsAndOwners = useMemo(() => {
         const temp = workspaceUsers.filter(
             (user) =>
                 user.workspaceRole.name == "ADMIN" &&
-                user.name.toLowerCase().includes(searchValue.toLowerCase())
+                (user.name.toLowerCase().includes(searchValue.toLowerCase()) ||
+                    user.email
+                        .toLowerCase()
+                        .includes(searchValue.toLowerCase()))
         );
+       
+
         if (sortTypes == "a_to_z") {
             temp.sort((a, b) => a.name.localeCompare(b.name));
         } else {
             temp.sort((a, b) => b.name.localeCompare(a.name));
         }
+
         return temp;
     });
     return (
