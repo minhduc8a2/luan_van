@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { IoSettingsOutline } from "react-icons/io5";
 import { useSelector } from "react-redux";
 import { Link, Outlet } from "react-router-dom";
@@ -11,10 +11,17 @@ import { usePage, Link as InertiaLink } from "@inertiajs/react";
 import Avatar from "@/Components/Avatar";
 import { LuUser2 } from "react-icons/lu";
 import { PiAddressBookTabs } from "react-icons/pi";
-import { MdLogout, MdOutlineRocketLaunch } from "react-icons/md";
+import {
+    MdLogout,
+    MdOutlineDarkMode,
+    MdOutlineLightMode,
+    MdOutlineRocketLaunch,
+} from "react-icons/md";
 import NotificationPopup from "@/Components/NotificationPopup";
 import Event from "./Event";
 import { IoMdInformationCircleOutline } from "react-icons/io";
+import ThemeContext from "@/ThemeProvider";
+import ThemePicker from "@/Components/ThemePicker";
 
 export default function Admin() {
     const [loaded, setLoaded] = useState(false);
@@ -36,7 +43,8 @@ export default function Admin() {
 function Wrapper({ children }) {
     const { auth } = usePage().props;
     const { workspace } = useSelector((state) => state.workspace);
-
+    const { theme } = useContext(ThemeContext);
+    const [isThemePickerOpen, setIsThemePickerOpen] = useState(false);
     return (
         <div className="flex flex-col min-h-screen">
             <nav className="h-20 drop-shadow flex px-8 bg-color-contrast justify-between items-center ">
@@ -88,7 +96,7 @@ function Wrapper({ children }) {
                                 title="Account & profile"
                                 to="account_profile"
                             />
-                              <PanelItem
+                            <PanelItem
                                 icon={<IoMdInformationCircleOutline />}
                                 title="About this workspace"
                                 to="about_workspace"
@@ -117,7 +125,22 @@ function Wrapper({ children }) {
                             Other
                         </h5>
                         <ul className="flex flex-col gap-y-2">
-                          
+                            <ThemePicker
+                                isOpen={isThemePickerOpen}
+                                setIsOpen={setIsThemePickerOpen}
+                            />
+                            <button
+                                className="flex gap-x-3 text-color-medium-emphasis items-center"
+                                onClick={() => setIsThemePickerOpen(true)}
+                            >
+                                {theme.mode ? (
+                                    <MdOutlineDarkMode className="text-lg"/>
+                                ) : (
+                                    <MdOutlineLightMode className="text-lg"/>
+                                )}{" "}
+                                Theme
+                            </button>
+
                             <InertiaLink
                                 className="flex items-center gap-x-2 text-color-medium-emphasis"
                                 href={route("logout")}

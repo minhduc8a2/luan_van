@@ -7,7 +7,7 @@ import { usePage } from "@inertiajs/react";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import ThemePicker from "./ThemePicker";
+import ThemePicker from "@/Components/ThemePicker";
 
 export default function UserOptions() {
     const { auth } = usePage().props;

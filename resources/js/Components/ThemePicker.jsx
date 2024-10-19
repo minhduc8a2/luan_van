@@ -1,6 +1,6 @@
 
 import CustomedDialog from "@/Components/CustomedDialog";
-import React, { useContext, useState } from "react";
+import React, { useContext } from "react";
 import ThemeContext from "@/ThemeProvider";
 import { MdOutlineDarkMode, MdOutlineLightMode } from "react-icons/md";
 export default function ThemePicker({isOpen,setIsOpen}) {
