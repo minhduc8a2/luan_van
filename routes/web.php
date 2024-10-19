@@ -112,6 +112,7 @@ Route::middleware(['auth', HandleWorkspaceRequests::class])->group(function () {
         Route::get("/admin/home", [WorkspaceController::class, 'settingsHome'])->name('workspaces.settingsHome');
         Route::get("/admin/manage_members", [WorkspaceController::class, 'manageMembers'])->name('workspaces.manageMembers');
 
+
         Route::get("/init_workspace_data", [WorkspaceController::class, 'initWorkspaceData'])->name('workspaces.initWorkspaceData');
         Route::get('/browse_users', [UserController::class, 'browseUsers'])->name("users.browseUsers");
 

@@ -107,3 +107,39 @@ export const formatToMinuteSecond = (timeInSeconds) => {
     const seconds = Math.floor(timeInSeconds % 60);
     return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
 };
+
+export function formatDateWithOrdinalSuffix(date) {
+    const months = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+    ];
+    const day = date.getDate();
+    const month = months[date.getMonth()];
+    const year = date.getFullYear();
+
+    const getOrdinalSuffix = (day) => {
+        if (day > 3 && day < 21) return "th";
+        switch (day % 10) {
+            case 1:
+                return "st";
+            case 2:
+                return "nd";
+            case 3:
+                return "rd";
+            default:
+                return "th";
+        }
+    };
+
+    return `${month} ${day}${getOrdinalSuffix(day)}, ${year}`;
+}

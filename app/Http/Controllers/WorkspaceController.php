@@ -230,7 +230,7 @@ class WorkspaceController extends Controller
         try {
             DB::beginTransaction();
             $exists = $workspace->users()->where('users.id', $userId)->first();
-            
+
             if ($exists) {
                 $workspace->users()->updateExistingPivot($userId, ['is_deactivated' => $wantDeactivate]);
                 broadcast(new WorkspaceEvent(workspace: $workspace, type: "DeactivateUser_updated", fromUserId: "", data: $workspace->users()->where('users.id', $userId)->first()));

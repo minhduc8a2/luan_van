@@ -13,7 +13,7 @@ import Home from "./Admin/Home";
 import AccountAndProfile from "./Admin/AccountAndProfile/AccountAndProfile";
 import HomePage from "./HomePage/HomePage";
 import ReduxProvider from "@/Components/ReduxProvider";
-import AboutWorkspace from "./Admin/AboutWorkspace";
+import AboutWorkspace from "./Admin/AboutWorkspace/AboutWorkspace";
 
 export default function Index() {
     return (
