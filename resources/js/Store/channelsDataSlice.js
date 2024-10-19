@@ -10,6 +10,7 @@ export const channelsDataSlice = createSlice({
                 delete state[action.payload.id];
             }
         },
+
         setChannelData(state, action) {
             if (!state[action.payload.id]) {
                 state[action.payload.id] = {};
@@ -18,7 +19,9 @@ export const channelsDataSlice = createSlice({
                 state[action.payload.id][key] = action.payload.data[key];
             });
         },
-
+        clearChannelData(state, action) {
+            state = {};
+        },
         removeUserFromChannel(state, action) {
             if (
                 state[action.payload.id] &&
@@ -256,6 +259,7 @@ export const {
     addMessages,
     updateMessageAfterSendSuccessfully,
     updateMessageAfterSendFailed,
+    clearChannelData,
 } = channelsDataSlice.actions;
 
 export default channelsDataSlice.reducer;

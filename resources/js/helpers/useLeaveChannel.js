@@ -11,13 +11,14 @@ const useLeaveChannel = (workspaceId) => {
     const successHandler = useSuccessHandler("Leave channel successfully!");
     const errorHandler = useErrorHandler();
     const { workspace } = useSelector((state) => state.workspace);
-    const reloadPermissions = useReloadPermissions();
+    const reloadPermissions = useReloadPermissions(workspaceId);
     const dispatch = useDispatch();
     const goToChannel = useGoToChannel();
     return (channelId, channelType, wantToGoToMainChannel = true) => {
         return axios
             .post(
                 route("channel.leave", {
+                    workspace:workspaceId,
                     channel: channelId,
                 }),
                 {},

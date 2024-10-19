@@ -32,8 +32,12 @@ class MessagePolicy
     public function create(User $user, Channel $channel): bool
     {
         if ($channel->is_archived) return false;
-
-        return $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name)
+        if ($channel->type == ChannelTypes::PUBLIC->name) {
+            if ($user->workspacePermissionCheck($channel->workspace, PermissionTypes::WORKSPACE_ALL->name))
+                return true;
+        }
+        return
+            $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name)
             || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_CHAT->name);
     }
 
@@ -134,6 +138,10 @@ class MessagePolicy
     {
 
         if ($channel->is_archived) return false;
+        if ($channel->type == ChannelTypes::PUBLIC->name) {
+            if ($user->workspacePermissionCheck($channel->workspace, PermissionTypes::WORKSPACE_ALL->name))
+                return true;
+        }
         return $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name)
             || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_THREAD->name);
     }

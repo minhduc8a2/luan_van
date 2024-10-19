@@ -1,15 +1,11 @@
 import React, { useEffect, useState } from "react";
-import icon from "@/../images/icon.png";
 import banner from "@/../images/banner.png";
 import Button from "@/Components/Button";
-import WorkspaceAvatar from "@/Components/WorkspaceAvatar";
-import { FaArrowRight } from "react-icons/fa";
 import { AddWorkspace } from "@/Components/AddWorkspace";
 import { usePage, Link as InertiaLink } from "@inertiajs/react";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { setWorkspaces } from "@/Store/workspaceSlice";
-import { Link } from "react-router-dom";
 import WorkspaceItem from "./WorkspaceItem";
 import InvitationRequest from "./InvitationRequest";
 import SnackLogo from "@/Components/SnackLogo";

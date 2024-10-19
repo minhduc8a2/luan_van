@@ -17,7 +17,7 @@ export default function AccountAndProfile() {
         </>,
     ];
     return (
-        <div>
+        <div className="pl-16 pt-16">
             <div className="flex gap-x-3">
                 <IoMdSettings className="text-dark-green text-4xl" />
                 <h1 className="text-4xl font-bold text-color-high-emphasis">

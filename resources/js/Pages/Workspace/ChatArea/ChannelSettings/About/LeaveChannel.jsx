@@ -1,9 +1,6 @@
 import React from "react";
 import Button from "@/Components/Button";
 
-
-
-
 import { FaLock } from "react-icons/fa";
 
 import useLeaveChannel from "@/helpers/useLeaveChannel";
@@ -25,13 +22,13 @@ export default function LeaveChannel({ channel }) {
         });
     }
 
-   
     if (channel.type === "PUBLIC")
         return (
             <div>
                 <Button
                     className="!text-danger-500  !hover:text-danger-500 bg-transparent w-full border-none py-4 !justify-start rounded-bl-lg rounded-br-lg"
                     onClick={onSubmit}
+                    loading={processing}
                 >
                     Leave channel
                 </Button>
@@ -77,6 +74,5 @@ export default function LeaveChannel({ channel }) {
                     />
                 </CustomedDialog>
             </>
-           
         );
 }

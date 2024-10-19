@@ -12,7 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { CreateChannelForm } from "./createChannelForm";
 import { FiArchive } from "react-icons/fi";
 
-import { useContext, useMemo } from "react";
+import { useContext, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import useGoToChannel from "@/helpers/useGoToChannel";
 import ThemeContext from "@/ThemeProvider";
@@ -20,6 +20,7 @@ import WorkspaceOptions from "./WorkspaceOptions";
 
 export default function Panel({}) {
     const { auth } = usePage().props;
+    const [isInvitationFormOpen, setIsInvitationFormOpen] = useState(false);
     const { workspace, workspacePermissions } = useSelector(
         (state) => state.workspace
     );
@@ -43,6 +44,7 @@ export default function Panel({}) {
     const selfChannel = useMemo(() => {
         return channels.find((cn) => cn.type == "SELF");
     }, [channels]);
+
     return (
         <div
             className={`${
@@ -192,8 +194,23 @@ export default function Panel({}) {
                         />
                     </ul>
                     {workspacePermissions?.inviteToWorkspace && (
-                        <InvitationForm workspace={workspace} />
+                        <button
+                            className="grid-item mt-2 px-4 w-fit"
+                            onClick={() => {
+                                setIsInvitationFormOpen(true);
+                            }}
+                        >
+                            <div className="flex items-center w-full h-full">
+                                <LuPlus className="text-sm" />
+                            </div>
+                            <div className="">Add coworkers</div>
+                        </button>
                     )}
+                    <InvitationForm
+                        workspace={workspace}
+                        isOpen={isInvitationFormOpen}
+                        onClose={() => setIsInvitationFormOpen(false)}
+                    />
                 </div>
             </div>
         </div>

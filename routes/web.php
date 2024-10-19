@@ -45,7 +45,7 @@ Route::middleware(['auth', HandleWorkspaceRequests::class])->group(function () {
             Route::post("/edit_name", [ChannelController::class, 'editName'])->name("channel.edit_name");
             Route::post("/change_type", [ChannelController::class, 'changeType'])->name("channel.change_type");
             Route::post("/leave", [ChannelController::class, 'leave'])->name("channel.leave");
-            Route::post("/join", [ChannelController::class, 'join'])->name("channel.join");
+            Route::post("/join", [ChannelController::class, 'join'])->name("channels.join");
             Route::post("/add_managers", [ChannelController::class, 'addManagers'])->name("channels.addManagers");
             Route::post("/remove_manager", [ChannelController::class, 'removeManager'])->name("channels.removeManager");
             Route::post("/last_read", [ChannelController::class, 'lastRead'])->name("channel.last_read");

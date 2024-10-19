@@ -2,16 +2,21 @@ import { useDispatch } from "react-redux";
 import useErrorHandler from "./useErrorHandler";
 import useReloadPermissions from "./useReloadPermissions";
 import { addJoinedChannelId } from "@/Store/joinedChannelIdsSlice";
+import { useParams } from "react-router-dom";
 
 const useJoinChannel = () => {
-    const reloadPermissions = useReloadPermissions();
+    const { workspaceId } = useParams();
+    const reloadPermissions = useReloadPermissions(workspaceId);
     const errorHandler = useErrorHandler();
     const dispatch = useDispatch();
 
     return (channelId) => {
         return axios
             .post(
-                route("channel.join", channelId),
+                route("channels.join", {
+                    workspace: workspaceId,
+                    channel: channelId,
+                }),
                 {},
                 {
                     headers: {

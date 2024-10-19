@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useContext, useMemo } from "react";
 import ChangeChannelNameForm from "./ChangeChannelNameForm";
 import { EditDescriptionForm } from "./EditDescriptionForm";
 
@@ -14,9 +14,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { setProfile } from "@/Store/profileSlice";
 import { useChannelData } from "@/helpers/customHooks";
 import { useParams } from "react-router-dom";
-export default function About({ channelName, onClose }) {
+import { ChannelSettingsContext } from "../ChannelSettings";
+export default function About({ channelName }) {
     const { auth } = usePage().props;
     const { channelId } = useParams();
+    const {setShow} = useContext(ChannelSettingsContext)
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
     const { channels } = useSelector((state) => state.channels);
     const { permissions } = useChannelData(channelId);
@@ -88,9 +90,9 @@ export default function About({ channelName, onClose }) {
                             <div className="text-sm font-semibold text-color-high-emphasis">
                                 Email Address
                             </div>
-                            <div className="text-sm text-link">
+                            <a href={"mailto:"+directChannelUser.email}  className="text-sm text-link">
                                 {directChannelUser.email}
-                            </div>
+                            </a>
                         </div>
                     </div>
                     {directChannelUser.phone && (
@@ -102,16 +104,16 @@ export default function About({ channelName, onClose }) {
                                 <div className="text-sm font-semibold text-color-high-emphasis">
                                     Phone
                                 </div>
-                                <div className="text-sm text-link">
+                                <a href={"tel:"+directChannelUser.phone} className="text-sm text-link">
                                     {directChannelUser.phone}
-                                </div>
+                                </a>
                             </div>
                         </div>
                     )}
                     <button
                         className="text-link hover:underline font-bold mt-4"
                         onClick={() => {
-                            onClose();
+                            setShow(false)
                             dispatch(setProfile(directChannelUser.id));
                         }}
                     >

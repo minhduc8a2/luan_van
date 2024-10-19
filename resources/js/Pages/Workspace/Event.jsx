@@ -1,13 +1,10 @@
 import { router, usePage } from "@inertiajs/react";
-import React, { useCallback, useMemo, useRef } from "react";
+import React, { useCallback, useRef } from "react";
 import { useEffect } from "react";
 import { setManyOnline, setOnlineStatus } from "@/Store/OnlineStatusSlice";
 import { useDispatch, useSelector } from "react-redux";
-import { addActivity, addNotificationCount } from "@/Store/activitySlice";
-import {
-    isBroadcastNotification,
-    isChannelsNotificationBroadcast,
-} from "@/helpers/notificationTypeHelper";
+import { addNotificationCount } from "@/Store/activitySlice";
+import { isChannelsNotificationBroadcast } from "@/helpers/notificationTypeHelper";
 
 import { toggleHuddle } from "@/Store/huddleSlice";
 import { deleteFileInThread, setThreadedMessageId } from "@/Store/threadSlice";
@@ -20,7 +17,6 @@ import {
     addMessageCountForChannel,
     addNewChannelToChannelsStore,
     removeChannel,
-    removeChannelFromChannelsStore,
     updateChannelInformation,
 } from "@/Store/channelsSlice";
 import { isHiddenUser } from "@/helpers/userHelper";
@@ -28,24 +24,24 @@ import {
     addManagersToChannel,
     addMessage,
     addUsersToChannel,
+    clearChannelData,
     deleteMessage,
     editMessage,
     removeManagerFromChannel,
     removeUserFromChannel,
-    updateMessageAfterSendSuccessfully,
 } from "@/Store/channelsDataSlice";
-import { useParams } from "react-router-dom";
-
+import { useNavigate, useParams } from "react-router-dom";
 import useReloadPermissions from "@/helpers/useReloadPermissions";
-
 import useGoToChannel from "@/helpers/useGoToChannel";
 import useLoadWorkspaceData from "@/helpers/useLoadWorkspaceData";
 import { updateWorkspace } from "@/Store/workspaceSlice";
+import useReloadLoadedChannelsDataPermissions from "@/helpers/useReloadLoadedChannelsDataPermissions";
+import useLoadWorkspaces from "@/helpers/useLoadWorkspaces";
 
 export default function Event() {
     const { auth } = usePage().props;
     const { channelId, workspaceId } = useParams();
-    const { workspace, workspaces } = useSelector((state) => state.workspace);
+    const { workspace } = useSelector((state) => state.workspace);
     const dispatch = useDispatch();
     const { channels } = useSelector((state) => state.channels);
     const channelsData = useSelector((state) => state.channelsData);
@@ -53,7 +49,9 @@ export default function Event() {
     const { threadMessageId } = useSelector((state) => state.thread);
     const connectionRef = useRef(null);
     const { channelId: huddleChannelId } = useSelector((state) => state.huddle);
-    const reloadPermissions = useReloadPermissions();
+    const reloadPermissions = useReloadPermissions(workspaceId);
+    const reloadLoadedChannelsDataPermissions =
+        useReloadLoadedChannelsDataPermissions(workspaceId);
     const goToChannel = useGoToChannel();
     const loadWorkspaceData = useLoadWorkspaceData();
     const channelsDataRef = useRef(null);
@@ -63,7 +61,13 @@ export default function Event() {
     const channelIdRef = useRef(null);
     const huddleChannelIdRef = useRef(null);
     const mainChannelRef = useRef(null);
-
+    const reloadLoadedChannelsDataPermissionsRef = useRef(null);
+    const navigate = useNavigate();
+    const loadWorkspaces = useLoadWorkspaces();
+    useEffect(() => {
+        reloadLoadedChannelsDataPermissionsRef.current =
+            reloadLoadedChannelsDataPermissions;
+    }, [reloadLoadedChannelsDataPermissions]);
     useEffect(() => {
         channelsDataRef.current = channelsData;
     }, [channelsData]);
@@ -363,7 +367,9 @@ export default function Event() {
                             e.data?.id == auth.user.id &&
                             !!e.data?.pivot?.is_deactivated
                         ) {
-                            router.get(route("workspaces"));
+                            loadWorkspaces().then(() =>
+                                navigate("/workspaces")
+                            );
                         }
                         break;
                     case "UserRole_updated":
@@ -373,6 +379,10 @@ export default function Event() {
                                 data: e.data,
                             })
                         );
+                        if (auth.user.id == e.data?.id) {
+                            reloadLoadedChannelsDataPermissionsRef.current();
+                            loadWorkspaceData("workspacePermissions");
+                        }
                         break;
                     case "ChannelObserver_storeChannel":
                         const newChannel = e.data;

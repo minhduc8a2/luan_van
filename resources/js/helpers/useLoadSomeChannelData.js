@@ -10,7 +10,7 @@ const useLoadSomeChannelData = (workspaceId) => {
             tokensRef.current.map((token) => token.abort());
         }
         tokensRef.current = types.map((i) => new AbortController());
-        return new Promise.all(
+        return Promise.all(
             types.map((type, index) => {
                 return axios
                     .get(

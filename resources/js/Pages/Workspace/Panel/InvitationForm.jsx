@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import copy from "copy-to-clipboard";
 import TextArea from "@/Components/Input/TextArea";
 import { FaLink } from "react-icons/fa6";
@@ -9,13 +9,14 @@ import useSuccessHandler from "@/helpers/useSuccessHandler";
 import CustomedDialog from "@/Components/CustomedDialog";
 import LoadingSpinner from "@/Components/LoadingSpinner";
 
-export function InvitationForm({ workspace }) {
+export function InvitationForm({ workspace, isOpen, onClose }) {
     const [invitationLink, setInvitationLink] = useState("");
     const [invitationSent, setInvitationSent] = useState("");
     const [generatingLink, setGeneratingLink] = useState(false);
+    const [linkCopied,setLinkCopied] = useState(false)
     const errorHandler = useErrorHandler();
     const successHandler = useSuccessHandler("Invitation sent successfully!");
-    const [isOpen, setIsOpen] = useState(false);
+
     const { getValues, setValues, loading, submit, reset } = useCustomedForm(
         {
             emailList: "",
@@ -35,18 +36,22 @@ export function InvitationForm({ workspace }) {
                 emailList.map((em) => em.trim()).filter((em) => em != "")
             );
         }
+        if (getValues().emailList.length == 0) return;
 
         submit().then((response) => {
             copy(response.data.invitation_link);
+            setLinkCopied(true)
             setInvitationLink(response.data.invitation_link);
             setInvitationSent(response.data.invitation_sent);
             successHandler(response);
+            reset();
         });
     }
     function generateInviteLink(e) {
         e.preventDefault();
         if (invitationLink) {
             copy(invitationLink);
+            setLinkCopied(true)
             return;
         }
         setGeneratingLink(true);
@@ -56,6 +61,7 @@ export function InvitationForm({ workspace }) {
             })
             .then((response) => {
                 copy(response.data.invitation_link);
+                setLinkCopied(true)
                 setInvitationLink(response.data.invitation_link);
             })
             .catch(errorHandler)
@@ -63,61 +69,52 @@ export function InvitationForm({ workspace }) {
                 setGeneratingLink(false);
             });
     }
-
+    useEffect(() => {
+        if (isOpen) {
+            reset();
+            setLinkCopied(false)
+        }
+    }, [isOpen]);
     return (
-        <div className="">
-            <button
-                className="grid-item mt-2 px-4 w-fit"
-                onClick={() => {
-                    reset();
-                    setIsOpen(true);
+        <CustomedDialog isOpen={isOpen} onClose={onClose}>
+            <CustomedDialog.Title>
+                {`Invite people to ${workspace.name}`}
+            </CustomedDialog.Title>
+            <TextArea
+                id="name"
+                rows="2"
+                label="To:"
+                placeholder="name@gmail.com"
+                value={getValues().emailList}
+                onChange={(e) => {
+                    setValues("emailList", e.target.value);
                 }}
-            >
-                <div className="flex items-center w-full h-full">
-                    <LuPlus className="text-sm" />
+            />
+            <div className="flex justify-between items-end">
+                <div className="flex gap-x-2 items-center">
+                    <button
+                        className="flex gap-x-2 items-center text-link font-bold"
+                        onClick={generateInviteLink}
+                    >
+                        <FaLink className="text-lg" /> Copy invite link
+                    </button>
+                    {generatingLink && (
+                        <div className="ml-4 relative">
+                            <LoadingSpinner />
+                        </div>
+                    )}
+                    {linkCopied && (
+                        <div className="text-sm text-color-medium-emphasis">
+                            Link copied
+                        </div>
+                    )}
                 </div>
-                <div className="">Add coworkers</div>
-            </button>
-            <CustomedDialog isOpen={isOpen} onClose={() => setIsOpen(false)}>
-                <CustomedDialog.Title>
-                    {`Invite people to ${workspace.name}`}
-                </CustomedDialog.Title>
-                <TextArea
-                    id="name"
-                    rows="2"
-                    label="To:"
-                    placeholder="name@gmail.com"
-                    value={getValues().emailList}
-                    onChange={(e) => {
-                        setValues("emailList", e.target.value);
-                    }}
+                <CustomedDialog.ActionButtons
+                    btnName2="Send Invitation"
+                    onClickBtn2={onSubmit}
+                    loading={loading}
                 />
-                <div className="flex justify-between items-end">
-                    <div className="flex gap-x-2 items-center">
-                        <button
-                            className="flex gap-x-2 items-center text-link font-bold"
-                            onClick={generateInviteLink}
-                        >
-                            <FaLink className="text-lg" /> Copy invite link
-                        </button>
-                        {generatingLink && (
-                            <div className="ml-4 relative">
-                                <LoadingSpinner />
-                            </div>
-                        )}
-                        {invitationLink && (
-                            <div className="text-sm text-color-medium-emphasis">
-                                Link copied
-                            </div>
-                        )}
-                    </div>
-                    <CustomedDialog.ActionButtons
-                        btnName2="Send Invitation"
-                        onClickBtn2={onSubmit}
-                        loading={loading}
-                    />
-                </div>
-            </CustomedDialog>
-        </div>
+            </div>
+        </CustomedDialog>
     );
 }

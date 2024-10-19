@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import ChannelSettings from "./ChannelSettings/ChannelSettings";
 import Button from "@/Components/Button";
 import TipTapEditor from "@/Components/TipTapEditor";
@@ -30,6 +30,7 @@ export default function Editor({
     const { channelId, workspaceId } = useParams();
     const { publicAppUrl } = useSelector((state) => state.workspace);
     const { channelUsers } = useChannelUsers(channelId);
+    const [joining, setJoining] = useState(false);
     const joinChannel = useJoinChannel();
     const dispatch = useDispatch();
     function onSubmit(content, fileObjects, JSONContent) {
@@ -77,12 +78,15 @@ export default function Editor({
         }, 0);
         axios
             .post(
-                route("message.store", { channel: channel.id }),
+                route("message.store", {
+                    workspace: workspaceId,
+                    channel: channel.id,
+                }),
                 {
                     content,
                     fileObjects,
                     mentionsList,
-                    created_at:newMessage.created_at,
+                    created_at: newMessage.created_at,
                 },
                 {
                     headers: {
@@ -135,13 +139,16 @@ export default function Editor({
                         {channelName}
                     </div>
                     <div className="flex gap-x-4 justify-center my-4 ">
-                        <ChannelSettings
-                            channelName={channelName}
-                           
-                        />
+                        <ChannelSettings channelName={channelName} />
                         <Button
-                           type="green"
-                            onClick={() => joinChannel(channelId)}
+                            loading={joining}
+                            type="green"
+                            onClick={() => {
+                                setJoining(true);
+                                joinChannel(channelId).finally(() => {
+                                    setJoining(false);
+                                });
+                            }}
                         >
                             Join Channel
                         </Button>

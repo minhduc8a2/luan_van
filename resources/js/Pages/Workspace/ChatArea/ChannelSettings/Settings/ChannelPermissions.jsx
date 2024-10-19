@@ -93,7 +93,7 @@ export default function ChannelPermissions() {
                     <div className="font-semibold ">Channel permissions</div>
                 </CustomedDialog.Title>
                 <div className="">
-                    <h5 className=" font-bold ">
+                    <h5 className=" font-bold text-color-high-emphasis">
                         Who can post in this channel?
                     </h5>
                     <ul className="flex flex-col gap-y-2 mt-4">
@@ -121,6 +121,7 @@ export default function ChannelPermissions() {
                                     />
                                     <label
                                         htmlFor={who.value + "_who_can_post"}
+                                        className="text-color-high-emphasis"
                                     >
                                         {who.title}
                                     </label>
@@ -130,7 +131,7 @@ export default function ChannelPermissions() {
                     </ul>
                 </div>
                 <div className="mt-4">
-                    <h5 className=" font-bold ">
+                    <h5 className=" font-bold text-color-high-emphasis">
                         Who can add new member to this channel?
                     </h5>
                     <ul className="flex flex-col gap-y-2 mt-4">
@@ -162,6 +163,7 @@ export default function ChannelPermissions() {
                                         htmlFor={
                                             who.value + "_who_can_add_member"
                                         }
+                                         className="text-color-high-emphasis"
                                     >
                                         {who.title}
                                     </label>
@@ -171,7 +173,7 @@ export default function ChannelPermissions() {
                     </ul>
                 </div>
                 <div className="mt-4">
-                    <h5 className=" font-bold ">
+                    <h5 className=" font-bold text-color-high-emphasis">
                         Allow huddles in this channel?
                     </h5>
                     <ul className="flex flex-col gap-y-2 mt-4">
@@ -185,7 +187,7 @@ export default function ChannelPermissions() {
                                     setValues("allowHuddle", true);
                                 }}
                             />
-                            <label htmlFor="allow_huddles">
+                            <label htmlFor="allow_huddles"  className="text-color-high-emphasis">
                                 Yes, members can start and join huddles
                             </label>
                         </li>
@@ -199,7 +201,7 @@ export default function ChannelPermissions() {
                                     setValues("allowHuddle", false);
                                 }}
                             />
-                            <label htmlFor="not_allow_huddles">
+                            <label htmlFor="not_allow_huddles"  className="text-color-high-emphasis">
                                 No, members can’t start or join huddles
                             </label>
                         </li>
@@ -217,8 +219,8 @@ export default function ChannelPermissions() {
                             }}
                         />
                         <div className="">
-                            <label htmlFor="allow_thread">Allow threads</label>
-                            <p>
+                            <label htmlFor="allow_thread" className="text-color-high-emphasis">Allow threads</label>
+                            <p className="text-color-high-emphasis">
                                 Everyone will be able to add replies to messages
                                 posted in this channel, regardless of overall
                                 posting permissions
