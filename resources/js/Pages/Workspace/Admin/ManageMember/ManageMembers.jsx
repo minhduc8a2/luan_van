@@ -57,11 +57,8 @@ export default function ManageMembers() {
     const filteredMembers = useMemo(() => {
         let temp = workspaceUsers.filter(
             (user) =>
-                user.workspaceRole.name == "ADMIN" &&
-                (user.name.toLowerCase().includes(searchValue.toLowerCase()) ||
-                    user.email
-                        .toLowerCase()
-                        .includes(searchValue.toLowerCase()))
+                user.name.toLowerCase().includes(searchValue.toLowerCase()) ||
+                user.email.toLowerCase().includes(searchValue.toLowerCase())
         );
         //owntype
         switch (filter.accountType) {
@@ -155,9 +152,11 @@ export default function ManageMembers() {
                     </div>
 
                     <ul className="flex flex-col ">
-                        {
-                            filteredMembers.length ==0 && <p className="text-color-medium-emphasis text-center text-sm mt-4">No members yet.</p>
-                        }
+                        {filteredMembers.length == 0 && (
+                            <p className="text-color-medium-emphasis text-center text-sm mt-4">
+                                No members yet.
+                            </p>
+                        )}
                         {filteredMembers.map((user) => {
                             return <MemberRow user={user} key={user.id} />;
                         })}

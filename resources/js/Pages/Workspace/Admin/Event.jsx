@@ -1,6 +1,6 @@
 import useLoadWorkspaceData from "@/helpers/useLoadWorkspaceData";
-import { updateWorkspace } from "@/Store/workspaceSlice";
-import { updateWorkspaceUserInformation } from "@/Store/workspaceUsersSlice";
+import { updateCurrentWorkspace } from "@/Store/workspaceSlice";
+import { addWorkspaceUser, updateWorkspaceUserInformation } from "@/Store/workspaceUsersSlice";
 import { router, usePage } from "@inertiajs/react";
 import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
@@ -18,11 +18,13 @@ export default function Event() {
                 console.log("workspaceEvent", e);
                 switch (e.type) {
                     case "WorkspaceObserver_updated":
-                        dispatch(updateWorkspace(e.data));
+                        dispatch(updateCurrentWorkspace(e.data));
                         break;
                     case "InvitationPermission_updated":
                         loadWorkspaceData("workspacePermissions");
                         break;
+                    case "newUserRequestToJoinWorkspace":
+                        dispatch(addWorkspaceUser(e.data))
                     case "DeactivateUser_updated":
                         dispatch(
                             updateWorkspaceUserInformation({
@@ -37,6 +39,7 @@ export default function Event() {
                             router.get(route("workspaces"));
                         }
                         break;
+                    case "AcceptJoiningRequest":
                     case "UserRole_updated":
                         dispatch(
                             updateWorkspaceUserInformation({

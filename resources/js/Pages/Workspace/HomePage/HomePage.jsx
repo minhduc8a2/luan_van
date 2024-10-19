@@ -5,7 +5,7 @@ import { AddWorkspace } from "@/Components/AddWorkspace";
 import { usePage, Link as InertiaLink } from "@inertiajs/react";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
-import { setWorkspaces } from "@/Store/workspaceSlice";
+import { setWorkspaces, updateWorkspace } from "@/Store/workspaceSlice";
 import WorkspaceItem from "./WorkspaceItem";
 import InvitationRequest from "./InvitationRequest";
 import SnackLogo from "@/Components/SnackLogo";
@@ -20,15 +20,23 @@ export default function HomePage() {
             dispatch(setWorkspaces({ workspaces: response.data.workspaces }));
         });
     }, []);
-    // useEffect(() => {
-    //     Echo.private("App.Models.User." + auth.user.id).notification(
-    //         (notification) => {
-    //             console.log(notification);
-    //             const { changesType } = notification;
+    useEffect(() => {
+        console.log("Register user notifications");
+        Echo.private("App.Models.User." + auth.user.id).notification(
+            (notification) => {
+                console.log(notification);
+                const { changesType, workspace } = notification;
+                switch (changesType) {
+                    case "AcceptJoiningRequest":
+                        dispatch(updateWorkspace(workspace));
+                        break;
 
-    //         }
-    //     );
-    // }, []);
+                    default:
+                        break;
+                }
+            }
+        );
+    }, [auth.user.id]);
     return (
         <div className="min-h-screen bg-color-contrast">
             <InvitationRequest />

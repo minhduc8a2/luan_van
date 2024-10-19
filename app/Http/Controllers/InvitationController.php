@@ -63,12 +63,16 @@ class InvitationController extends Controller implements HasMiddleware
 
             if ($workspace->isInvitationToWorkspaceWithAdminApprovalRequired()) {
                 $user->workspaces()->attach($workspace->id, ['role_id' => Role::getRoleIdByName(BaseRoles::MEMBER->name)]);
+                $user = $workspace->users()->where('users.id', $user->id)->first();
+                $user->workspaceRole = Role::find($user->pivot->role_id)->setVisible(["name"]);
+                broadcast(new WorkspaceEvent(workspace: $workspace, type: "newUserRequestToJoinWorkspace", fromUserId: $request->user()->id, data: $user));
                 DB::commit();
                 return redirect(route('workspaces', ['request' => true, 'workspaceId' => $workspace->id]));
             } else {
 
                 $workspace->addUserToWorkspace($user);
-
+                $user = $workspace->users()->where('users.id', $user->id)->first();
+                $user->workspaceRole = Role::find($user->pivot->role_id)->setVisible(["name"]);
                 broadcast(new WorkspaceEvent(workspace: $workspace, type: "newUserJoinWorkspace", fromUserId: $request->user()->id, data: $user));
                 DB::commit();
                 return redirect(route('workspace.show', $workspace->id));

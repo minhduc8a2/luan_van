@@ -44,6 +44,10 @@ class WorkspacePolicy
     {
         return $user->workspacePermissionCheck($workspace, PermissionTypes::WORKSPACE_ALL->name);
     }
+    public function acceptJoiningRequest(User $user, Workspace $workspace): bool
+    {
+        return $user->workspacePermissionCheck($workspace, PermissionTypes::WORKSPACE_ALL->name);
+    }
     /**
      * Determine whether the user can update the model.
      */

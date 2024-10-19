@@ -122,6 +122,7 @@ class User extends Authenticatable implements MustVerifyEmail
         $exists = DB::table('user_workspace')
             ->where('user_id', '=', $this->id)
             ->where('workspace_id', '=', $workspace->id)
+            ->where('is_approved', true)
             ->exists();
         return $exists;
     }

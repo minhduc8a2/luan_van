@@ -38,7 +38,7 @@ class Workspace extends Model
 
     public function users(): BelongsToMany
     {
-        return $this->belongsToMany(User::class)->withPivot(['role_id', 'is_approved','is_deactivated'])->withTimestamps();
+        return $this->belongsToMany(User::class)->withPivot(['role_id', 'is_approved', 'is_deactivated'])->withTimestamps();
     }
 
     public function channels(): HasMany
@@ -77,7 +77,7 @@ class Workspace extends Model
         if ($user->isWorkspaceMember($this)) return;
         $roleId = Role::getRoleByName(BaseRoles::MEMBER->name)->id;
         $otherUsers = $this->users->pluck('name', 'id');
-        $user->workspaces()->attach($this->id, ['role_id' => $roleId, 'is_approved' => true]);
+        $user->workspaces()->sync([$this->id => ['role_id' => $roleId, 'is_approved' => true]]);
         $this->assignUserToMainChannel($user, Role::getRoleByName(BaseRoles::MEMBER->name));
 
         //create private channels

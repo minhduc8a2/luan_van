@@ -11,15 +11,27 @@ export const workspaceSlice = createSlice({
     },
     reducers: {
         setWorkspaceData(state, action) {
-            Object.keys(action.payload).forEach((key) => {
-                state[key] = action.payload[key];
-            });
+            Object.assign(state, action.payload);
         },
-        updateWorkspace(state, action) {
+        updateCurrentWorkspace(state, action) {
             if (!state.workspace) state.workspace = {};
-            Object.keys(action.payload).forEach((key) => {
-                state.workspace[key] = action.payload[key];
-            });
+            Object.assign(state.workspace, action.payload);
+
+            const workspaceIndex = state.workspaces.findIndex(
+                (wsp) => wsp.id === action.payload.id
+            );
+            if (workspaceIndex >= 0) {
+                Object.assign(state.workspaces[workspaceIndex], action.payload);
+            }
+        },
+
+        updateWorkspace(state, action) {
+            const workspaceIndex = state.workspaces.findIndex(
+                (wsp) => wsp.id === action.payload.id
+            );
+            if (workspaceIndex >= 0) {
+                Object.assign(state.workspaces[workspaceIndex], action.payload);
+            }
         },
         setWorkspaces(state, action) {
             if (action.payload.workspaces) {
@@ -30,7 +42,11 @@ export const workspaceSlice = createSlice({
 });
 
 // Action creators are generated for each case reducer function
-export const { setWorkspaceData, updateWorkspace, setWorkspaces } =
-    workspaceSlice.actions;
+export const {
+    setWorkspaceData,
+    updateCurrentWorkspace,
+    setWorkspaces,
+    updateWorkspace,
+} = workspaceSlice.actions;
 
 export default workspaceSlice.reducer;

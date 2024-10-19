@@ -2,7 +2,7 @@ import React from "react";
 import ExpandableItem from "../ExpandableItem";
 import { useDispatch, useSelector } from "react-redux";
 import { useCustomedForm } from "@/helpers/customHooks";
-import { updateWorkspace } from "@/Store/workspaceSlice";
+import { updateCurrentWorkspace } from "@/Store/workspaceSlice";
 import InputLabel from "@/Components/InputLabel";
 import TextInput from "@/Components/Input/TextInput";
 import Button from "@/Components/Button";
@@ -21,9 +21,9 @@ export default function ChangeWorkspaceName() {
     function onSubmit(e) {
         e.preventDefault();
         const oldName = workspace.name;
-        dispatch(updateWorkspace({ name: getValues().name }));
+        dispatch(updateCurrentWorkspace({ name: getValues().name }));
         submit().catch(() => {
-            dispatch(updateWorkspace({ name: oldName }));
+            dispatch(updateCurrentWorkspace({ name: oldName }));
         });
     }
     return (

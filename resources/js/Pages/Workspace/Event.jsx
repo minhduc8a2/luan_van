@@ -34,7 +34,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import useReloadPermissions from "@/helpers/useReloadPermissions";
 import useGoToChannel from "@/helpers/useGoToChannel";
 import useLoadWorkspaceData from "@/helpers/useLoadWorkspaceData";
-import { updateWorkspace } from "@/Store/workspaceSlice";
+import { updateCurrentWorkspace } from "@/Store/workspaceSlice";
 import useReloadLoadedChannelsDataPermissions from "@/helpers/useReloadLoadedChannelsDataPermissions";
 import useLoadWorkspaces from "@/helpers/useLoadWorkspaces";
 
@@ -351,7 +351,7 @@ export default function Event() {
                 console.log("workspaceEvent", e);
                 switch (e.type) {
                     case "WorkspaceObserver_updated":
-                        dispatch(updateWorkspace(e.data));
+                        dispatch(updateCurrentWorkspace(e.data));
                         break;
                     case "InvitationPermission_updated":
                         loadWorkspaceData("workspacePermissions");
@@ -371,6 +371,14 @@ export default function Event() {
                                 navigate("/workspaces")
                             );
                         }
+                        break;
+                    case "AcceptJoiningRequest":
+                        dispatch(
+                            updateWorkspaceUserInformation({
+                                id: e.data?.id,
+                                data: e.data,
+                            })
+                        );
                         break;
                     case "UserRole_updated":
                         dispatch(

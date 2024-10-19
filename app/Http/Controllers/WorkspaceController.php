@@ -11,6 +11,7 @@ use App\Helpers\PermissionTypes;
 use App\Models\Channel;
 use App\Models\Invitation;
 use App\Models\Workspace;
+use App\Notifications\WorkspaceNotification;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -179,7 +180,7 @@ class WorkspaceController extends Controller
             return Helper::createSuccessResponse();
         } catch (\Throwable $th) {
             DB::rollBack();
-            // dd($th);
+            dd($th);
             Helper::createErrorResponse();
         }
     }
@@ -216,6 +217,35 @@ class WorkspaceController extends Controller
         }
     }
 
+    public function acceptJoiningRequest(Request $request, Workspace $workspace)
+    {
+        if ($request->user()->cannot('acceptJoiningRequest', [Workspace::class, $workspace])) abort(401);
+
+        $validated = $request->validate(['userId' => 'required|integer']);
+
+        $userId = $validated['userId'];
+
+        try {
+            $user = $workspace->users()->where('users.id', $userId)->first();
+            if (!$user) Helper::createErrorResponse();
+            if ($user->pivot->is_approved) {
+                return Helper::createSuccessResponse();
+            }
+            DB::beginTransaction();
+            $workspace->addUserToWorkspace($user);
+            $user->pivot->is_approved = true;
+            $user->workspaceRole = Role::find($user->pivot->role_id)->setVisible(["name"]);
+            $workspace->pivot = $user->pivot;
+            $user->notify(new WorkspaceNotification($workspace, "AcceptJoiningRequest"));
+            broadcast(new WorkspaceEvent(workspace: $workspace, type: "AcceptJoiningRequest", fromUserId: "", data: $user));
+            DB::commit();
+            return Helper::createSuccessResponse();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+
+            Helper::createErrorResponse();
+        }
+    }
     public function deactivateUser(Request $request, Workspace $workspace)
     {
         if ($request->user()->cannot('deactivateUser', [Workspace::class, $workspace])) abort(401);
