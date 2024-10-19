@@ -16,7 +16,7 @@ export default function MemberRow({ user }) {
     const onlineStatusMap = useSelector((state) => state.onlineStatus);
     return (
         <div
-            className={`flex gap-x-4  border-b border-b-color/15 ${
+            className={`flex gap-x-4 min-w-full border-b border-b-color/15 w-fit ${
                 user.pivot?.is_deactivated ? "opacity-75" : ""
             }`}
         >
@@ -30,7 +30,7 @@ export default function MemberRow({ user }) {
                 onClose={() => setIsDeactivateUserOpen(false)}
                 user={user}
             />
-            <div className="flex justify-between border-r border-r-color/15 flex-1  py-2 px-2">
+            <div className="flex justify-between border-r border-r-color/15  min-w-96  py-2 px-2">
                 <AvatarAndName user={user} className="h-6 w-6" noStatus />
                 {user.id != workspace.user_id && (
                     <CustomedPopover
@@ -62,25 +62,25 @@ export default function MemberRow({ user }) {
                     </CustomedPopover>
                 )}
             </div>
-            <div className="w-48 text-left py-2 text-color-medium-emphasis text-sm">
+            <div className="min-w-48 text-left py-2 text-color-medium-emphasis text-sm">
                 {user.display_name}
             </div>
-            <div className="w-96 text-left py-2 text-color-medium-emphasis text-sm">
+            <div className="min-w-48 text-left py-2 text-color-medium-emphasis text-sm">
                 {user.email}
             </div>
-            <div className="w-48 text-left py-2 text-color-medium-emphasis text-sm">
+            <div className="min-w-48 text-left py-2 text-color-medium-emphasis text-sm">
                 {workspace.user_id == user.id
                     ? "OWNER"
                     : user.workspaceRole?.name}
             </div>
-            <div className="w-48 text-left py-2 text-color-medium-emphasis text-sm">
+            <div className="min-w-48 text-left py-2 text-color-medium-emphasis text-sm">
                 {user.pivot?.is_deactivated
                     ? "Deactivated"
                     : onlineStatusMap[user.id]
                     ? "Active"
                     : "Inactive"}
             </div>
-            <div className="w-48 text-left py-2 text-color-medium-emphasis text-sm">
+            <div className="min-w-48 text-left py-2 text-color-medium-emphasis text-sm">
                 {UTCToDateTime(user.pivot?.created_at)}
             </div>
         </div>

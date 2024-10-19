@@ -345,7 +345,7 @@ export default function BrowseChannels() {
                     className="mt-4 bg-background flex-1 max-h-full overflow-y-auto scrollbar rounded-lg border border-color/15"
                 >
                     {filteredChannels.length == 0 && (
-                        <p className="text-center p-4">No results found</p>
+                        <p className="text-center p-4 text-color-medium-emphasis">No results found</p>
                     )}
                     {filteredChannels.map((cn, index) => {
                         return (
