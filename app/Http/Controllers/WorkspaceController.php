@@ -221,23 +221,29 @@ class WorkspaceController extends Controller
     {
         if ($request->user()->cannot('acceptJoiningRequest', [Workspace::class, $workspace])) abort(401);
 
-        $validated = $request->validate(['userId' => 'required|integer']);
+        $validated = $request->validate(['userIds' => 'required|array', 'userIds.*' => 'integer']);
 
-        $userId = $validated['userId'];
+        $userIds = $validated['userIds'];
 
         try {
-            $user = $workspace->users()->where('users.id', $userId)->first();
-            if (!$user) Helper::createErrorResponse();
-            if ($user->pivot->is_approved) {
-                return Helper::createSuccessResponse();
-            }
             DB::beginTransaction();
-            $workspace->addUserToWorkspace($user);
-            $user->pivot->is_approved = true;
-            $user->workspaceRole = Role::find($user->pivot->role_id)->setVisible(["name"]);
-            $workspace->pivot = $user->pivot;
-            $user->notify(new WorkspaceNotification($workspace, "AcceptJoiningRequest"));
-            broadcast(new WorkspaceEvent(workspace: $workspace, type: "AcceptJoiningRequest", fromUserId: "", data: $user));
+            $acceptedUsers = [];
+            foreach ($userIds as $userId) {
+
+                $user = $workspace->users()->where('users.id', $userId)->first();
+                if (!$user) continue;
+                if ($user->pivot->is_approved) {
+                    continue;
+                }
+
+                $workspace->addUserToWorkspace($user);
+                $user->pivot->is_approved = true;
+                $user->workspaceRole = Role::find($user->pivot->role_id)->setVisible(["name"]);
+                $workspace->pivot = $user->pivot;
+                $user->notify(new WorkspaceNotification($workspace, "AcceptJoiningRequest"));
+                array_push($acceptedUsers, $user);
+            }
+            broadcast(new WorkspaceEvent(workspace: $workspace, type: "AcceptJoiningRequest", fromUserId: "", data: $acceptedUsers));
             DB::commit();
             return Helper::createSuccessResponse();
         } catch (\Throwable $th) {

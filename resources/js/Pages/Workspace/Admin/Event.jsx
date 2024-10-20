@@ -1,6 +1,9 @@
 import useLoadWorkspaceData from "@/helpers/useLoadWorkspaceData";
 import { updateCurrentWorkspace } from "@/Store/workspaceSlice";
-import { addWorkspaceUser, updateWorkspaceUserInformation } from "@/Store/workspaceUsersSlice";
+import {
+    addWorkspaceUser,
+    updateWorkspaceUserInformation,
+} from "@/Store/workspaceUsersSlice";
 import { router, usePage } from "@inertiajs/react";
 import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
@@ -24,7 +27,7 @@ export default function Event() {
                         loadWorkspaceData("workspacePermissions");
                         break;
                     case "newUserRequestToJoinWorkspace":
-                        dispatch(addWorkspaceUser(e.data))
+                        dispatch(addWorkspaceUser(e.data));
                     case "DeactivateUser_updated":
                         dispatch(
                             updateWorkspaceUserInformation({
@@ -40,6 +43,15 @@ export default function Event() {
                         }
                         break;
                     case "AcceptJoiningRequest":
+                        e.data?.forEach((user) =>
+                            dispatch(
+                                updateWorkspaceUserInformation({
+                                    id: user.id,
+                                    data: user,
+                                })
+                            )
+                        );
+                        break;
                     case "UserRole_updated":
                         dispatch(
                             updateWorkspaceUserInformation({

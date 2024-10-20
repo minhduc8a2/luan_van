@@ -18,10 +18,9 @@ export default function MemberRow({ user }) {
     const onlineStatusMap = useSelector((state) => state.onlineStatus);
 
     const { loading, submit } = useCustomedForm(
-        { userId: user.id },
+        { userIds: [user.id] },
         {
             url: route("workspaces.acceptJoiningRequest", workspace.id),
-            
         }
     );
 

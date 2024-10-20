@@ -373,12 +373,15 @@ export default function Event() {
                         }
                         break;
                     case "AcceptJoiningRequest":
-                        dispatch(
-                            updateWorkspaceUserInformation({
-                                id: e.data?.id,
-                                data: e.data,
-                            })
+                        e.data?.forEach((user) =>
+                            dispatch(
+                                updateWorkspaceUserInformation({
+                                    id: user.id,
+                                    data: user,
+                                })
+                            )
                         );
+
                         break;
                     case "UserRole_updated":
                         dispatch(

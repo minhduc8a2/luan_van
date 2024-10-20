@@ -6,12 +6,28 @@ import Button from "@/Components/Button";
 import { InvitationForm } from "../../Panel/InvitationForm";
 import FilterButton from "@/Components/FilterButton";
 import SimpleSearchInput from "@/Components/Input/SimpleSearchInput";
+import useSuccessHandler from "@/helpers/useSuccessHandler";
+import { useCustomedForm } from "@/helpers/customHooks";
 
 export default function ManageMembers() {
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
     const loadWorkspaceUsers = useLoadWorkspaceUsers();
     const { workspace } = useSelector((state) => state.workspace);
     const [isInvitationFormOpen, setIsInvitationFormOpen] = useState(false);
+    const { loading, submit, setValues } = useCustomedForm(
+        { userIds: [] },
+        {
+            url: route("workspaces.acceptJoiningRequest", workspace.id),
+        }
+    );
+    const successHandler = useSuccessHandler("Accepted all joining requests!");
+    function acceptAllJoiningRequest() {
+        setValues(
+            "userIds",
+            workspaceUsers.filter((u) => !u.pivot?.is_approved).map((u) => u.id)
+        );
+        submit().then(successHandler);
+    }
     useEffect(() => {
         loadWorkspaceUsers();
     }, []);
@@ -48,6 +64,11 @@ export default function ManageMembers() {
             title: "Guests",
             value: "GUEST",
         },
+        {
+            inside: "Requesting",
+            title: "Requesting",
+            value: "REQUESTING",
+        },
     ];
     const [sortTypes, setSortTypes] = useState(sortList[0].value);
     const [searchValue, setSearchValue] = useState("");
@@ -75,6 +96,9 @@ export default function ManageMembers() {
             case "GUEST":
                 temp = temp.filter((u) => u.workspaceRole.name == "GUEST");
                 break;
+            case "REQUESTING":
+                temp = temp.filter((u) => !u.pivot?.is_approved);
+                break;
         }
         if (sortTypes == "a_to_z") {
             temp.sort((a, b) => a.name.localeCompare(b.name));
@@ -83,6 +107,11 @@ export default function ManageMembers() {
         }
         return temp;
     });
+
+    const hasJoiningRequests = useMemo(
+        () => workspaceUsers.some((u) => !u.pivot?.is_approved),
+        [workspaceUsers]
+    );
     return (
         <div className="bg-color-contrast h-full pt-8">
             <InvitationForm
@@ -101,21 +130,41 @@ export default function ManageMembers() {
                     Invite People
                 </Button>
             </div>
-            <div className="flex justify-between px-8 mt-8 items-center">
-                <div className="flex items-center gap-x-4">
-                    <FilterButton
-                        list={sortList}
-                        action={(value) => setSortTypes(value)}
-                    />
-                    <FilterButton
-                        list={accountTypeList}
-                        action={(value) => {
-                            setFilter((pre) => ({
-                                ...pre,
-                                accountType: value,
-                            }));
-                        }}
-                    />
+            <div className="flex flex-wrap gap-y-4 justify-between px-8 mt-8 items-center">
+                <div className="flex items-center gap-x-8 flex-wrap gap-y-4">
+                    <div className="flex items-center gap-x-4">
+                        <h6 className="text-sm text-color-medium-emphasis">
+                            Filter:{" "}
+                        </h6>
+                        <FilterButton
+                            list={sortList}
+                            action={(value) => setSortTypes(value)}
+                        />
+                        <FilterButton
+                            list={accountTypeList}
+                            action={(value) => {
+                                setFilter((pre) => ({
+                                    ...pre,
+                                    accountType: value,
+                                }));
+                            }}
+                        />
+                    </div>
+                    {hasJoiningRequests && (
+                        <div className="flex items-center gap-x-4">
+                            <h6 className="text-sm text-color-medium-emphasis">
+                                Actions:
+                            </h6>
+                            <Button
+                                className="!px-2 !py-1 text-sm !rounded"
+                                type="green"
+                                onClick={acceptAllJoiningRequest}
+                                loading={loading}
+                            >
+                                Accept all requests
+                            </Button>
+                        </div>
+                    )}
                 </div>
                 <SimpleSearchInput
                     width="w-96"
