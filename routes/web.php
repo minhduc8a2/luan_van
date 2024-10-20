@@ -67,8 +67,10 @@ Route::middleware(['auth', HandleWorkspaceRequests::class])->group(function () {
             Route::post("/messages/{message}/reactions/delete", [ReactionController::class, 'delete'])->name('reaction.delete');
         });
 
-        Route::post("/invitation_link", [InvitationController::class, 'store'])->name('invitation.store');
-        Route::post("/invitation_mail", [InvitationController::class, 'storeAndSendInvitationMail'])->name('invitation.mail');
+        Route::post("/invitation_link", [InvitationController::class, 'store'])->name('invitations.store');
+        Route::post("/invitation_mail", [InvitationController::class, 'storeAndSendInvitationMail'])->name('invitations.mail');
+        Route::post("/invitation_resend", [InvitationController::class, 'resendInvitation'])->name('invitations.resendInvitation');
+        Route::delete("/invitations/{invitation}", [InvitationController::class, 'destroy'])->name('invitations.delete');
         Route::get("/notifications", [NotificationController::class, 'get'])->name('notifications.get');
         // Route::get('/mailable', function () {
         //     return new  InvitationMail("https://google.com", "company A", "A", "B");

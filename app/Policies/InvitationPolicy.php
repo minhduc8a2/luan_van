@@ -38,7 +38,11 @@ class InvitationPolicy
             ||
             $user->workspacePermissionCheck($workspace, PermissionTypes::WORKSPACE_INVITATION_WITH_ADMIN_APPROVAL_REQUIRED->name);
     }
-
+    public function resendInvitation(User $user, Workspace $workspace): bool
+    {
+        return
+            $user->workspacePermissionCheck($workspace, PermissionTypes::WORKSPACE_ALL->name);
+    }
 
 
 
@@ -53,9 +57,10 @@ class InvitationPolicy
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Invitation $invitation): bool
+    public function delete(User $user,  Workspace $workspace): bool
     {
-        //
+        return
+            $user->workspacePermissionCheck($workspace, PermissionTypes::WORKSPACE_ALL->name);
     }
 
     /**

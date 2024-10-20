@@ -21,7 +21,7 @@ export function InvitationForm({ workspace, isOpen, onClose }) {
             emailList: "",
         },
         {
-            url: route("invitation.mail", workspace.id),
+            url: route("invitations.mail", workspace.id),
         }
     );
 
@@ -51,7 +51,7 @@ export function InvitationForm({ workspace, isOpen, onClose }) {
         }
         setGeneratingLink(true);
         axios
-            .post(route("invitation.store", workspace.id), {})
+            .post(route("invitations.store", workspace.id), {})
             .then((response) => {
                 copy(response.data.invitation_link);
                 setLinkCopied(true);

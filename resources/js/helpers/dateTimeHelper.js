@@ -108,7 +108,7 @@ export const formatToMinuteSecond = (timeInSeconds) => {
     return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
 };
 
-export function formatDateWithOrdinalSuffix(date) {
+export function formatDateWithOrdinalSuffix(date, dense = false) {
     const months = [
         "January",
         "February",
@@ -123,8 +123,24 @@ export function formatDateWithOrdinalSuffix(date) {
         "November",
         "December",
     ];
+    const shortMonths = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+    ];
     const day = date.getDate();
-    const month = months[date.getMonth()];
+    const month = dense
+        ? shortMonths[date.getMonth()]
+        : months[date.getMonth()];
     const year = date.getFullYear();
 
     const getOrdinalSuffix = (day) => {

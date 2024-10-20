@@ -11,6 +11,7 @@
         --color-contrast:255 255 255;
         --color-high-emphasis: 35 35 35;
         --color-medium-emphasis: 72 72 72;
+        --color-low-emphasis: 108 108 108;
         --color-disabled: 158 158 158;
         --link: 20 105 141;
     }
@@ -47,9 +48,9 @@
         --foreground: 34 37 41;
         --color: 255 255 255;
         --color-contrast:0 0 0;
-
         --color-high-emphasis: 220 220 220;
         --color-medium-emphasis: 183 183 183;
+        --color-low-emphasis: 146 146 146;
         --color-disabled: 97 97 97;
         --link: 29 155 209;
     }

@@ -1,11 +1,22 @@
-import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+    createContext,
+    useContext,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import { InvitationForm } from "../../Panel/InvitationForm";
 import Button from "@/Components/Button";
 import { useSelector } from "react-redux";
 import SimpleSearchInput from "@/Components/Input/SimpleSearchInput";
-const InvitationContext = createContext(null);
+import { useParams } from "react-router-dom";
+import PendingInvitations from "./PendingInvitations";
+export const InvitationContext = createContext(null);
 export default function Invitations() {
+    const { workspaceId } = useParams();
     const [isInvitationFormOpen, setIsInvitationFormOpen] = useState(false);
+    const [invitations, setInvitations] = useState([]);
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
     const [tabIndex, setTabIndex] = useState(0);
     const { workspace } = useSelector((state) => state.workspace);
@@ -26,8 +37,16 @@ export default function Invitations() {
     useEffect(() => {
         inputRef.current.focus();
     }, [tabIndex]);
+
+    useEffect(() => {
+        axios
+            .get(route("workspaces.invitations", workspaceId))
+            .then((response) => {
+                setInvitations(response.data.invitations);
+            });
+    }, []);
     return (
-        <InvitationContext.Provider value={{ tabIndex, setTabIndex }}>
+        <InvitationContext.Provider value={{ tabIndex, setTabIndex, invitations,setInvitations }}>
             <div className="bg-color-contrast h-full pt-8 px-8">
                 <InvitationForm
                     workspace={workspace}
@@ -64,6 +83,10 @@ export default function Invitations() {
                     className=" mt-4"
                     placeholder={searchPlaceholder}
                 />
+
+                {tabIndex == 0 && (
+                    <PendingInvitations  />
+                )}
             </div>
         </InvitationContext.Provider>
     );

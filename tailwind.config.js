@@ -20,6 +20,7 @@ export default {
                 "color-contrast": `rgb(var(--color-contrast) / <alpha-value>)`,
                 "color-high-emphasis": `rgb(var(--color-high-emphasis) / <alpha-value>)`,
                 "color-medium-emphasis": `rgb(var(--color-medium-emphasis) / <alpha-value>)`,
+                "color-low-emphasis": `rgb(var(--color-low-emphasis) / <alpha-value>)`,
                 "color-disabled": `rgb(var(--color-disabled) / <alpha-value>)`,
 
                 primary: {

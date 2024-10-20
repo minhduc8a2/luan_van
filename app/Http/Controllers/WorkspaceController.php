@@ -12,6 +12,7 @@ use App\Models\Channel;
 use App\Models\Invitation;
 use App\Models\Workspace;
 use App\Notifications\WorkspaceNotification;
+use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -30,7 +31,7 @@ class WorkspaceController extends Controller
 
     function clientRouting(Request $request, Workspace $workspace)
     {
-        if ($request->user()->cannot('view', [Workspace::class, $workspace])) abort(403);
+
 
         return Inertia::render("Workspace/Index");
     }
@@ -120,31 +121,43 @@ class WorkspaceController extends Controller
      */
     public function show(Request $request, Workspace $workspace)
     {
-
+        if ($request->user()->cannot('view', [Workspace::class, $workspace])) abort(403);
         return $this->clientRouting($request, $workspace);
     }
     public function settings(Request $request, Workspace $workspace)
     {
+        if ($request->user()->cannot('update', [Workspace::class, $workspace])) abort(403);
         return $this->clientRouting($request, $workspace);
     }
     public function accountAndProfile(Request $request, Workspace $workspace)
     {
+        if ($request->user()->cannot('update', [Workspace::class, $workspace])) abort(403);
         return $this->clientRouting($request, $workspace);
     }
     public function settingsHome(Request $request, Workspace $workspace)
     {
+        if ($request->user()->cannot('view', [Workspace::class, $workspace])) abort(403);
         return $this->clientRouting($request, $workspace);
     }
     public function manageMembers(Request $request, Workspace $workspace)
     {
+        if ($request->user()->cannot('update', [Workspace::class, $workspace])) abort(403);
+
         return $this->clientRouting($request, $workspace);
     }
     public function aboutWorkspace(Request $request, Workspace $workspace)
     {
+        if ($request->user()->cannot('view', [Workspace::class, $workspace])) abort(403);
         return $this->clientRouting($request, $workspace);
     }
     public function invitations(Request $request, Workspace $workspace)
     {
+        if ($request->user()->cannot('viewInvitations', [Workspace::class, $workspace])) abort(403);
+
+        if ($request->expectsJson()) {
+            return ['invitations' => $workspace->invitations()->where('expired_at', '>', Carbon::now())->with(['user'])->get()];
+        }
+
         return $this->clientRouting($request, $workspace);
     }
 

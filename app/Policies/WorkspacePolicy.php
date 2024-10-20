@@ -55,15 +55,18 @@ class WorkspacePolicy
     {
         return $user->workspacePermissionCheck($workspace, PermissionTypes::WORKSPACE_ALL->name);
     }
-
-
+    public function viewInvitations(User $user, Workspace $workspace): bool
+    {
+        return $user->workspacePermissionCheck($workspace, PermissionTypes::WORKSPACE_ALL->name);
+    }
 
     /**
      * Determine whether the user can delete the model.
      */
     public function delete(User $user, Workspace $workspace): bool
     {
-        return $user->workspacePermissionCheck($workspace, PermissionTypes::WORKSPACE_ALL->name);
+
+        return $user->id==$workspace->user_id;
     }
 
     /**

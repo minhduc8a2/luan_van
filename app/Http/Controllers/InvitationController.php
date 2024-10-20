@@ -89,9 +89,29 @@ class InvitationController extends Controller implements HasMiddleware
         }
     }
 
+    public function resendInvitation(Request $request, Workspace $workspace)
+    {
+        if ($request->user()->cannot('resendInvitation', [Invitation::class, $workspace])) abort(403);
+        $validated = $request->validate([
+            'id' => 'required|integer'
+        ]);
+        try {
+            $invitation = $workspace->invitations()->where('invitations.id', $validated['id'])->first();
+            if ($invitation) {
+                $toUserName = Helper::nameFromEmail($invitation->email);
+                $invitationLink = env('PUBLIC_APP_URL') . '/invitations/' . $invitation->code;
+                Mail::to($invitation->email)->send(new InvitationMail($invitationLink, $workspace->name, $request->user()->name, $toUserName));
+
+                return Helper::createSuccessResponse();
+            }
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+        return Helper::createErrorResponse();
+    }
     public function storeAndSendInvitationMail(Request $request, Workspace $workspace)
     {
-        if ($request->user()->cannot('create', [Invitation::class, $workspace])) abort(403);
+        if ($request->user()->cannot('create', [Invitation::class, $workspace])) abort(401);
 
         $validated = $request->validate([
             'emailList.*' => 'required|email'
@@ -119,5 +139,17 @@ class InvitationController extends Controller implements HasMiddleware
             dd($th);
             return Helper::createErrorResponse();
         }
+    }
+
+    public function destroy(Request $request, Workspace $workspace, Invitation $invitation)
+    {
+        if ($request->user()->cannot('delete', [Invitation::class, $workspace])) abort(401);
+        try {
+            $invitation->delete();
+            return Helper::createSuccessResponse();
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+        Helper::createErrorResponse();
     }
 }
