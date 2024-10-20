@@ -12,16 +12,22 @@ import { useSelector } from "react-redux";
 import SimpleSearchInput from "@/Components/Input/SimpleSearchInput";
 import { useParams } from "react-router-dom";
 import PendingInvitations from "./PendingInvitations";
+import AcceptedInvitations from "./AcceptedInvitations";
+import useLoadWorkspaceUsers from "@/helpers/useLoadWorkspaceUsers";
 export const InvitationContext = createContext(null);
 export default function Invitations() {
     const { workspaceId } = useParams();
+    const [searchValue,setSearchValue] = useState("")
     const [isInvitationFormOpen, setIsInvitationFormOpen] = useState(false);
     const [invitations, setInvitations] = useState([]);
-    const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
     const [tabIndex, setTabIndex] = useState(0);
     const { workspace } = useSelector((state) => state.workspace);
     const inputRef = useRef(null);
     const tabNames = ["Pending", "Accepted", "Invite Links"];
+    const loadWorkspaceUsers = useLoadWorkspaceUsers();
+    useEffect(() => {
+        loadWorkspaceUsers();
+    }, []);
     const searchPlaceholder = useMemo(() => {
         switch (tabIndex) {
             case 0:
@@ -46,7 +52,9 @@ export default function Invitations() {
             });
     }, []);
     return (
-        <InvitationContext.Provider value={{ tabIndex, setTabIndex, invitations,setInvitations }}>
+        <InvitationContext.Provider
+            value={{ tabIndex, setTabIndex, invitations, setInvitations, searchValue }}
+        >
             <div className="bg-color-contrast h-full pt-8 px-8">
                 <InvitationForm
                     workspace={workspace}
@@ -80,13 +88,13 @@ export default function Invitations() {
                 </div>
                 <SimpleSearchInput
                     ref={inputRef}
-                    className=" mt-4"
+                    className=" my-4"
                     placeholder={searchPlaceholder}
+                    onChange={(e)=>setSearchValue(e.target.value)}
                 />
-
-                {tabIndex == 0 && (
-                    <PendingInvitations  />
-                )}
+                <hr />
+                {tabIndex == 0 && <PendingInvitations />}
+                {tabIndex == 1 && <AcceptedInvitations />}
             </div>
         </InvitationContext.Provider>
     );

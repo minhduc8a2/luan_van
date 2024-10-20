@@ -1,18 +1,18 @@
-import Button from "@/Components/Button";
-import { useCustomedForm } from "@/helpers/customHooks";
 import {
     compareDateTime,
     formatDateWithOrdinalSuffix,
 } from "@/helpers/dateTimeHelper";
 import React, { useContext, useMemo, useState } from "react";
 import { FaArrowDown, FaArrowUp } from "react-icons/fa";
-import { IoMdCheckmark } from "react-icons/io";
 import { useParams } from "react-router-dom";
 import { InvitationContext } from "./Invitations";
+import { useSelector } from "react-redux";
+import Avatar from "@/Components/Avatar";
 
-export default function PendingInvitations() {
+export default function AcceptedInvitations() {
     const { invitations, searchValue } = useContext(InvitationContext);
     const [sortBy, setSortBy] = useState({ type: "email", direction: true });
+
     function handleSortClick(type) {
         if (sortBy.type === type) {
             setSortBy((prev) => ({ ...prev, direction: !prev.direction }));
@@ -24,7 +24,7 @@ export default function PendingInvitations() {
         const temp = invitations.filter(
             (invitation) =>
                 invitation.email &&
-                !invitation.is_fulfilled &&
+                invitation.is_fulfilled &&
                 invitation.email
                     .toLowerCase()
                     .includes(searchValue.toLowerCase())
@@ -52,10 +52,10 @@ export default function PendingInvitations() {
         }
         return temp;
     }, [invitations, sortBy, searchValue]);
-    console.log(filteredInvitations);
+
     return (
-        <div className="px-8">
-            <div className="grid grid-cols-3 ">
+        <div className="px-8 w-full overflow-x-auto">
+            <div className="grid grid-cols-2 gap-x-4 min-w-[800px]">
                 <button
                     className={`w-full  flex gap-x-2 items-baseline px-6 hover:bg-background pt-6 pb-2 ${
                         sortBy.type == "email"
@@ -89,92 +89,44 @@ export default function PendingInvitations() {
                     )}
                 </button>
             </div>
-            <div className=" flex flex-col ">
-                {filteredInvitations.map((invitation) => {
-                    return (
-                        <InvitationItem
-                            key={invitation.id}
-                            invitation={invitation}
-                        />
-                    );
-                })}
-            </div>
+
+            {filteredInvitations.map((invitation) => {
+                return (
+                    <InvitationItem
+                        key={invitation.id}
+                        invitation={invitation}
+                    />
+                );
+            })}
         </div>
     );
 }
 
 function InvitationItem({ invitation }) {
-    const [alreadyResent, setAlreadyResent] = useState(false);
-    const { workspaceId } = useParams();
-    const { setInvitations } = useContext(InvitationContext);
-    const { submit: resendInvitationSumbit, loading: resendInvitationLoading } =
-        useCustomedForm(
-            { id: invitation.id },
-            { url: route("invitations.resendInvitation", workspaceId) }
-        );
-    const { submit: revokeSumbit, loading: revokeLoading } = useCustomedForm(
-        { id: invitation.id },
-        {
-            url: route("invitations.delete", {
-                workspace: workspaceId,
-                invitation: invitation.id,
-            }),
-            method: "delete",
-        }
-    );
-
-    function resend() {
-        resendInvitationSumbit().then(() => {
-            setAlreadyResent(true);
-        });
-    }
-    function revoke() {
-        revokeSumbit().then(() => {
-            setInvitations((pre) => pre.filter((i) => i.id != invitation.id));
-        });
-    }
+    const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
+    const user = useMemo(() => {
+        return workspaceUsers.find((user) => user.email == invitation.email);
+    }, [workspaceUsers]);
     return (
-        <div className="grid grid-cols-3 px-6 border-t py-4">
-            <div>
-                <div className="font-bold">{invitation.email}</div>
-                <div className="text-sm text-color-low-emphasis">
-                    Invited by{" "}
-                    <span className="text-link text-base">
-                        {invitation.user.name}
-                    </span>
+        <div className="grid grid-cols-2 px-6 border-t py-4 min-w-[800px]">
+            <div className="flex gap-x-3 items-center">
+                <Avatar src={user?.avatar_url} noStatus className="h-10 w-10" />
+                <div>
+                    <div className="font-bold">{invitation.email}</div>
+                    <div className="text-sm text-color-low-emphasis">
+                        Invited by{" "}
+                        <span className="text-link text-base">
+                            {invitation.user.name}
+                        </span>
+                    </div>
                 </div>
             </div>
             <div className="text-color-medium-emphasis ">
-                Sent{" "}
+                Joined{" "}
                 {formatDateWithOrdinalSuffix(
-                    new Date(invitation.created_at),
+                    new Date(user?.pivot?.created_at),
                     true
                 )}
-            </div>
-            <div className="flex gap-x-4 justify-end">
-                <Button
-                    size="small"
-                    loading={resendInvitationLoading}
-                    onClick={resend}
-                    className="text-color-medium-emphasis"
-                >
-                    {alreadyResent ? (
-                        <div className="flex gap-x-2 items-center">
-                            <IoMdCheckmark className="text-sm" /> Invitation
-                            resent
-                        </div>
-                    ) : (
-                        " Resend invitation"
-                    )}
-                </Button>
-                <Button
-                    size="small"
-                    className="text-color-medium-emphasis"
-                    loading={revokeLoading}
-                    onClick={revoke}
-                >
-                    Revoke
-                </Button>
             </div>
         </div>
     );
