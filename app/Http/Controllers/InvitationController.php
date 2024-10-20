@@ -141,6 +141,21 @@ class InvitationController extends Controller implements HasMiddleware
         }
     }
 
+    public function renew(Request $request, Workspace $workspace, Invitation $invitation)
+    {
+        if ($request->user()->cannot('delete', [Invitation::class, $workspace])) abort(401);
+        try {
+            DB::beginTransaction();
+            $invitation->expired_at = Carbon::now()->addDays(30);
+            $invitation->save();
+            DB::commit();
+            return ['invitation' => $invitation];
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            dd($th);
+            return Helper::createErrorResponse();
+        }
+    }
     public function destroy(Request $request, Workspace $workspace, Invitation $invitation)
     {
         if ($request->user()->cannot('delete', [Invitation::class, $workspace])) abort(401);

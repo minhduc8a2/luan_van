@@ -14,6 +14,7 @@ import { useParams } from "react-router-dom";
 import PendingInvitations from "./PendingInvitations";
 import AcceptedInvitations from "./AcceptedInvitations";
 import useLoadWorkspaceUsers from "@/helpers/useLoadWorkspaceUsers";
+import InviteLinks from "./InviteLinks";
 export const InvitationContext = createContext(null);
 export default function Invitations() {
     const { workspaceId } = useParams();
@@ -95,6 +96,7 @@ export default function Invitations() {
                 <hr />
                 {tabIndex == 0 && <PendingInvitations />}
                 {tabIndex == 1 && <AcceptedInvitations />}
+                {tabIndex == 2 && <InviteLinks />}
             </div>
         </InvitationContext.Provider>
     );

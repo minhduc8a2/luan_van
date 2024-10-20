@@ -155,7 +155,7 @@ class WorkspaceController extends Controller
         if ($request->user()->cannot('viewInvitations', [Workspace::class, $workspace])) abort(403);
 
         if ($request->expectsJson()) {
-            return ['invitations' => $workspace->invitations()->where('expired_at', '>', Carbon::now())->with(['user'])->get()];
+            return ['invitations' => $workspace->invitations()->get()];
         }
 
         return $this->clientRouting($request, $workspace);

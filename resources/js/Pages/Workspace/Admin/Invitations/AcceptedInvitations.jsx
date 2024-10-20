@@ -107,6 +107,9 @@ function InvitationItem({ invitation }) {
     const user = useMemo(() => {
         return workspaceUsers.find((user) => user.email == invitation.email);
     }, [workspaceUsers]);
+    const creator = useMemo(() => {
+        return workspaceUsers.find((user) => user.id == invitation.user_id);
+    }, [workspaceUsers, invitation]);
     return (
         <div className="grid grid-cols-2 px-6 border-t py-4 min-w-[800px]">
             <div className="flex gap-x-3 items-center">
@@ -116,7 +119,7 @@ function InvitationItem({ invitation }) {
                     <div className="text-sm text-color-low-emphasis">
                         Invited by{" "}
                         <span className="text-link text-base">
-                            {invitation.user.name}
+                            {creator.name}
                         </span>
                     </div>
                 </div>

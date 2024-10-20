@@ -9,6 +9,7 @@ import { FaArrowDown, FaArrowUp } from "react-icons/fa";
 import { IoMdCheckmark } from "react-icons/io";
 import { useParams } from "react-router-dom";
 import { InvitationContext } from "./Invitations";
+import { useSelector } from "react-redux";
 
 export default function PendingInvitations() {
     const { invitations, searchValue } = useContext(InvitationContext);
@@ -54,8 +55,8 @@ export default function PendingInvitations() {
     }, [invitations, sortBy, searchValue]);
     console.log(filteredInvitations);
     return (
-        <div className="px-8">
-            <div className="grid grid-cols-3 ">
+        <div className="px-8 overflow-x-auto">
+            <div className="grid grid-cols-[repeat(3,minmax(16rem,1fr))] ">
                 <button
                     className={`w-full  flex gap-x-2 items-baseline px-6 hover:bg-background pt-6 pb-2 ${
                         sortBy.type == "email"
@@ -88,22 +89,23 @@ export default function PendingInvitations() {
                         <FaArrowUp className="text-link text-xs" />
                     )}
                 </button>
+                <div className=""></div>
             </div>
-            <div className=" flex flex-col ">
-                {filteredInvitations.map((invitation) => {
-                    return (
-                        <InvitationItem
-                            key={invitation.id}
-                            invitation={invitation}
-                        />
-                    );
-                })}
-            </div>
+
+            {filteredInvitations.map((invitation) => {
+                return (
+                    <InvitationItem
+                        key={invitation.id}
+                        invitation={invitation}
+                    />
+                );
+            })}
         </div>
     );
 }
 
 function InvitationItem({ invitation }) {
+    const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
     const [alreadyResent, setAlreadyResent] = useState(false);
     const { workspaceId } = useParams();
     const { setInvitations } = useContext(InvitationContext);
@@ -133,15 +135,16 @@ function InvitationItem({ invitation }) {
             setInvitations((pre) => pre.filter((i) => i.id != invitation.id));
         });
     }
+    const creator = useMemo(() => {
+        return workspaceUsers.find((user) => user.id == invitation.user_id);
+    }, [workspaceUsers, invitation]);
     return (
-        <div className="grid grid-cols-3 px-6 border-t py-4">
+        <div className="grid grid-cols-[repeat(3,minmax(16rem,1fr))] px-6 border-t py-4 min-w-fit">
             <div>
                 <div className="font-bold">{invitation.email}</div>
                 <div className="text-sm text-color-low-emphasis">
                     Invited by{" "}
-                    <span className="text-link text-base">
-                        {invitation.user.name}
-                    </span>
+                    <span className="text-link text-base">{creator?.name}</span>
                 </div>
             </div>
             <div className="text-color-medium-emphasis ">

@@ -45,7 +45,11 @@ class InvitationPolicy
     }
 
 
-
+    public function renew(User $user, Workspace $workspace): bool
+    {
+        return
+            $user->workspacePermissionCheck($workspace, PermissionTypes::WORKSPACE_ALL->name);
+    }
     /**
      * Determine whether the user can update the model.
      */
