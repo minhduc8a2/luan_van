@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -20,6 +21,14 @@ class Invitation extends Model
     protected $casts = [
         'expired_at' => 'datetime',
     ];
+
+    protected $appends = ['is_fulfilled'];
+    protected function isFulfilled(): Attribute
+    {
+        return new Attribute(
+            get: fn() => $this->email && $this->workspace->users()->where('users.email', $this->email)->exists(),
+        );
+    }
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

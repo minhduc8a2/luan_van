@@ -111,6 +111,7 @@ Route::middleware(['auth', HandleWorkspaceRequests::class])->group(function () {
         Route::get("/admin/account_profile", [WorkspaceController::class, 'accountAndProfile'])->name('workspaces.accountAndProfile');
         Route::get("/admin/home", [WorkspaceController::class, 'settingsHome'])->name('workspaces.settingsHome');
         Route::get("/admin/manage_members", [WorkspaceController::class, 'manageMembers'])->name('workspaces.manageMembers');
+        Route::get("/admin/invitations", [WorkspaceController::class, 'invitations'])->name('workspaces.invitations');
 
         Route::post("/accept_joining_request", [WorkspaceController::class, 'acceptJoiningRequest'])->name('workspaces.acceptJoiningRequest');
         Route::get("/init_workspace_data", [WorkspaceController::class, 'initWorkspaceData'])->name('workspaces.initWorkspaceData');

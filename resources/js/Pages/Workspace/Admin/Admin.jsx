@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-import { IoSettingsOutline } from "react-icons/io5";
+import { IoPersonAddOutline, IoSettingsOutline } from "react-icons/io5";
 import { useSelector } from "react-redux";
 import { Link, Outlet } from "react-router-dom";
 
@@ -117,6 +117,11 @@ function Wrapper({ children }) {
                                 icon={<PiAddressBookTabs />}
                                 title="Manage members"
                                 to="manage_members"
+                            />
+                            <PanelItem
+                                icon={<IoPersonAddOutline />}
+                                title="Invitations"
+                                to="invitations"
                             />
                         </ul>
                     </div>

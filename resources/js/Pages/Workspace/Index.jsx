@@ -14,6 +14,7 @@ import AccountAndProfile from "./Admin/AccountAndProfile/AccountAndProfile";
 import HomePage from "./HomePage/HomePage";
 import ReduxProvider from "@/Components/ReduxProvider";
 import AboutWorkspace from "./Admin/AboutWorkspace/AboutWorkspace";
+import Invitations from "./Admin/Invitations/Invitations";
 
 export default function Index() {
     return (
@@ -36,6 +37,7 @@ export default function Index() {
                             element={<ManageMembers />}
                         />
                         <Route path="settings" element={<Settings />} />
+                        <Route path="invitations" element={<Invitations />} />
                     </Route>
                     <Route path=":workspaceId" element={<Layout />}>
                         <Route

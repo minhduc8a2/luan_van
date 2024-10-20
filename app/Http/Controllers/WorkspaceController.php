@@ -143,6 +143,10 @@ class WorkspaceController extends Controller
     {
         return $this->clientRouting($request, $workspace);
     }
+    public function invitations(Request $request, Workspace $workspace)
+    {
+        return $this->clientRouting($request, $workspace);
+    }
 
 
 

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('email')->nullable();
             $table->timestamp('expired_at')->nullable();
+           
             $table->timestamps();
         });
     }
