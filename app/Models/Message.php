@@ -35,18 +35,22 @@ class Message extends Model
 
     ];
     public $timestamps = false;
-    protected function createdAt(): Attribute
-    {
-        return Attribute::make(
-            get: fn(string $value) => Carbon::parse($value)->setTimezone('UTC')->toISOString()
-        );
-    }
-    protected function updatedAt(): Attribute
-    {
-        return Attribute::make(
-            get: fn(string $value) => Carbon::parse($value)->setTimezone('UTC')->toISOString()
-        );
-    }
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+    // protected function createdAt(): Attribute
+    // {
+    //     return Attribute::make(
+    //         get: fn(string $value) => Carbon::parse($value)->setTimezone('UTC')->toISOString()
+    //     );
+    // }
+    // protected function updatedAt(): Attribute
+    // {
+    //     return Attribute::make(
+    //         get: fn(string $value) => Carbon::parse($value)->setTimezone('UTC')->toISOString()
+    //     );
+    // }
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

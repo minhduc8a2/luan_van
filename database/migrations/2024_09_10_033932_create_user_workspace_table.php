@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignId('role_id')->constrained()->cascadeOnDelete();
             $table->boolean('is_approved')->default(false);
             $table->boolean('is_deactivated')->default(false);
+            $table->foreignId('invitation_id')->nullable();
             $table->timestamps();
         });
     }

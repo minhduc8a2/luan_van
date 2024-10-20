@@ -76,9 +76,14 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Workspace::class);
     }
 
+    public function invitations(): HasMany
+    {
+        return $this->hasMany(Invitation::class);
+    }
+
     public function workspaces(): BelongsToMany
     {
-        return $this->belongsToMany(Workspace::class)->withPivot(['role_id', 'is_approved', 'is_deactivated'])->withTimestamps();
+        return $this->belongsToMany(Workspace::class)->withPivot(['role_id', 'is_approved', 'is_deactivated','invitation_id'])->withTimestamps();
     }
 
     public function ownChannels(): HasMany

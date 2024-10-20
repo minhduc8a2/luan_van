@@ -56,7 +56,7 @@ Route::middleware(['auth', HandleWorkspaceRequests::class])->group(function () {
             Route::delete("", [ChannelController::class, 'destroy'])->name("channel.delete");
             Route::post("/messages", [MessageController::class, 'store'])->name('message.store');
             Route::get("", [ChannelController::class, 'show'])->name('channels.show')->missing(function (Workspace $workspace) {
-                return Redirect::route('/channels/' . $workspace->mainChannel()->id);
+                return Redirect::route('/channels/' . $workspace->main_channel_id);
             });
             Route::get("/init_channel_data", [ChannelController::class, 'initChannelData'])->name('channels.initChannelData');
             Route::get("/messages/infinite_messages", [MessageController::class, 'infiniteMessages'])->name('messages.infiniteMessages');

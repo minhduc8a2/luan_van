@@ -33,49 +33,32 @@ class InvitationController extends Controller implements HasMiddleware
         try {
             DB::beginTransaction();
             $invitation = Invitation::where('code', '=', $code)->first();
-            //check invitation link is exists and valid
-            $expirationTime = $invitation->created_at->addDays(30);
 
-            $isExpired = Carbon::now()->greaterThan($expirationTime);
-
-            if ($isExpired) {
+            if ($invitation->isExpired()) {
                 abort(403, 'Expired link');
             }
-            //add user to workspace
             $user = $request->user();
+            if ($invitation->email && $user->email != $invitation->email) abort(401, 'Invalid link');
 
-
-
-
-            /**
-             * @var Workspace $workspace
-             */
-            $workspace = Workspace::find($invitation->workspace_id);
-            if (!$workspace) throw ValidationException::withMessages([
-                'message' => 'Invalid link',
-            ]);
-
+            $workspace = $invitation->workspace;
             //check already memebers or requested
             if ($user->workspaces()->where('workspaces.id', $workspace->id)->exists()) {
                 return redirect(route('workspace.show', $workspace->id));
             }
-
-
             if ($workspace->isInvitationToWorkspaceWithAdminApprovalRequired()) {
-                $user->workspaces()->attach($workspace->id, ['role_id' => Role::getRoleIdByName(BaseRoles::MEMBER->name)]);
+                $user->workspaces()->attach($workspace->id, ['role_id' => Role::getRoleIdByName(BaseRoles::MEMBER->name), 'invitation_id' => $invitation->id]);
                 $user = $workspace->users()->where('users.id', $user->id)->first();
                 $user->workspaceRole = Role::find($user->pivot->role_id)->setVisible(["name"]);
                 broadcast(new WorkspaceEvent(workspace: $workspace, type: "newUserRequestToJoinWorkspace", fromUserId: $request->user()->id, data: $user));
                 DB::commit();
                 return redirect(route('workspaces', ['request' => true, 'workspaceId' => $workspace->id]));
             } else {
-
-                $workspace->addUserToWorkspace($user);
+                $workspace->addUserToWorkspace($user, $invitation->id);
                 $user = $workspace->users()->where('users.id', $user->id)->first();
                 $user->workspaceRole = Role::find($user->pivot->role_id)->setVisible(["name"]);
                 broadcast(new WorkspaceEvent(workspace: $workspace, type: "newUserJoinWorkspace", fromUserId: $request->user()->id, data: $user));
                 DB::commit();
-                return redirect(route('workspace.show', $workspace->id));
+                return redirect(route('channels.show', ['workspace' => $workspace->id, 'channel' => $workspace->main_channel_id]));
             }
 
             //
@@ -89,23 +72,19 @@ class InvitationController extends Controller implements HasMiddleware
     public function store(Request $request, Workspace $workspace)
     {
         if ($request->user()->cannot('create', [Invitation::class, $workspace])) abort(403);
-
-        $validated = $request->validate([
-
-            'workspace_id' => 'required|integer',
-        ]);
         try {
-            $code = Str::uuid();
+
             DB::beginTransaction();
-            Invitation::create([
-                'code' => $code,
-                'workspace_id' => $validated['workspace_id']
+            $invitation = Invitation::factory()->create([
+                'user_id' => $request->user()->id,
+                'workspace_id' => $workspace->id,
             ]);
-            $invitationLink = env('PUBLIC_APP_URL') . '/invitations/' . $code;
+            $invitationLink = env('PUBLIC_APP_URL') . '/invitations/' . $invitation->code;
             DB::commit();
             return ['invitation_link' => $invitationLink];
         } catch (\Throwable $th) {
             DB::rollBack();
+            dd($th);
             Helper::createErrorResponse();
         }
     }
@@ -115,32 +94,29 @@ class InvitationController extends Controller implements HasMiddleware
         if ($request->user()->cannot('create', [Invitation::class, $workspace])) abort(403);
 
         $validated = $request->validate([
-
-            'workspace_id' => 'required|integer',
             'emailList.*' => 'required|email'
         ]);
-
+        $requestUser = $request->user();
         try {
-            $code = Str::uuid();
-            Invitation::create([
-                'code' => $code,
-                'workspace_id' => $validated['workspace_id']
-            ]);
-            $workspace = Workspace::findOrFail($validated['workspace_id']);
-            $invitationLink = env('PUBLIC_APP_URL') . '/invitations/' . $code;
+            DB::beginTransaction();
             $emailList = $validated['emailList'];
-            $invitatioEmailSent = [];
             foreach ($emailList as $email) {
                 if ($workspace->isWorkspaceMemberByEmail($email)) continue;
+                // if (Invitation::hasInvitationIn($email, $workspace, $requestUser, 1)) continue;
                 $toUserName = Helper::nameFromEmail($email);
+                $invitation = Invitation::factory()->create([
+                    'user_id' => $request->user()->id,
+                    'workspace_id' => $workspace->id,
+                    'email' => $email,
+                ]);
+                $invitationLink = env('PUBLIC_APP_URL') . '/invitations/' . $invitation->code;
                 Mail::to($email)->send(new InvitationMail($invitationLink, $workspace->name, $request->user()->name, $toUserName));
-                array_push($invitatioEmailSent, $email);
             }
-            // $request->session()->flash('invitation_link', $invitationLink);
-
-            return ['invitation_sent' => $invitatioEmailSent, 'invitation_link' => $invitationLink];
+            DB::commit();
+            return Helper::createSuccessResponse();
         } catch (\Throwable $th) {
-
+            DB::rollBack();
+            dd($th);
             return Helper::createErrorResponse();
         }
     }

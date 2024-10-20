@@ -110,7 +110,7 @@ function Wrapper({ children }) {
                         <ul className="flex flex-col gap-y-2">
                             <PanelItem
                                 icon={<IoSettingsOutline />}
-                                title="Settings"
+                                title="Settings & permissions"
                                 to="settings"
                             />
                             <PanelItem

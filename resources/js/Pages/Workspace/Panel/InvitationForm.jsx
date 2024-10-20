@@ -11,16 +11,14 @@ import LoadingSpinner from "@/Components/LoadingSpinner";
 
 export function InvitationForm({ workspace, isOpen, onClose }) {
     const [invitationLink, setInvitationLink] = useState("");
-    const [invitationSent, setInvitationSent] = useState("");
     const [generatingLink, setGeneratingLink] = useState(false);
-    const [linkCopied,setLinkCopied] = useState(false)
+    const [linkCopied, setLinkCopied] = useState(false);
     const errorHandler = useErrorHandler();
     const successHandler = useSuccessHandler("Invitation sent successfully!");
 
     const { getValues, setValues, loading, submit, reset } = useCustomedForm(
         {
             emailList: "",
-            workspace_id: workspace.id,
         },
         {
             url: route("invitation.mail", workspace.id),
@@ -39,11 +37,8 @@ export function InvitationForm({ workspace, isOpen, onClose }) {
         if (getValues().emailList.length == 0) return;
 
         submit().then((response) => {
-            copy(response.data.invitation_link);
-            setLinkCopied(true)
-            setInvitationLink(response.data.invitation_link);
-            setInvitationSent(response.data.invitation_sent);
             successHandler(response);
+            onClose();
             reset();
         });
     }
@@ -51,17 +46,15 @@ export function InvitationForm({ workspace, isOpen, onClose }) {
         e.preventDefault();
         if (invitationLink) {
             copy(invitationLink);
-            setLinkCopied(true)
+            setLinkCopied(true);
             return;
         }
         setGeneratingLink(true);
         axios
-            .post(route("invitation.store", workspace.id), {
-                workspace_id: workspace.id,
-            })
+            .post(route("invitation.store", workspace.id), {})
             .then((response) => {
                 copy(response.data.invitation_link);
-                setLinkCopied(true)
+                setLinkCopied(true);
                 setInvitationLink(response.data.invitation_link);
             })
             .catch(errorHandler)
@@ -72,7 +65,7 @@ export function InvitationForm({ workspace, isOpen, onClose }) {
     useEffect(() => {
         if (isOpen) {
             reset();
-            setLinkCopied(false)
+            setLinkCopied(false);
         }
     }, [isOpen]);
     return (

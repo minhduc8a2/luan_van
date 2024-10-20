@@ -38,7 +38,7 @@ class Workspace extends Model
 
     public function users(): BelongsToMany
     {
-        return $this->belongsToMany(User::class)->withPivot(['role_id', 'is_approved', 'is_deactivated'])->withTimestamps();
+        return $this->belongsToMany(User::class)->withPivot(['role_id', 'is_approved', 'is_deactivated', 'invitation_id'])->withTimestamps();
     }
 
     public function channels(): HasMany
@@ -46,6 +46,10 @@ class Workspace extends Model
         return $this->hasMany(Channel::class);
     }
 
+    public function invitations(): HasMany
+    {
+        return $this->hasMany(Invitation::class);
+    }
     public function permissions(): MorphMany
     {
         return $this->morphMany(Permission::class, 'permissionable');
@@ -72,12 +76,12 @@ class Workspace extends Model
         }
     }
 
-    public function addUserToWorkspace(User $user)
+    public function addUserToWorkspace(User $user,int $invitationId = null)
     {
         if ($user->isWorkspaceMember($this)) return;
         $roleId = Role::getRoleByName(BaseRoles::MEMBER->name)->id;
         $otherUsers = $this->users->pluck('name', 'id');
-        $user->workspaces()->sync([$this->id => ['role_id' => $roleId, 'is_approved' => true]]);
+        $user->workspaces()->sync([$this->id => ['role_id' => $roleId, 'is_approved' => true, 'invitation_id' => $invitationId]]);
         $this->assignUserToMainChannel($user, Role::getRoleByName(BaseRoles::MEMBER->name));
 
         //create private channels
