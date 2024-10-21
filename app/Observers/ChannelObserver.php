@@ -10,16 +10,7 @@ class ChannelObserver
     /**
      * Handle the Channel "created" event.
      */
-    public function created(Channel $channel): void
-    {
-        if ($channel->type == "SELF") return;
-        try {
-            broadcast(new WorkspaceEvent(workspace: $channel->workspace, type: "ChannelObserver_storeChannel", fromUserId: $channel->user_id, data: $channel->loadCount('users')));
-            //code...
-        } catch (\Throwable $th) {
-            //throw $th;
-        }
-    }
+    
 
     /**
      * Handle the Channel "updated" event.

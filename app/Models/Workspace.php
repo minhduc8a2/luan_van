@@ -1,10 +1,11 @@
 <?php
 
 namespace App\Models;
-
 use App\Helpers\BaseRoles;
 use App\Helpers\ChannelTypes;
 use App\Helpers\PermissionTypes;
+use App\Helpers\WorkspaceEventsEnum;
+use App\Notifications\WorkspaceNotification;
 use App\Observers\WorkspaceObserver;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -76,25 +77,26 @@ class Workspace extends Model
         }
     }
 
-    public function addUserToWorkspace(User $user,int $invitationId = null)
+    public function addUserToWorkspace(User $user, int $invitationId = null)
     {
         if ($user->isWorkspaceMember($this)) return;
-        $roleId = Role::getRoleByName(BaseRoles::MEMBER->name)->id;
+        $roleMemberId = Role::getRoleByName(BaseRoles::MEMBER->name)->id;
         $otherUsers = $this->users->pluck('name', 'id');
-        $user->workspaces()->sync([$this->id => ['role_id' => $roleId, 'is_approved' => true, 'invitation_id' => $invitationId]]);
+        $user->workspaces()->sync([$this->id => ['role_id' => $roleMemberId, 'is_approved' => true, 'invitation_id' => $invitationId]]);
         $this->assignUserToMainChannel($user, Role::getRoleByName(BaseRoles::MEMBER->name));
 
-        //create private channels
+        //create direct channels
         foreach ($otherUsers as $id => $name) {
             /**
              * @var Channel $newChannel
              */
             $newChannel = $this->channels()->create(['user_id' => $user->id, 'name' => $user->id . "_" . $id, "type" => ChannelTypes::DIRECT->name]);
             $newChannel->initChannelPermissions();
-            $user->channels()->attach($newChannel->id, ['role_id' => $roleId]);
+            $user->channels()->attach($newChannel->id, ['role_id' => $roleMemberId]);
             $otherUser = User::find($id);
             if ($otherUser) {
-                $otherUser->channels()->attach($newChannel->id, ['role_id' => $roleId]);
+                $otherUser->channels()->attach($newChannel->id, ['role_id' => $roleMemberId]);
+                $otherUser->notify(new WorkspaceNotification($this, WorkspaceEventsEnum::STORE_CHANNEL->name, ['channel'=>$newChannel, 'byUser'=>$user]));
             }
         }
         //create self channel

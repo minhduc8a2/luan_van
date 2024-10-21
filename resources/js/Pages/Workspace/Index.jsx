@@ -15,6 +15,7 @@ import HomePage from "./HomePage/HomePage";
 import ReduxProvider from "@/Components/ReduxProvider";
 import AboutWorkspace from "./Admin/AboutWorkspace/AboutWorkspace";
 import Invitations from "./Admin/Invitations/Invitations";
+import OnlineStatusProvider from "@/services/OnlineStatusProvider";
 
 export default function Index() {
     return (
@@ -39,7 +40,14 @@ export default function Index() {
                         <Route path="settings" element={<Settings />} />
                         <Route path="invitations" element={<Invitations />} />
                     </Route>
-                    <Route path=":workspaceId" element={<Layout />}>
+                    <Route
+                        path=":workspaceId"
+                        element={
+                            <OnlineStatusProvider>
+                                <Layout />
+                            </OnlineStatusProvider>
+                        }
+                    >
                         <Route
                             path="channels/:channelId"
                             element={<ChatArea />}

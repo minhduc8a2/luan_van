@@ -2,15 +2,11 @@
 
 namespace App\Events;
 
-use App\Models\User;
-use App\Models\Workspace;
-use Illuminate\Broadcasting\Channel;
+
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 
 class WorkspaceEvent implements ShouldBroadcastNow
@@ -20,7 +16,7 @@ class WorkspaceEvent implements ShouldBroadcastNow
     /**
      * Create a new event instance.
      */
-    public function __construct(public Workspace $workspace, public string $type = "", public $data = null, public string $fromUserId = "")
+    public function __construct(public String $workspaceId, public string $type = "", public $data = null)
     {
         //
     }
@@ -33,13 +29,12 @@ class WorkspaceEvent implements ShouldBroadcastNow
     public function broadcastOn(): array
     {
         return [
-            new PresenceChannel('workspaces.' . $this->workspace->id),
-            new PrivateChannel('private_workspaces.' . $this->workspace->id),
+            new PrivateChannel('private_workspaces.' . $this->workspaceId),
         ];
     }
 
     public function broadcastWith(): array
     {
-        return ['type' => $this->type, 'fromUserId' => $this->fromUserId, 'data' => $this->data];
+        return ['type' => $this->type, 'data' => $this->data];
     }
 }

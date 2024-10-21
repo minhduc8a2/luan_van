@@ -4,7 +4,7 @@ import { PiHouseLineBold, PiHouseLineFill } from "react-icons/pi";
 import { FaRegBell } from "react-icons/fa6";
 
 import WorkspaceAvatar from "@/Components/WorkspaceAvatar";
-import WorkspaceListItem from "@/Components/WorkspaceListItem";
+import WorkspaceListItem from "@/Pages/Workspace/SideBar/WorkspaceListItem";
 
 import { AddWorkspace } from "@/Components/AddWorkspace";
 import { useRef, useEffect } from "react";

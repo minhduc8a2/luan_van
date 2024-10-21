@@ -29,7 +29,6 @@ import NotificationPopup from "@/Components/NotificationPopup";
 export default function Layout() {
     const { channelId } = useParams();
     const dispatch = useDispatch();
-    const storeRef = useRef();
 
     try {
         const leftWindowWidth = parseInt(

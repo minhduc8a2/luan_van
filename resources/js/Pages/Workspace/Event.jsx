@@ -37,6 +37,8 @@ import useLoadWorkspaceData from "@/helpers/useLoadWorkspaceData";
 import { updateCurrentWorkspace } from "@/Store/workspaceSlice";
 import useReloadLoadedChannelsDataPermissions from "@/helpers/useReloadLoadedChannelsDataPermissions";
 import useLoadWorkspaces from "@/helpers/useLoadWorkspaces";
+import WorkspaceEventsEnum from "@/services/WorkspaceEventsEnum";
+import ChannelEventsEnum from "@/services/ChannelEventsEnum";
 
 export default function Event() {
     const { auth } = usePage().props;
@@ -47,7 +49,7 @@ export default function Event() {
     const channelsData = useSelector((state) => state.channelsData);
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
     const { threadMessageId } = useSelector((state) => state.thread);
-    const connectionRef = useRef(null);
+
     const { channelId: huddleChannelId } = useSelector((state) => state.huddle);
     const reloadPermissions = useReloadPermissions(workspaceId);
     const reloadLoadedChannelsDataPermissions =
@@ -158,25 +160,6 @@ export default function Event() {
         };
     }, [userListener, auth.user.id]);
 
-    function workspaceListener() {
-        console.log("init worksapce listener");
-        connectionRef.current = Echo.join(`workspaces.${workspaceId}`);
-        connectionRef.current
-            .here((users) => {
-                dispatch(setManyOnline(users));
-            })
-            .joining((user) => {
-                dispatch(setOnlineStatus({ user, onlineStatus: true }));
-            })
-            .leaving((user) => {
-                dispatch(setOnlineStatus({ user, onlineStatus: false }));
-            })
-
-            .error((error) => {
-                console.error(error);
-            });
-    }
-
     function listenChannels() {
         channels.forEach((cn) => {
             console.log("Listen for channel: " + cn.name);
@@ -278,7 +261,7 @@ export default function Event() {
                             );
 
                             break;
-                        case "removeUserFromChannel":
+                        case ChannelEventsEnum.REMOVE_USER_FROM_CHANNEL:
                             dispatch(
                                 removeManagerFromChannel({
                                     id: cn.id,
@@ -335,14 +318,6 @@ export default function Event() {
         //     });
         // };
     }, [channels, workspaceId, auth.user.id]);
-    useEffect(() => {
-        workspaceListener();
-
-        return () => {
-            connectionRef.current = null;
-            Echo.leave(`workspaces.${workspaceId}`);
-        };
-    }, [workspaceId]);
 
     useEffect(() => {
         Echo.private(`private_workspaces.${workspaceId}`).listen(
@@ -395,7 +370,7 @@ export default function Event() {
                             loadWorkspaceData("workspacePermissions");
                         }
                         break;
-                    case "ChannelObserver_storeChannel":
+                    case WorkspaceEventsEnum.STORE_CHANNEL:
                         const newChannel = e.data;
                         if (
                             newChannel.type == "DIRECT" &&
@@ -404,10 +379,6 @@ export default function Event() {
                                 .some((id) => id == auth.user.id)
                         ) {
                             dispatch(addNewChannelToChannelsStore(e.data));
-                        } else if (newChannel.type != "DIRECT") {
-                            if (newChannel.user_id == auth.user.id) {
-                                dispatch(addNewChannelToChannelsStore(e.data));
-                            }
                         }
                         break;
                     case "ChannelObserver_deleteChannel":
@@ -460,17 +431,6 @@ export default function Event() {
             Echo.leave(`private_workspaces.${workspaceId}`);
         };
     }, [workspaceId, auth.user.id]);
-
-    useEffect(() => {
-        if (connectionRef.current)
-            connectionRef.current
-                .joining((user) => {
-                    dispatch(setOnlineStatus({ user, onlineStatus: true }));
-                })
-                .leaving((user) => {
-                    dispatch(setOnlineStatus({ user, onlineStatus: false }));
-                });
-    }, [workspaceId]);
 
     return <></>;
 }

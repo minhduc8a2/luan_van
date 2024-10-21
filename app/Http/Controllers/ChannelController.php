@@ -16,8 +16,10 @@ use App\Events\ChannelEvent;
 use Illuminate\Http\Request;
 use App\Helpers\ChannelTypes;
 use App\Events\WorkspaceEvent;
+use App\Helpers\ChannelEventsEnum;
 use Illuminate\Support\Carbon;
 use App\Helpers\PermissionTypes;
+use App\Helpers\WorkspaceEventsEnum;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Broadcast;
@@ -304,17 +306,20 @@ class ChannelController extends Controller
             if ($channelExists) {
                 abort(400, "Channel exists! Please choose a different name!");
             }
-            //
+            $user = $request->user();
             /**
              * @var Channel $channel
              */
-            $channel = $request->user()->ownChannels()->create(['name' => $validated['name'], 'type' => $validated['type'], 'workspace_id' => $workspace->id]);
+            $channel = $user()->ownChannels()->create(['name' => $validated['name'], 'type' => $validated['type'], 'workspace_id' => $workspace->id]);
             $channel->assignManagerRoleAndManagerPermissions($request->user());
             $channel->initChannelPermissions();
-
-
+            $channel->users_count = 1;
+            //create channel manually and broadcast only public  channels
+            if ($channel->type == ChannelTypes::PUBLIC->name) {
+                broadcast(new WorkspaceEvent(workspaceId: $workspace->id, type: WorkspaceEventsEnum::STORE_CHANNEL->name, data: $channel))->toOthers();
+            }
             DB::commit();
-            return Helper::createSuccessResponse();
+            return ['channel' => $channel];
         } catch (\Throwable $th) {
             DB::rollBack();
             Helper::createErrorResponse();
@@ -374,7 +379,7 @@ class ChannelController extends Controller
             Helper::createErrorResponse();
         }
     }
-    public function editName(Request $request,Workspace $workspace, Channel $channel)
+    public function editName(Request $request, Workspace $workspace, Channel $channel)
     {
         if ($request->user()->cannot('updateName', $channel)) {
             return  abort(403);
@@ -396,7 +401,7 @@ class ChannelController extends Controller
         }
     }
 
-    public function changeType(Request $request,Workspace $workspace, Channel $channel)
+    public function changeType(Request $request, Workspace $workspace, Channel $channel)
     {
         if ($request->user()->cannot('changeType', $channel)) {
             return  abort(403);
@@ -414,12 +419,8 @@ class ChannelController extends Controller
             foreach ($channelUsers as $channelUser) {
                 if ($channelUser->id == $user->id) continue;
                 $channelUser->notify(new ChannelsNotification(
-                    fromUser: $user,
-                    toUser: null,
-                    channel: $channel,
-                    workspace: $channel->workspace,
-                    changesType: 'changeType',
-                    data: ['oldType' => $oldType, 'newType' => $channel->type]
+                    changesType: ChannelEventsEnum::CHANGE_CHANNEL_TYPE->name,
+                    data: ['oldType' => $oldType, 'newType' => $channel->type, 'channel' => $channel, 'workspace' => $workspace]
                 ));
             }
 
@@ -433,7 +434,7 @@ class ChannelController extends Controller
         }
     }
 
-    public function leave(Request $request,Workspace $workspace, Channel $channel)
+    public function leave(Request $request, Workspace $workspace, Channel $channel)
     {
         if ($request->user()->cannot('leave', $channel)) {
             return  abort(403);
@@ -456,7 +457,7 @@ class ChannelController extends Controller
             Helper::createErrorResponse();
         }
     }
-    public function join(Request $request,Workspace $workspace, Channel $channel)
+    public function join(Request $request, Workspace $workspace, Channel $channel)
     {
 
         if ($request->user()->cannot('join', $channel)) {
@@ -479,7 +480,7 @@ class ChannelController extends Controller
             Helper::createErrorResponse();
         }
     }
-    public function removeUserFromChannel(Request $request,Workspace $workspace, Channel $channel)
+    public function removeUserFromChannel(Request $request, Workspace $workspace, Channel $channel)
     {
         if ($request->user()->cannot('removeUserFromChannel', $channel)) {
             return  abort(403);
@@ -502,8 +503,8 @@ class ChannelController extends Controller
 
 
             //notify
-            broadcast(new ChannelEvent($channel, "removeUserFromChannel", $user->id));
-            $user->notify(new ChannelsNotification($request->user(), $user, $channel, $channel->workspace, "removedFromChannel"));
+            broadcast(new ChannelEvent($channel, ChannelEventsEnum::REMOVE_USER_FROM_CHANNEL->name, $user->id));
+            $user->notify(new ChannelsNotification(ChannelEventsEnum::REMOVED_FROM_CHANNEL->name, ['channel' => $channel, 'workspace' => $workspace]));
             Message::createStringMessageAndBroadcast($channel, $request->user(), $request->user()->name . " has removed " . $user->name . " from channel");
 
             DB::commit();
@@ -514,7 +515,7 @@ class ChannelController extends Controller
             Helper::createErrorResponse();
         }
     }
-    public function addUsersToChannel(Request $request,Workspace $workspace, Channel $channel)
+    public function addUsersToChannel(Request $request, Workspace $workspace, Channel $channel)
     {
 
         if ($request->user()->cannot('addUsersToChannel', $channel)) {
@@ -531,7 +532,7 @@ class ChannelController extends Controller
                 if ($user->channels()->where('channels.id', '=', $channel->id)->exists()) continue;
                 $user->channels()->attach($channel->id, ['role_id' => Role::getRoleIdByName(BaseRoles::MEMBER->name)]);
 
-                $user->notify(new ChannelsNotification($request->user(), $user, $channel->loadCount('messages as unread_messages_count')->loadCount('users'), $channel->workspace, "addedToNewChannel"));
+                $user->notify(new ChannelsNotification(ChannelEventsEnum::ADDED_TO_NEW_CHANNEL->name, ['channel' => $channel->loadCount('messages as unread_messages_count')->loadCount('users'), 'workspace' => $workspace, 'byUser' => $request->user()]));
                 Message::createStringMessageAndBroadcast($channel, $request->user(), $request->user()->name . " has added " . $user->name . " to channel");
             }
             $userIds = collect($validated['users'])->pluck('id')->toArray();
@@ -546,7 +547,7 @@ class ChannelController extends Controller
         }
     }
 
-    public function addManagers(Request $request,Workspace $workspace, Channel $channel)
+    public function addManagers(Request $request, Workspace $workspace, Channel $channel)
     {
 
         if ($request->user()->cannot('addManagers', $channel)) abort(403);
@@ -563,12 +564,11 @@ class ChannelController extends Controller
                 $user->channels()->updateExistingPivot($channel->id, [
                     'role_id' => Role::getRoleIdByName(BaseRoles::MANAGER->name),
                 ]);
-                $user->notify(new ChannelsNotification($request->user(), null, $channel, $channel->workspace, "addedAsManager"));
+                $user->notify(new ChannelsNotification($request->user(), null, $channel, $channel->workspace, ChannelEventsEnum::ADDED_AS_MANAGER, ['channel' => $channel, 'workspace' => $workspace, 'byUser' => $request->user()]));
             }
             $managerIds = collect($validated['users'])->pluck('id')->toArray();
             broadcast(new ChannelEvent($channel, "addManagers", $managerIds));
             DB::commit();
-
             return ['message' => 'successfull'];
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -576,7 +576,7 @@ class ChannelController extends Controller
             Helper::createErrorResponse();
         }
     }
-    public function removeManager(Request $request,Workspace $workspace, Channel $channel)
+    public function removeManager(Request $request, Workspace $workspace, Channel $channel)
     {
 
 
@@ -594,12 +594,8 @@ class ChannelController extends Controller
             ]);
             broadcast(new ChannelEvent($channel, "removeManager", $user->id));
             $user->notify(new ChannelsNotification(
-                fromUser: $request->user(),
-                toUser: null,
-                channel: $channel,
-                workspace: $channel->workspace,
-                changesType: "removedManagerRole",
-
+                ChannelEventsEnum::REMOVED_MANAGER_ROLE->name,
+                ['channel' => $channel, 'workspace' => $workspace, 'byUser' => $request->user()]
             ));
             DB::commit();
 
@@ -631,7 +627,7 @@ class ChannelController extends Controller
         }
     }
 
-    public function updatePermissions(Request $request,Workspace $workspace, Channel $channel)
+    public function updatePermissions(Request $request, Workspace $workspace, Channel $channel)
     {
 
 
@@ -703,7 +699,7 @@ class ChannelController extends Controller
     }
 
 
-    public function archive(Request $request,Workspace $workspace, Channel $channel)
+    public function archive(Request $request, Workspace $workspace, Channel $channel)
     {
 
 
@@ -718,12 +714,9 @@ class ChannelController extends Controller
             $channelUsers = $channel->users;
             foreach ($channelUsers as $channelUser) {
                 $channelUser->notify(new ChannelsNotification(
-                    fromUser: $user,
-                    toUser: null,
-                    channel: $channel,
-                    workspace: $channel->workspace,
-                    changesType: $validated['status'] ? 'archiveChannel' : "unarchiveChannel",
 
+                    $validated['status'] ? ChannelEventsEnum::ARCHIVE_CHANNEL->NAME : ChannelEventsEnum::UNARCHIVE_CHANNEL->name,
+                    ['channel' => $channel, 'workspace' => $workspace, 'byUser' => $user]
                 ));
             }
             DB::commit();
@@ -765,7 +758,7 @@ class ChannelController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request,Workspace $workspace, Channel $channel)
+    public function destroy(Request $request, Workspace $workspace, Channel $channel)
     {
         if ($request->user()->cannot('delete', $channel)) abort(403);
         try {
@@ -781,11 +774,8 @@ class ChannelController extends Controller
 
             foreach ($channelUsers as $channelUser) {
                 $channelUser->notify(new ChannelsNotification(
-                    fromUser: $user,
-                    toUser: null,
-                    channel: $copiedChannel,
-                    workspace: $workspace,
-                    changesType: 'deleteChannel',
+                    ChannelEventsEnum::DELETE_CHANNEL->name,
+                    ['channel' => $channel, 'workspace' => $workspace, 'byUser' => $user]
 
                 ));
             }

@@ -1,13 +1,15 @@
 import { useState } from "react";
 import TextArea from "@/Components/Input/TextArea";
 import SelectInput from "@/Components/Input/SelectInput";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useCustomedForm } from "@/helpers/customHooks";
 import useErrorHandler from "@/helpers/useErrorHandler";
 import CustomedDialog from "@/Components/CustomedDialog";
+import { addNewChannelToChannelsStore } from "@/Store/channelsSlice";
 
 export function CreateChannelForm({ activateButtonNode, callback = () => {} }) {
     const [isOpen, setIsOpen] = useState(false);
+    const dispatch = useDispatch();
     const { workspacePermissions, workspace } = useSelector(
         (state) => state.workspace
     );
@@ -21,19 +23,15 @@ export function CreateChannelForm({ activateButtonNode, callback = () => {} }) {
 
     const { getValues, setValues, reset, submit, loading } = useCustomedForm(
         { name: "", type: "PUBLIC" },
-        { url: route("channel.store", workspace.id) }
+        { url: route("channel.store", workspace.id), hasEchoHeader: true }
     );
-
-    const errorHandler = useErrorHandler();
     function onSubmit(e) {
         e.preventDefault();
-        submit()
-            .then(() => {
-                setSuccess(true);
-                reset();
-                callback();
-            })
-            .catch(errorHandler);
+        submit().then((response) => {
+            dispatch(addNewChannelToChannelsStore(response.data?.channel));
+            reset();
+            callback();
+        });
     }
     return (
         <>
