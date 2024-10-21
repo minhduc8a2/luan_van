@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Role;
 use App\Models\User;
 use Inertia\Inertia;
-
 use App\Helpers\Helper;
 use App\Models\Channel;
 use App\Models\Message;
@@ -369,7 +368,7 @@ class ChannelController extends Controller
 
             $channel->description = $validated['description'] ?? "";
             $channel->save();
-
+            broadcast(new ChannelEvent($channel->id, ChannelEventsEnum::CHANNEL_UPDATED->name, $channel));
             DB::commit();
 
             return Helper::createSuccessResponse();
@@ -390,6 +389,7 @@ class ChannelController extends Controller
 
             $channel->name = $validated['name'];
             $channel->save();
+            broadcast(new ChannelEvent($channel->id, ChannelEventsEnum::CHANNEL_UPDATED->name, $channel));
 
             DB::commit();
 
@@ -414,13 +414,14 @@ class ChannelController extends Controller
             $channel->type = $validated['type'];
             $channel->save();
             Message::createStringMessageAndBroadcast($channel, $request->user(), $request->user()->name . " has changed channel privacy from " . $oldType . " to " . $channel->type . ".");
-            broadcast(new ChannelEvent($channel, "changeType"));
             $channelUsers = $channel->users;
             foreach ($channelUsers as $channelUser) {
                 if ($channelUser->id == $user->id) continue;
                 $channelUser->notify(new ChannelsNotification(
-                    changesType: ChannelEventsEnum::CHANGE_CHANNEL_TYPE->name,
-                    data: ['oldType' => $oldType, 'newType' => $channel->type, 'channel' => $channel, 'workspace' => $workspace]
+                    $workspace,
+                    $channel,
+                    ChannelEventsEnum::CHANGE_CHANNEL_TYPE->name,
+                    ['oldType' => $oldType, 'newType' => $channel->type]
                 ));
             }
 
@@ -447,7 +448,7 @@ class ChannelController extends Controller
             DB::beginTransaction();
 
             $request->user()->channels()->detach($channel->id);
-            broadcast(new ChannelEvent($channel, "leave", $request->user()->id));
+            broadcast(new ChannelEvent($channel->id, ChannelEventsEnum::LEAVE->name, $request->user()->id));
             DB::commit();
 
             return ['message' => 'successfull'];
@@ -470,7 +471,7 @@ class ChannelController extends Controller
 
                 $request->user()->channels()->attach($channel->id, ['role_id' => Role::getRoleIdByName(BaseRoles::MEMBER->name)]);
             }
-            broadcast(new ChannelEvent($channel, "join", $request->user()->id))->toOthers();
+            broadcast(new ChannelEvent($channel->id, ChannelEventsEnum::NEW_USER_JOIN->name, $request->user()->id))->toOthers();
             DB::commit();
 
             return ['message' => 'successfull'];
@@ -503,8 +504,12 @@ class ChannelController extends Controller
 
 
             //notify
-            broadcast(new ChannelEvent($channel, ChannelEventsEnum::REMOVE_USER_FROM_CHANNEL->name, $user->id));
-            $user->notify(new ChannelsNotification(ChannelEventsEnum::REMOVED_FROM_CHANNEL->name, ['channel' => $channel, 'workspace' => $workspace]));
+            broadcast(new ChannelEvent($channel->id, ChannelEventsEnum::REMOVE_USER_FROM_CHANNEL->name, $user->id));
+            $user->notify(new ChannelsNotification(
+                $workspace,
+                $channel,
+                ChannelEventsEnum::REMOVED_FROM_CHANNEL->name
+            ));
             Message::createStringMessageAndBroadcast($channel, $request->user(), $request->user()->name . " has removed " . $user->name . " from channel");
 
             DB::commit();
@@ -532,11 +537,16 @@ class ChannelController extends Controller
                 if ($user->channels()->where('channels.id', '=', $channel->id)->exists()) continue;
                 $user->channels()->attach($channel->id, ['role_id' => Role::getRoleIdByName(BaseRoles::MEMBER->name)]);
 
-                $user->notify(new ChannelsNotification(ChannelEventsEnum::ADDED_TO_NEW_CHANNEL->name, ['channel' => $channel->loadCount('messages as unread_messages_count')->loadCount('users'), 'workspace' => $workspace, 'byUser' => $request->user()]));
+                $user->notify(new ChannelsNotification(
+                    $workspace,
+                    $channel->loadCount('messages as unread_messages_count')->loadCount('users'),
+                    ChannelEventsEnum::ADDED_TO_NEW_CHANNEL->name,
+                    ['byUser' => $request->user()]
+                ));
                 Message::createStringMessageAndBroadcast($channel, $request->user(), $request->user()->name . " has added " . $user->name . " to channel");
             }
             $userIds = collect($validated['users'])->pluck('id')->toArray();
-            broadcast(new ChannelEvent($channel, "addUsersToChannel", $userIds));
+            broadcast(new ChannelEvent($channel->id, ChannelEventsEnum::ADD_USERS_TO_CHANNEL->name, $userIds));
             DB::commit();
 
             return ['message' => 'successfull'];
@@ -564,15 +574,19 @@ class ChannelController extends Controller
                 $user->channels()->updateExistingPivot($channel->id, [
                     'role_id' => Role::getRoleIdByName(BaseRoles::MANAGER->name),
                 ]);
-                $user->notify(new ChannelsNotification($request->user(), null, $channel, $channel->workspace, ChannelEventsEnum::ADDED_AS_MANAGER, ['channel' => $channel, 'workspace' => $workspace, 'byUser' => $request->user()]));
+                $user->notify(new ChannelsNotification(
+                    $workspace,
+                    $channel,
+                    ChannelEventsEnum::ADDED_AS_MANAGER->name,
+                    ['byUser' => $request->user()]
+                ));
             }
             $managerIds = collect($validated['users'])->pluck('id')->toArray();
-            broadcast(new ChannelEvent($channel, "addManagers", $managerIds));
+            broadcast(new ChannelEvent($channel->id, ChannelEventsEnum::ADD_MANAGERS->name, $managerIds));
             DB::commit();
             return ['message' => 'successfull'];
         } catch (\Throwable $th) {
             DB::rollBack();
-
             Helper::createErrorResponse();
         }
     }
@@ -592,13 +606,15 @@ class ChannelController extends Controller
             $user->channels()->updateExistingPivot($channel->id, [
                 'role_id' => Role::getRoleIdByName(BaseRoles::MEMBER->name),
             ]);
-            broadcast(new ChannelEvent($channel, "removeManager", $user->id));
-            $user->notify(new ChannelsNotification(
-                ChannelEventsEnum::REMOVED_MANAGER_ROLE->name,
-                ['channel' => $channel, 'workspace' => $workspace, 'byUser' => $request->user()]
-            ));
-            DB::commit();
 
+            $user->notify(new ChannelsNotification(
+                $workspace,
+                $channel,
+                ChannelEventsEnum::REMOVED_MANAGER_ROLE->name,
+                ['byUser' => $request->user()]
+            ));
+            broadcast(new ChannelEvent($channel->id, ChannelEventsEnum::REMOVE_MANAGER->name, $user->id));
+            DB::commit();
             return ['message' => 'successfull'];
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -688,7 +704,7 @@ class ChannelController extends Controller
                 $channel->deleteGuestPermission(PermissionTypes::CHANNEL_THREAD->name);
                 $channel->deleteMemberPermission(PermissionTypes::CHANNEL_THREAD->name);
             }
-            broadcast(new ChannelEvent($channel, "updateChannelPermissions"));
+            broadcast(new ChannelEvent($channel->id, ChannelEventsEnum::UPDATE_CHANNEL_PERMISSIONS->name));
 
             DB::commit();
             return [];
@@ -710,13 +726,14 @@ class ChannelController extends Controller
             $channel->is_archived = $validated['status'];
             $user = $request->user();
             $channel->save();
-            broadcast(new ChannelEvent($channel, "archiveChannel"));
+            broadcast(new ChannelEvent($channel->id, "archiveChannel"));
             $channelUsers = $channel->users;
             foreach ($channelUsers as $channelUser) {
                 $channelUser->notify(new ChannelsNotification(
-
+                    $workspace,
+                    $channel,
                     $validated['status'] ? ChannelEventsEnum::ARCHIVE_CHANNEL->NAME : ChannelEventsEnum::UNARCHIVE_CHANNEL->name,
-                    ['channel' => $channel, 'workspace' => $workspace, 'byUser' => $user]
+                    ['byUser' => $user]
                 ));
             }
             DB::commit();
@@ -774,8 +791,10 @@ class ChannelController extends Controller
 
             foreach ($channelUsers as $channelUser) {
                 $channelUser->notify(new ChannelsNotification(
+                    $workspace,
+                    $channel,
                     ChannelEventsEnum::DELETE_CHANNEL->name,
-                    ['channel' => $channel, 'workspace' => $workspace, 'byUser' => $user]
+                    ['byUser' => $user]
 
                 ));
             }

@@ -3,7 +3,9 @@
 namespace App\Observers;
 
 use App\Models\File;
+use App\Events\ChannelEvent;
 use App\Events\WorkspaceEvent;
+use App\Helpers\ChannelEventsEnum;
 
 class FileObserver
 {
@@ -13,7 +15,10 @@ class FileObserver
     public function created(File $file): void
     {
         try {
-            broadcast(new WorkspaceEvent(workspace: $file->workspace, type: "FileObserver_fileCreated", fromUserId: "", data: $file));
+            $channelIds = $file->messages()->pluck('channel_id')->unique();
+            foreach ($channelIds as $channelId) {
+                broadcast(new ChannelEvent($channelId, ChannelEventsEnum::FILE_CREATED->name, $file));
+            }
             //code...
         } catch (\Throwable $th) {
             //throw $th;
@@ -34,7 +39,10 @@ class FileObserver
     public function deleted(File $file): void
     {
         try {
-            broadcast(new WorkspaceEvent(workspace: $file->workspace, type: "FileObserver_fileDeleted", fromUserId: "", data: $file->id));
+            $channelIds = $file->messages()->pluck('channel_id')->unique();
+            foreach ($channelIds as $channelId) {
+                broadcast(new ChannelEvent($channelId, ChannelEventsEnum::FILE_DELETED->name, $file->id));
+            }
             //code...
         } catch (\Throwable $th) {
             //throw $th;

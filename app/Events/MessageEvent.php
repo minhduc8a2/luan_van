@@ -2,6 +2,7 @@
 
 namespace App\Events;
 
+use App\Helpers\ChannelEventsEnum;
 use App\Models\Channel;
 use App\Models\Message;
 use Illuminate\Queue\SerializesModels;
@@ -19,7 +20,7 @@ class MessageEvent implements ShouldBroadcastNow
     /**
      * Create a new event instance.
      */
-    public function __construct(public Channel $channel, public Message $message, public string $type = "newMessageCreated", public $temporaryId = null)
+    public function __construct(public Channel $channel, public Message $message, public string $type = ChannelEventsEnum::NEW_MESSAGE_CREATED->name, public $temporaryId = null)
     {
         //
     }

@@ -15,8 +15,12 @@ class ChannelsNotification extends Notification
     /**
      * Create a new notification instance.
      */
-    public function __construct(public string $changesType, public  $data = null)
-    {
+    public function __construct(
+        public string $workspace,
+        public string $channel,
+        public string $changesType,
+        public  $data = null
+    ) {
         //
     }
 
@@ -44,7 +48,8 @@ class ChannelsNotification extends Notification
     public function toBroadcast(User $notifiable): BroadcastMessage
     {
         return new BroadcastMessage([
-
+            "workspace" => $this->workspace,
+            "channel" => $this->channel,
             "changesType" => $this->changesType,
             "data" => $this->data,
             "created_at" => Carbon::now()
@@ -60,6 +65,8 @@ class ChannelsNotification extends Notification
     public function toArray(User $notifiable): array
     {
         return [
+            "workspace" => $this->workspace,
+            "channel" => $this->channel,
             "changesType" => $this->changesType,
             "data" => $this->data,
         ];

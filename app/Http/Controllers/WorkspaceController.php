@@ -8,6 +8,7 @@ use App\Models\Role;
 use Inertia\Inertia;
 use App\Helpers\Helper;
 use App\Helpers\PermissionTypes;
+use App\Helpers\WorkspaceEventsEnum;
 use App\Models\Channel;
 use App\Models\Invitation;
 use App\Models\Workspace;
@@ -191,7 +192,7 @@ class WorkspaceController extends Controller
             $memberRoleId = Role::getRoleIdByName(BaseRoles::MEMBER->name);
             $workspace->permissions()->create(['permission_type' => $permissionType, 'role_id' => $memberRoleId]);
 
-            broadcast(new WorkspaceEvent(workspace: $workspace, type: "InvitationPermission_updated", fromUserId: "", data: $workspace));
+            broadcast(new WorkspaceEvent($workspace->id, WorkspaceEventsEnum::INVITATION_PERMISSIONS_UPDATED->name));
 
             DB::commit();
             return Helper::createSuccessResponse();
@@ -224,7 +225,7 @@ class WorkspaceController extends Controller
 
             $user = $workspace->users()->where('users.id', $userId)->first();
             $user->workspaceRole = Role::find($user->pivot->role_id)->setVisible(["name"]);
-            broadcast(new WorkspaceEvent(workspace: $workspace, type: "UserRole_updated", fromUserId: "", data: $user));
+            broadcast(new WorkspaceEvent($workspace->id, WorkspaceEventsEnum::USER_ROLE_UPDATED->name,  $user));
             DB::commit();
             return Helper::createSuccessResponse();
         } catch (\Throwable $th) {
@@ -260,7 +261,7 @@ class WorkspaceController extends Controller
                 $user->notify(new WorkspaceNotification($workspace, "AcceptJoiningRequest"));
                 array_push($acceptedUsers, $user);
             }
-            broadcast(new WorkspaceEvent(workspace: $workspace, type: "AcceptJoiningRequest", fromUserId: "", data: $acceptedUsers));
+            broadcast(new WorkspaceEvent($workspace->id, WorkspaceEventsEnum::ACCEPT_JOINING_REQUEST->name,  data: $acceptedUsers));
             DB::commit();
             return Helper::createSuccessResponse();
         } catch (\Throwable $th) {
@@ -286,7 +287,7 @@ class WorkspaceController extends Controller
 
             if ($exists) {
                 $workspace->users()->updateExistingPivot($userId, ['is_deactivated' => $wantDeactivate]);
-                broadcast(new WorkspaceEvent(workspace: $workspace, type: "DeactivateUser_updated", fromUserId: "", data: $workspace->users()->where('users.id', $userId)->first()));
+                broadcast(new WorkspaceEvent($workspace->id, WorkspaceEventsEnum::DEACTIVATE_USER_UPDATED->name, data: $workspace->users()->where('users.id', $userId)->first()));
             }
             DB::commit();
             return Helper::createSuccessResponse();

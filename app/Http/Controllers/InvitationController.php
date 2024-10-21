@@ -11,6 +11,7 @@ use Illuminate\Support\Str;
 use App\Mail\InvitationMail;
 use Illuminate\Http\Request;
 use App\Events\WorkspaceEvent;
+use App\Helpers\WorkspaceEventsEnum;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -49,14 +50,14 @@ class InvitationController extends Controller implements HasMiddleware
                 $user->workspaces()->attach($workspace->id, ['role_id' => Role::getRoleIdByName(BaseRoles::MEMBER->name), 'invitation_id' => $invitation->id]);
                 $user = $workspace->users()->where('users.id', $user->id)->first();
                 $user->workspaceRole = Role::find($user->pivot->role_id)->setVisible(["name"]);
-                broadcast(new WorkspaceEvent(workspace: $workspace, type: "newUserRequestToJoinWorkspace", fromUserId: $request->user()->id, data: $user));
+                broadcast(new WorkspaceEvent($workspace->id, WorkspaceEventsEnum::NEW_USER_REQUEST_TO_JOIN_WORKSPACE->name,  data: ['newUser' => $user, 'byUser' => $request->user()->id]));
                 DB::commit();
                 return redirect(route('workspaces', ['request' => true, 'workspaceId' => $workspace->id]));
             } else {
                 $workspace->addUserToWorkspace($user, $invitation->id);
                 $user = $workspace->users()->where('users.id', $user->id)->first();
                 $user->workspaceRole = Role::find($user->pivot->role_id)->setVisible(["name"]);
-                broadcast(new WorkspaceEvent(workspace: $workspace, type: "newUserJoinWorkspace", fromUserId: $request->user()->id, data: $user));
+                broadcast(new WorkspaceEvent($workspace->id, WorkspaceEventsEnum::NEW_USER_JOIN_WORKSPACE->name, data: ['newUser' => $user, 'byUser' => $request->user()->id]));
                 DB::commit();
                 return redirect(route('channels.show', ['workspace' => $workspace->id, 'channel' => $workspace->main_channel_id]));
             }

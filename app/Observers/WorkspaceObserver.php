@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Events\WorkspaceEvent;
+use App\Helpers\WorkspaceEventsEnum;
 use App\Models\Workspace;
 
 class WorkspaceObserver
@@ -22,7 +23,7 @@ class WorkspaceObserver
     {
         try {
             //code...
-            broadcast(new WorkspaceEvent(workspace: $workspace, type: "WorkspaceObserver_updated", fromUserId: "", data: $workspace));
+            broadcast(new WorkspaceEvent($workspace->id, WorkspaceEventsEnum::WORKSPACE_UPDATED->name, data: $workspace));
         } catch (\Throwable $th) {
             //throw $th;
         }

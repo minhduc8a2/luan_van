@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Models\User;
 use App\Events\WorkspaceEvent;
+use App\Helpers\WorkspaceEventsEnum;
 
 class UserObserver
 {
@@ -24,10 +25,9 @@ class UserObserver
             try {
                 //code...
                 broadcast(new WorkspaceEvent(
-                    workspace: $workspace,
-                    type: "UserObserver_updated",
-                    fromUserId: "",
-                    data: $user
+                    $workspace->id,
+                    WorkspaceEventsEnum::USER_UPDATED->name,
+                    $user
                 ));
             } catch (\Throwable $th) {
                 //throw $th;

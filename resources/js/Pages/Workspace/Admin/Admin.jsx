@@ -18,7 +18,6 @@ import {
     MdOutlineRocketLaunch,
 } from "react-icons/md";
 import NotificationPopup from "@/Components/NotificationPopup";
-import Event from "./Event";
 import { IoMdInformationCircleOutline } from "react-icons/io";
 import ThemeContext from "@/ThemeProvider";
 import ThemePicker from "@/Components/ThemePicker";
@@ -31,7 +30,6 @@ export default function Admin() {
             <InitData loaded={loaded} setLoaded={setLoaded} />
             {loaded && (
                 <Wrapper>
-                    <Event />
                     <Outlet />
                     <NotificationPopup />
                 </Wrapper>
@@ -139,9 +137,9 @@ function Wrapper({ children }) {
                                 onClick={() => setIsThemePickerOpen(true)}
                             >
                                 {theme.mode ? (
-                                    <MdOutlineDarkMode className="text-lg"/>
+                                    <MdOutlineDarkMode className="text-lg" />
                                 ) : (
-                                    <MdOutlineLightMode className="text-lg"/>
+                                    <MdOutlineLightMode className="text-lg" />
                                 )}{" "}
                                 Theme
                             </button>

@@ -2,12 +2,8 @@ import React, { memo, useEffect, useState } from "react";
 import SideBar from "./SideBar/SideBar";
 import HeadBar from "./HeadBar";
 import Panel from "./Panel/Panel";
-
-import { useRef } from "react";
 import Huddle from "./Huddle/Huddle";
-import Event from "./Event";
 import { useDispatch, useSelector } from "react-redux";
-
 import { setMedia } from "@/Store/mediaSlice";
 import Image from "@/Components/Image";
 import Video from "@/Components/Video";
@@ -17,7 +13,6 @@ import { setLeftWindowWidth, setRightWindowWidth } from "@/Store/sizeSlice";
 import LeftWindow from "./LeftWindow";
 import Profile from "./Profile/Profile";
 import Activity from "./Activity/Activity";
-
 import { setLeftWindowType } from "@/Store/windowTypeSlice";
 import InitData from "./InitData";
 import { Outlet, useParams } from "react-router-dom";
@@ -97,7 +92,6 @@ function Wrapper({ children }) {
             <InitData loaded={loaded} setLoaded={(value) => setLoaded(value)} />
             {loaded && (
                 <>
-                    <Event />
                     <div className="client-container bg-primary-500 text-white ">
                         <div className="client-headbar ">
                             <HeadBar />

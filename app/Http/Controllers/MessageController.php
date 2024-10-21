@@ -292,12 +292,12 @@ class MessageController extends Controller
 
                     $fileInstances = $message->files()->createMany($files);
 
-                    try {
-                        //code...
-                        broadcast(new WorkspaceEvent(workspace: $channel->workspace, type: "ChannelMessage_fileCreated", fromUserId: "", data: ['channelId' => $channel->id, 'files' => $fileInstances]));
-                    } catch (\Throwable $th) {
-                        // throw $th;
-                    }
+                    // try {
+                    //     //code...
+                    //     broadcast(new WorkspaceEvent(workspace: $channel->workspace, type: "ChannelMessage_fileCreated", fromUserId: "", data: ['channelId' => $channel->id, 'files' => $fileInstances]));
+                    // } catch (\Throwable $th) {
+                    //     // throw $th;
+                    // }
                 }
             }
 
@@ -386,12 +386,12 @@ class MessageController extends Controller
                 $files = $this->createFiles($fileObjects, $request->user(), $channel->workspace);
 
                 $fileInstances = $newMessage->files()->createMany($files);
-                try {
-                    //code...
-                    broadcast(new WorkspaceEvent(workspace: $channel->workspace, type: "ThreadMessage_fileCreated", fromUserId: "", data: ['channelId' => $channel->id, 'files' => $fileInstances]));
-                } catch (\Throwable $th) {
-                    throw $th;
-                }
+                // try {
+                //     //code...
+                //     broadcast(new WorkspaceEvent(workspace: $channel->workspace, type: "ThreadMessage_fileCreated", fromUserId: "", data: ['channelId' => $channel->id, 'files' => $fileInstances]));
+                // } catch (\Throwable $th) {
+                //     throw $th;
+                // }
             }
             try {
                 //code...

@@ -18,11 +18,11 @@ class ChannelEvent implements ShouldBroadcastNow
     /**
      * Create a new event instance.
      */
-    public function __construct(public Channel $channel, public string $type, public  $data = null)
+    public function __construct(public String $channelId, public string $type, public  $data = null)
     {
         //
     }
-   
+
     /**
      * Get the channels the event should broadcast on.
      *
@@ -32,8 +32,8 @@ class ChannelEvent implements ShouldBroadcastNow
     {
         return [
 
-            new PresenceChannel('channels.' . $this->channel->id),
-            new PrivateChannel('private_channels.' . $this->channel->id),
+            new PresenceChannel('channels.' . $this->channelId),
+            new PrivateChannel('private_channels.' . $this->channelId),
         ];
     }
     public function broadcastWith(): array

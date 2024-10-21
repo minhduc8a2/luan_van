@@ -16,6 +16,9 @@ import ReduxProvider from "@/Components/ReduxProvider";
 import AboutWorkspace from "./Admin/AboutWorkspace/AboutWorkspace";
 import Invitations from "./Admin/Invitations/Invitations";
 import OnlineStatusProvider from "@/services/OnlineStatusProvider";
+import UserNotificationEventHandlersProvider from "@/services/UserNotificationEventHandlersProvider";
+import WorkspaceEventHandlersProvider from "@/services/WorkspaceEventHandlersProvider";
+import ChannelEventHandlersProvider from "@/services/ChannelEventHandlersProvider";
 
 export default function Index() {
     return (
@@ -44,7 +47,13 @@ export default function Index() {
                         path=":workspaceId"
                         element={
                             <OnlineStatusProvider>
-                                <Layout />
+                                <UserNotificationEventHandlersProvider>
+                                    <WorkspaceEventHandlersProvider>
+                                        <ChannelEventHandlersProvider>
+                                            <Layout />
+                                        </ChannelEventHandlersProvider>
+                                    </WorkspaceEventHandlersProvider>
+                                </UserNotificationEventHandlersProvider>
                             </OnlineStatusProvider>
                         }
                     >

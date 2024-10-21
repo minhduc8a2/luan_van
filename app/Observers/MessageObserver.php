@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Models\Message;
 use App\Events\MessageEvent;
 use App\Events\ThreadMessageEvent;
+use App\Helpers\ChannelEventsEnum;
 
 class MessageObserver
 {
@@ -27,11 +28,11 @@ class MessageObserver
                     },
                     'reactions',
 
-                ])->loadCount('threadMessages'), "messageEdited"));
+                ])->loadCount('threadMessages'), ChannelEventsEnum::MESSAGE_EDITED->name));
             } else {
                 broadcast(new ThreadMessageEvent($message->threadedMessage, $message->load(['files' => function ($query) {
                     $query->withTrashed();
-                }, 'reactions']), "messageEdited"));
+                }, 'reactions']), ChannelEventsEnum::MESSAGE_EDITED->name));
             }
         } catch (\Throwable $th) {
             //throw $th;
@@ -46,13 +47,13 @@ class MessageObserver
         try {
             //code...
             if ($message->threaded_message_id == null) {
-                broadcast(new MessageEvent($message->channel, $message, "messageDeleted"));
+                broadcast(new MessageEvent($message->channel, $message, ChannelEventsEnum::MESSAGE_DELETED->name));
             } else {
-                broadcast(new ThreadMessageEvent($message->threadedMessage, $message, "messageDeleted"));}
+                broadcast(new ThreadMessageEvent($message->threadedMessage, $message, ChannelEventsEnum::MESSAGE_DELETED->name));
+            }
         } catch (\Throwable $th) {
             //throw $th;
         }
-        
     }
 
     /**

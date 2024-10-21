@@ -28,13 +28,8 @@ export default function OnlineStatusProvider({ children }) {
             });
         console.log("Subscribed to workspace users' online status.");
         return () => {
-            if (connectionRef.current) {
-                connectionRef.current.leave();
-                connectionRef.current = null;
-                console.log(
-                    "Unsubscribed from workspace users' online status."
-                );
-            }
+            Echo.leave(`workspaces.${workspaceId}`);
+            console.log("Unsubscribed from workspace users' online status.");
         };
     }, [workspaceId, dispatch]);
     return <>{children}</>;

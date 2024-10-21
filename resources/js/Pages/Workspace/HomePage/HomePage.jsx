@@ -20,23 +20,7 @@ export default function HomePage() {
             dispatch(setWorkspaces({ workspaces: response.data.workspaces }));
         });
     }, []);
-    useEffect(() => {
-        console.log("Register user notifications");
-        Echo.private("App.Models.User." + auth.user.id).notification(
-            (notification) => {
-                console.log(notification);
-                const { changesType, workspace } = notification;
-                switch (changesType) {
-                    case "AcceptJoiningRequest":
-                        dispatch(updateWorkspace(workspace));
-                        break;
-
-                    default:
-                        break;
-                }
-            }
-        );
-    }, [auth.user.id]);
+   
     return (
         <div className="min-h-screen bg-color-contrast">
             <InvitationRequest />
