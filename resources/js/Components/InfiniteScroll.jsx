@@ -109,29 +109,6 @@ export default function InfiniteScroll({
         }
     }, [bottom_inView, bottomHasMore, bottomLoading, scrollToItem]);
 
-    //     useEffect(()=>{
-    //         if(!scrollToItem) return;
-
-    //         if(topLoading || bottomLoading) return;
-
-    //         const targetMessage = document.getElementById(
-    //             `message-${scrollToItem}`
-    //         );
-
-    //         if (targetMessage) {
-    //             targetMessage.classList.add("bg-link/15");
-
-    //             setTimeout(() => {
-    //                 targetMessage.classList.remove("bg-link/15");
-    //             }, 1000);
-    //             targetMessage.scrollIntoView({
-    //                 behavior: "instant",
-    //                 block: "center",
-    //             });
-    //             dispatch(setMention(null));
-    //         }
-    //   },[scrollToItem,topLoading,bottomLoading])
-
     function ButtonLoading({ position }) {
         if (position == "top") {
             return (

@@ -414,12 +414,11 @@ class ChannelController extends Controller
             Message::createStringMessageAndBroadcast($channel, $request->user(), $request->user()->name . " has changed channel privacy from " . $oldType . " to " . $channel->type . ".");
             $channelUsers = $channel->users;
             foreach ($channelUsers as $channelUser) {
-                if ($channelUser->id == $user->id) continue;
                 $channelUser->notify(new ChannelsNotification(
                     $workspace,
                     $channel,
                     ChannelEventsEnum::CHANGE_CHANNEL_TYPE->name,
-                    ['oldType' => $oldType, 'newType' => $channel->type]
+                    ['byUser' => $user, 'oldType' => $oldType, 'newType' => $channel->type]
                 ));
             }
 

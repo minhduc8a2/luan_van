@@ -9,6 +9,7 @@ import { isChannelsNotificationBroadcast } from "@/helpers/notificationTypeHelpe
 import {
     addNewChannelToChannelsStore,
     removeChannel,
+    updateChannelInformation,
 } from "@/Store/channelsSlice";
 import useReloadPermissions from "@/helpers/useReloadPermissions";
 import useGoToChannel from "@/helpers/useGoToChannel";
@@ -17,7 +18,6 @@ import { toggleHuddle } from "@/Store/huddleSlice";
 export default function UserNotificationEventHandlersProvider({ children }) {
     const { auth } = usePage().props;
     const { channelId, workspaceId } = useParams();
-    const connectionRef = useRef(null);
     const dispatch = useDispatch();
     const goToChannel = useGoToChannel();
     //
@@ -44,7 +44,7 @@ export default function UserNotificationEventHandlersProvider({ children }) {
         channelsDataRef.current = channelsData;
     }, [channelsData]);
     useEffect(() => {
-        connectionRef.current = Echo.private(
+       Echo.private(
             "App.Models.User." + auth.user.id
         ).notification((notification) => {
             console.log(notification);
@@ -87,6 +87,8 @@ export default function UserNotificationEventHandlersProvider({ children }) {
                         ) {
                             reloadPermissions(channel?.id);
                         }
+                        console.log(channel);
+                        dispatch(updateChannelInformation({id:channel?.id,data:channel}))
                         break;
                     case ChannelEventsEnum.DELETE_CHANNEL:
                         if (huddleChannelIdRef.current == e.data) {
@@ -106,6 +108,6 @@ export default function UserNotificationEventHandlersProvider({ children }) {
             Echo.leave("App.Models.User." + auth.user.id);
             console.log("Unsubcribed from user notifications");
         };
-    }, [workspaceId, auth.user.id, dispatch]);
+    }, [workspaceId, auth.user.id]);
     return <>{children}</>;
 }

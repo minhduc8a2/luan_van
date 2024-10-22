@@ -2,7 +2,9 @@
 
 namespace App\Notifications;
 
+use App\Models\Channel;
 use App\Models\User;
+use App\Models\Workspace;
 use Illuminate\Bus\Queueable;
 use Illuminate\Support\Carbon;
 use Illuminate\Notifications\Notification;
@@ -16,8 +18,8 @@ class ChannelsNotification extends Notification
      * Create a new notification instance.
      */
     public function __construct(
-        public string $workspace,
-        public string $channel,
+        public Workspace $workspace,
+        public Channel $channel,
         public string $changesType,
         public  $data = null
     ) {

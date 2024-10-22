@@ -33,9 +33,15 @@ export default function ChangeToPrivateConfirm({ channelName }) {
         e.preventDefault();
         setProcessing(true);
         axios
-            .post(route("channel.change_type", channel.id), {
-                type: channelType,
-            })
+            .post(
+                route("channel.change_type", {
+                    workspace: workspace.id,
+                    channel: channel.id,
+                }),
+                {
+                    type: channelType,
+                }
+            )
             .catch(handleError)
             .finally(() => {
                 setIsOpen(false);
@@ -60,7 +66,11 @@ export default function ChangeToPrivateConfirm({ channelName }) {
                     {channel.type == "PUBLIC" ? "private" : "public"} channel
                 </div>
             </Button>
-            <CustomedDialog isOpen={isOpen} onClose={() => setIsOpen(false)} className="text-color-high-emphasis">
+            <CustomedDialog
+                isOpen={isOpen}
+                onClose={() => setIsOpen(false)}
+                className="text-color-high-emphasis"
+            >
                 <CustomedDialog.Title>
                     {`Change to a ${
                         channel.type == "PUBLIC" ? "private" : "public"
