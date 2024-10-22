@@ -42,7 +42,10 @@ export default function ForwardMessage({ message, show, onClose }) {
         let mentionsList = getMentionsFromContent(JSONContent);
         axios
             .post(
-                route("message.store", { channel: channel.id }),
+                route("message.store", {
+                    workspace: workspaceId,
+                    channel: channel.id,
+                }),
                 {
                     content,
                     channelId: choosenChannelsList[0].id,

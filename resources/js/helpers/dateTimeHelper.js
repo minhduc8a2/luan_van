@@ -88,11 +88,6 @@ export function groupListByDate(list) {
 
         return grouped;
     }, {});
-    Object.keys(groupedList).forEach((key) => {
-        groupedList[key].sort((a, b) =>
-            compareDateTime(a.created_at, b.created_at)
-        );
-    });
     return groupedList;
 }
 

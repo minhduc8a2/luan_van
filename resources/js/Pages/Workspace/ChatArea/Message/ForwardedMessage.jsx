@@ -28,8 +28,7 @@ export default function ForwardedMessage({
     index,
     threadStyle = false,
     messagableConnectionRef,
-    newMessageReactionReceive,
-    resetNewMessageReactionReceive,
+
     noToolbar = false,
 }) {
     const { auth } = usePage().props;
@@ -78,38 +77,6 @@ export default function ForwardedMessage({
     useEffect(() => {
         setReactions(message.reactions ? [...message.reactions] : []);
     }, [message]);
-
-    useEffect(() => {
-        if (
-            newMessageReactionReceive &&
-            newMessageReactionReceive.id == message.id
-        ) {
-            if (
-                newMessageReactionReceive.method &&
-                newMessageReactionReceive.method == "DELETE"
-            ) {
-                setReactions((pre) =>
-                    pre.filter(
-                        (reaction) =>
-                            !(
-                                reaction.emoji_id ===
-                                    newMessageReactionReceive.emoji_id &&
-                                reaction.user_id ===
-                                    newMessageReactionReceive.user_id
-                            )
-                    )
-                );
-            } else
-                setReactions((pre) => [
-                    ...pre,
-                    {
-                        emoji_id: newMessageReactionReceive.emoji_id,
-                        user_id: newMessageReactionReceive.user_id,
-                    },
-                ]);
-            resetNewMessageReactionReceive();
-        }
-    }, [newMessageReactionReceive]);
 
     function editMessage(content, _, JSONContent) {
         let mentionsList = getMentionsFromContent(JSONContent);

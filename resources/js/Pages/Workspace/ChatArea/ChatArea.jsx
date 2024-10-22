@@ -461,14 +461,6 @@ export default function ChatArea() {
                                                         messagableConnectionRef={
                                                             channelConnectionRef
                                                         }
-                                                        newMessageReactionReceive={
-                                                            newMessageReactionReceive
-                                                        }
-                                                        resetNewMessageReactionReceive={() =>
-                                                            setNewMessageReactionReceive(
-                                                                null
-                                                            )
-                                                        }
                                                     />
                                                 );
                                             }
@@ -481,14 +473,6 @@ export default function ChatArea() {
                                                     index={index}
                                                     messagableConnectionRef={
                                                         channelConnectionRef
-                                                    }
-                                                    newMessageReactionReceive={
-                                                        newMessageReactionReceive
-                                                    }
-                                                    resetNewMessageReactionReceive={() =>
-                                                        setNewMessageReactionReceive(
-                                                            null
-                                                        )
                                                     }
                                                 />
                                             );

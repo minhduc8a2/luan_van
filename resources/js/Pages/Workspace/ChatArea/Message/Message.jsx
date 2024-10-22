@@ -39,9 +39,6 @@ export default function Message({
     hasChanged,
     index,
     threadStyle = false,
-
-    newMessageReactionReceive,
-    resetNewMessageReactionReceive,
     forwardedMessageChannel = null,
     forwarded = false,
 }) {
@@ -76,38 +73,6 @@ export default function Message({
     const groupedReactions = useMemo(() => {
         return groupReactions(message.reactions, workspaceUsers, auth.user);
     }, [message.reactions]);
-
-    useEffect(() => {
-        if (
-            newMessageReactionReceive &&
-            newMessageReactionReceive.id == message.id
-        ) {
-            if (
-                newMessageReactionReceive.method &&
-                newMessageReactionReceive.method == "DELETE"
-            ) {
-                setReactions((pre) =>
-                    pre.filter(
-                        (reaction) =>
-                            !(
-                                reaction.emoji_id ===
-                                    newMessageReactionReceive.emoji_id &&
-                                reaction.user_id ===
-                                    newMessageReactionReceive.user_id
-                            )
-                    )
-                );
-            } else
-                setReactions((pre) => [
-                    ...pre,
-                    {
-                        emoji_id: newMessageReactionReceive.emoji_id,
-                        user_id: newMessageReactionReceive.user_id,
-                    },
-                ]);
-            resetNewMessageReactionReceive();
-        }
-    }, [newMessageReactionReceive]);
 
     function editMessage(content, _, JSONContent) {
         let mentionsList = getMentionsFromContent(JSONContent);
