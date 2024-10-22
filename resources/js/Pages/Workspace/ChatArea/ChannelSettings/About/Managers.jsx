@@ -1,4 +1,3 @@
-
 import React, { useMemo } from "react";
 import { SettingsButton } from "./SettingsButton";
 import { FaLock } from "react-icons/fa";
@@ -14,7 +13,7 @@ import { useParams } from "react-router-dom";
 import useErrorHandler from "@/helpers/useErrorHandler";
 import CustomedDialog from "@/Components/CustomedDialog";
 export default function Managers() {
-    const { channelId } = useParams();
+    const { channelId, workspaceId } = useParams();
     const { channel } = useChannel(channelId);
     const { permissions } = useChannelData(channelId);
     const onlineStatusMap = useSelector((state) => state.onlineStatus);
@@ -27,7 +26,10 @@ export default function Managers() {
     function removeManager(user) {
         axios
             .post(
-                route("channels.removeManager", channel.id),
+                route("channels.removeManager", {
+                    workspace: workspaceId,
+                    channel: channelId,
+                }),
                 {
                     user,
                 },

@@ -293,7 +293,7 @@ export default function ChatArea() {
         if (channelName.includes("all-")) return welcomeMessages[0];
         if (channelName.includes("social")) return welcomeMessages[2];
         return welcomeMessages[1];
-    }, [channel?.id]);
+    }, [channel]);
 
     const isChannelMember = useMemo(() => {
         if (!channel) return false;

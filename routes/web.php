@@ -39,7 +39,8 @@ Route::middleware(['auth', HandleWorkspaceRequests::class])->group(function () {
     Route::get('/workspaces', [WorkspaceController::class, 'index'])->name('workspaces');
 
     Route::prefix('workspaces/{workspace}')->group(function () {
-
+        Route::post("/channels", [ChannelController::class, 'store'])->name('channel.store');
+        Route::get("/channels/check_exists", [ChannelController::class, 'checkChannelExists'])->name('channels.checkExists');
         Route::prefix('channels/{channel}')->group(function () {
             Route::post("/edit_description", [ChannelController::class, 'editDescription'])->name("channel.edit_description");
             Route::post("/edit_name", [ChannelController::class, 'editName'])->name("channel.edit_name");
@@ -126,8 +127,8 @@ Route::middleware(['auth', HandleWorkspaceRequests::class])->group(function () {
 
 
         Route::get("/browse_channels", [ChannelController::class, 'browseChannels'])->name('channels.browseChannels');
-        Route::post("/channels", [ChannelController::class, 'store'])->name('channel.store');
-        Route::get("/channels/check_exists", [ChannelController::class, 'checkChannelExists'])->name('channel.checkExists');
+
+
 
 
         Route::get("/messages", [MessageController::class, 'getMessage'])->name('messages.getMessage');
@@ -136,8 +137,8 @@ Route::middleware(['auth', HandleWorkspaceRequests::class])->group(function () {
 
         Route::get("/messages/{message}/thread_messages", [MessageController::class, 'getThreadMessages'])->name("messages.threadMessages");
 
-        Route::post("/notifications/mark_read", [NotificationController::class, "markRead"])->name("notifications.mark_read");
-        Route::post("/notifications/{notificationId}/mark_view", [NotificationController::class, "markView"])->name("notifications.mark_view");
+        Route::get("/notifications/mark_read", [NotificationController::class, "markRead"])->name("notifications.mark_read");
+        Route::get("/notifications/{notification}/mark_view", [NotificationController::class, "markView"])->name("notifications.mark_view");
     });
 });
 

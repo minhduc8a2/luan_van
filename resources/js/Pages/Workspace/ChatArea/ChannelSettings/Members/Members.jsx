@@ -1,4 +1,3 @@
-
 import TextInput from "@/Components/Input/TextInput";
 import { IoPersonAddOutline } from "react-icons/io5";
 import { useState } from "react";
@@ -14,7 +13,7 @@ import CustomedDialog from "@/Components/CustomedDialog";
 
 export default function Members() {
     const [errors, setErrors] = useState(null);
-    const { channelId } = useParams();
+    const { channelId, workspaceId } = useParams();
 
     const { permissions } = useChannelData(channelId);
     const { channelUsers } = useChannelUsers(channelId);
@@ -23,23 +22,41 @@ export default function Members() {
     const handleError = useErrorHandler();
     function removeChannelManager(user) {
         axios
-            .post(route("channels.removeManager", channelId), {
-                user,
-            })
+            .post(
+                route("channels.removeManager", {
+                    workspace: workspaceId,
+                    channel: channelId,
+                }),
+                {
+                    user,
+                }
+            )
             .catch(handleError);
     }
     function makeChannelManager(user) {
         axios
-            .post(route("channels.addManagers", channelId), {
-                users: [user],
-            })
+            .post(
+                route("channels.addManagers", {
+                    workspace: workspaceId,
+                    channel: channelId,
+                }),
+                {
+                    users: [user],
+                }
+            )
             .catch(handleError);
     }
     function removeFromChannel(user) {
         axios
-            .post(route("channel.remove_user_from_channel", channelId), {
-                user,
-            })
+            .post(
+                route("channel.remove_user_from_channel", {
+                    workspace: workspaceId,
+                    channel: channelId,
+                }),
+                {
+                    user,
+                }
+            )
             .catch(handleError);
     }
 

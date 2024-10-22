@@ -36,7 +36,12 @@ export function isChannelsNotification(givenType) {
 export function isChannelsNotificationBroadcast(givenType) {
     return givenType == "App\\Notifications\\ChannelsNotification";
 }
+export function isWorkspaceNotificationBroadcast(givenType) {
+    return givenType == "App\\Notifications\\WorkspaceNotification";
+}
 
 export function isBroadcastNotification(givenType) {
     return givenType.startsWith("App\\Notifications");
 }
+
+

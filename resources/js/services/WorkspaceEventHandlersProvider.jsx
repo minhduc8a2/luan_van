@@ -123,15 +123,9 @@ export default function WorkspaceEventHandlersProvider({ children }) {
                     }
                     break;
                 case WorkspaceEventsEnum.STORE_CHANNEL:
-                    const newChannel = e.data;
-                    if (
-                        newChannel.type == "DIRECT" &&
-                        newChannel.name
-                            .split("_")
-                            .some((id) => id == auth.user.id)
-                    ) {
-                        dispatch(addNewChannelToChannelsStore(e.data));
-                    }
+                    const newChannel = e.data?.channel;
+                    dispatch(addNewChannelToChannelsStore(newChannel));
+
                     break;
 
                 case WorkspaceEventsEnum.USER_UPDATED:
@@ -143,11 +137,11 @@ export default function WorkspaceEventHandlersProvider({ children }) {
                     );
                     break;
                 case WorkspaceEventsEnum.NEW_USER_JOIN_WORKSPACE:
-                    dispatch(addWorkspaceUser(e.data));
+                    dispatch(addWorkspaceUser(e.data?.newUser));
                     dispatch(
                         addUsersToChannel({
                             id: mainChannelIdRef.current,
-                            userIds: [e.data.id],
+                            userIds: [e.data?.newUser?.id],
                         })
                     );
                     break;

@@ -414,6 +414,7 @@ class ChannelController extends Controller
             Message::createStringMessageAndBroadcast($channel, $request->user(), $request->user()->name . " has changed channel privacy from " . $oldType . " to " . $channel->type . ".");
             $channelUsers = $channel->users;
             foreach ($channelUsers as $channelUser) {
+                // if($channelUser->id==$user->id) continue;
                 $channelUser->notify(new ChannelsNotification(
                     $workspace,
                     $channel,
@@ -505,7 +506,8 @@ class ChannelController extends Controller
             $user->notify(new ChannelsNotification(
                 $workspace,
                 $channel,
-                ChannelEventsEnum::REMOVED_FROM_CHANNEL->name
+                ChannelEventsEnum::REMOVED_FROM_CHANNEL->name,
+                ['byUser'=>$request->user()]
             ));
             Message::createStringMessageAndBroadcast($channel, $request->user(), $request->user()->name . " has removed " . $user->name . " from channel");
 
@@ -743,6 +745,7 @@ class ChannelController extends Controller
 
     function checkChannelExists(Request $request, Workspace $workspace)
     {
+        
         $channelId = $request->query("channelId");
         $user = $request->user();
         if (!$channelId) return [

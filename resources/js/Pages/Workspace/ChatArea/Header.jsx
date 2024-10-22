@@ -14,7 +14,7 @@ import {
     useChannelUsers,
 } from "@/helpers/customHooks";
 import { useParams } from "react-router-dom";
-import LoadingSpinner from "@/Components/LoadingSpinner";
+
 import CustomedDialog from "@/Components/CustomedDialog";
 
 export default function Header({
@@ -122,7 +122,7 @@ export default function Header({
                                             isOpen={isOpen}
                                             onClose={() => setIsOpen(false)}
                                         >
-                                            <h5 className="mb-4  ">
+                                            <h5 className="mb-4  text-color-high-emphasis">
                                                 You're not allowed to huddle in
                                                 channel. Contact Admins or
                                                 Channel managers for more

@@ -10,8 +10,8 @@ import useErrorHandler from "@/helpers/useErrorHandler";
 import { useParams } from "react-router-dom";
 
 export default function AddPeople({ close, setErrors }) {
-    const {channelId} = useParams()
-    const {workspace} = useSelector(state=>state.workspace)
+    const { channelId } = useParams();
+    const { workspace } = useSelector((state) => state.workspace);
     const [choosenUsers, setChoosenUsers] = useState({});
     const { channels } = useSelector((state) => state.channels);
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
@@ -25,9 +25,15 @@ export default function AddPeople({ close, setErrors }) {
     function submit() {
         setProcessing(true);
         axios
-            .post(route("channel.add_users_to_channel", channel.id), {
-                users: [...Object.values(choosenUsers)],
-            })
+            .post(
+                route("channel.add_users_to_channel", {
+                    workspace: workspace.id,
+                    channel: channel.id,
+                }),
+                {
+                    users: [...Object.values(choosenUsers)],
+                }
+            )
 
             .catch(handleError)
             .finally(() => {

@@ -5,7 +5,10 @@ import ChannelEventsEnum from "./Enums/ChannelEventsEnum";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { addNotificationCount } from "@/Store/activitySlice";
-import { isChannelsNotificationBroadcast } from "@/helpers/notificationTypeHelper";
+import {
+    isChannelsNotificationBroadcast,
+    isWorkspaceNotificationBroadcast,
+} from "@/helpers/notificationTypeHelper";
 import {
     addNewChannelToChannelsStore,
     removeChannel,
@@ -14,6 +17,7 @@ import {
 import useReloadPermissions from "@/helpers/useReloadPermissions";
 import useGoToChannel from "@/helpers/useGoToChannel";
 import { toggleHuddle } from "@/Store/huddleSlice";
+import WorkspaceEventsEnum from "./Enums/WorkspaceEventsEnum";
 
 export default function UserNotificationEventHandlersProvider({ children }) {
     const { auth } = usePage().props;
@@ -44,65 +48,93 @@ export default function UserNotificationEventHandlersProvider({ children }) {
         channelsDataRef.current = channelsData;
     }, [channelsData]);
     useEffect(() => {
-       Echo.private(
-            "App.Models.User." + auth.user.id
-        ).notification((notification) => {
-            console.log(notification);
-            const { workspace, channel, changesType, data } = notification;
-            if (workspaceId != workspace.id) return;
-            dispatch(addNotificationCount());
-            if (isChannelsNotificationBroadcast(notification.type)) {
-                switch (changesType) {
-                    case ChannelEventsEnum.ADDED_TO_NEW_CHANNEL:
-                        dispatch(addNewChannelToChannelsStore(channel));
+        Echo.private("App.Models.User." + auth.user.id).notification(
+            (notification) => {
+                console.log(notification);
+                const { workspace, channel, changesType, data } = notification;
+                if (workspaceId != workspace.id) return;
 
-                        if (
-                            channelsDataRef.current.hasOwnProperty(
-                                channelIdRef.current
-                            )
-                        ) {
-                            reloadPermissions(channelIdRef.current);
-                        }
-                        break;
-                    case ChannelEventsEnum.REMOVED_FROM_CHANNEL:
-                        if (channel?.id != channelIdRef.current) {
-                            dispatch(removeChannel(channel?.id));
-                        } else {
-                            if (channel?.type == "PRIVATE") {
+                if (isWorkspaceNotificationBroadcast(notification.type)) {
+                    switch (changesType) {
+                        case WorkspaceEventsEnum.STORE_CHANNEL:
+                            dispatch(
+                                addNewChannelToChannelsStore(data.channel)
+                            );
+                            break;
+
+                        default:
+                            break;
+                    }
+                }
+
+                if (isChannelsNotificationBroadcast(notification.type)) {
+                    //add count
+                    if (data?.byUser?.id != auth.user.id) {
+                        dispatch(addNotificationCount());
+                    }
+                    //
+                    switch (changesType) {
+                        case ChannelEventsEnum.ADDED_TO_NEW_CHANNEL:
+                            dispatch(addNewChannelToChannelsStore(channel));
+
+                            if (
+                                channelsDataRef.current.hasOwnProperty(
+                                    channelIdRef.current
+                                )
+                            ) {
+                                reloadPermissions(channelIdRef.current);
+                            }
+                            break;
+                        case ChannelEventsEnum.REMOVED_FROM_CHANNEL:
+                            if (channel?.id != channelIdRef.current) {
                                 dispatch(removeChannel(channel?.id));
-                                if (channel?.id == channelIdRef.current) {
-                                    goToChannel(
-                                        workspace?.id,
-                                        workspace?.main_channel_id
-                                    );
-                                }
                             } else {
+                                if (channel?.type == "PRIVATE") {
+                                    dispatch(removeChannel(channel?.id));
+                                    if (channel?.id == channelIdRef.current) {
+                                        goToChannel(
+                                            workspace?.id,
+                                            workspace?.main_channel_id
+                                        );
+                                    }
+                                } else {
+                                    reloadPermissions(channel?.id);
+                                }
+                            }
+                            break;
+                        case ChannelEventsEnum.CHANGE_CHANNEL_TYPE:
+                            if (
+                                channelsDataRef.current.hasOwnProperty(
+                                    channel?.id
+                                )
+                            ) {
                                 reloadPermissions(channel?.id);
                             }
-                        }
-                        break;
-                    case ChannelEventsEnum.CHANGE_CHANNEL_TYPE:
-                        if (
-                            channelsDataRef.current.hasOwnProperty(channel?.id)
-                        ) {
-                            reloadPermissions(channel?.id);
-                        }
-                        console.log(channel);
-                        dispatch(updateChannelInformation({id:channel?.id,data:channel}))
-                        break;
-                    case ChannelEventsEnum.DELETE_CHANNEL:
-                        if (huddleChannelIdRef.current == e.data) {
-                            dispatch(toggleHuddle());
-                        }
 
-                        if (channelIdRef.current == e.data) {
-                            goToChannel(workspaceId, mainChannelRef.current.id);
-                        }
-                        dispatch(removeChannel(e.data));
-                        break;
+                            dispatch(
+                                updateChannelInformation({
+                                    id: channel?.id,
+                                    data: channel,
+                                })
+                            );
+                            break;
+                        case ChannelEventsEnum.DELETE_CHANNEL:
+                            if (huddleChannelIdRef.current == e.data) {
+                                dispatch(toggleHuddle());
+                            }
+
+                            if (channelIdRef.current == e.data) {
+                                goToChannel(
+                                    workspaceId,
+                                    mainChannelRef.current.id
+                                );
+                            }
+                            dispatch(removeChannel(e.data));
+                            break;
+                    }
                 }
             }
-        });
+        );
         console.log("Subcribed to user notifications");
         return () => {
             Echo.leave("App.Models.User." + auth.user.id);

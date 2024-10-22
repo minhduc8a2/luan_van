@@ -27,7 +27,7 @@ import { useParams } from "react-router-dom";
 import ThemeContext from "@/ThemeProvider";
 export default function Activity() {
     const { workspaceId } = useParams();
-    const {theme} = useContext(ThemeContext)
+    const { theme } = useContext(ThemeContext);
     const { leftWindowType } = useSelector((state) => state.windowType);
     const nextPageUrlRef = useRef(null);
     const dispatch = useDispatch();
@@ -38,18 +38,17 @@ export default function Activity() {
     const [onlyUnread, setOnlyUnread] = useState(false);
     function handleNotificationClick(notification, trailingAction) {
         if (notification.view_at == null)
-            router.post(
-                route("notifications.mark_view", notification.id),
-                {},
-                {
-                    preserveState: true,
-                    preserveScroll: true,
-                    onSuccess: () => {
-                        dispatch(setAsView(notification.id));
-                        trailingAction();
-                    },
-                }
-            );
+            axios
+                .get(
+                    route("notifications.mark_view", {
+                        workspace: workspaceId,
+                        notification: notification.id,
+                    })
+                )
+                .then(() => {
+                    dispatch(setAsView(notification.id));
+                    trailingAction();
+                });
         else trailingAction();
     }
     useEffect(() => {
@@ -73,17 +72,11 @@ export default function Activity() {
                         (notification) => notification.read_at == null
                     )
                 )
-                    router.post(
-                        route("notifications.mark_read"),
-                        {},
-                        {
-                            preserveState: true,
-                            preserveScroll: true,
-                            onSuccess: () => {
-                                dispatch(setAsRead());
-                            },
-                        }
-                    );
+                    axios
+                        .post(route("notifications.mark_read", workspaceId), {})
+                        .then(() => {
+                            dispatch(setAsRead());
+                        });
             }
         };
     }, [leftWindowType]);
@@ -94,7 +87,11 @@ export default function Activity() {
         });
     }, [notifications, onlyUnread]);
     return (
-        <div className={`${theme.mode?"bg-black/35":"bg-white/15"} bg-black/35 flex flex-col h-full rounded-l-lg rounded-s-lg pb-4` }>
+        <div
+            className={`${
+                theme.mode ? "bg-black/35" : "bg-white/15"
+            } bg-black/35 flex flex-col h-full rounded-l-lg rounded-s-lg pb-4`}
+        >
             <div className="flex justify-between items-end p-4">
                 <h3 className="text-xl font-semibold">Activity</h3>
 
@@ -118,7 +115,7 @@ export default function Activity() {
                 ref={notificationContainerRef}
             >
                 {loading && notifications.length == 0 && (
-                    <LoadingSpinner spinerStyle="border-white"/>
+                    <LoadingSpinner spinerStyle="border-white" />
                 )}
                 {filteredNotifications.map((notification, index) => {
                     if (isHuddleInvitationNotificationType(notification.type)) {

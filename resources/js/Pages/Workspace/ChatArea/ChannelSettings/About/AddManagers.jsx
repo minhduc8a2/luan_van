@@ -10,7 +10,7 @@ import { useChannel, useChannelUsers } from "@/helpers/customHooks";
 import { useParams } from "react-router-dom";
 import useErrorHandler from "@/helpers/useErrorHandler";
 export default function AddManagers({ close, setErrors }) {
-    const { channelId } = useParams();
+    const { channelId, workspaceId } = useParams();
     const { channelUsers } = useChannelUsers(channelId);
     const { channel } = useChannel(channelId);
     const [choosenUsers, setChoosenUsers] = useState({});
@@ -20,9 +20,15 @@ export default function AddManagers({ close, setErrors }) {
     function submit() {
         setProcessing(true);
         axios
-            .post(route("channels.addManagers", channel.id), {
-                users: [...Object.values(choosenUsers)],
-            })
+            .post(
+                route("channels.addManagers", {
+                    workspace: workspaceId,
+                    channel: channelId,
+                }),
+                {
+                    users: [...Object.values(choosenUsers)],
+                }
+            )
             .then(() => {
                 setProcessing(false);
                 close();
@@ -53,7 +59,7 @@ export default function AddManagers({ close, setErrors }) {
                     setChoosenUsers={(value) => setChoosenUsers(value)}
                 />
             </div>
-            
+
             <div className="flex justify-end gap-x-4 mt-8">
                 <Button onClick={close}>Cancel</Button>
                 <Button loading={processing} onClick={submit}>

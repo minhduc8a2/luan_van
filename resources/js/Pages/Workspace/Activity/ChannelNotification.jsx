@@ -13,20 +13,21 @@ import { FaLock } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import useGoToChannel from "@/helpers/useGoToChannel";
 import { setNotificationPopup } from "@/Store/notificationPopupSlice";
+import ChannelEventsEnum from "@/services/Enums/ChannelEventsEnum";
 export default function ChannelNotification({
     notification,
     handleNotificationClick,
 }) {
     const { auth } = usePage().props;
-   
+    const { workspaceId } = useParams();
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
     // console.log(notification);
 
-    const { fromUser, channel, workspace, data, changesType } =
+    const { channel, workspace, data, changesType } =
         isChannelsNotificationBroadcast(notification.type)
             ? notification
             : notification.data;
-
+    const byUser = data?.byUser;
     const read_at = notification.read_at;
     const created_at = notification.created_at;
     const view_at = notification.view_at;
@@ -35,7 +36,7 @@ export default function ChannelNotification({
     const goToChannel = useGoToChannel();
     function handleNotificationClickedPart() {
         axios
-            .get(route("channel.checkExists"), {
+            .get(route("channels.checkExists", workspaceId), {
                 params: { channelId: channel.id },
             })
             .then((response) => {
@@ -61,10 +62,10 @@ export default function ChannelNotification({
 
     let message = useMemo(() => {
         switch (changesType) {
-            case "addedToNewChannel":
+            case ChannelEventsEnum.ADDED_TO_NEW_CHANNEL:
                 return (
                     <div className="text-left">
-                        {`${fromUser.name} has added you to `}
+                        {`${byUser.name} has added you to `}
                         <div className="inline-block">
                             <div className="flex items-baseline ">
                                 {channel.type == "PUBLIC" ? (
@@ -77,10 +78,10 @@ export default function ChannelNotification({
                         </div>
                     </div>
                 );
-            case "removedFromChannel":
+            case ChannelEventsEnum.REMOVED_FROM_CHANNEL:
                 return (
                     <div className="text-left">
-                        {`${fromUser.name} has remove you from `}
+                        {`${byUser.name} has remove you from `}
                         <div className="inline-block">
                             <div className="flex items-baseline ">
                                 {channel.type == "PUBLIC" ? (
@@ -93,10 +94,10 @@ export default function ChannelNotification({
                         </div>
                     </div>
                 );
-            case "deleteChannel":
+            case ChannelEventsEnum.DELETE_CHANNEL:
                 return (
                     <div className="text-left">
-                        {`${fromUser.name} has deleted `}
+                        {`${byUser.name} has deleted `}
                         <div className="inline-block">
                             <div className="flex items-baseline ">
                                 {channel.type == "PUBLIC" ? (
@@ -109,10 +110,10 @@ export default function ChannelNotification({
                         </div>
                     </div>
                 );
-            case "removedManagerRole":
+            case ChannelEventsEnum.REMOVED_MANAGER_ROLE:
                 return (
                     <div className="text-left">
-                        {`${fromUser.name} has removed your Manager Role in `}
+                        {`${byUser.name} has removed your Manager Role in `}
                         <div className="inline-block">
                             <div className="flex items-baseline ">
                                 {channel.type == "PUBLIC" ? (
@@ -125,10 +126,10 @@ export default function ChannelNotification({
                         </div>
                     </div>
                 );
-            case "addedAsManager":
+            case ChannelEventsEnum.ADDED_AS_MANAGER:
                 return (
                     <div className="text-left">
-                        {`${fromUser.name} has added you as Manager in channel `}
+                        {`${byUser.name} has added you as Manager in channel `}
                         <div className="inline-block">
                             <div className="flex items-baseline ">
                                 {channel.type == "PUBLIC" ? (
@@ -141,16 +142,16 @@ export default function ChannelNotification({
                         </div>
                     </div>
                 );
-            case "changeType":
+            case ChannelEventsEnum.CHANGE_CHANNEL_TYPE:
                 return (
                     <div className="text-left">
-                        {`${fromUser.name} has changed channel privacy from ${data.oldType} to ${data.newType}`}
+                        {`${byUser.name} has changed channel privacy from ${data.oldType} to ${data.newType}`}
                     </div>
                 );
-            case "unarchiveChannel":
+            case ChannelEventsEnum.UNARCHIVE_CHANNEL:
                 return (
                     <div className="text-left">
-                        {`${fromUser.name} has unarchived channel `}
+                        {`${byUser.name} has unarchived channel `}
                         <div className="inline-block">
                             <div className="flex items-baseline ">
                                 {channel.type == "PUBLIC" ? (
@@ -163,10 +164,10 @@ export default function ChannelNotification({
                         </div>
                     </div>
                 );
-            case "archiveChannel":
+            case ChannelEventsEnum.ARCHIVE_CHANNEL:
                 return (
                     <div className="text-left">
-                        {`${fromUser.name} has archived channel `}
+                        {`${byUser.name} has archived channel `}
                         <div className="inline-block">
                             <div className="flex items-baseline ">
                                 {channel.type == "PUBLIC" ? (
@@ -183,6 +184,7 @@ export default function ChannelNotification({
                 break;
         }
     }, [notification]);
+    if (byUser.id == auth.user.id) return "";
     return (
         <div>
             <button
@@ -190,6 +192,7 @@ export default function ChannelNotification({
                     read_at != null ? "" : "bg-primary-300/15"
                 }`}
                 onClick={() => {
+                    console.log(notification);
                     handleNotificationClick(
                         notification,
                         handleNotificationClickedPart
@@ -213,14 +216,14 @@ export default function ChannelNotification({
                 <div className="flex gap-x-2 justify-between">
                     <div className={`message-container   flex-1`}>
                         <Avatar
-                            src={fromUser.avatar_url}
+                            src={byUser.avatar_url}
                             className="w-8 h-8"
                             noStatus={true}
                         />
                         <div className="mx-2 ">
                             <div className="flex gap-x-2 items-center">
                                 <div className="text-sm font-bold">
-                                    {fromUser.name}
+                                    {byUser.name}
                                 </div>
                                 <div className="text-xs">
                                     {UTCToDateTime(created_at)}
