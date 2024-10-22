@@ -67,9 +67,9 @@ export default function HuddleInvitation({ close }) {
     }
     return (
         <div>
-            <h3 className="font-bold text-xl">Invite people to your huddle</h3>
+            <h3 className="font-bold text-xl text-color-high-emphasis">Invite people to your huddle</h3>
 
-            <p className="text-sm max-w-[90%]">
+            <p className="text-sm max-w-[90%] text-color-medium-emphasis">
                 {
                     "You can invite whomever you’d like to the huddle, and they’ll receive a notification to join."
                 }
@@ -81,7 +81,7 @@ export default function HuddleInvitation({ close }) {
                     setChoosenUsers={(value) => setChoosenUsers(value)}
                 />
             </div>
-            <h4 className="text-sm font-bold mt-8">Suggested</h4>
+            <h4 className="text-sm font-bold mt-8 text-color-medium-emphasis">Suggested</h4>
             <ul className="mt-4 flex flex-col gap-y-4 h-40 overflow-y-auto scrollbar ">
                 {channelUsers.map((user) => {
                     if (user.id == auth.user.id) return "";

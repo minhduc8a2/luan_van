@@ -46,7 +46,7 @@ export default function AutocompleInput({
             <input
                 type="text"
                 placeholder="Search by name"
-                className="bg-transparent border-none focus:border-none focus:ring-0 w-full"
+                className="bg-transparent border-none focus:border-none focus:ring-0 w-full text-color-high-emphasis"
                 value={inputValue}
                 onChange={(e) => {
                     const value = e.target.value;
