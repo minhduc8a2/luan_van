@@ -20,7 +20,7 @@ class HuddleInvitationNotification extends Notification
     /**
      * Create a new notification instance.
      */
-    public function __construct(public Channel $channel, public Workspace $workspace, public User $fromUser, public User $toUser)
+    public function __construct(public Channel $channel, public Workspace $workspace, public User $byUser, public User $toUser)
     {
         //
     }
@@ -50,7 +50,7 @@ class HuddleInvitationNotification extends Notification
     {
         return new BroadcastMessage([
             "channel" => $this->channel,
-            "fromUser" => $this->fromUser,
+            "byUser" => $this->byUser,
             "toUser" => $this->toUser,
             "workspace" => $this->workspace,
             "created_at" => Carbon::now()
@@ -67,7 +67,7 @@ class HuddleInvitationNotification extends Notification
     {
         return [
             "channel" => $this->channel,
-            "fromUser" => $this->fromUser,
+            "byUser" => $this->byUser,
             "toUser" => $this->toUser,
             "workspace" => $this->workspace,
 

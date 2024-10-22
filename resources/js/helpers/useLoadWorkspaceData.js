@@ -1,3 +1,4 @@
+import { setNotificationsCount } from "@/Store/activitySlice";
 import { setWorkspaceData } from "@/Store/workspaceSlice";
 import { useRef } from "react";
 import { useDispatch } from "react-redux";
@@ -20,6 +21,9 @@ const useLoadWorkspaceData = () => {
             })
             .then((response) => {
                 dispatch(setWorkspaceData(response.data));
+                dispatch(
+                    setNotificationsCount(response.data.newNotificationsCount)
+                );
             })
             .catch((error) => {
                 console.error(error);

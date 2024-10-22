@@ -418,8 +418,9 @@ class ChannelController extends Controller
                 $channelUser->notify(new ChannelsNotification(
                     $workspace,
                     $channel,
+                    $user,
                     ChannelEventsEnum::CHANGE_CHANNEL_TYPE->name,
-                    ['byUser' => $user, 'oldType' => $oldType, 'newType' => $channel->type]
+                    ['oldType' => $oldType, 'newType' => $channel->type]
                 ));
             }
 
@@ -506,8 +507,9 @@ class ChannelController extends Controller
             $user->notify(new ChannelsNotification(
                 $workspace,
                 $channel,
+                $request->user(),
                 ChannelEventsEnum::REMOVED_FROM_CHANNEL->name,
-                ['byUser'=>$request->user()]
+
             ));
             Message::createStringMessageAndBroadcast($channel, $request->user(), $request->user()->name . " has removed " . $user->name . " from channel");
 
@@ -539,8 +541,9 @@ class ChannelController extends Controller
                 $user->notify(new ChannelsNotification(
                     $workspace,
                     $channel->loadCount('messages as unread_messages_count')->loadCount('users'),
+                    $request->user(),
                     ChannelEventsEnum::ADDED_TO_NEW_CHANNEL->name,
-                    ['byUser' => $request->user()]
+
                 ));
                 Message::createStringMessageAndBroadcast($channel, $request->user(), $request->user()->name . " has added " . $user->name . " to channel");
             }
@@ -576,8 +579,9 @@ class ChannelController extends Controller
                 $user->notify(new ChannelsNotification(
                     $workspace,
                     $channel,
+                    $request->user(),
                     ChannelEventsEnum::ADDED_AS_MANAGER->name,
-                    ['byUser' => $request->user()]
+
                 ));
             }
             $managerIds = collect($validated['users'])->pluck('id')->toArray();
@@ -609,8 +613,9 @@ class ChannelController extends Controller
             $user->notify(new ChannelsNotification(
                 $workspace,
                 $channel,
+                $request->user(),
                 ChannelEventsEnum::REMOVED_MANAGER_ROLE->name,
-                ['byUser' => $request->user()]
+
             ));
             broadcast(new ChannelEvent($channel->id, ChannelEventsEnum::REMOVE_MANAGER->name, $user->id));
             DB::commit();
@@ -731,8 +736,9 @@ class ChannelController extends Controller
                 $channelUser->notify(new ChannelsNotification(
                     $workspace,
                     $channel,
+                    $user,
                     $validated['status'] ? ChannelEventsEnum::ARCHIVE_CHANNEL->NAME : ChannelEventsEnum::UNARCHIVE_CHANNEL->name,
-                    ['byUser' => $user]
+
                 ));
             }
             DB::commit();
@@ -745,7 +751,7 @@ class ChannelController extends Controller
 
     function checkChannelExists(Request $request, Workspace $workspace)
     {
-        
+
         $channelId = $request->query("channelId");
         $user = $request->user();
         if (!$channelId) return [
@@ -793,8 +799,9 @@ class ChannelController extends Controller
                 $channelUser->notify(new ChannelsNotification(
                     $workspace,
                     $channel,
+                    $user,
                     ChannelEventsEnum::DELETE_CHANNEL->name,
-                    ['byUser' => $user]
+
 
                 ));
             }

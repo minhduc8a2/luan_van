@@ -41,7 +41,10 @@ class WorkspaceController extends Controller
         $only = $request->query('only');
         $user = $request->user();
         $workspaces = fn() => $user->workspaces;
-        $newNotificationsCount = fn() =>  $user->notifications()->where("read_at", null)->count();
+        $newNotificationsCount = fn() =>  $user->notifications()
+            ->whereNull('read_at')
+            ->whereRaw("JSON_EXTRACT(data, '$.byUser.id') != ?", [$request->user()->id])
+            ->count();
         $workspacePermissions = fn() =>  [
             'createChannel' => $user->can('create', [Channel::class, $workspace]),
             'update' => $user->can('update', [Workspace::class, $workspace]),

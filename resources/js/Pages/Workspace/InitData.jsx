@@ -10,8 +10,6 @@ import { useParams } from "react-router-dom";
 export default function InitData({ loaded, setLoaded }) {
     const { workspaceId } = useParams();
 
-    const { newNotificationsCount } = useSelector((state) => state.workspace);
-    const dispatch = useDispatch();
     const loadWorkspaceData = useLoadWorkspaceData();
     const loadWorkspaceUsers = useLoadWorkspaceUsers();
     const loadChannels = useLoadChannels(workspaceId);
@@ -28,8 +26,6 @@ export default function InitData({ loaded, setLoaded }) {
         loadWorkspaceRelatedData()
             .then(() => {
                 setLoaded(true);
-
-                dispatch(setNotificationsCount(newNotificationsCount));
             })
             .catch((error) => {
                 console.log(error);

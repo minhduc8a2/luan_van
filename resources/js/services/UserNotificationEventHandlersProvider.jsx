@@ -51,7 +51,8 @@ export default function UserNotificationEventHandlersProvider({ children }) {
         Echo.private("App.Models.User." + auth.user.id).notification(
             (notification) => {
                 console.log(notification);
-                const { workspace, channel, changesType, data } = notification;
+                const { workspace, channel, byUser, changesType, data } =
+                    notification;
                 if (workspaceId != workspace.id) return;
 
                 if (isWorkspaceNotificationBroadcast(notification.type)) {
@@ -69,7 +70,7 @@ export default function UserNotificationEventHandlersProvider({ children }) {
 
                 if (isChannelsNotificationBroadcast(notification.type)) {
                     //add count
-                    if (data?.byUser?.id != auth.user.id) {
+                    if (byUser?.id != auth.user.id) {
                         dispatch(addNotificationCount());
                     }
                     //

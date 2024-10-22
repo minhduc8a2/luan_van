@@ -66,6 +66,7 @@ export default function Activity() {
     useEffect(() => {
         return () => {
             if (leftWindowType == "activity") {
+                console.log("IN ACTIVITY");
                 dispatch(setNotificationsCount(0));
                 if (
                     notifications.some(

@@ -23,11 +23,11 @@ export default function ChannelNotification({
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
     // console.log(notification);
 
-    const { channel, workspace, data, changesType } =
+    const { channel, workspace,byUser, data, changesType } =
         isChannelsNotificationBroadcast(notification.type)
             ? notification
             : notification.data;
-    const byUser = data?.byUser;
+    
     const read_at = notification.read_at;
     const created_at = notification.created_at;
     const view_at = notification.view_at;

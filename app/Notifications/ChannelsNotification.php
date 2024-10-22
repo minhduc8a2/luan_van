@@ -20,6 +20,7 @@ class ChannelsNotification extends Notification
     public function __construct(
         public Workspace $workspace,
         public Channel $channel,
+        public User $byUser,
         public string $changesType,
         public  $data = null
     ) {
@@ -52,6 +53,7 @@ class ChannelsNotification extends Notification
         return new BroadcastMessage([
             "workspace" => $this->workspace,
             "channel" => $this->channel,
+            "byUser"=>$this->byUser,
             "changesType" => $this->changesType,
             "data" => $this->data,
             "created_at" => Carbon::now()
@@ -69,6 +71,7 @@ class ChannelsNotification extends Notification
         return [
             "workspace" => $this->workspace,
             "channel" => $this->channel,
+            "byUser"=>$this->byUser,
             "changesType" => $this->changesType,
             "data" => $this->data,
         ];

@@ -8,7 +8,9 @@ export const activitySlice = createSlice({
             state.notifications = [...action.payload];
         },
         setNotificationsCount(state, action) {
+            console.log("notifications count:",action.payload);
             state.new_count = action.payload;
+
         },
         addNotificationCount(state, action) {
             state.new_count += 1;
