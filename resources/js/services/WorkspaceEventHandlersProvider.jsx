@@ -14,7 +14,7 @@ import useLoadWorkspaceData from "@/helpers/useLoadWorkspaceData";
 import { updateCurrentWorkspace } from "@/Store/workspaceSlice";
 import useReloadLoadedChannelsDataPermissions from "@/helpers/useReloadLoadedChannelsDataPermissions";
 import useLoadWorkspaces from "@/helpers/useLoadWorkspaces";
-import WorkspaceEventsEnum from "@/services/WorkspaceEventsEnum";
+import WorkspaceEventsEnum from "@/services/Enums/WorkspaceEventsEnum";
 export default function WorkspaceEventHandlersProvider({ children }) {
     const { auth } = usePage().props;
     const { channelId, workspaceId } = useParams();
@@ -155,10 +155,10 @@ export default function WorkspaceEventHandlersProvider({ children }) {
                     break;
             }
         });
-        console.log("Subcribed to workspace events", connectionRef.current);
+        console.log("Subcribed to workspace: ", workspaceId);
         return () => {
             Echo.leave(`private_workspaces.${workspaceId}`);
-            console.log("Unsubcribed from workspace events");
+            console.log("Unsubcribed from workspace: ", workspaceId);
         };
     }, [workspaceId, auth.user.id]);
     return <>{children}</>;

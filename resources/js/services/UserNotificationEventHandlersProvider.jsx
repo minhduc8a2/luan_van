@@ -1,7 +1,7 @@
 import { usePage } from "@inertiajs/react";
 import React, { useEffect, useRef } from "react";
 
-import ChannelEventsEnum from "./ChannelEventsEnum";
+import ChannelEventsEnum from "./Enums/ChannelEventsEnum";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { addNotificationCount } from "@/Store/activitySlice";

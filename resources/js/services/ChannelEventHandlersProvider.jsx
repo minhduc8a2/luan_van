@@ -23,7 +23,7 @@ import {
 import { useParams } from "react-router-dom";
 import useReloadPermissions from "@/helpers/useReloadPermissions";
 import useReloadLoadedChannelsDataPermissions from "@/helpers/useReloadLoadedChannelsDataPermissions";
-import ChannelEventsEnum from "@/services/ChannelEventsEnum";
+import ChannelEventsEnum from "@/services/Enums/ChannelEventsEnum";
 
 export default function ChannelEventHandlersProvider({ children }) {
     const { auth } = usePage().props;
