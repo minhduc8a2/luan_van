@@ -30,4 +30,6 @@ enum ChannelEventsEnum
    case NEW_MESSAGE_CREATED;
    case MESSAGE_EDITED;
    case MESSAGE_DELETED;
+   case REACTION_CREATED;
+   case REACTION_DELETED;
 }

@@ -4,9 +4,8 @@ namespace App\Policies;
 
 use App\Models\User;
 use App\Models\Channel;
-use App\Helpers\ChannelTypes;
 use App\Helpers\PermissionTypes;
-
+use App\Models\Reaction;
 
 class ReactionPolicy
 {
@@ -17,9 +16,10 @@ class ReactionPolicy
             || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_VIEW->name);
     }
 
-    public function delete(User $user, Channel $channel): bool
+    public function delete(User $user, Channel $channel, Reaction $reaction): bool
     {
         if ($channel->is_archived) return false;
+        if ($reaction->user_id != $user->id) return false;
         return $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name)
             || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_VIEW->name);
     }

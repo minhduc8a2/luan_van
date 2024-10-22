@@ -19,6 +19,8 @@ return new class extends Migration
             $table->foreignId('role_id')->constrained()->cascadeOnDelete();
             $table->timestamp('last_read_at')->nullable();
             $table->timestamps();
+
+            $table->unique(['user_id', 'channel_id']);
         });
     }
 

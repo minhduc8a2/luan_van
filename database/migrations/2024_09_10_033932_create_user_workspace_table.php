@@ -20,6 +20,9 @@ return new class extends Migration
             $table->boolean('is_deactivated')->default(false);
             $table->foreignId('invitation_id')->nullable();
             $table->timestamps();
+
+            $table->unique(['user_id','workspace_id']);
+
         });
     }
 

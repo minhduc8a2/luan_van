@@ -81,13 +81,10 @@ export default function ForwardMessage({ message, show, onClose }) {
         if (choosenChannelsList.length > 0) {
             const choosenChannel = choosenChannelsList[0];
             if (channelsData.hasOwnProperty(choosenChannel.id)) {
-                return channelsData[choosenChannel.id].channelUserIds.reduce(
-                    (val, id) => {
-                        const u = workspaceUsers.find((u) => u.id == id);
-                        if (u) return [...val, u];
-                        else return [...val];
-                    },
-                    []
+                return workspaceUsers.filter((wspUser) =>
+                    channelsData[
+                        choosenChannel.id
+                    ].channelUserIdsMap.hasOwnProperty(wspUser.id)
                 );
             }
         }

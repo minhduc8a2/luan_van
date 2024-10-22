@@ -32,13 +32,14 @@ import useGoToMessage from "@/helpers/useGoToMessage";
 import { MdError } from "react-icons/md";
 import CustomedDialog from "@/Components/CustomedDialog";
 import ThemeContext from "@/ThemeProvider";
+import useErrorHandler from "@/helpers/useErrorHandler";
 export default function Message({
     message,
     user,
     hasChanged,
     index,
     threadStyle = false,
-    messagableConnectionRef,
+
     newMessageReactionReceive,
     resetNewMessageReactionReceive,
     forwardedMessageChannel = null,
@@ -52,14 +53,13 @@ export default function Message({
     const dispatch = useDispatch();
     const goToChannel = useGoToChannel();
     const files = message.files || [];
-    const [reactions, setReactions] = useState(
-        message.reactions ? [...message.reactions] : []
-    );
+
     const imageFiles = [];
     const videoFiles = [];
     const documentFiles = [];
     const deletedFiles = [];
     const otherFiles = [];
+    const errorHandler = useErrorHandler();
     files.forEach((file) => {
         if (isImage(file.type)) imageFiles.push(file);
         else if (isDocument(file.type)) documentFiles.push(file);
@@ -74,11 +74,8 @@ export default function Message({
     const [forwardedMessage, setForwardedMessage] = useState(null);
     const goToMessageInHook = useGoToMessage();
     const groupedReactions = useMemo(() => {
-        return groupReactions(reactions, workspaceUsers, auth.user);
-    }, [reactions]);
-    useEffect(() => {
-        setReactions(message.reactions ? [...message.reactions] : []);
-    }, [message]);
+        return groupReactions(message.reactions, workspaceUsers, auth.user);
+    }, [message.reactions]);
 
     useEffect(() => {
         if (
@@ -116,6 +113,7 @@ export default function Message({
         let mentionsList = getMentionsFromContent(JSONContent);
 
         if (content == "<p></p>" && mentionsList.length == 0) return;
+        const oldContent = message.content;
         dispatch(
             editMessageInStore({
                 id: message.channel_id,
@@ -123,112 +121,90 @@ export default function Message({
             })
         );
         setIsEditing(false);
-        router.post(
-            route("message.update", message.id),
-            {
-                content,
-                mentionsList,
-            },
-            {
-                only: [],
-                preserveState: true,
-                preserveScroll: true,
-
-                headers: {
-                    "X-Socket-Id": Echo.socketId(),
+        axios
+            .post(
+                route("message.update", {
+                    workspace: workspaceId,
+                    message: message.id,
+                }),
+                {
+                    content,
+                    mentionsList,
                 },
-            }
-        );
+                {
+                    headers: {
+                        "X-Socket-Id": Echo.socketId(),
+                    },
+                }
+            )
+            .catch(() => {
+                dispatch(
+                    editMessageInStore({
+                        id: message.channel_id,
+                        data: { message_id: message.id, oldContent },
+                    })
+                );
+            });
     }
     function reactToMessage(emojiId) {
-        router.post(
-            route("reaction.store", {
-                channel: channel.id,
-                message: message.id,
-            }),
-            {
-                emoji_id: emojiId,
-            },
-            {
-                preserveScroll: true,
-                preserveState: true,
-                onSuccess: () => {
-                    setReactions((pre) => [
-                        ...pre,
-                        { emoji_id: emojiId, user_id: auth.user.id },
-                    ]);
-                    messagableConnectionRef.current.whisper("messageReaction", {
-                        method: "STORE",
-                        emoji_id: emojiId,
-                        user_id: auth.user.id,
-                        id: message.id,
-                    });
-                },
-            }
+        const reaction = message.reactions.find(
+            (re) => re.emoji_id == emojiId && re.user_id == auth.user.id
         );
+        if (!reaction) {
+            axios.post(
+                route("reaction.store", {
+                    workspace: channel.workspace_id,
+                    channel: channel.id,
+                    message: message.id,
+                }),
+                {
+                    emoji_id: emojiId,
+                },
+                {
+                    headers: {
+                        "X-Socket-Id": Echo.socketId(),
+                    },
+                }
+            );
+        }
     }
     function removeMessageReaction(emojiId) {
-        router.post(
-            route("reaction.delete", {
-                channel: channel.id,
-                message: message.id,
-            }),
-            {
-                emoji_id: emojiId,
-            },
-            {
-                preserveScroll: true,
-                preserveState: true,
-                onSuccess: () => {
-                    setReactions((pre) =>
-                        pre.filter(
-                            (reaction) =>
-                                !(
-                                    reaction.emoji_id === emojiId &&
-                                    reaction.user_id === auth.user.id
-                                )
-                        )
-                    );
-                    messagableConnectionRef.current.whisper("messageReaction", {
-                        method: "DELETE",
-                        emoji_id: emojiId,
-                        user_id: auth.user.id,
-                        id: message.id,
-                    });
-                },
-                onError: (errors) => {
-                    console.log(errors);
-                },
-            }
+        const reaction = message.reactions.find(
+            (re) => re.emoji_id == emojiId && re.user_id == auth.user.id
         );
+        if (reaction) {
+            axios.delete(
+                route("reaction.delete", {
+                    workspace: channel.workspace_id,
+                    channel: channel.id,
+                    reaction: reaction.id,
+                }),
+                {
+                    emoji_id: emojiId,
+                }
+            );
+        }
     }
     function deleteFile(file) {
-        router.delete(
-            route("files.delete", {
-                file: file.id,
-            }),
-            {
-                headers: {
-                    "X-Socket-Id": Echo.socketId(),
-                },
-                preserveState: true,
-                only: [],
-                onError: (errors) => {
-                    dispatch(
-                        setNotificationPopup({
-                            type: "error",
-                            messages: Object.values(errors),
-                        })
-                    );
-                },
-            }
-        );
+        axios
+            .delete(
+                route("files.delete", {
+                    workspace: workspaceId,
+                    file: file.id,
+                }),
+                {
+                    headers: {
+                        "X-Socket-Id": Echo.socketId(),
+                    },
+                }
+            )
+            .catch(errorHandler);
     }
 
     function goToMessage() {
         goToMessageInHook(message);
     }
-    // if (!channel) return "";
+
     return (
         <div
             className={`message-container transition-all  pl-8 pt-1 pr-4 pb-2 relative break-all group hover:bg-color/10 ${

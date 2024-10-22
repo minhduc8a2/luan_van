@@ -64,7 +64,7 @@ Route::middleware(['auth', HandleWorkspaceRequests::class])->group(function () {
             Route::post("/messages/{message}", [MessageController::class, 'storeThreadMessage'])->name('thread_message.store');
             Route::post("/huddle_invitation", [HuddleController::class, 'invite'])->name("huddle.invitation");
             Route::post("/messages/{message}/reactions", [ReactionController::class, 'store'])->name('reaction.store');
-            Route::post("/messages/{message}/reactions/delete", [ReactionController::class, 'delete'])->name('reaction.delete');
+            Route::delete("/reactions/{reaction}", [ReactionController::class, 'delete'])->name('reaction.delete');
         });
 
         Route::post("/invitation_link", [InvitationController::class, 'store'])->name('invitations.store');

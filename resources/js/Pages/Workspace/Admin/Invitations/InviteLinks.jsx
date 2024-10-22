@@ -18,11 +18,6 @@ export default function InviteLinks() {
     }, [invitations]);
     return (
         <div className="mt-4 px-12">
-            <div className="flex justify-end">
-                <Button type="danger" className="border-0">
-                    Deactivate all
-                </Button>
-            </div>
             <div className=" overflow-x-auto">
                 <div className="grid  grid-cols-[repeat(6,minmax(12rem,1fr))] mt-4 ">
                     <HeaderItem>Link creator</HeaderItem>

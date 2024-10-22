@@ -7,50 +7,56 @@ const useChannelData = (channelId) => {
     if (!channelId)
         return {
             permissions: {},
-            messages: [],
+            messagesMap: {},
             channelPermissions: {},
-            channelUserIds: [],
-            managerIds: [],
+            channelUserIdsMap: {},
+            managerIdsMap: {},
         };
     return (
         (channelsData.hasOwnProperty(channelId) && channelsData[channelId]) || {
             permissions: {},
-            messages: [],
+            messagesMap: {},
             channelPermissions: {},
-            channelUserIds: [],
-            managerIds: [],
+            channelUserIdsMap: {},
+            managerIdsMap: {},
         }
     );
 };
 
 const useManagers = (channelId) => {
-    const { managerIds } = useChannelData(channelId);
+    const { managerIdsMap } = useChannelData(channelId);
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
 
     const managers = useMemo(() => {
-        if (!managerIds.length || !workspaceUsers.length) {
+        if (
+            !Object.values(managerIdsMap || {}).length ||
+            !workspaceUsers.length
+        ) {
             return [];
         }
 
         return workspaceUsers.filter((user) =>
-            managerIds.some((id) => user.id === id)
+            managerIdsMap.hasOwnProperty(user.id)
         );
-    }, [managerIds, workspaceUsers]);
+    }, [managerIdsMap, workspaceUsers]);
     return { managers };
 };
 
 const useChannelUsers = (channelId) => {
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
-    const { channelUserIds } = useChannelData(channelId);
+    const { channelUserIdsMap } = useChannelData(channelId);
 
     const channelUsers = useMemo(() => {
-        if (!channelUserIds?.length || !workspaceUsers?.length) {
+        if (
+            !Object.values(channelUserIdsMap || {})?.length ||
+            !workspaceUsers?.length
+        ) {
             return [];
         }
         return workspaceUsers.filter((user) =>
-            channelUserIds.some((id) => user.id === id)
+            channelUserIdsMap.hasOwnProperty(user.id)
         );
-    }, [channelUserIds, workspaceUsers, channelId]);
+    }, [channelUserIdsMap, workspaceUsers, channelId]);
     return { channelUsers };
 };
 const useChannel = (channelId) => {
@@ -64,7 +70,6 @@ const useChannel = (channelId) => {
         channel,
     };
 };
-
 
 const useCustomedForm = (
     initValues = {},
@@ -82,10 +87,10 @@ const useCustomedForm = (
     const errorHandler = useErrorHandler();
     const values = useRef(initValues);
     const token = useRef(null);
-    const [refresh,setRefresh] = useState(0)
+    const [refresh, setRefresh] = useState(0);
     function setValues(name, value) {
         values.current[name] = value;
-        setRefresh(pre=>pre+1)
+        setRefresh((pre) => pre + 1);
     }
 
     function getValues() {
@@ -126,8 +131,7 @@ const useCustomedForm = (
             .catch(errorHandler)
             .finally(() => {
                 setLoading(false);
-            })
-            
+            });
     }
 
     return {
@@ -148,5 +152,4 @@ export {
     useChannel,
     useChannelUsers,
     useCustomedForm,
-    
 };

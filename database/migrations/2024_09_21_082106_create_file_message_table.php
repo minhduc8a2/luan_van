@@ -16,6 +16,9 @@ return new class extends Migration
             $table->foreignId('file_id')->constrained()->cascadeOnDelete();
             $table->foreignId('message_id')->nullable();
             $table->timestamps();
+
+            $table->unique(['file_id','message_id']);
+
         });
     }
 

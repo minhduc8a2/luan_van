@@ -42,8 +42,6 @@ class ChannelController extends Controller
             'archive' => $user->can('archive', [Channel::class, $channel]),
             'chat' => $user->can('create', [Message::class, $channel]),
             'thread' => $user->can('createThread', [Message::class, $channel]),
-            'createReaction' => $user->can('create', [Reaction::class, $channel]),
-            'deleteReaction' => $user->can('delete', [Reaction::class, $channel]),
             'updateDescription' => $user->can('updateDescription', [Channel::class, $channel]),
             'updateName' => $user->can('updateName', [Channel::class, $channel]),
             'updatePermissions' => $user->can('updatePermissions', [Channel::class, $channel]),

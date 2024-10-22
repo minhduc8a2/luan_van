@@ -5,15 +5,12 @@ import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
 import EmojiPicker from "@emoji-mart/react";
 import data from "@emoji-mart/data";
 import { useState } from "react";
-import { usePage } from "@inertiajs/react";
-import { useChannelData } from "@/helpers/customHooks";
+
 export default function Reactions({
     groupedReactions,
     reactToMessage,
     removeMessageReaction,
 }) {
-    const { channelId } = usePage().props;
-    const { permissions } = useChannelData(channelId);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     if (groupedReactions.length == 0) return "";
     return (
@@ -33,15 +30,9 @@ export default function Reactions({
                 >
                     <button
                         onClick={() => {
-                            if (
-                                reaction.hasReacted &&
-                                permissions.deleteReaction
-                            ) {
+                            if (reaction.hasReacted) {
                                 removeMessageReaction(reaction.emoji_id);
-                            } else if (
-                                !reaction.hasReacted &&
-                                permissions.createReaction
-                            ) {
+                            } else if (!reaction.hasReacted) {
                                 reactToMessage(reaction.emoji_id);
                             }
                         }}
@@ -49,9 +40,7 @@ export default function Reactions({
                             reaction.hasReacted
                                 ? "bg-blue-500/25"
                                 : "bg-color/15"
-                        } rounded-full px-[6px] flex items-center gap-x-1 py-[2px] ${
-                            permissions.deleteReaction ? "" : "cursor-default"
-                        }`}
+                        } rounded-full px-[6px] flex items-center gap-x-1 py-[2px]  `}
                     >
                         <div className="text-sm">{reaction.nativeEmoji}</div>
                         <div className="text-sm w-2 font-semibold text-color-medium-emphasis">
@@ -60,11 +49,11 @@ export default function Reactions({
                     </button>
                 </Tooltip>
             ))}
-            {groupedReactions.length > 0 && permissions.createReaction && (
+            {groupedReactions.length > 0 && (
                 <div className="bg-white/15 rounded-full px-[8px] flex items-center gap-x-1 py-[4px]">
                     <Tooltip
                         content={
-                            <div className="whitespace-nowrap p-1 text-center text-sm ">
+                            <div className="whitespace-nowrap p-1 text-center text-sm text-color-medium-emphasis">
                                 Find a reaction
                             </div>
                         }
@@ -82,6 +71,7 @@ export default function Reactions({
                                                     onClick={() =>
                                                         setShowEmojiPicker(true)
                                                     }
+                                                    className="text-color-medium-emphasis"
                                                 />
                                             </PopoverButton>
                                             <PopoverPanel

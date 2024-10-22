@@ -26,7 +26,18 @@ export default function Index() {
             <Routes>
                 <Route path="/workspaces" element={<ReduxProvider />}>
                     <Route path="" element={<HomePage />} />
-                    <Route path=":workspaceId/admin" element={<Admin />}>
+                    <Route
+                        path=":workspaceId/admin"
+                        element={
+                            <OnlineStatusProvider>
+                                <UserNotificationEventHandlersProvider>
+                                    <WorkspaceEventHandlersProvider>
+                                        <Admin />
+                                    </WorkspaceEventHandlersProvider>
+                                </UserNotificationEventHandlersProvider>
+                            </OnlineStatusProvider>
+                        }
+                    >
                         <Route path="home" element={<Home />} />
                         <Route
                             path="about_workspace"

@@ -12,231 +12,220 @@ export const channelsDataSlice = createSlice({
         },
 
         setChannelData(state, action) {
-            if (!state[action.payload.id]) {
-                state[action.payload.id] = {};
+            const { id, data } = action.payload;
+            if (!state[id]) {
+                state[id] = {};
             }
-            Object.keys(action.payload.data).forEach((key) => {
-                state[action.payload.id][key] = action.payload.data[key];
+            const channel = state[id];
+
+            Object.keys(data).forEach((key) => {
+                switch (key) {
+                    case "messages":
+                        channel.messagesMap = {};
+                        data.messages.forEach(
+                            (msg) => (channel.messagesMap[msg.id] = msg)
+                        );
+                        break;
+                    case "managerIds":
+                        channel.managerIdsMap = {};
+                        data.managerIds.forEach(
+                            (id) => (channel.managerIdsMap[id] = true)
+                        );
+                        break;
+                    case "channelUserIds":
+                        channel.channelUserIdsMap = {};
+                        data.channelUserIds.forEach(
+                            (id) => (channel.channelUserIdsMap[id] = true)
+                        );
+                        break;
+                    default:
+                        channel[key] = data[key];
+                        break;
+                }
             });
         },
         clearChannelData(state, action) {
             state = {};
         },
         removeUserFromChannel(state, action) {
-            if (
-                state[action.payload.id] &&
-                state[action.payload.id].channelUserIds
-            ) {
-                state[action.payload.id].channelUserIds = state[
-                    action.payload.id
-                ].channelUserIds.filter(
-                    (userId) => userId != action.payload.userId
-                );
+            const { id, userId } = action.payload;
+            const channel = state[id];
+            if (channel && channel.channelUserIdsMap) {
+                delete channel.channelUserIdsMap[userId];
             }
         },
         addUsersToChannel(state, action) {
-            if (
-                state[action.payload.id] &&
-                state[action.payload.id].channelUserIds
-            ) {
-                action.payload.userIds.forEach((userId) => {
-                    if (
-                        !state[action.payload.id].channelUserIds.find(
-                            (uId) => uId == userId
-                        )
-                    ) {
-                        state[action.payload.id].channelUserIds.push(userId);
-                    }
+            const { id, userIds } = action.payload;
+            const channel = state[id];
+            if (channel && channel.channelUserIdsMap) {
+                userIds.forEach((userId) => {
+                    channel.channelUserIdsMap[userId] = true;
                 });
             }
         },
         removeManagerFromChannel(state, action) {
-            if (
-                state[action.payload.id] &&
-                state[action.payload.id].managerIds
-            ) {
-                state[action.payload.id].managerIds = state[
-                    action.payload.id
-                ].managerIds.filter(
-                    (userId) => userId != action.payload.userId
-                );
+            const { id, userId } = action.payload;
+            const channel = state[id];
+            if (channel && channel.managerIdsMap) {
+                delete channel.managerIdsMap[userId];
             }
         },
         addManagersToChannel(state, action) {
-            if (
-                state[action.payload.id] &&
-                state[action.payload.id].managerIds
-            ) {
-                action.payload.userIds?.forEach((userId) => {
-                    if (
-                        !state[action.payload.id].managerIds.find(
-                            (uId) => uId == userId
-                        )
-                    ) {
-                        state[action.payload.id].managerIds.push(userId);
-                    }
+            const { id, userIds } = action.payload;
+            const channel = state[id];
+            if (channel && channel.managerIdsMap) {
+                userIds?.forEach((userId) => {
+                    channel.managerIdsMap[userId] = true;
                 });
             }
         },
         addMessages(state, action) {
-            if (!Array.isArray(action.payload.data) || !action.payload.id)
-                return;
-
-            if (state[action.payload.id] && state[action.payload.id].messages) {
+            const { id, data } = action.payload;
+            if (!Array.isArray(data) || !id) return;
+            const channel = state[id];
+            if (channel && channel.messagesMap) {
                 // filter existing messages
-                state[action.payload.id].messages = state[
-                    action.payload.id
-                ].messages.filter((msg) => !msg.isTemporary);
-                const filteredNewMessages = action.payload.data.filter(
-                    (msg) =>
-                        !state[action.payload.id].messages.some(
-                            (m) => m.id == msg.id
-                        )
-                );
-                //
-                if (action.payload.position == "top") {
-                    state[action.payload.id].messages = [
-                        ...filteredNewMessages,
-                        ...state[action.payload.id].messages,
-                    ];
-                } else {
-                    state[action.payload.id].messages = [
-                        ...state[action.payload.id].messages,
-                        ...filteredNewMessages,
-                    ];
-                }
+                Object.values(channel.messagesMap).forEach((msg) => {
+                    if (msg.isTemporary) delete channel.messagesMap[msg.id];
+                });
+
+                data.forEach((msg) => {
+                    channel.messagesMap[msg.id]= msg;
+                });
             }
         },
         addMessage(state, action) {
-            if (state[action.payload.id] && state[action.payload.id].messages) {
-                if (
-                    !state[action.payload.id].messages.find(
-                        (msg) => msg.id == action.payload.data.id
-                    )
-                ) {
-                    state[action.payload.id].messages.push(action.payload.data);
-                }
+            const { id, data } = action.payload;
+            const channel = state[id];
+            if (channel && channel.messagesMap) {
+                channel.messagesMap[data.id] = data;
             }
         },
 
         updateMessageAfterSendSuccessfully(state, action) {
-            if (state[action.payload.id] && state[action.payload.id].messages) {
-                let messageIndex = state[action.payload.id].messages.findIndex(
-                    (message) => message.id == action.payload.temporaryId
-                );
-                if (messageIndex >= 0) {
-                    const { id, files } = action.payload.data;
-                    state[action.payload.id].messages[messageIndex].id = id;
-                    state[action.payload.id].messages[messageIndex].files =
-                        files;
-                    state[action.payload.id].messages[
-                        messageIndex
-                    ].isTemporary = false;
-                    state[action.payload.id].messages[
-                        messageIndex
-                    ].isSending = false;
+            const { id, data, temporaryId } = action.payload;
+            const channel = state[id];
+            if (channel && channel.messagesMap) {
+                const { id: newId, files } = data;
+                if (channel.messagesMap[temporaryId]) {
+                    channel.messagesMap[temporaryId].id = newId;
+                    channel.messagesMap[temporaryId].files = files;
+                    channel.messagesMap[temporaryId].isTemporary = false;
+                    channel.messagesMap[temporaryId].isSending = false;
+
+                    channel.messagesMap[newId] =
+                        channel.messagesMap[temporaryId];
+
+                    delete channel.messagesMap[temporaryId];
                 }
             }
         },
         updateMessageAfterSendFailed(state, action) {
-            if (state[action.payload.id] && state[action.payload.id].messages) {
-                let messageIndex = state[action.payload.id].messages.findIndex(
-                    (message) => message.id == action.payload.temporaryId
-                );
-                if (messageIndex >= 0) {
-                    state[action.payload.id].messages[
-                        messageIndex
-                    ].isSending = false;
-                    state[action.payload.id].messages[
-                        messageIndex
-                    ].isFailed = true;
-                }
+            const { id, temporaryId } = action.payload;
+            const channel = state[id];
+            if (
+                channel &&
+                channel.messagesMap &&
+                channel.messagesMap[temporaryId]
+            ) {
+                channel.messagesMap[temporaryId].isSending = false;
+                channel.messagesMap[temporaryId].isFailed = true;
             }
         },
         editMessage(state, action) {
-            if (state[action.payload.id] && state[action.payload.id].messages) {
-                let messageIndex = state[action.payload.id].messages.findIndex(
-                    (message) => message.id == action.payload.data.message_id
-                );
-                if (messageIndex >= 0) {
-                    state[action.payload.id].messages[messageIndex].content =
-                        action.payload.data.content;
-                    state[action.payload.id].messages[
-                        messageIndex
-                    ].is_edited = true;
-                }
+            const { id, data } = action.payload;
+            const channel = state[id];
+            if (
+                channel &&
+                channel.messagesMap &&
+                channel.messagesMap[data.message_id]
+            ) {
+                channel.messagesMap[data.message_id].content = data.content;
+                channel.messagesMap[data.message_id].is_edited = true;
+            }
+        },
+        addReactionToMessage(state, action) {
+            const { id, data } = action.payload;
+            const channel = state[id];
+            if (
+                channel &&
+                channel.messagesMap &&
+                channel.messagesMap[data.message_id]
+            ) {
+                channel.messagesMap[data.message_id].reactions.push(data);
+            }
+        },
+        removeReactionFromMessage(state, action) {
+            const { id, data } = action.payload;
+            const channel = state[id];
+            if (
+                channel &&
+                channel.messagesMap &&
+                channel.messagesMap[data.message_id]
+            ) {
+                channel.messagesMap[data.message_id].reactions =
+                    channel.messagesMap[data.message_id].reactions.filter(
+                        (reaction) => reaction.id != data.reactionId
+                    );
             }
         },
         deleteMessage(state, action) {
-            if (state[action.payload.id] && state[action.payload.id].messages) {
-                let messageIndex = state[action.payload.id].messages.findIndex(
-                    (message) => message.id == action.payload.data.message_id
-                );
-                if (messageIndex >= 0) {
-                    state[action.payload.id].messages[messageIndex].deleted_at =
-                        new Date().toUTCString();
-                    state[action.payload.id].messages[messageIndex].reactions =
-                        [];
+            const { id, data } = action.payload;
+            const channel = state[id];
+            if (
+                channel &&
+                channel.messagesMap &&
+                channel.messagesMap[data.message_id]
+            ) {
+                channel.messagesMap[data.message_id].deleted_at =
+                    new Date().toUTCString();
+                channel.messagesMap[data.message_id].reactions = [];
 
-                    state[action.payload.id].messages[messageIndex].files = [];
-                }
+                channel.messagesMap[data.message_id].files = [];
             }
         },
 
         addThreadMessagesCount(state, action) {
-            if (state[action.payload.id] && state[action.payload.id].messages) {
-                let messageIndex = state[action.payload.id].messages.findIndex(
-                    (message) => message.id == action.payload.data.message_id
-                );
-                if (messageIndex >= 0) {
-                    state[action.payload.id].messages[
-                        messageIndex
-                    ].thread_messages_count += 1;
-                }
+            const { id, data } = action.payload;
+            const channel = state[id];
+            if (
+                channel &&
+                channel.messagesMap &&
+                channel.messagesMap[data.message_id]
+            ) {
+                channel.messagesMap[data.message_id].thread_messages_count += 1;
             }
         },
         subtractThreadMessagesCount(state, action) {
-            if (state[action.payload.id] && state[action.payload.id].messages) {
-                let messageIndex = state[action.payload.id].messages.findIndex(
-                    (message) => message.id == action.payload.data.message_id
-                );
-                if (messageIndex >= 0) {
-                    state[action.payload.id].messages[
-                        messageIndex
-                    ].thread_messages_count -= 1;
-                }
+            const { id, data } = action.payload;
+            const channel = state[id];
+            if (
+                channel &&
+                channel.messagesMap &&
+                channel.messagesMap[data.message_id]
+            ) {
+                channel.messages[messageIndex].thread_messages_count -= 1;
             }
         },
 
         deleteFile(state, action) {
-            if (state[action.payload.id] && state[action.payload.id].messages) {
-                for (
-                    let msgIndex = 0;
-                    msgIndex < state[action.payload.id].messages.length;
-                    msgIndex++
-                ) {
-                    const files =
-                        state[action.payload.id].messages[msgIndex].files; // Access the 'files' array
-
-                    for (
-                        let fileIndex = 0;
-                        fileIndex < files.length;
-                        fileIndex++
-                    ) {
-                        if (
-                            files[fileIndex].id == action.payload.data.file_id
-                        ) {
-                            files[fileIndex].deleted_at =
-                                new Date().toUTCString();
-                            files[fileIndex].url = "";
-                            files[fileIndex].type = "";
-                            files[fileIndex].path = "";
-                            files[fileIndex].name = "";
-
-                            return;
-                        }
+            const { id, data } = action.payload;
+            const channel = state[id];
+            if (channel && channel.messagesMap) {
+                const fileIdToDelete = data.file_id;
+                Object.values(channel.messagesMap).forEach((message) => {
+                    const files = message.files;
+                    const fileIndex = files.findIndex(
+                        (file) => file.id === fileIdToDelete
+                    );
+                    if (fileIndex !== -1) {
+                        files[fileIndex].deleted_at = new Date().toUTCString();
+                        files[fileIndex].url = "";
+                        files[fileIndex].type = "";
+                        files[fileIndex].path = "";
+                        files[fileIndex].name = "";
                     }
-                }
+                });
             }
         },
     },
@@ -260,6 +249,8 @@ export const {
     updateMessageAfterSendSuccessfully,
     updateMessageAfterSendFailed,
     clearChannelData,
+    addReactionToMessage,
+    removeReactionFromMessage,
 } = channelsDataSlice.actions;
 
 export default channelsDataSlice.reducer;

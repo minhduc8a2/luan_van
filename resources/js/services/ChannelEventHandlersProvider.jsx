@@ -13,11 +13,13 @@ import { isHiddenUser } from "@/helpers/userHelper";
 import {
     addManagersToChannel,
     addMessage,
+    addReactionToMessage,
     addUsersToChannel,
     deleteFile,
     deleteMessage,
     editMessage,
     removeManagerFromChannel,
+    removeReactionFromMessage,
     removeUserFromChannel,
 } from "@/Store/channelsDataSlice";
 import { useParams } from "react-router-dom";
@@ -141,6 +143,7 @@ export default function ChannelEventHandlersProvider({ children }) {
                         }
                     })
                     .listen("ChannelEvent", (e) => {
+                        console.log("ChannelEvent",e);
                         switch (e.type) {
                             case ChannelEventsEnum.CHANNEL_UPDATED:
                                 dispatch(
@@ -239,6 +242,22 @@ export default function ChannelEventHandlersProvider({ children }) {
                                     })
                                 );
                                 dispatch(deleteFileInThread(e.data));
+                                break;
+                            case ChannelEventsEnum.REACTION_CREATED:
+                                dispatch(
+                                    addReactionToMessage({
+                                        id: cn.id,
+                                        data: e.data,
+                                    })
+                                );
+                                break;
+                            case ChannelEventsEnum.REACTION_DELETED:
+                                dispatch(
+                                    removeReactionFromMessage({
+                                        id: cn.id,
+                                        data: e.data,
+                                    })
+                                );
                                 break;
                         }
                     });

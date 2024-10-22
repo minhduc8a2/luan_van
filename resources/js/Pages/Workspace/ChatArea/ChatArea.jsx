@@ -33,12 +33,17 @@ import { useParams } from "react-router-dom";
 import { setMention } from "@/Store/mentionSlice";
 import LoadingSpinner from "@/Components/LoadingSpinner";
 import MessagePlaceHolder from "./Message/MessagePlaceHolder";
+import ChannelEventsEnum from "@/services/Enums/ChannelEventsEnum";
 export default function ChatArea() {
     const { auth } = usePage().props;
     const { channelId, workspaceId } = useParams();
     // console.log(channelId);
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
-    const { permissions, messages } = useChannelData(channelId);
+    const { permissions, messagesMap } = useChannelData(channelId);
+    const messages = useMemo(
+        () => Object.values(messagesMap || {}),
+        [messagesMap]
+    );
     const { channelUsers } = useChannelUsers(channelId);
 
     const { channel } = useChannel(channelId);
@@ -170,7 +175,7 @@ export default function ChatArea() {
                 console.log("messageEvent", e);
 
                 switch (e.type) {
-                    case "newMessageCreated":
+                    case ChannelEventsEnum.NEW_MESSAGE_CREATED:
                         setNewMessageReceived(true);
                 }
             }
