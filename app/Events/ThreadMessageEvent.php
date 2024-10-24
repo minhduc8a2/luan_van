@@ -33,7 +33,7 @@ class ThreadMessageEvent implements ShouldBroadcastNow
     public function broadcastOn(): array
     {
         return [
-            new PresenceChannel('channels.' . $this->threadedMessage->channel_id),
+            new PrivateChannel('private_channels.' . $this->threadedMessage->channel_id),
             new PresenceChannel('threads.' . $this->threadedMessage->id),
         ];
     }

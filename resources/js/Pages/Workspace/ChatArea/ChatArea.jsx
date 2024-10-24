@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { createContext, useCallback, useContext, useMemo } from "react";
 import { usePage } from "@inertiajs/react";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -34,10 +34,14 @@ import { setMention } from "@/Store/mentionSlice";
 import LoadingSpinner from "@/Components/LoadingSpinner";
 import MessagePlaceHolder from "./Message/MessagePlaceHolder";
 import ChannelEventsEnum from "@/services/Enums/ChannelEventsEnum";
+
+export const ChatAreaContext = createContext({ scrollBottom: null });
 export default function ChatArea() {
     const { auth } = usePage().props;
     const { channelId, workspaceId } = useParams();
+    const containerRef = useRef(null);
     // console.log(channelId);
+    const [newMessageReceived, setNewMessageReceived] = useState(false);
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
     const { permissions, messagesMap } = useChannelData(channelId);
     const messages = useMemo(
@@ -52,12 +56,10 @@ export default function ChatArea() {
     const { messageId, threadMessage: mentionThreadMessage } = useSelector(
         (state) => state.mention
     );
-    const [focus, setFocus] = useState(1);
+
     const dispatch = useDispatch();
     const [loaded, setLoaded] = useState(false);
-    const [newMessageReceived, setNewMessageReceived] = useState(true);
-    const [newMessageReactionReceive, setNewMessageReactionReceive] =
-        useState(null);
+
     const channelConnectionRef = useRef(null);
     //Mention
     const [hasMention, setHasMention] = useState(false);
@@ -69,15 +71,97 @@ export default function ChatArea() {
     const [bottomHasMore, setBottomHasMore] = useState();
     const [temporaryMessageSending, setTemporaryMessageSending] =
         useState(false);
+    const [initedTopAndBottom, setInitedTopAndBottom] = useState(false);
+    const scrollBottom = useCallback(() => {
+        if (containerRef.current) {
+            containerRef.current.scrollTop =
+                containerRef.current.scrollHeight -
+                containerRef.current.clientHeight;
+        }
+    }, []);
+    //auto scroll bottom when just showed channel
     useEffect(() => {
-        if (messages && !temporaryMessageSending) {
+        if (!messageId && loaded) {
+            scrollBottom();
+        }
+    }, [channelId, loaded]);
+
+    //show new message
+    useEffect(() => {
+        if (newMessageReceived) {
+            scrollBottom();
+            setNewMessageReceived(false);
+        }
+    }, [newMessageReceived]);
+
+    useEffect(() => {
+        if (channelId) {
+            Echo.private(`private_channels.${channelId}`)
+                .listen("MessageEvent", (e) => {
+                    switch (e.type) {
+                        case ChannelEventsEnum.NEW_MESSAGE_CREATED:
+                            //check user is bottom, if true, scroll bottom next render
+                            if (
+                                containerRef.current.scrollTop ==
+                                containerRef.current.scrollHeight -
+                                    containerRef.current.clientHeight
+                            ) {
+                                setNewMessageReceived(true);
+                            }
+                    }
+                })
+                .listen("ThreadMessageEvent", (e) => {
+                    if (
+                        e.type == "newMessageCreated" &&
+                        !isHiddenUser(workspaceUsers, e.message?.user_id)
+                    )
+                        dispatch(
+                            addThreadMessagesCount({
+                                id: channelId,
+                                data: { message_id: e.threadedMessageId },
+                            })
+                        );
+                    else if (
+                        e.type == "messageDeleted" &&
+                        !isHiddenUser(workspaceUsers, e.message?.user_id)
+                    )
+                        dispatch(
+                            subtractThreadMessagesCount({
+                                id: channelId,
+                                data: { message_id: e.threadedMessageId },
+                            })
+                        );
+                    // console.log(e);
+                })
+
+                .error((error) => {
+                    console.error(error);
+                });
+        }
+    }, [channelId]);
+
+    //init Top and bottom once, no need to inifinte load when messages changes!
+    useEffect(() => {
+        setInitedTopAndBottom(false);
+    }, [channelId]);
+
+    //init top and bottom load when first show channel
+    useEffect(() => {
+        if (
+            messages &&
+            !temporaryMessageSending &&
+            !initedTopAndBottom &&
+            loaded
+        ) {
             const { minId, maxId } = findMinMaxId(messages);
-            // console.log(minId, maxId);
+            console.log(minId, maxId);
             setTopHasMore(maxId);
             setBottomHasMore(minId);
+            setInitedTopAndBottom(true);
         }
-    }, [channel?.id, messages]);
+    }, [channelId,loaded, messages, initedTopAndBottom]);
 
+    //handle reconnect when offline
     useEffect(() => {
         function handleReconnect() {
             console.log("reconnected");
@@ -95,6 +179,7 @@ export default function ChatArea() {
         };
     }, [messages]);
 
+    //infinite load
     const loadMoreTopToken = useRef(null);
     const loadMoreBottomToken = useRef(null);
 
@@ -168,20 +253,6 @@ export default function ChatArea() {
         }
     };
 
-    useEffect(() => {
-        Echo.private(`private_channels.${channelId}`).listen(
-            "MessageEvent",
-            (e) => {
-                console.log("messageEvent", e);
-
-                switch (e.type) {
-                    case ChannelEventsEnum.NEW_MESSAGE_CREATED:
-                        setNewMessageReceived(true);
-                }
-            }
-        );
-    }, [channelId]);
-
     let preValue = null;
     let hasChanged = false;
 
@@ -190,8 +261,9 @@ export default function ChatArea() {
 
     useEffect(() => {
         if (!channel) return;
-        if (!messageId) setNewMessageReceived(true);
-        dispatch(resetMessageCountForChannel(channel));
+
+        dispatch(resetMessageCountForChannel(channel)); // reset new message count show in pannel channel to 0
+        //fallback to set last time read of user on channel
         axios.post(
             route("channel.last_read", {
                 workspace: workspaceId,
@@ -200,6 +272,7 @@ export default function ChatArea() {
             {}
         );
         return () => {
+            //set last time read of user on channel
             axios.post(
                 route("channel.last_read", {
                     workspace: workspaceId,
@@ -209,15 +282,16 @@ export default function ChatArea() {
             );
         };
     }, [channelId]);
+
+    //want to jump to a message
     useEffect(() => {
         if (messageId && !mentionThreadMessage) {
             setHasMention(messageId);
             setMentionFulfilled(false);
             dispatch(setMention(null));
-
-            if (newMessageReceived) setNewMessageReceived(false);
         }
-    }, [messageId, newMessageReceived]);
+    }, [messageId]);
+
     const groupedMessages = useMemo(() => {
         if (!messages) return [];
         const gMessages = groupListByDate(messages);
@@ -235,49 +309,6 @@ export default function ChatArea() {
                 };
             });
     }, [messages]);
-    useEffect(() => {
-        if (!channel?.id) return;
-
-        channelConnectionRef.current = Echo.join(`channels.${channel.id}`);
-        channelConnectionRef.current
-            .here((users) => {})
-
-            .listen("ThreadMessageEvent", (e) => {
-                if (
-                    e.type == "newMessageCreated" &&
-                    !isHiddenUser(workspaceUsers, e.message?.user_id)
-                )
-                    dispatch(
-                        addThreadMessagesCount({
-                            id: channelId,
-                            data: { message_id: e.threadedMessageId },
-                        })
-                    );
-                else if (
-                    e.type == "messageDeleted" &&
-                    !isHiddenUser(workspaceUsers, e.message?.user_id)
-                )
-                    dispatch(
-                        subtractThreadMessagesCount({
-                            id: channelId,
-                            data: { message_id: e.threadedMessageId },
-                        })
-                    );
-                // console.log(e);
-            })
-
-            .listenForWhisper("messageReaction", (e) => {
-                setNewMessageReactionReceive(e);
-            })
-            .error((error) => {
-                console.error(error);
-            });
-
-        return () => {
-            channelConnectionRef.current = null;
-            Echo.leave(`channels.${channel.id}`);
-        };
-    }, [channel?.id, threadMessageId]);
 
     const channelName = useMemo(() => {
         if (!channel) return "";
@@ -334,167 +365,165 @@ export default function ChatArea() {
     ]);
 
     return (
-        <div className="flex-1 flex min-h-0 max-h-full w-full relative">
-            {!loaded && <LoadingSpinner />}
-            <InitData loaded={loaded} setLoaded={(value) => setLoaded(value)} />
-
-            <div className="bg-background  chat-area-container flex-1 ">
-                <Header
-                    channel={channel}
-                    channelName={channelName}
-                    channelUsers={channelUsers}
+        <ChatAreaContext.Provider value={{ scrollBottom }}>
+            <div className="flex-1 flex min-h-0 max-h-full w-full relative">
+                {!loaded && <LoadingSpinner />}
+                <InitData
                     loaded={loaded}
+                    setLoaded={(value) => setLoaded(value)}
                 />
-                {loaded && channel && (
-                    <InfiniteScroll
-                        threshold={0.25}
-                        rootMargin="0px"
-                        loadMoreOnTop={(successCallBack) =>
-                            loadMore(
-                                "top",
-                                loadMoreTopToken.current,
-                                successCallBack
-                            )
-                        }
-                        loadMoreOnBottom={(successCallBack) =>
-                            loadMore(
-                                "bottom",
-                                loadMoreBottomToken.current,
-                                successCallBack
-                            )
-                        }
-                        topHasMore={topHasMore}
-                        bottomHasMore={bottomHasMore}
-                        topLoading={topLoading}
-                        bottomLoading={bottomLoading}
-                        triggerScrollBottom={newMessageReceived}
-                        clearTriggerScrollBottom={() =>
-                            setNewMessageReceived(false)
-                        }
-                        reverse
-                        scrollToItem={hasMention}
-                        className="overflow-y-auto max-w-full scrollbar"
-                    >
-                        {!bottomHasMore && (
-                            <div className="p-8">
-                                <h1 className="text-3xl font-extrabold text-color/85">
-                                    {" "}
-                                    {welcomeMessage}
-                                </h1>
 
-                                <div className="text-color/85 mt-2">
-                                    {channel?.description}{" "}
-                                    <div className="inline-block">
-                                        <EditDescriptionForm />
+                <div className="bg-background  chat-area-container flex-1 ">
+                    <Header
+                        channel={channel}
+                        channelName={channelName}
+                        channelUsers={channelUsers}
+                        loaded={loaded}
+                    />
+                    {loaded && channel && (
+                        <InfiniteScroll
+                            threshold={0}
+                            rootMargin="0px"
+                            loadMoreOnTop={(successCallBack) =>
+                                loadMore(
+                                    "top",
+                                    loadMoreTopToken.current,
+                                    successCallBack
+                                )
+                            }
+                            loadMoreOnBottom={(successCallBack) =>
+                                loadMore(
+                                    "bottom",
+                                    loadMoreBottomToken.current,
+                                    successCallBack
+                                )
+                            }
+                            topHasMore={topHasMore}
+                            bottomHasMore={bottomHasMore}
+                            topLoading={topLoading}
+                            bottomLoading={bottomLoading}
+                            reverse
+                            scrollToItem={hasMention}
+                            className="overflow-y-auto max-w-full scrollbar"
+                            ref={containerRef}
+                        >
+                            {!bottomHasMore && (
+                                <div className="p-8">
+                                    <h1 className="text-3xl font-extrabold text-color/85">
+                                        {" "}
+                                        {welcomeMessage}
+                                    </h1>
+
+                                    <div className="text-color/85 mt-2">
+                                        {channel?.description}{" "}
+                                        <div className="inline-block">
+                                            <EditDescriptionForm />
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        )}
-                        {bottomHasMore && (
-                            <div className="my-4 flex flex-col gap-y-4">
-                                <MessagePlaceHolder />
-                                <MessagePlaceHolder />
-                            </div>
-                        )}
-                        {groupedMessages.map(({ date, mgs }, pIndex) => {
-                            return (
-                                <div className="relative pb-4" key={date}>
-                                    <div className="border-t border-color/15 translate-y-3"></div>
-                                    <div className="text-xs text-color-medium-emphasis font-bold border border-color/15 rounded-full h-6 flex items-center px-4 sticky top-0 left-1/2 -translate-x-1/2  w-fit bg-background z-20">
-                                        {date}
-                                    </div>
+                            )}
+                            {bottomHasMore && (
+                                <div className="my-4 flex flex-col gap-y-4">
+                                    <MessagePlaceHolder />
+                                    <MessagePlaceHolder />
+                                </div>
+                            )}
+                            {groupedMessages.map(({ date, mgs }, pIndex) => {
+                                return (
+                                    <div className="relative pb-4" key={date}>
+                                        <div className="border-t border-color/15 translate-y-3"></div>
+                                        <div className="text-xs text-color-medium-emphasis font-bold border border-color/15 rounded-full h-6 flex items-center px-4 sticky top-0 left-1/2 -translate-x-1/2  w-fit bg-background z-20">
+                                            {date}
+                                        </div>
 
-                                    <ul className="">
-                                        {mgs.map((message, index) => {
-                                            let user = {
-                                                ...workspaceUsers.find(
-                                                    (mem) =>
-                                                        mem.id ===
-                                                        message.user_id
-                                                ),
-                                            };
-                                            if (
-                                                user &&
-                                                !channelUsers.find(
-                                                    (u) => u.id == user.id
-                                                )
-                                            ) {
-                                                user.notMember = true;
-                                            }
-                                            if (!user)
-                                                user = {
-                                                    id: message.user_id,
-                                                    name: message.user_name,
-                                                    notMember: true,
+                                        <ul className="">
+                                            {mgs.map((message, index) => {
+                                                let user = {
+                                                    ...workspaceUsers.find(
+                                                        (mem) =>
+                                                            mem.id ===
+                                                            message.user_id
+                                                    ),
                                                 };
-                                            // if (!user) return "";
-                                            hasChanged = false;
-                                            if (preValue) {
                                                 if (
-                                                    preValue.user.id !=
-                                                        user.id ||
-                                                    differenceInSeconds(
-                                                        preValue.message
-                                                            .created_at,
-                                                        message.created_at
-                                                    ) > 10
+                                                    user &&
+                                                    !channelUsers.find(
+                                                        (u) => u.id == user.id
+                                                    )
                                                 ) {
-                                                    hasChanged = true;
+                                                    user.notMember = true;
+                                                }
+                                                if (!user)
+                                                    user = {
+                                                        id: message.user_id,
+                                                        name: message.user_name,
+                                                        notMember: true,
+                                                    };
+                                                // if (!user) return "";
+                                                hasChanged = false;
+                                                if (preValue) {
+                                                    if (
+                                                        preValue.user.id !=
+                                                            user.id ||
+                                                        differenceInSeconds(
+                                                            preValue.message
+                                                                .created_at,
+                                                            message.created_at
+                                                        ) > 10
+                                                    ) {
+                                                        hasChanged = true;
+                                                        preValue = {
+                                                            user,
+                                                            message,
+                                                        };
+                                                    }
+                                                } else
                                                     preValue = {
                                                         user,
                                                         message,
                                                     };
+                                                if (message.forwarded_message) {
+                                                    return (
+                                                        <ForwardedMessage
+                                                            key={message.id}
+                                                            message={message}
+                                                            user={user}
+                                                            hasChanged={
+                                                                hasChanged
+                                                            }
+                                                            index={index}
+                                                        />
+                                                    );
                                                 }
-                                            } else
-                                                preValue = {
-                                                    user,
-                                                    message,
-                                                };
-                                            if (message.forwarded_message) {
                                                 return (
-                                                    <ForwardedMessage
+                                                    <Message
                                                         key={message.id}
                                                         message={message}
                                                         user={user}
                                                         hasChanged={hasChanged}
                                                         index={index}
-                                                        messagableConnectionRef={
-                                                            channelConnectionRef
-                                                        }
                                                     />
                                                 );
-                                            }
-                                            return (
-                                                <Message
-                                                    key={message.id}
-                                                    message={message}
-                                                    user={user}
-                                                    hasChanged={hasChanged}
-                                                    index={index}
-                                                    messagableConnectionRef={
-                                                        channelConnectionRef
-                                                    }
-                                                />
-                                            );
-                                        })}
-                                    </ul>
-                                </div>
-                            );
-                        })}
-                    </InfiniteScroll>
-                )}
-                {loaded && channel && (
-                    <Editor
-                        channel={channel}
-                        permissions={permissions}
-                        isChannelMember={isChannelMember}
-                        channelName={channelName}
-                        setFocus={setFocus}
-                        setTemporaryMessageSending={setTemporaryMessageSending}
-                        setNewMessageReceived={setNewMessageReceived}
-                    />
-                )}
+                                            })}
+                                        </ul>
+                                    </div>
+                                );
+                            })}
+                        </InfiniteScroll>
+                    )}
+                    {loaded && channel && (
+                        <Editor
+                            channel={channel}
+                            permissions={permissions}
+                            isChannelMember={isChannelMember}
+                            channelName={channelName}
+                            setTemporaryMessageSending={
+                                setTemporaryMessageSending
+                            }
+                        />
+                    )}
+                </div>
             </div>
-        </div>
+        </ChatAreaContext.Provider>
     );
 }

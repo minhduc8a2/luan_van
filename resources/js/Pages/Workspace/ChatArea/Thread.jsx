@@ -9,7 +9,7 @@ import {
     updateThreadMessageAfterSendFailed,
     updateThreadMessageAfterSendSuccessfully,
 } from "@/Store/threadSlice";
-import React, { useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 import { IoClose } from "react-icons/io5";
 import { useDispatch, useSelector } from "react-redux";
 import Message from "./Message/Message";
@@ -44,7 +44,7 @@ export default function Thread() {
         (state) => state.mention
     );
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
-
+    const containerRef = useRef(null);
     const {
         message: threadedMessage,
         messageId: threadedMessageId,
@@ -68,12 +68,11 @@ export default function Thread() {
 
     const [loadingMessages, setLoadingMessages] = useState(false);
 
-    const [newMessageReactionReceive, setNewMessageReactionReceive] =
-        useState(null);
     const threadConnectionRef = useRef(null);
-    const [newMessageReceived, setNewMessageReceived] = useState(true);
+
     let preValue = null;
     let hasChanged = false;
+
     //Mention
     const [hasMention, setHasMention] = useState(false);
     const [mentionFulfilled, setMentionFulfilled] = useState(true);
@@ -84,13 +83,37 @@ export default function Thread() {
     const [bottomHasMore, setBottomHasMore] = useState();
     const [temporaryMessageSending, setTemporaryMessageSending] =
         useState(false);
+    const [initedTopAndBottom, setInitedTopAndBottom] = useState(false);
     useEffect(() => {
-        if (messages && !temporaryMessageSending) {
+        setInitedTopAndBottom(false);
+    }, [channelId]);
+
+    const scrollBottom = useCallback(() => {
+        if (containerRef.current) {
+            containerRef.current.scrollTop =
+                containerRef.current.scrollHeight -
+                containerRef.current.clientHeight;
+        }
+    }, []);
+    //auto scroll bottom when just showed channel
+    useEffect(() => {
+        if (!mentionThreadMessage && !loadingMessages) {
+            scrollBottom();
+        }
+    }, [threadedMessageId, loadingMessages]);
+    useEffect(() => {
+        if (
+            messages &&
+            !temporaryMessageSending &&
+            !initedTopAndBottom &&
+            messages.length > 0
+        ) {
             console.log(messages);
             const { minId, maxId } = findMinMaxId(messages);
             // console.log(minId, maxId);
             setTopHasMore(maxId);
             setBottomHasMore(minId);
+            setInitedTopAndBottom(true);
         }
     }, [channel?.id, messages]);
 
@@ -237,14 +260,14 @@ export default function Thread() {
                 data: { message_id: threadedMessageId },
             })
         );
-        setNewMessageReceived(true);
+
         setTimeout(() => {
             setTemporaryMessageSending(false);
         }, 0);
         axios
             .post(
                 route("thread_message.store", {
-                    workspace:workspaceId,
+                    workspace: workspaceId,
                     channel: channel.id,
                     message: threadedMessageId,
                 }),
@@ -286,8 +309,6 @@ export default function Thread() {
     }
 
     useEffect(() => {
-        setNewMessageReceived(true);
-        console.log("reset thread");
         return () => {
             dispatch(setThreadMessages([]));
         };
@@ -418,9 +439,8 @@ export default function Thread() {
             setHasMention(mentionThreadMessage.id);
             setMentionFulfilled(false);
             dispatch(setMention(null));
-            if (newMessageReceived) setNewMessageReceived(false);
         }
-    }, [mentionThreadMessage, newMessageReceived]);
+    }, [mentionThreadMessage]);
     useEffect(() => {
         if (hasMention && sortedMessages && !mentionFulfilled) {
             const targetMessage = document.getElementById(
@@ -538,13 +558,10 @@ export default function Thread() {
                                 bottomHasMore={bottomHasMore}
                                 topLoading={topLoading}
                                 bottomLoading={bottomLoading}
-                                triggerScrollBottom={newMessageReceived}
-                                clearTriggerScrollBottom={() =>
-                                    setNewMessageReceived(false)
-                                }
                                 reverse
                                 rootMargin="100px"
                                 scrollToItem={hasMention}
+                                ref={containerRef}
                                 className="overflow-y-auto max-w-full flex-1 scrollbar"
                             >
                                 {bottomHasMore && (
@@ -584,17 +601,6 @@ export default function Thread() {
                                             hasChanged={hasChanged}
                                             index={index}
                                             threadStyle={true}
-                                            messagableConnectionRef={
-                                                threadConnectionRef
-                                            }
-                                            newMessageReactionReceive={
-                                                newMessageReactionReceive
-                                            }
-                                            resetNewMessageReactionReceive={() =>
-                                                setNewMessageReactionReceive(
-                                                    null
-                                                )
-                                            }
                                         />
                                     );
                                 })}

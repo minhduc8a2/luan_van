@@ -8,7 +8,7 @@ export default function PublicChannel({ channel, changeChannel }) {
     const [isPending, startTransition] = useTransition();
     function onClick() {
         startTransition(() => {
-            changeChannel(channel);
+            changeChannel(channel.id);
         });
     }
     return (

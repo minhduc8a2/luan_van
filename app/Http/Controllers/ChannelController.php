@@ -307,7 +307,7 @@ class ChannelController extends Controller
             /**
              * @var Channel $channel
              */
-            $channel = $user()->ownChannels()->create(['name' => $validated['name'], 'type' => $validated['type'], 'workspace_id' => $workspace->id]);
+            $channel = $user->ownChannels()->create(['name' => $validated['name'], 'type' => $validated['type'], 'workspace_id' => $workspace->id]);
             $channel->assignManagerRoleAndManagerPermissions($request->user());
             $channel->initChannelPermissions();
             $channel->users_count = 1;
@@ -319,6 +319,7 @@ class ChannelController extends Controller
             return ['channel' => $channel];
         } catch (\Throwable $th) {
             DB::rollBack();
+            dd($th);
             Helper::createErrorResponse();
         }
     }

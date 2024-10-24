@@ -1,30 +1,27 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { forwardRef, useEffect, useRef, useState } from "react";
 import { IoReloadOutline } from "react-icons/io5";
 import { useInView } from "react-intersection-observer";
 import LoadingSpinner from "./LoadingSpinner";
-import { useDispatch } from "react-redux";
-import { setMention } from "@/Store/mentionSlice";
 
-export default function InfiniteScroll({
-    children,
-    topLoading,
-    bottomLoading,
-    topHasMore,
-    bottomHasMore,
-    loadMoreOnTop,
-    loadMoreOnBottom,
-    className = "",
-    showManualLoadButtons = false,
-    showLoadingMessage = false,
-    reverse = false,
-    triggerScrollBottom,
-    clearTriggerScrollBottom,
-    rootMargin = "500px",
-    scrollToItem = null,
-    threshold = 0.1
-}) {
-    const containerRef = useRef(null);
-    
+const InfiniteScroll = forwardRef(function (
+    {
+        children,
+        topLoading,
+        bottomLoading,
+        topHasMore,
+        bottomHasMore,
+        loadMoreOnTop,
+        loadMoreOnBottom,
+        className = "",
+        showManualLoadButtons = false,
+        showLoadingMessage = false,
+        reverse = false,
+        rootMargin = "500px",
+        scrollToItem = null,
+        threshold = 0.1,
+    },
+    containerRef
+) {
     const { ref: top_ref, inView: top_inView } = useInView({
         threshold,
         root: containerRef.current,
@@ -46,7 +43,7 @@ export default function InfiniteScroll({
             if (!reverse) {
                 setJustTopLoaded(false);
             }
-           
+
             loadMoreOnTop(() => {
                 if (!reverse) {
                     preScrollPositionRef.current = {
@@ -54,7 +51,6 @@ export default function InfiniteScroll({
                             containerRef.current?.scrollHeight || 0,
                         oldScrollTop: containerRef.current?.scrollTop || 0,
                     };
-                   
 
                     if (!scrollToItem) setJustTopLoaded(true);
                 }
@@ -74,27 +70,13 @@ export default function InfiniteScroll({
     }, [justTopLoaded]);
 
     useEffect(() => {
-        if (scrollToItem) {
-            if (clearTriggerScrollBottom) clearTriggerScrollBottom();
-            return;
-        }
-        if (triggerScrollBottom && !topLoading && !bottomLoading) {
-            console.log("scroll bottom");
-            containerRef.current.scrollTop =
-                containerRef.current.scrollHeight -
-                containerRef.current.clientHeight;
-            if (clearTriggerScrollBottom) clearTriggerScrollBottom();
-        }
-    }, [triggerScrollBottom, topLoading, bottomLoading, scrollToItem]);
-
-    useEffect(() => {
         console.log("bottom_inView", bottom_inView);
         if (bottomHasMore && !bottomLoading && bottom_inView) {
             console.log("load more on bottom");
             if (reverse) {
                 setJustTopLoaded(false);
             }
-           
+
             loadMoreOnBottom(() => {
                 if (reverse) {
                     preScrollPositionRef.current = {
@@ -102,7 +84,7 @@ export default function InfiniteScroll({
                             containerRef.current?.scrollHeight || 0,
                         oldScrollTop: containerRef.current?.scrollTop || 0,
                     };
-                  
+
                     if (!scrollToItem) setJustTopLoaded(true);
                 }
             });
@@ -169,4 +151,5 @@ export default function InfiniteScroll({
             <ButtonLoading position={reverse ? "top" : "bottom"} />
         </ul>
     );
-}
+});
+export default InfiniteScroll;

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import ChannelSettings from "./ChannelSettings/ChannelSettings";
 import Button from "@/Components/Button";
 import TipTapEditor from "@/Components/TipTapEditor";
@@ -16,17 +16,18 @@ import {
     updateMessageAfterSendFailed,
     updateMessageAfterSendSuccessfully,
 } from "@/Store/channelsDataSlice";
+import { ChatAreaContext } from "./ChatArea";
 
 export default function Editor({
     channel,
     permissions,
     isChannelMember,
     channelName,
-    setFocus,
     setTemporaryMessageSending,
-    setNewMessageReceived,
 }) {
+    const { scrollBottom } = useContext(ChatAreaContext);
     const { auth } = usePage().props;
+    const [focus, setFocus] = useState(1);
     const { channelId, workspaceId } = useParams();
     const { publicAppUrl } = useSelector((state) => state.workspace);
     const { channelUsers } = useChannelUsers(channelId);
@@ -72,8 +73,9 @@ export default function Editor({
         };
         setTemporaryMessageSending(true);
         dispatch(addMessage({ id: channelId, data: newMessage }));
-        setNewMessageReceived(true);
+
         setTimeout(() => {
+            scrollBottom();
             setTemporaryMessageSending(false);
         }, 0);
         axios

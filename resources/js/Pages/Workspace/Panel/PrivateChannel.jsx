@@ -10,7 +10,7 @@ export default function PrivateChannel({ channel, changeChannel }) {
     const [isPending, startTransition] = useTransition();
     function onClick() {
         startTransition(() => {
-            changeChannel(channel);
+            changeChannel(channel.id);
         });
     }
     return (

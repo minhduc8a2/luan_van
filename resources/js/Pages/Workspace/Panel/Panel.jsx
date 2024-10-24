@@ -1,16 +1,13 @@
-import { IoIosArrowDown } from "react-icons/io";
-import { HiOutlinePencilAlt } from "react-icons/hi";
 import { BiMessageRoundedDetail } from "react-icons/bi";
 import { FaCaretDown } from "react-icons/fa";
-import { LuLock, LuPlus } from "react-icons/lu";
+import { LuPlus } from "react-icons/lu";
 
-import { router, usePage } from "@inertiajs/react";
+import { usePage } from "@inertiajs/react";
 import { InvitationForm } from "./InvitationForm";
 import { DirectChannel } from "./DirectChannel";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 
 import { CreateChannelForm } from "./createChannelForm";
-import { FiArchive } from "react-icons/fi";
 
 import { memo, useContext, useMemo, useState, useTransition } from "react";
 import { useParams } from "react-router-dom";
@@ -33,8 +30,8 @@ const Panel = memo(function Panel() {
     const goToChannel = useGoToChannel();
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
 
-    function changeChannel(channel) {
-        goToChannel(channel.workspace_id, channel.id);
+    function changeChannel(channelId) {
+        goToChannel(workspaceId, channelId);
     }
     const directChannels = useMemo(() => {
         return channels.filter((cn) => cn.type == "DIRECT");
@@ -90,6 +87,7 @@ const Panel = memo(function Panel() {
                         })}
                     </ul>
                     <CreateChannelForm
+                        callback={(channelId) => changeChannel(channelId)}
                         activateButtonNode={
                             <div className="grid-item mt-2 px-4">
                                 <div className="flex items-center ">

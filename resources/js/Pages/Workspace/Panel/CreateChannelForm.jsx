@@ -28,8 +28,9 @@ export function CreateChannelForm({ activateButtonNode, callback = () => {} }) {
         e.preventDefault();
         submit().then((response) => {
             dispatch(addNewChannelToChannelsStore(response.data?.channel));
+            setIsOpen(false);
             reset();
-            callback();
+            callback(response.data?.channel?.id);
         });
     }
     return (
