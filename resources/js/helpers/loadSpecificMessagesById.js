@@ -1,4 +1,5 @@
 export function loadSpecificMessagesById(
+    workspaceId,
     messageId,
     channelId,
     threaded_message_id = null,
@@ -7,11 +8,11 @@ export function loadSpecificMessagesById(
     return axios
         .get(
             route("messages.getSpecificMessagesById", {
+                workspace: workspaceId,
                 channel: channelId,
-                messageId: messageId,
-                threaded_message_id,
             }),
             {
+                params: { threaded_message_id, messageId },
                 signal: token?.signal,
             }
         )

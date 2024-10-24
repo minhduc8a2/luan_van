@@ -159,7 +159,7 @@ export default function ChatArea() {
             setBottomHasMore(minId);
             setInitedTopAndBottom(true);
         }
-    }, [channelId,loaded, messages, initedTopAndBottom]);
+    }, [channelId, loaded, messages, initedTopAndBottom]);
 
     //handle reconnect when offline
     useEffect(() => {
@@ -382,7 +382,7 @@ export default function ChatArea() {
                     />
                     {loaded && channel && (
                         <InfiniteScroll
-                            threshold={0}
+                            threshold={0.1}
                             rootMargin="0px"
                             loadMoreOnTop={(successCallBack) =>
                                 loadMore(

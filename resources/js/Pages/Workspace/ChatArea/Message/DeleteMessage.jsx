@@ -3,21 +3,30 @@ import CustomedDialog from "@/Components/CustomedDialog";
 import { useCustomedForm } from "@/helpers/customHooks";
 import { deleteMessage } from "@/Store/channelsDataSlice";
 import { deleteThreadMessage, setThreadedMessageId } from "@/Store/threadSlice";
-import React, {  useState} from "react";
+import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useParams } from "react-router-dom";
 
 export default function DeleteMessage({ message, user }) {
+    const { workspaceId } = useParams();
     const { messageId: threadMessageId } = useSelector((state) => state.thread);
     const [isOpen, setIsOpen] = useState(false);
     const { submit, loading } = useCustomedForm(
         {},
-        { url: route("message.delete", message.id), method: "delete" }
+        {
+            url: route("message.delete", {
+                workspace: workspaceId,
+                message: message.id,
+            }),
+            method: "delete",
+        }
     );
 
     const dispatch = useDispatch();
 
     function onSubmit() {
-        submit().then(() => {
+        submit().then((response) => {
+            if(response.ok)
             dispatch(
                 deleteMessage({
                     id: message.channel_id,

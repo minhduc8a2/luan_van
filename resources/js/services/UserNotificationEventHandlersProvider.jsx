@@ -51,10 +51,16 @@ export default function UserNotificationEventHandlersProvider({ children }) {
         Echo.private("App.Models.User." + auth.user.id).notification(
             (notification) => {
                 console.log(notification);
+
                 const { workspace, channel, byUser, changesType, data } =
                     notification;
                 if (workspaceId != workspace.id) return;
-
+                if (
+                    byUser?.id != auth.user.id &&
+                    !isWorkspaceNotificationBroadcast(notification.type)
+                ) {
+                    dispatch(addNotificationCount());
+                }
                 if (isWorkspaceNotificationBroadcast(notification.type)) {
                     switch (changesType) {
                         case WorkspaceEventsEnum.STORE_CHANNEL:
@@ -70,9 +76,7 @@ export default function UserNotificationEventHandlersProvider({ children }) {
 
                 if (isChannelsNotificationBroadcast(notification.type)) {
                     //add count
-                    if (byUser?.id != auth.user.id) {
-                        dispatch(addNotificationCount());
-                    }
+
                     //
                     switch (changesType) {
                         case ChannelEventsEnum.ADDED_TO_NEW_CHANNEL:

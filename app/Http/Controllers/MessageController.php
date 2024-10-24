@@ -76,7 +76,7 @@ class MessageController extends Controller
         return $messagesQuery->limit($perPage)->get();
     }
 
-    public function getSpecificMessagesById(Request $request,  Channel $channel)
+    public function getSpecificMessagesById(Request $request, Workspace $workspace,  Channel $channel)
     {
         $messageId = $request->query('messageId');
         $threaded_message_id = $request->query('thread_message_id');
@@ -488,7 +488,7 @@ class MessageController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request, Message $message)
+    public function destroy(Request $request, Workspace $workspace, Message $message)
     {
         if ($request->user()->cannot('delete', [Message::class, $message])) return abort(403);
         try {
@@ -499,9 +499,6 @@ class MessageController extends Controller
             if ($isChannelMessage) {
 
                 $message->threadMessages()->forceDelete();
-
-                //no need to delete files, not depend on message
-
             }
             $message->reactions()->delete();
             $message->files()->detach();

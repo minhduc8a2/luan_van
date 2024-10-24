@@ -2,7 +2,7 @@
 
 namespace App\Events;
 
-
+use App\Helpers\ChannelEventsEnum;
 use App\Models\Channel;
 use App\Models\Message;
 use Illuminate\Queue\SerializesModels;
@@ -20,7 +20,7 @@ class ThreadMessageEvent implements ShouldBroadcastNow
     /**
      * Create a new event instance.
      */
-    public function __construct(public Message $threadedMessage, public Message $threadMessage, public string $type = "newMessageCreated", public $temporaryId=null)
+    public function __construct(public Message $threadedMessage, public Message $threadMessage, public string $type = ChannelEventsEnum::NEW_MESSAGE_CREATED->name, public $temporaryId = null)
     {
         //
     }
@@ -43,7 +43,7 @@ class ThreadMessageEvent implements ShouldBroadcastNow
             'threadedMessageId' => $this->threadedMessage->id,
             'message' => $this->threadMessage,
             "type" => $this->type,
-            "temporaryId"=>$this->temporaryId
+            "temporaryId" => $this->temporaryId
         ];
     }
 }

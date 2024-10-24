@@ -24,8 +24,8 @@ export default function MentionNotification({
     const channelsData = useSelector((state) => state.channelsData);
     const { channelId, workspaceId } = useParams();
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
-    const { messages } = useChannelData(channelId);
-    const { fromUser, channel, workspace, message, threadMessage } =
+    const { messagesMap } = useChannelData(channelId);
+    const { byUser, channel, workspace, message, threadMessage } =
         isMentionNotificationBroadcast(notification.type)
             ? notification
             : notification.data;
@@ -38,7 +38,7 @@ export default function MentionNotification({
     function handleNotificationClickedPart() {
         //check channel is available
         axios
-            .get(route("channel.checkExists"), {
+            .get(route("channels.checkExists", workspaceId), {
                 params: { channelId: channel.id },
             })
             .then((response) => {
@@ -57,6 +57,7 @@ export default function MentionNotification({
                     if (!channelsData.hasOwnProperty(channel.id)) {
                         loadChannelRelatedData(channel.id).then(() => {
                             loadSpecificMessagesById(
+                                workspaceId,
                                 threadMessage.id,
                                 channel.id,
                                 message.id
@@ -76,6 +77,8 @@ export default function MentionNotification({
                         });
                     } else {
                         loadSpecificMessagesById(
+                            workspaceId,
+
                             threadMessage.id,
                             channel.id,
                             message.id
@@ -95,7 +98,7 @@ export default function MentionNotification({
                     }
                 } else if (
                     channel.id == channelId &&
-                    messages.find((msg) => msg.id == message.id)
+                    messagesMap.hasOwnProperty(message.id)
                 ) {
                     const targetMessage = document.getElementById(
                         `message-${message.id}`
@@ -114,18 +117,20 @@ export default function MentionNotification({
                     }
                 } else {
                     if (channelsData.hasOwnProperty(channel.id)) {
-                        loadSpecificMessagesById(message.id, channel.id).then(
-                            (data) => {
-                                dispatch(
-                                    setChannelData({
-                                        id: channel.id,
-                                        data: { messages: data },
-                                    })
-                                );
-                                dispatch(setMention({ messageId: message.id }));
-                                navigate(`channels/${channel.id}`);
-                            }
-                        );
+                        loadSpecificMessagesById(
+                            workspaceId,
+                            message.id,
+                            channel.id
+                        ).then((data) => {
+                            dispatch(
+                                setChannelData({
+                                    id: channel.id,
+                                    data: { messages: data },
+                                })
+                            );
+                            dispatch(setMention({ messageId: message.id }));
+                            navigate(`channels/${channel.id}`);
+                        });
                     } else {
                         dispatch(setMention({ messageId: message.id }));
                         navigate(`channels/${channel.id}`);
@@ -163,14 +168,14 @@ export default function MentionNotification({
                 <div className="flex gap-x-2 justify-between">
                     <div className={`message-container   flex-1`}>
                         <Avatar
-                            src={fromUser.avatar_url}
+                            src={byUser.avatar_url}
                             className="w-8 h-8"
                             noStatus={true}
                         />
                         <div className="mx-2 ">
                             <div className="flex gap-x-2 items-center">
                                 <div className="text-sm font-bold">
-                                    {fromUser.name}
+                                    {byUser.name}
                                 </div>
                                 <div className="text-xs">
                                     {UTCToDateTime(created_at)}

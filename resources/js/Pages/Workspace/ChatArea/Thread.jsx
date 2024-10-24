@@ -37,6 +37,7 @@ import {
 } from "@/Store/channelsDataSlice";
 import { useParams } from "react-router-dom";
 import MessagePlaceHolder from "./Message/MessagePlaceHolder";
+import ChannelEventsEnum from "@/services/Enums/ChannelEventsEnum";
 export default function Thread() {
     const { auth } = usePage().props;
     const dispatch = useDispatch();
@@ -341,12 +342,12 @@ export default function Thread() {
             .listen("ThreadMessageEvent", (e) => {
                 console.log(e);
                 switch (e.type) {
-                    case "newMessageCreated":
+                    case ChannelEventsEnum.NEW_MESSAGE_CREATED:
                         if (!isHiddenUser(workspaceUsers, e.message?.user_id))
                             dispatch(addThreadMessage(e.message));
 
                         break;
-                    case "messageEdited":
+                    case ChannelEventsEnum.MESSAGE_EDITED:
                         if (!isHiddenUser(workspaceUsers, e.message?.user_id)) {
                             dispatch(
                                 editThreadMessage({
@@ -357,16 +358,14 @@ export default function Thread() {
                         }
                         break;
 
-                    case "messageDeleted":
+                    case ChannelEventsEnum.MESSAGE_DELETED:
                         if (!isHiddenUser(workspaceUsers, e.message?.user_id)) {
                             dispatch(deleteThreadMessage(e.message.id));
                         }
                         break;
                 }
             })
-            .listenForWhisper("messageReaction", (e) => {
-                setNewMessageReactionReceive(e);
-            })
+
             .error((error) => {
                 console.error(error);
             });

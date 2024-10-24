@@ -4,7 +4,15 @@ import { useEffect } from "react";
 
 import { useDispatch, useSelector } from "react-redux";
 
-import { deleteFileInThread, setThreadedMessageId } from "@/Store/threadSlice";
+import {
+    addReactionToThreadedMessage,
+    addReactionToThreadMessage,
+    deleteFileInThread,
+    editThreadedMessage,
+    removeReactionFromThreadedMessage,
+    removeReactionFromThreadMessage,
+    setThreadedMessageId,
+} from "@/Store/threadSlice";
 import {
     addMessageCountForChannel,
     updateChannelInformation,
@@ -125,6 +133,12 @@ export default function ChannelEventHandlersProvider({ children }) {
                                         },
                                     })
                                 );
+                                dispatch(
+                                    editThreadedMessage({
+                                        id: e.message.id,
+                                        data: e.message,
+                                    })
+                                );
                                 break;
                             case ChannelEventsEnum.MESSAGE_DELETED:
                                 if (threadMessageIdRef.current == e.message?.id)
@@ -143,7 +157,7 @@ export default function ChannelEventHandlersProvider({ children }) {
                         }
                     })
                     .listen("ChannelEvent", (e) => {
-                        console.log("ChannelEvent",e);
+                        console.log("ChannelEvent", e);
                         switch (e.type) {
                             case ChannelEventsEnum.CHANNEL_UPDATED:
                                 dispatch(
@@ -250,6 +264,18 @@ export default function ChannelEventHandlersProvider({ children }) {
                                         data: e.data,
                                     })
                                 );
+                                dispatch(
+                                    addReactionToThreadedMessage({
+                                        id: e.data.message_id,
+                                        data: e.data,
+                                    })
+                                );
+                                dispatch(
+                                    addReactionToThreadMessage({
+                                        message_id: e.data.message_id,
+                                        data: e.data,
+                                    })
+                                );
                                 break;
                             case ChannelEventsEnum.REACTION_DELETED:
                                 dispatch(
@@ -258,6 +284,19 @@ export default function ChannelEventHandlersProvider({ children }) {
                                         data: e.data,
                                     })
                                 );
+                                dispatch(
+                                    removeReactionFromThreadedMessage({
+                                        id: e.data.message_id,
+                                        reactionId: e.data.reactionId,
+                                    })
+                                );
+                                dispatch(
+                                    removeReactionFromThreadMessage({
+                                        message_id: e.data.message_id,
+                                        reactionId: e.data.reactionId,
+                                    })
+                                );
+
                                 break;
                         }
                     });
