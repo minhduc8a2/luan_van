@@ -4,11 +4,14 @@ import { IoIosArrowForward } from "react-icons/io";
 import { IoSettingsOutline } from "react-icons/io5";
 import { LuUser2 } from "react-icons/lu";
 import { RiContactsBook2Line, RiUserSettingsLine } from "react-icons/ri";
+import { useSelector } from "react-redux";
 import { Link, useParams } from "react-router-dom";
 
 export default function Home() {
     const { auth } = usePage().props;
     const { workspaceId } = useParams();
+    const { workspacePermissions } = useSelector((state) => state.workspace);
+
     return (
         <div className="pl-16 pt-16">
             <div className="flex gap-x-3">
@@ -27,22 +30,24 @@ export default function Home() {
                                 password, and manage other account settings"
                 />
             </div>
-            <div className="bg-color-contrast p-4 rounded-lg w-3/4 mt-8">
-                <LinkItem
-                    to={`/workspaces/${workspaceId}/admin/settings`}
-                    bgColor="bg-orange-500"
-                    icon={<IoSettingsOutline className="text-3xl" />}
-                    title="Settings & Permissions"
-                    description="Configure your workspace settings, permissions."
-                />
-                <LinkItem
-                    to={`/workspaces/${workspaceId}/admin/manage_members`}
-                    bgColor="bg-dark-green"
-                    icon={<RiContactsBook2Line className="text-3xl" />}
-                    title="Manage Your Workspace"
-                    description="Invite new members and manage user permissions."
-                />
-            </div>
+            {workspacePermissions.update && (
+                <div className="bg-color-contrast p-4 rounded-lg w-3/4 mt-8">
+                    <LinkItem
+                        to={`/workspaces/${workspaceId}/admin/settings`}
+                        bgColor="bg-orange-500"
+                        icon={<IoSettingsOutline className="text-3xl" />}
+                        title="Settings & Permissions"
+                        description="Configure your workspace settings, permissions."
+                    />
+                    <LinkItem
+                        to={`/workspaces/${workspaceId}/admin/manage_members`}
+                        bgColor="bg-dark-green"
+                        icon={<RiContactsBook2Line className="text-3xl" />}
+                        title="Manage Your Workspace"
+                        description="Invite new members and manage user permissions."
+                    />
+                </div>
+            )}
         </div>
     );
 }

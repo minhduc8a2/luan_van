@@ -135,7 +135,7 @@ class WorkspaceController extends Controller
     }
     public function accountAndProfile(Request $request, Workspace $workspace)
     {
-        if ($request->user()->cannot('update', [Workspace::class, $workspace])) abort(403);
+        if ($request->user()->cannot('view', [Workspace::class, $workspace])) abort(403);
         return $this->clientRouting($request, $workspace);
     }
     public function settingsHome(Request $request, Workspace $workspace)

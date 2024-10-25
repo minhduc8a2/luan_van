@@ -6,35 +6,31 @@ import HideUser from "./HideUser";
 import { router, usePage } from "@inertiajs/react";
 import { useDispatch } from "react-redux";
 import { updateWorkspaceUserInformation } from "@/Store/workspaceUsersSlice";
+import { useParams } from "react-router-dom";
+import useErrorHandler from "@/helpers/useErrorHandler";
 
 export default function MoreOptions({ user }) {
     const [hideUserOpen, setHideUserOpen] = useState(false);
-    const { workspace } = usePage().props;
+    const { workspaceId } = useParams();
     const dispatch = useDispatch();
+    const errorHandler = useErrorHandler();
+
     function unhideUser() {
-        router.post(
-            route("users.hide"),
-            { userId: user.id, workspaceId: workspace.id, mode: "unhide" },
-            {
-                preserveState: true,
-                onError: (errors) => {
-                    dispatch(
-                        setNotificationPopup({
-                            type: "error",
-                            messages: Object.values(errors),
-                        })
-                    );
-                },
-                onSuccess: () => {
-                    dispatch(
-                        updateWorkspaceUserInformation({
-                            id: user.id,
-                            data: { is_hidden: false },
-                        })
-                    );
-                },
-            }
-        );
+        axios
+            .post(route("users.hide", workspaceId), {
+                userId: user.id,
+                mode: "unhide",
+            })
+
+            .then(() => {
+                dispatch(
+                    updateWorkspaceUserInformation({
+                        id: user.id,
+                        data: { is_hidden: false },
+                    })
+                );
+            })
+            .catch(errorHandler);
     }
     return (
         <>

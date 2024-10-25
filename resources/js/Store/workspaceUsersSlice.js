@@ -14,11 +14,10 @@ export const workspaceUsersSlice = createSlice({
                 (user) => user.id === action.payload.id
             );
             if (userIndex >= 0) {
-                Object.keys(action.payload.data).forEach((key) => {
-                    if (key == "id") return;
-                    state.workspaceUsers[userIndex][key] =
-                        action.payload.data[key];
-                });
+                Object.assign(
+                    state.workspaceUsers[userIndex],
+                    action.payload.data
+                );
             }
         },
         addWorkspaceUser(state, action) {

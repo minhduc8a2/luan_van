@@ -75,7 +75,7 @@ class UserController extends Controller
         //
     }
 
-  
+
     public function updateAvatar(Request $request, User $user)
     {
         if ($request->user()->id !== $user->id) return abort(403);
@@ -86,7 +86,7 @@ class UserController extends Controller
         ]);
 
         $avatarFile = $validated['avatarFile'];
-        
+
         $path = $avatarFile->store('public/users_' . $user->id);
         $url = Storage::url($path);
         $oldAvatarFilePath = null;
@@ -139,11 +139,10 @@ class UserController extends Controller
         return back();
     }
 
-    public function hide(Request $request)
+    public function hide(Request $request, Workspace $workspace)
     {
         $validated = $request->validate([
             "userId" => "required|integer",
-            "workspaceId" => "required|integer",
             "mode" => "required|in:hide,unhide",
         ]);
         if ($request->user()->id == $validated["userId"]) return abort(403);
@@ -155,22 +154,22 @@ class UserController extends Controller
                 DB::table("hidden_users")->insert([
                     'user_id' => $request->user()->id,
                     'hidden_user_id' => $validated["userId"],
-                    "workspace_id" => $validated["workspaceId"]
+                    "workspace_id" => $workspace->id
                 ]);
             } else {
                 DB::table("hidden_users")
                     ->where('user_id', $request->user()->id)
                     ->where('hidden_user_id', $validated["userId"])
-                    ->where('workspace_id', $validated["workspaceId"])
+                    ->where('workspace_id', $workspace->id)
                     ->delete();
             }
 
 
             DB::commit();
-            return back();
+            return Helper::createSuccessResponse();
         } catch (\Throwable $th) {
             DB::rollBack();
-            return back()->withErrors(['server' => "Something went wrong! Please try later."]);
+            Helper::createErrorResponse();
         }
     }
     /**

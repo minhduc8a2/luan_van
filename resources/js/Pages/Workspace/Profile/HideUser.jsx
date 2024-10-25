@@ -1,44 +1,35 @@
 import Button from "@/Components/Button";
 import CustomedDialog from "@/Components/CustomedDialog";
-import CustomedPopover from "@/Components/CustomedPopover";
-import { setNotificationPopup } from "@/Store/notificationPopupSlice";
+import useErrorHandler from "@/helpers/useErrorHandler";
 import { updateWorkspaceUserInformation } from "@/Store/workspaceUsersSlice";
-import { router, usePage } from "@inertiajs/react";
-import React, { useState } from "react";
 import { FiBellOff } from "react-icons/fi";
 import { IoSettingsOutline } from "react-icons/io5";
 import { RiUserForbidLine } from "react-icons/ri";
 import { useDispatch } from "react-redux";
+import { useParams } from "react-router-dom";
 
 export default function HideUser({ user, isOpen, onClose }) {
-    const { workspace } = usePage().props;
+    const { workspaceId } = useParams();
     const dispatch = useDispatch();
+    const errorHandler = useErrorHandler();
 
     function hideUser() {
-        router.post(
-            route("users.hide"),
-            { userId: user.id, workspaceId: workspace.id, mode: "hide" },
-            {
-                preserveState: true,
-                onError: (errors) => {
-                    dispatch(
-                        setNotificationPopup({
-                            type: "error",
-                            messages: Object.values(errors),
-                        })
-                    );
-                },
-                onSuccess: () => {
-                    onClose();
-                    dispatch(
-                        updateWorkspaceUserInformation({
-                            id: user.id,
-                            data: { is_hidden: true },
-                        })
-                    );
-                },
-            }
-        );
+        axios
+            .post(route("users.hide", workspaceId), {
+                userId: user.id,
+                mode: "hide",
+            })
+
+            .then(() => {
+                onClose();
+                dispatch(
+                    updateWorkspaceUserInformation({
+                        id: user.id,
+                        data: { is_hidden: true },
+                    })
+                );
+            })
+            .catch(errorHandler);
     }
     return (
         <>

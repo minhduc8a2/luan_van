@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useContext, useMemo } from "react";
 import { UTCToDateTime, UTCToTime } from "@/helpers/dateTimeHelper";
 import Avatar from "@/Components/Avatar";
 import { isDocument, isImage, isVideo } from "@/helpers/fileHelpers";
@@ -21,6 +21,7 @@ import ForwardMessage from "./ForwardMessage/ForwardMessage";
 import Message from "./Message";
 import { useChannel, useChannelUsers } from "@/helpers/customHooks";
 import { useParams } from "react-router-dom";
+import ThemeContext from "@/ThemeProvider";
 export default function ForwardedMessage({
     message,
     user,
@@ -33,6 +34,7 @@ export default function ForwardedMessage({
 }) {
     const { auth } = usePage().props;
     const { channelId } = useParams();
+    const { theme } = useContext(ThemeContext);
     const dispatch = useDispatch();
     const { channels } = useSelector((state) => state.channels);
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
@@ -238,7 +240,9 @@ export default function ForwardedMessage({
                 ) : (
                     <>
                         <div
-                            className="prose prose-invert "
+                            className={`prose ${
+                                theme.mode ? "prose-invert" : ""
+                            } select-text`}
                             dangerouslySetInnerHTML={{
                                 __html: message.deleted_at
                                     ? '<p class="italic text-color/50">Deleted message</p>'

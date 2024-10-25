@@ -131,7 +131,7 @@ export default function ForwardMessage({ message, show, onClose }) {
                                     onRemove={() => setChoosenChannelsList([])}
                                     key={item.id}
                                 >
-                                    <div className="flex items-baseline gap-x-1">
+                                    <div className="flex items-baseline gap-x-1 text-color-medium-emphasis">
                                         {item.type == "PUBLIC" ? (
                                             <span className="text-xl">#</span>
                                         ) : (
@@ -195,7 +195,7 @@ export default function ForwardMessage({ message, show, onClose }) {
                             } else
                                 return (
                                     <button
-                                        className="flex items-baseline gap-x-1 hover:bg-color/15 px-4 py-1"
+                                        className="flex items-baseline gap-x-1 hover:bg-color/15 px-4 py-1 text-color-medium-emphasis"
                                         key={item.id}
                                         onClick={() =>
                                             handleChooseChannel(item)

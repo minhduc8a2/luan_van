@@ -39,7 +39,10 @@ const Panel = memo(function Panel() {
     const selfChannel = useMemo(() => {
         return channels.find((cn) => cn.type == "SELF");
     }, [channels]);
-
+    const currentUser =
+        useMemo(() => {
+            return workspaceUsers.find((u) => u.id == auth.user.id);
+        }, [workspaceUsers]) || auth.user;
     return (
         <div
             className={`${
@@ -128,7 +131,7 @@ const Panel = memo(function Panel() {
                         })}
                         <DirectChannel
                             isOnline={true}
-                            user={{ ...auth.user, online: true }}
+                            user={{ ...currentUser, online: true }}
                             channel={selfChannel}
                         />
                     </ul>

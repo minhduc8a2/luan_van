@@ -67,11 +67,11 @@ export default function UpdateEmailForm() {
                 </div>
                 {mustVerifyEmail && user.email_verified_at === null && (
                     <div>
-                        <p className="text-sm mt-2 text-gray-800">
+                        <p className="text-sm mt-2 text-color-high-emphasis">
                             Your email address is unverified.
                             <button
                                 onClick={reSendEmailVerification}
-                                className="underline text-sm text-color-medium-emphasis hover:text-gray-900 rounded-md "
+                                className="underline text-sm text-color-medium-emphasis hover:text-color-high-emphasis rounded-md "
                             >
                                 Click here to re-send the verification email.
                             </button>
@@ -97,7 +97,7 @@ export default function UpdateEmailForm() {
                         leave="transition ease-in-out"
                         leaveTo="opacity-0"
                     >
-                        <p className="text-sm text-gray-600">Saved.</p>
+                        <p className="text-sm text-color-medium-emphasis">Saved.</p>
                     </Transition>
                 </div>
             </form>

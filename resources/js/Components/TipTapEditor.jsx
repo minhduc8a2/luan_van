@@ -545,7 +545,7 @@ export default function TipTapEditor({
                                 )}
                         </div>
 
-                        <div className="p-1 px-2 bg-green-800 rounded flex justify-center items-center gap-x-2">
+                        <div className="p-1 px-2 bg-green-800 text-white rounded flex justify-center items-center gap-x-2">
                             <button onClick={() => submit(editor)}>
                                 <IoMdSend className="text-base" />
                             </button>

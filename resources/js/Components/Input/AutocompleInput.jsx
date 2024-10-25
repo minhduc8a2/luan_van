@@ -38,11 +38,11 @@ function AutocompleInput({
 
 function InputItem({ children, onRemove }) {
     return (
-        <div className="p-2 bg-link/15 rounded flex gap-x-2 items-center">
+        <div className="p-2 bg-link/15 rounded flex gap-x-2 items-center text-color-medium-emphasis">
             {children}
             <button
                 onClick={onRemove}
-                className="h-6 w-6 flex justify-center items-center rounded hover:bg-color/15"
+                className="h-6 w-6 flex justify-center items-center rounded hover:bg-color/15 text-color-medium-emphasis"
             >
                 <IoClose />
             </button>
