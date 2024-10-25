@@ -286,11 +286,15 @@ class WorkspaceController extends Controller
         }
         try {
             DB::beginTransaction();
-            $exists = $workspace->users()->where('users.id', $userId)->first();
+            $exists = $workspace->users()->where('users.id', $userId)->exists();
 
             if ($exists) {
+
                 $workspace->users()->updateExistingPivot($userId, ['is_deactivated' => $wantDeactivate]);
-                broadcast(new WorkspaceEvent($workspace->id, WorkspaceEventsEnum::DEACTIVATE_USER_UPDATED->name, data: $workspace->users()->where('users.id', $userId)->first()));
+                $user = $workspace->users()->where('users.id', $userId)->first();
+                $workspace->pivot=$user->pivot;
+                $user->notify(new WorkspaceNotification($workspace,WorkspaceEventsEnum::DEACTIVATE_USER_UPDATED->name));
+                broadcast(new WorkspaceEvent($workspace->id, WorkspaceEventsEnum::DEACTIVATE_USER_UPDATED->name, data:$user ));
             }
             DB::commit();
             return Helper::createSuccessResponse();

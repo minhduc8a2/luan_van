@@ -48,6 +48,7 @@ export default function UserOptions() {
                 </CustomedPopover.ListItem>
                 <CustomedPopover.ListItem>
                     <Link
+                        className="block"
                         to={`/workspaces/${workspaceId}/admin/account_profile`}
                     >
                         Account settings
@@ -55,7 +56,7 @@ export default function UserOptions() {
                 </CustomedPopover.ListItem>
 
                 <CustomedPopover.ListItem>
-                    <Link to="/workspaces">
+                    <Link to="/workspaces" className="block">
                         Sign out of{" "}
                         <span className="font-bold capitalize">
                             {workspace.name}

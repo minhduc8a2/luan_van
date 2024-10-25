@@ -5,7 +5,7 @@ import { AddWorkspace } from "@/Components/AddWorkspace";
 import { usePage, Link as InertiaLink } from "@inertiajs/react";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
-import { setWorkspaces, updateWorkspace } from "@/Store/workspaceSlice";
+import { setWorkspaces } from "@/Store/workspaceSlice";
 import WorkspaceItem from "./WorkspaceItem";
 import InvitationRequest from "./InvitationRequest";
 import SnackLogo from "@/Components/SnackLogo";
