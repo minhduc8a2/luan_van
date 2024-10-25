@@ -148,7 +148,7 @@ export default function Managers() {
                                     searchValue.toLowerCase();
                                 return (
                                     user.display_name
-                                        .toLowerCase()
+                                        ?.toLowerCase()
                                         .includes(lowerCaseValue) ||
                                     user.name
                                         .toLowerCase()

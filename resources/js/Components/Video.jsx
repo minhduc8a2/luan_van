@@ -28,7 +28,7 @@ export default function Video({
     deleteFn,
     noToolbar = false,
 }) {
-    const publicAppUrl = import.meta.env.VITE_PUBLIC_APP_URL
+    const publicAppUrl = import.meta.env.VITE_PUBLIC_APP_URL;
     const [smallLoaded, setSmallLoaded] = useState(false);
     const [largeLoaded, setLargeLoaded] = useState(false);
     const [playing, setPlaying] = useState(false);
@@ -42,7 +42,7 @@ export default function Video({
     const [fullscreen, setFullscreen] = useState(fullScreenMode);
     const timeoutRef = useRef(null);
     const [isMouseMoving, setIsMouseMoving] = useState(false);
-    const close = useClose();
+   
     if (!src) return "";
     const showController = () => {
         setIsMouseMoving(true);
@@ -331,50 +331,54 @@ export default function Video({
                         <RiExpandDiagonalFill className="text-lg" />
                     </button>
                     <Popover className="relative">
-                        <PopoverButton className=" p-2 bg-black/75 rounded-lg text-gray-200 hover:text-white hover:bg-black/85">
-                            <div
-                                onClick={() => {
-                                    setIsHovered(true);
-                                }}
-                            >
-                                <MdMoreVert className="text-xl" />
-                            </div>
-                        </PopoverButton>
-                        <PopoverPanel anchor="bottom" className="">
-                            <div className="w-64 flex flex-col z-20 relative rounded-lg mt-4 border border-color/15 py-2 bg-background ">
-                                <a
-                                    href={src}
-                                    target="_blank"
-                                    className=" hover:bg-color/15 py-1 text-left px-4"
-                                >
-                                    Open in new tab
-                                </a>
-                                <button
-                                    className=" hover:bg-color/15 py-1 text-left px-4"
-                                    onClick={() => {
-                                        copy(publicAppUrl + src);
-                                        close();
-                                        setIsHovered(false);
-                                    }}
-                                >
-                                    Copy link to file
-                                </button>
-                                <button
-                                    onClick={() => deleteFn()}
-                                    className="text-danger-500 hover:bg-color/15 py-1 text-left px-4"
-                                >
-                                    Delete
-                                </button>
-                            </div>
-                            <div
-                                className="fixed top-0 bottom-0 right-0 left-0 bg-transparent overflow-hidden z-10"
-                                onClick={() => {
-                                    close();
+                        {({ close }) => (
+                            <>
+                                <PopoverButton className=" p-2 bg-black/75 rounded-lg text-gray-200 hover:text-white hover:bg-black/85">
+                                    <div
+                                        onClick={() => {
+                                            setIsHovered(true);
+                                        }}
+                                    >
+                                        <MdMoreVert className="text-xl" />
+                                    </div>
+                                </PopoverButton>
+                                <PopoverPanel anchor="bottom" className="">
+                                    <div className="w-64 flex flex-col z-20 relative rounded-lg mt-4 border border-color/15 py-2 bg-background ">
+                                        <a
+                                            href={src}
+                                            target="_blank"
+                                            className=" hover:bg-color/15 py-1 text-left px-4"
+                                        >
+                                            Open in new tab
+                                        </a>
+                                        <button
+                                            className=" hover:bg-color/15 py-1 text-left px-4"
+                                            onClick={() => {
+                                                copy(publicAppUrl + src);
+                                                close();
+                                                setIsHovered(false);
+                                            }}
+                                        >
+                                            Copy link to file
+                                        </button>
+                                        <button
+                                            onClick={() => deleteFn()}
+                                            className="text-danger-500 hover:bg-color/15 py-1 text-left px-4"
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
+                                    <div
+                                        className="fixed top-0 bottom-0 right-0 left-0 bg-transparent overflow-hidden z-10"
+                                        onClick={() => {
+                                            close();
 
-                                    setIsHovered(false);
-                                }}
-                            ></div>
-                        </PopoverPanel>
+                                            setIsHovered(false);
+                                        }}
+                                    ></div>
+                                </PopoverPanel>
+                            </>
+                        )}
                     </Popover>
                 </div>
             )}

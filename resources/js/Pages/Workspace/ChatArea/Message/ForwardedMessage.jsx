@@ -109,66 +109,43 @@ export default function ForwardedMessage({
         );
     }
     function reactToMessage(emojiId) {
-        router.post(
-            route("reaction.store", {
-                channel: channel.id,
-                message: message.id,
-            }),
-            {
-                emoji_id: emojiId,
-            },
-            {
-                preserveScroll: true,
-                preserveState: true,
-                onSuccess: () => {
-                    setReactions((pre) => [
-                        ...pre,
-                        { emoji_id: emojiId, user_id: auth.user.id },
-                    ]);
-                    messagableConnectionRef.current.whisper("messageReaction", {
-                        method: "STORE",
-                        emoji_id: emojiId,
-                        user_id: auth.user.id,
-                        id: message.id,
-                    });
-                },
-            }
+        const reaction = message.reactions.find(
+            (re) => re.emoji_id == emojiId && re.user_id == auth.user.id
         );
+        if (!reaction) {
+            axios.post(
+                route("reaction.store", {
+                    workspace: channel.workspace_id,
+                    channel: channel.id,
+                    message: message.id,
+                }),
+                {
+                    emoji_id: emojiId,
+                },
+                {
+                    headers: {
+                        "X-Socket-Id": Echo.socketId(),
+                    },
+                }
+            );
+        }
     }
     function removeMessageReaction(emojiId) {
-        router.post(
-            route("reaction.delete", {
-                channel: channel.id,
-                message: message.id,
-            }),
-            {
-                emoji_id: emojiId,
-            },
-            {
-                preserveScroll: true,
-                preserveState: true,
-                onSuccess: () => {
-                    setReactions((pre) =>
-                        pre.filter(
-                            (reaction) =>
-                                !(
-                                    reaction.emoji_id === emojiId &&
-                                    reaction.user_id === auth.user.id
-                                )
-                        )
-                    );
-                    messagableConnectionRef.current.whisper("messageReaction", {
-                        method: "DELETE",
-                        emoji_id: emojiId,
-                        user_id: auth.user.id,
-                        id: message.id,
-                    });
-                },
-                onError: (errors) => {
-                    console.log(errors);
-                },
-            }
+        const reaction = message.reactions.find(
+            (re) => re.emoji_id == emojiId && re.user_id == auth.user.id
         );
+        if (reaction) {
+            axios.delete(
+                route("reaction.delete", {
+                    workspace: channel.workspace_id,
+                    channel: channel.id,
+                    reaction: reaction.id,
+                }),
+                {
+                    emoji_id: emojiId,
+                }
+            );
+        }
     }
 
     return (

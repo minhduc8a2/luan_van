@@ -100,7 +100,7 @@ export default function Members() {
                         const lowerCaseValue = searchValue.toLowerCase();
                         return (
                             user.display_name
-                                .toLowerCase()
+                                ?.toLowerCase()
                                 .includes(lowerCaseValue) ||
                             user.name.toLowerCase().includes(lowerCaseValue)
                         );
