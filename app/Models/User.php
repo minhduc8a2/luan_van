@@ -58,6 +58,11 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         $this->notify(new \App\Notifications\VerifyEmailQueuedNotification);
     }
+
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new \App\Notifications\Auth\QueuedResetPassword($token));
+    }
     /**
      * Get the attributes that should be cast.
      *
@@ -83,7 +88,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function workspaces(): BelongsToMany
     {
-        return $this->belongsToMany(Workspace::class)->withPivot(['role_id', 'is_approved', 'is_deactivated','invitation_id'])->withTimestamps();
+        return $this->belongsToMany(Workspace::class)->withPivot(['role_id', 'is_approved', 'is_deactivated', 'invitation_id'])->withTimestamps();
     }
 
     public function ownChannels(): HasMany

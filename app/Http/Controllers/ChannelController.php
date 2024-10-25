@@ -15,11 +15,13 @@ use App\Events\ChannelEvent;
 use Illuminate\Http\Request;
 use App\Helpers\ChannelTypes;
 use App\Events\WorkspaceEvent;
-use App\Helpers\ChannelEventsEnum;
 use Illuminate\Support\Carbon;
 use App\Helpers\PermissionTypes;
-use App\Helpers\WorkspaceEventsEnum;
+use App\Helpers\ChannelEventsEnum;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use App\Helpers\WorkspaceEventsEnum;
+use App\Jobs\DeleteChannel;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Broadcast;
 use App\Notifications\ChannelsNotification;
@@ -731,21 +733,23 @@ class ChannelController extends Controller
             $channel->is_archived = $validated['status'];
             $user = $request->user();
             $channel->save();
-            broadcast(new ChannelEvent($channel->id, "archiveChannel"));
+            broadcast(new ChannelEvent($channel->id, $validated['status'] ? ChannelEventsEnum::ARCHIVE_CHANNEL->name : ChannelEventsEnum::UNARCHIVE_CHANNEL->name, $channel));
             $channelUsers = $channel->users;
             foreach ($channelUsers as $channelUser) {
                 $channelUser->notify(new ChannelsNotification(
                     $workspace,
                     $channel,
                     $user,
-                    $validated['status'] ? ChannelEventsEnum::ARCHIVE_CHANNEL->NAME : ChannelEventsEnum::UNARCHIVE_CHANNEL->name,
+                    $validated['status'] ? ChannelEventsEnum::ARCHIVE_CHANNEL->name : ChannelEventsEnum::UNARCHIVE_CHANNEL->name,
 
                 ));
             }
+
             DB::commit();
             return Helper::createSuccessResponse();
         } catch (\Throwable $th) {
             DB::rollBack();
+            dd($th);
             Helper::createErrorResponse();
         }
     }
@@ -794,25 +798,24 @@ class ChannelController extends Controller
             $workspace = $channel->workspace;
             $channel->messages()->forceDelete();
             $channel->permissions()->delete();
-            $channel->delete();
+            DeleteChannel::dispatch($channel->id)->delay(now()->addSeconds(2));
 
             foreach ($channelUsers as $channelUser) {
                 $channelUser->notify(new ChannelsNotification(
                     $workspace,
-                    $channel,
+                    $copiedChannel,
                     $user,
-                    ChannelEventsEnum::DELETE_CHANNEL->name,
-
-
+                    ChannelEventsEnum::DELETE_CHANNEL->name
                 ));
             }
 
 
+
             DB::commit();
-            return ['message' => 'successfull'];
+            return Helper::createSuccessResponse();
         } catch (\Throwable $th) {
             DB::rollBack();
-
+            dd($th);
             Helper::createErrorResponse();
         }
     }

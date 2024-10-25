@@ -21,6 +21,7 @@ use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Auth\ProviderController;
 use App\Http\Middleware\HandleWorkspaceRequests;
+use App\Models\Channel;
 use App\Models\Workspace;
 
 
@@ -56,8 +57,13 @@ Route::middleware(['auth', HandleWorkspaceRequests::class])->group(function () {
             Route::post("/archive", [ChannelController::class, 'archive'])->name("channels.archive");
             Route::delete("", [ChannelController::class, 'destroy'])->name("channel.delete");
             Route::post("/messages", [MessageController::class, 'store'])->name('message.store');
-            Route::get("", [ChannelController::class, 'show'])->name('channels.show')->missing(function (Workspace $workspace) {
-                return Redirect::route('/channels/' . $workspace->main_channel_id);
+            Route::get("", [ChannelController::class, 'show'])->name('channels.show')->missing(function (Request $request) {
+                $workspace = $request->route('workspace');
+                if ($workspace instanceof Workspace) {
+
+                    return Redirect::route('channels.show', ['workspace' => $workspace->id, 'channel' => $workspace->main_channel_id]);
+                }
+                return Redirect::route('workspaces');
             });
             Route::get("/init_channel_data", [ChannelController::class, 'initChannelData'])->name('channels.initChannelData');
             Route::get("/messages/infinite_messages", [MessageController::class, 'infiniteMessages'])->name('messages.infiniteMessages');
@@ -90,12 +96,14 @@ Route::middleware(['auth', HandleWorkspaceRequests::class])->group(function () {
 
             $validated = $request->validate([
                 'file' => "max:" . (200 * 1024),
+                'id' => "required|string"
             ]);
             // dd($validated['files']);
             $temporaryFileObjects = [];
             $file = $validated['file'];
+            $id = $validated['id'];
             $path = $file->store('public/users_' . $user->id);
-            array_push($temporaryFileObjects, ['path' => $path, 'type' => $file->getMimeType(), 'name' => $file->getClientOriginalName()]);
+            array_push($temporaryFileObjects, ['path' => $path, 'type' => $file->getMimeType(), 'name' => $file->getClientOriginalName(), 'id' => $id]);
 
             DeleteTemporaryFiles::dispatch($temporaryFileObjects)->delay(now()->addMinutes(30));
             return response()->json($temporaryFileObjects);

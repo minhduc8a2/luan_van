@@ -11,7 +11,7 @@ import useSuccessHandler from "@/helpers/useSuccessHandler";
 import { ChannelSettingsContext } from "../ChannelSettings";
 import CustomedDialog from "@/Components/CustomedDialog";
 export default function DeleteChannel() {
-    const { channelId } = useParams();
+    const { channelId, workspaceId } = useParams();
     const { setShow } = useContext(ChannelSettingsContext);
 
     const { channels } = useSelector((state) => state.channels);
@@ -29,11 +29,12 @@ export default function DeleteChannel() {
         if (!confirm) return;
         setProcessing(true);
         axios
-            .delete(route("channel.delete", channel.id), {
-                headers: {
-                    "X-Socket-Id": Echo.socketId(),
-                },
-            })
+            .delete(
+                route("channel.delete", {
+                    workspace: workspaceId,
+                    channel: channelId,
+                })
+            )
             .then((response) => {
                 setShow(false);
                 successHandler(response);

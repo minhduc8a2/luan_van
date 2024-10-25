@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import Button from "@/Components/Button";
 
 import { FaLock } from "react-icons/fa";
@@ -7,8 +7,10 @@ import useLeaveChannel from "@/helpers/useLeaveChannel";
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import CustomedDialog from "@/Components/CustomedDialog";
+import { ChannelSettingsContext } from "../ChannelSettings";
 export default function LeaveChannel({ channel }) {
     const { workspace } = useSelector((state) => state.workspace);
+    const {setShow} = useContext(ChannelSettingsContext)
     const leaveChannel = useLeaveChannel(workspace.id);
     const [success, setSuccess] = useState(false);
     const [processing, setProcessing] = useState(false);
@@ -19,6 +21,7 @@ export default function LeaveChannel({ channel }) {
         leaveChannel(channel.id, channel.type, true).then(() => {
             setSuccess(true);
             setProcessing(false);
+            setShow(false)
         });
     }
 

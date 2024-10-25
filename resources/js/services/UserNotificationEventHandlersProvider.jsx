@@ -22,6 +22,7 @@ import WorkspaceEventsEnum from "./Enums/WorkspaceEventsEnum";
 export default function UserNotificationEventHandlersProvider({ children }) {
     const { auth } = usePage().props;
     const { channelId, workspaceId } = useParams();
+    const { workspace } = useSelector((state) => state.workspace);
     const dispatch = useDispatch();
     const goToChannel = useGoToChannel();
     //
@@ -32,7 +33,7 @@ export default function UserNotificationEventHandlersProvider({ children }) {
     //
     const channelIdRef = useRef(null);
     //
-
+    const mainChannelIdRef = useRef(null);
     //
     const { channelId: huddleChannelId } = useSelector((state) => state.huddle);
     const huddleChannelIdRef = useRef(null);
@@ -47,6 +48,10 @@ export default function UserNotificationEventHandlersProvider({ children }) {
     useEffect(() => {
         channelsDataRef.current = channelsData;
     }, [channelsData]);
+
+    useEffect(() => {
+        mainChannelIdRef.current = workspace?.main_channel_id;
+    }, [workspace]);
     useEffect(() => {
         Echo.private("App.Models.User." + auth.user.id).notification(
             (notification) => {
@@ -124,17 +129,17 @@ export default function UserNotificationEventHandlersProvider({ children }) {
                             );
                             break;
                         case ChannelEventsEnum.DELETE_CHANNEL:
-                            if (huddleChannelIdRef.current == e.data) {
+                            if (huddleChannelIdRef.current == channel?.id) {
                                 dispatch(toggleHuddle());
                             }
 
-                            if (channelIdRef.current == e.data) {
+                            if (channelIdRef.current == channel?.id) {
                                 goToChannel(
                                     workspaceId,
-                                    mainChannelRef.current.id
+                                    mainChannelIdRef.current
                                 );
                             }
-                            dispatch(removeChannel(e.data));
+                            dispatch(removeChannel(channel?.id));
                             break;
                     }
                 }

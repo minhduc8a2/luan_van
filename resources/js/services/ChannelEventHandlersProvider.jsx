@@ -220,10 +220,21 @@ export default function ChannelEventHandlersProvider({ children }) {
 
                             case ChannelEventsEnum.ARCHIVE_CHANNEL:
                                 reloadPermissions(cn.id);
-
+                                dispatch(
+                                    updateChannelInformation({
+                                        id: cn.id,
+                                        data: e.data,
+                                    })
+                                );
                                 break;
                             case ChannelEventsEnum.UNARCHIVE_CHANNEL:
                                 reloadPermissions(cn.id);
+                                dispatch(
+                                    updateChannelInformation({
+                                        id: cn.id,
+                                        data: e.data,
+                                    })
+                                );
                                 break;
                             case ChannelEventsEnum.NEW_USER_JOIN:
                                 dispatch(

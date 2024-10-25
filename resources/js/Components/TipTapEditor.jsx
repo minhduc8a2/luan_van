@@ -170,7 +170,7 @@ import Mention from "@tiptap/extension-mention";
 import { MentionList } from "./MentionList.jsx";
 import Button from "./Button";
 import { useParams } from "react-router-dom";
-
+import { v4 as uuidv4 } from "uuid";
 export default function TipTapEditor({
     onSubmit,
 
@@ -186,26 +186,27 @@ export default function TipTapEditor({
     const { workspaceId } = useParams();
     const inputId = useId();
     const serverResponseFileList = useRef([]);
-    const [fileList, setFileList] = useState([]);
+    const [fileListMap, setFileListMap] = useState({});
     const mentionsListRef = useRef({});
-    const abortControllers = useRef([]);
+    const abortControllers = useRef({});
     const [uploadProgress, setUploadProgress] = useState([]);
     const [uploading, setUploading] = useState(false);
     const uploadingRef = useRef(false);
     const inputFileRef = useRef(null);
-    function handleRemoveFile(file) {
-        const index = fileList.findIndex((f) => f.name == file.name);
-        const controller = abortControllers.current[index];
-        controller.abort();
-        abortControllers.current.splice(index, 1);
-        setFileList((pre) => pre.filter((f) => f.name != file.name));
+
+    function handleRemoveFile(id) {
+        setFileListMap((pre) => ({
+            ...pre,
+            [id]: null,
+        }));
+        abortControllers.current[id]?.abort();
         serverResponseFileList.current = serverResponseFileList.current.filter(
-            (f) => f.name != file.name
+            (f) => f.id != id
         );
     }
 
     function resetState() {
-        setFileList([]);
+        setFileListMap({});
         serverResponseFileList.current = [];
         mentionsListRef.current = [];
     }
@@ -226,22 +227,26 @@ export default function TipTapEditor({
         const files = e.target.files;
 
         // return;
-
-        setFileList((pre) => {
-            let tempList = [...pre];
-            Object.values(files).forEach((file) => {
-                tempList.push(file);
+        const filesWithId = Object.values(files).map((file) => ({
+            id: uuidv4(),
+            file,
+        }));
+        setFileListMap((pre) => {
+            let tempList = { ...pre };
+            filesWithId.forEach((fileWithId) => {
+                tempList[fileWithId.id] = fileWithId.file;
             });
             return tempList;
         });
-        const filesValues = Object.values(files);
+
         setUploading(true);
-        const filesValuesLength = filesValues.length;
-        setUploadProgress(Array(filesValuesLength).fill(0));
+
+        setUploadProgress(Array(filesWithId.length).fill(0));
+
         await Promise.all(
-            filesValues.map((file, index) => {
+            filesWithId.map((fileWithId, index) => {
                 const controller = new AbortController();
-                abortControllers.current.push(controller);
+                abortControllers.current[fileWithId.id] = controller;
                 uploadingRef.current = true;
                 return axios
                     .postForm(
@@ -249,7 +254,7 @@ export default function TipTapEditor({
                             workspace: workspaceId,
                             user: auth.user.id,
                         }),
-                        { file },
+                        { file: fileWithId.file, id: fileWithId.id },
                         {
                             signal: controller.signal,
                             onUploadProgress: function (progressEvent) {
@@ -445,27 +450,28 @@ export default function TipTapEditor({
                 <EditorContent editor={editor} />
             </div>
             <div className="flex gap-2 max-h-48 overflow-y-auto scrollbar flex-wrap">
-                {fileList.map((file, index) => {
+                {Object.entries(fileListMap).map(([id, file], index) => {
+                    if (!file) return "";
                     if (isImage(file.type)) {
                         return (
                             <SquareImage
                                 size="h-16 w-16"
                                 url={URL.createObjectURL(file)}
-                                key={"file_" + file.name}
+                                key={id}
                                 removable={true}
                                 uploadable={true}
                                 percentage={uploadProgress[index]}
-                                remove={() => handleRemoveFile(file)}
+                                remove={() => handleRemoveFile(id)}
                             />
                         );
                     } else {
                         return (
-                            <div className="" key={"file_" + file.name}>
+                            <div className="" key={id}>
                                 <FileItem
                                     file={file}
                                     maxWidth="max-w-72"
                                     removable
-                                    remove={() => handleRemoveFile(file)}
+                                    remove={() => handleRemoveFile(id)}
                                     uploadable={true}
                                     percentage={uploadProgress[index]}
                                 />
@@ -517,7 +523,9 @@ export default function TipTapEditor({
                                 uploadAllProgress < 100 && (
                                     <div className="flex gap-x-2 items-center">
                                         |
-                                        <div className="text-xs">Uploading</div>
+                                        <div className="text-xs text-color-medium-emphasis">
+                                            Uploading
+                                        </div>
                                         <div className="w-64">
                                             <div className="w-full bg-gray-200 rounded-full dark:bg-gray-700">
                                                 <div

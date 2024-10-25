@@ -125,7 +125,7 @@ export default function Editor({
                 />
             )}
             {!permissions.chat && !channel?.is_archived && isChannelMember && (
-                <h5 className="mb-4 text-center ml-4">
+                <h5 className="mb-4 text-center ml-4 text-color-high-emphasis">
                     You're not allowed to post in channel. Contact Admins or
                     Channel managers for more information!
                 </h5>

@@ -8,7 +8,7 @@ import { useParams } from "react-router-dom";
 import useErrorHandler from "@/helpers/useErrorHandler";
 import CustomedDialog from "@/Components/CustomedDialog";
 export default function ArchiveChannel() {
-    const { channelId } = useParams();
+    const { channelId, workspaceId } = useParams();
 
     const { channels } = useSelector((state) => state.channels);
 
@@ -28,7 +28,10 @@ export default function ArchiveChannel() {
 
         axios
             .post(
-                route("channels.archive", channel.id),
+                route("channels.archive", {
+                    workspace: workspaceId,
+                    channel: channelId,
+                }),
                 {
                     status: !channel.is_archived,
                 },

@@ -173,13 +173,13 @@ export default function Video({
                         <a
                             href={src}
                             download={name}
-                            className=" p-2  rounded-lg text-color-high-emphasis hover:text-white hover:bg-color/15  "
+                            className=" p-2  rounded-lg text-gray-200 hover:text-white hover:bg-color/15  "
                         >
                             <MdDownload className="text-lg" />
                         </a>
 
                         <button
-                            className=" p-2  rounded-lg text-color-high-emphasis hover:text-white hover:bg-color/15  "
+                            className=" p-2  rounded-lg text-gray-200 hover:text-white hover:bg-color/15  "
                             onClick={toggleFullScreen}
                         >
                             <IoClose className="text-lg" />
@@ -325,13 +325,13 @@ export default function Video({
                     }`}
                 >
                     <button
-                        className=" p-2 bg-black/75 rounded-lg text-color-high-emphasis hover:text-white hover:bg-black/85  "
+                        className=" p-2 bg-black/75 rounded-lg text-gray-200 hover:text-white hover:bg-black/85  "
                         onClick={toggleFullScreen}
                     >
                         <RiExpandDiagonalFill className="text-lg" />
                     </button>
                     <Popover className="relative">
-                        <PopoverButton className=" p-2 bg-black/75 rounded-lg text-color-high-emphasis hover:text-white hover:bg-black/85">
+                        <PopoverButton className=" p-2 bg-black/75 rounded-lg text-gray-200 hover:text-white hover:bg-black/85">
                             <div
                                 onClick={() => {
                                     setIsHovered(true);

@@ -1,5 +1,6 @@
 import ThemeContext from "@/ThemeProvider";
 import React, { useContext, useTransition } from "react";
+import { FiArchive } from "react-icons/fi";
 import { useParams } from "react-router-dom";
 
 export default function PublicChannel({ channel, changeChannel }) {

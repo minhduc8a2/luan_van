@@ -4,6 +4,7 @@ import Button from "@/Components/Button";
 import TextInput from "@/Components/Input/TextInput";
 import { Head, Link, useForm } from "@inertiajs/react";
 import { GrGroup } from "react-icons/gr";
+import Layout from "./Layout";
 
 export default function Register() {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -22,14 +23,7 @@ export default function Register() {
     };
 
     return (
-        <div className="min-h-screen flex flex-col justify-center items-center bg-color-contrast ">
-            <Head title="Register" />
-            <div className="flex items-baseline gap-x-2 mb-8 text-color-high-emphasis">
-                <GrGroup className=" text-xl" />{" "}
-                <Link href="/" className=" font-bold text-3xl ">
-                    Create new account
-                </Link>
-            </div>
+        <Layout>
             <form
                 onSubmit={submit}
                 className="w-full sm:max-w-md mt-6 px-6 py-4   overflow-hidden sm:rounded-lg"
@@ -113,6 +107,6 @@ export default function Register() {
                     Already registered?
                 </Link>
             </form>
-        </div>
+        </Layout>
     );
 }

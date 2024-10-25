@@ -16,6 +16,7 @@ import { loadSpecificMessagesById } from "@/helpers/loadSpecificMessagesById";
 import { useNavigate, useParams } from "react-router-dom";
 
 import useLoadChannelRelatedData from "@/helpers/useLoadRelatedChannelData";
+import { setNotificationPopup } from "@/Store/notificationPopupSlice";
 export default function MentionNotification({
     notification,
     handleNotificationClick,
