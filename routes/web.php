@@ -26,12 +26,10 @@ use App\Models\Workspace;
 
 
 Route::get("/", function () {
-    return "homepage";
+    return Redirect::route('workspaces');
 })->name('home');
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+
 Route::post("/workspaces", [WorkspaceController::class, 'store'])->name('workspaces.store');
 Route::middleware(['auth', HandleWorkspaceRequests::class])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

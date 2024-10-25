@@ -12,7 +12,7 @@ export default function Home() {
     return (
         <div className="pl-16 pt-16">
             <div className="flex gap-x-3">
-                <LuUser2 className=" text-4xl" />
+                <LuUser2 className=" text-4xl text-color-medium-emphasis" />
                 <h1 className="text-4xl font-bold text-color-high-emphasis">
                     Welcome,{" "}
                     <span className="capitalize">{auth.user.name}</span>!

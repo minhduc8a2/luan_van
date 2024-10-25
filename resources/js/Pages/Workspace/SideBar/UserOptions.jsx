@@ -4,19 +4,17 @@ import CustomedPopover from "@/Components/CustomedPopover";
 import { setProfile } from "@/Store/profileSlice";
 
 import { usePage } from "@inertiajs/react";
-import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
-import ThemePicker from "@/Components/ThemePicker";
+import { Link, useParams } from "react-router-dom";
 
 export default function UserOptions() {
     const { auth } = usePage().props;
+    const { workspaceId } = useParams();
     const { workspace } = useSelector((state) => state.workspace);
     const dispatch = useDispatch();
-    const [isOpen, setIsOpen] = useState(false);
+
     return (
         <>
-            <ThemePicker isOpen={isOpen} setIsOpen={setIsOpen} />
             <CustomedPopover
                 anchor="top start"
                 triggerNode={
@@ -40,6 +38,7 @@ export default function UserOptions() {
                         }
                     />
                 </div>
+
                 <CustomedPopover.ListItem
                     onClick={() => {
                         dispatch(setProfile(auth.user.id));
@@ -47,8 +46,12 @@ export default function UserOptions() {
                 >
                     Profile
                 </CustomedPopover.ListItem>
-                <CustomedPopover.ListItem onClick={() => setIsOpen(true)}>
-                    Theme
+                <CustomedPopover.ListItem>
+                    <Link
+                        to={`/workspaces/${workspaceId}/admin/account_profile`}
+                    >
+                        Account settings
+                    </Link>
                 </CustomedPopover.ListItem>
 
                 <CustomedPopover.ListItem>

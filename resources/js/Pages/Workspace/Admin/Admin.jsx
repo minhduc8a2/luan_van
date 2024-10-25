@@ -40,7 +40,10 @@ export default function Admin() {
 
 function Wrapper({ children }) {
     const { auth } = usePage().props;
-    const { workspace } = useSelector((state) => state.workspace);
+    const { workspace, workspacePermissions } = useSelector(
+        (state) => state.workspace
+    );
+
     const { theme } = useContext(ThemeContext);
     const [isThemePickerOpen, setIsThemePickerOpen] = useState(false);
     return (
@@ -101,28 +104,30 @@ function Wrapper({ children }) {
                             />
                         </ul>
                     </div>
-                    <div className=" mt-8">
-                        <h5 className="uppercase text-sm text-color-medium-emphasis mb-4">
-                            Administration
-                        </h5>
-                        <ul className="flex flex-col gap-y-2">
-                            <PanelItem
-                                icon={<IoSettingsOutline />}
-                                title="Settings & permissions"
-                                to="settings"
-                            />
-                            <PanelItem
-                                icon={<PiAddressBookTabs />}
-                                title="Manage members"
-                                to="manage_members"
-                            />
-                            <PanelItem
-                                icon={<IoPersonAddOutline />}
-                                title="Invitations"
-                                to="invitations"
-                            />
-                        </ul>
-                    </div>
+                    {workspacePermissions.update && (
+                        <div className=" mt-8">
+                            <h5 className="uppercase text-sm text-color-medium-emphasis mb-4">
+                                Administration
+                            </h5>
+                            <ul className="flex flex-col gap-y-2">
+                                <PanelItem
+                                    icon={<IoSettingsOutline />}
+                                    title="Settings & permissions"
+                                    to="settings"
+                                />
+                                <PanelItem
+                                    icon={<PiAddressBookTabs />}
+                                    title="Manage members"
+                                    to="manage_members"
+                                />
+                                <PanelItem
+                                    icon={<IoPersonAddOutline />}
+                                    title="Invitations"
+                                    to="invitations"
+                                />
+                            </ul>
+                        </div>
+                    )}
                     <div className=" mt-8">
                         <h5 className="uppercase text-sm text-color-medium-emphasis mb-4">
                             Other
