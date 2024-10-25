@@ -38,10 +38,13 @@ import { setMedia } from "@/Store/mediaSlice";
 
 import InfiniteScroll from "@/Components/InfiniteScroll";
 import ThemeContext from "@/ThemeProvider";
+import { ChannelEventHandlersProviderContext } from "@/services/ChannelEventHandlersProvider";
+import ChannelEventsEnum from "@/services/Enums/ChannelEventsEnum";
 export default function BrowseFiles() {
     const { auth } = usePage().props;
     const { theme } = useContext(ThemeContext);
-    const containerRef = useRef(null)
+    const { event, setEvent } = useContext(ChannelEventHandlersProviderContext);
+    const containerRef = useRef(null);
     const dispatch = useDispatch();
     const [files, setFiles] = useState([]);
     const [searchFilter, setSearchFilter] = useState("");
@@ -55,43 +58,36 @@ export default function BrowseFiles() {
     const [bottomHasMore, setBottomHasMore] = useState();
 
     useEffect(() => {
-        Echo.private(`private_workspaces.${workspace.id}`).listen(
-            "WorkspaceEvent",
-            (e) => {
-                switch (e.type) {
-                    case "FileObserver_fileDeleted":
-                        setFiles((pre) => {
-                            let temp = [...pre];
+        if (!event) return;
+        switch (event.type) {
+            case ChannelEventsEnum.FILE_DELETED:
+                setFiles((pre) => {
+                    let temp = [...pre];
 
-                            temp = temp.filter((f) => f.id != e.data);
-                            if (temp.length > 0) {
-                                setTopHasMore(temp[0].id);
-                                setBottomHasMore(temp[temp.length - 1].id);
-                            }
-                            return temp;
-                        });
-                        break;
-                    case "ThreadMessage_fileCreated":
-                    case "ChannelMessage_fileCreated":
-                        setFiles((pre) => {
-                            const sorted = [...e.data.files];
-                            sorted.sort((a, b) => b.id - a.id);
+                    temp = temp.filter((f) => f.id != event.data);
+                    if (temp.length > 0) {
+                        setTopHasMore(temp[0].id);
+                        setBottomHasMore(temp[temp.length - 1].id);
+                    }
+                    return temp;
+                });
+                break;
+            case ChannelEventsEnum.FILE_CREATED:
+                setFiles((pre) => {
+                    const sorted = [...event.data];
+                    sorted.sort((a, b) => b.id - a.id);
 
-                            const temp = [...sorted, ...pre];
-                            if (temp.length > 0) {
-                                setTopHasMore(temp[0].id);
-                                setBottomHasMore(temp[temp.length - 1].id);
-                            }
-                            return temp;
-                        });
-
-                        break;
-                    default:
-                        break;
-                }
-            }
-        );
-    }, []);
+                    const temp = [...sorted, ...pre];
+                    if (temp.length > 0) {
+                        setTopHasMore(temp[0].id);
+                        setBottomHasMore(temp[temp.length - 1].id);
+                    }
+                    return temp;
+                });
+            default:
+                break;
+        }
+    }, [event]);
 
     const filteredFilesList = useMemo(
         () =>
@@ -317,7 +313,9 @@ export default function BrowseFiles() {
                                 <div className="h-6 w-6 relative">
                                     <LoadingSpinner />
                                 </div>
-                                <div className="text-xs text-color-medium-emphasis">Loading ...</div>
+                                <div className="text-xs text-color-medium-emphasis">
+                                    Loading ...
+                                </div>
                             </div>
                         )}
                     </div>

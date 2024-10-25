@@ -44,7 +44,7 @@ export default function Message({
 }) {
     const { auth } = usePage().props;
     const { theme } = useContext(ThemeContext);
-    const { channelId } = useParams();
+    const { channelId, workspaceId } = useParams();
     const { channel } = useChannel(channelId);
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
     const dispatch = useDispatch();
@@ -193,7 +193,7 @@ export default function Message({
             >
                 <CustomedDialog.Title>Delete file</CustomedDialog.Title>
                 <div className="flex flex-col gap-y-4">
-                    <h5>
+                    <h5 className="text-color-high-emphasis">
                         Are you sure you want to delete this file permanently?
                     </h5>
                     {showConfirm && (

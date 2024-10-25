@@ -6,24 +6,14 @@ use App\Models\File;
 use App\Events\ChannelEvent;
 use App\Events\WorkspaceEvent;
 use App\Helpers\ChannelEventsEnum;
+use Illuminate\Support\Facades\Log;
 
 class FileObserver
 {
     /**
      * Handle the File "created" event.
      */
-    public function created(File $file): void
-    {
-        try {
-            $channelIds = $file->messages()->pluck('channel_id')->unique();
-            foreach ($channelIds as $channelId) {
-                broadcast(new ChannelEvent($channelId, ChannelEventsEnum::FILE_CREATED->name, $file));
-            }
-            //code...
-        } catch (\Throwable $th) {
-            //throw $th;
-        }
-    }
+    //files created not attached to messages yet!
 
     /**
      * Handle the File "updated" event.

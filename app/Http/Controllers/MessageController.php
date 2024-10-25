@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-
+use App\Events\ChannelEvent;
 use App\Models\User;
 
 use App\Helpers\Helper;
@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 
 use App\Events\WorkspaceEvent;
 use App\Events\ThreadMessageEvent;
+use App\Helpers\ChannelEventsEnum;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use App\Notifications\MentionNotification;
@@ -294,7 +295,7 @@ class MessageController extends Controller
 
                     // try {
                     //     //code...
-                    //     broadcast(new WorkspaceEvent(workspace: $channel->workspace, type: "ChannelMessage_fileCreated", fromUserId: "", data: ['channelId' => $channel->id, 'files' => $fileInstances]));
+                    broadcast(new ChannelEvent($channel->id, ChannelEventsEnum::FILE_CREATED->name, $fileInstances));
                     // } catch (\Throwable $th) {
                     //     // throw $th;
                     // }
@@ -386,6 +387,7 @@ class MessageController extends Controller
                 $files = $this->createFiles($fileObjects, $request->user(), $channel->workspace);
 
                 $fileInstances = $newMessage->files()->createMany($files);
+                broadcast(new ChannelEvent($channel->id, ChannelEventsEnum::FILE_CREATED->name, $fileInstances));
                 // try {
                 //     //code...
                 //     broadcast(new WorkspaceEvent(workspace: $channel->workspace, type: "ThreadMessage_fileCreated", fromUserId: "", data: ['channelId' => $channel->id, 'files' => $fileInstances]));

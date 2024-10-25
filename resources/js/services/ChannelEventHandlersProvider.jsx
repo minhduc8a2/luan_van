@@ -1,5 +1,5 @@
 import { usePage } from "@inertiajs/react";
-import { useRef } from "react";
+import { createContext, useRef, useState } from "react";
 import { useEffect } from "react";
 
 import { useDispatch, useSelector } from "react-redux";
@@ -34,9 +34,10 @@ import { useParams } from "react-router-dom";
 import useReloadPermissions from "@/helpers/useReloadPermissions";
 import useReloadLoadedChannelsDataPermissions from "@/helpers/useReloadLoadedChannelsDataPermissions";
 import ChannelEventsEnum from "@/services/Enums/ChannelEventsEnum";
-
+export const ChannelEventHandlersProviderContext = createContext({});
 export default function ChannelEventHandlersProvider({ children }) {
     const { auth } = usePage().props;
+    const [event, setEvent] = useState(null);
     const { channelId, workspaceId } = useParams();
     const { workspace } = useSelector((state) => state.workspace);
     const dispatch = useDispatch();
@@ -259,7 +260,19 @@ export default function ChannelEventHandlersProvider({ children }) {
                                 );
 
                                 break;
+                            case ChannelEventsEnum.FILE_CREATED:
+                                setEvent({
+                                    type: ChannelEventsEnum.FILE_CREATED,
+                                    data: e.data,
+                                    channelId: cn.id,
+                                });
+                                break;
                             case ChannelEventsEnum.FILE_DELETED:
+                                setEvent({
+                                    type: ChannelEventsEnum.FILE_DELETED,
+                                    data: e.data,
+                                    channelId: cn.id,
+                                });
                                 dispatch(
                                     deleteFile({
                                         id: cn.id,
@@ -333,5 +346,11 @@ export default function ChannelEventHandlersProvider({ children }) {
         };
     }, []);
 
-    return <>{children}</>;
+    return (
+        <ChannelEventHandlersProviderContext.Provider
+            value={{ event, setEvent }}
+        >
+            {children}
+        </ChannelEventHandlersProviderContext.Provider>
+    );
 }

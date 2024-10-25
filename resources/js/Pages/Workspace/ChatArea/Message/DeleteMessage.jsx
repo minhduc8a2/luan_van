@@ -48,7 +48,7 @@ export default function DeleteMessage({ message, user }) {
             </button>
             <CustomedDialog isOpen={isOpen} onClose={() => setIsOpen(false)}>
                 <CustomedDialog.Title>Delete message</CustomedDialog.Title>
-                <h5>
+                <h5 className="text-color-high-emphasis">
                     Are you sure you want to delete this message? This cannot be
                     undone.
                 </h5>

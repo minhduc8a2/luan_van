@@ -181,7 +181,7 @@ class FileController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request,  File $file)
+    public function destroy(Request $request,Workspace $workspace,  File $file)
     {
         // Helper::createErrorResponse();
 
