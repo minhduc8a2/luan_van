@@ -54,7 +54,7 @@ export default function Thread() {
     const channelId = threadedMessage?.channel_id;
     const { workspaceId } = useParams();
     const { permissions } = useChannelData(channelId);
-    const { publicAppUrl } = useSelector((state) => state.workspace);
+    const publicAppUrl = import.meta.env.VITE_PUBLIC_APP_URL
     const { channel } = useChannel(channelId);
     const { channelUsers } = useChannelUsers(channelId);
 
@@ -524,7 +524,7 @@ export default function Thread() {
                         <hr className="border-color/15 flex-1" />
                     </div>
                     {loadingMessages && (
-                        <div className="flex justify-center items-center">
+                        <div className="flex justify-center items-center text-color-medium-emphasis">
                             <div className="h-12 w-12 relative">
                                 <LoadingSpinner spinerStyle="border-link" />
                             </div>

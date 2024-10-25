@@ -18,6 +18,7 @@ import useReloadPermissions from "@/helpers/useReloadPermissions";
 import useGoToChannel from "@/helpers/useGoToChannel";
 import { toggleHuddle } from "@/Store/huddleSlice";
 import WorkspaceEventsEnum from "./Enums/WorkspaceEventsEnum";
+import { addJoinedChannelId, removeJoinedChannelId } from "@/Store/joinedChannelIdsSlice";
 
 export default function UserNotificationEventHandlersProvider({ children }) {
     const { auth } = usePage().props;
@@ -86,7 +87,7 @@ export default function UserNotificationEventHandlersProvider({ children }) {
                     switch (changesType) {
                         case ChannelEventsEnum.ADDED_TO_NEW_CHANNEL:
                             dispatch(addNewChannelToChannelsStore(channel));
-
+                            dispatch(addJoinedChannelId({id: channel.id}))
                             if (
                                 channelsDataRef.current.hasOwnProperty(
                                     channelIdRef.current
@@ -111,6 +112,7 @@ export default function UserNotificationEventHandlersProvider({ children }) {
                                     reloadPermissions(channel?.id);
                                 }
                             }
+                            dispatch(removeJoinedChannelId({id: channel.id}))
                             break;
                         case ChannelEventsEnum.CHANGE_CHANNEL_TYPE:
                             if (
@@ -140,6 +142,7 @@ export default function UserNotificationEventHandlersProvider({ children }) {
                                 );
                             }
                             dispatch(removeChannel(channel?.id));
+                            dispatch(removeJoinedChannelId({id: channel?.id}))
                             break;
                     }
                 }

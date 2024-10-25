@@ -17,11 +17,17 @@ import useLeaveChannel from "@/helpers/useLeaveChannel";
 import useIsChannelMember from "@/helpers/useIsChannelMember";
 
 import useJoinChannel from "@/helpers/useJoinChannel";
+import ChannelEventsEnum from "@/services/Enums/ChannelEventsEnum";
+import WorkspaceEventsEnum from "@/services/Enums/WorkspaceEventsEnum";
+import { useParams } from "react-router-dom";
+import { isChannelsNotificationBroadcast } from "@/helpers/notificationTypeHelper";
 export default function BrowseChannels() {
     const { auth } = usePage().props;
+    const { workspaceId } = useParams();
     const { workspace } = useSelector((state) => state.workspace);
     const dispatch = useDispatch();
     const [allChannels, setAllChannels] = useState([]);
+    const containerRef = useRef(null);
 
     const [searchValue, setSearchValue] = useState("");
     const [filterLoading, setFilterLoading] = useState(false);
@@ -34,14 +40,39 @@ export default function BrowseChannels() {
     const leaveChannelInHook = useLeaveChannel(workspace.id);
     const joinChannelInHook = useJoinChannel();
     useEffect(() => {
+        Echo.private("App.Models.User." + auth.user.id).notification(
+            (notification) => {
+                console.log(notification);
+
+                const { workspace, channel, byUser, changesType, data } =
+                    notification;
+                if (workspaceId != workspace.id) return;
+                if (isChannelsNotificationBroadcast(notification.type)) {
+                    switch (changesType) {
+                        case ChannelEventsEnum.DELETE_CHANNEL:
+                            setAllChannels((pre) => {
+                                let temp = [...pre];
+                                temp = temp.filter((f) => f.id != channel?.id);
+                                if (temp.length > 0) {
+                                    setTopHasMore(temp[0].id);
+                                    setBottomHasMore(temp[temp.length - 1].id);
+                                }
+                                return temp;
+                            });
+                            break;
+                    }
+                }
+            }
+        );
+    }, [workspaceId]);
+    useEffect(() => {
         Echo.private(`private_workspaces.${workspace.id}`).listen(
             "WorkspaceEvent",
             (e) => {
                 switch (e.type) {
-                    case "ChannelObserver_deleteChannel":
+                    case ChannelEventsEnum.DELETE_CHANNEL:
                         setAllChannels((pre) => {
                             let temp = [...pre];
-
                             temp = temp.filter((f) => f.id != e.data);
                             if (temp.length > 0) {
                                 setTopHasMore(temp[0].id);
@@ -51,25 +82,16 @@ export default function BrowseChannels() {
                         });
                         break;
 
-                    case "ChannelObserver_storeChannel":
-                        loadRegularChannels(e.data.workspace_id, e.data.id)
-                            .then((response) => {
-                                const newChannel = response.data;
-
-                                setAllChannels((pre) => {
-                                    const temp = [newChannel, ...pre];
-                                    if (temp.length > 0) {
-                                        setTopHasMore(temp[0].id);
-                                        setBottomHasMore(
-                                            temp[temp.length - 1].id
-                                        );
-                                    }
-                                    return temp;
-                                });
-                            })
-                            .catch((errors) => {
-                                console.log(errors);
-                            });
+                    case WorkspaceEventsEnum.STORE_CHANNEL:
+                        const newChannel = e.data;
+                        setAllChannels((pre) => {
+                            const temp = [newChannel, ...pre];
+                            if (temp.length > 0) {
+                                setTopHasMore(temp[0].id);
+                                setBottomHasMore(temp[temp.length - 1].id);
+                            }
+                            return temp;
+                        });
 
                         break;
                     default:
@@ -282,7 +304,9 @@ export default function BrowseChannels() {
                                 <div className="h-6 w-6 relative">
                                     <LoadingSpinner />
                                 </div>
-                                <div className="text-xs text-color-medium-emphasis">Loading ...</div>
+                                <div className="text-xs text-color-medium-emphasis">
+                                    Loading ...
+                                </div>
                             </div>
                         )}
                     </div>
@@ -342,10 +366,13 @@ export default function BrowseChannels() {
                     bottomHasMore={bottomHasMore}
                     topLoading={topLoading}
                     bottomLoading={bottomLoading}
+                    ref={containerRef}
                     className="mt-4 bg-background flex-1 max-h-full overflow-y-auto scrollbar rounded-lg border border-color/15"
                 >
                     {filteredChannels.length == 0 && (
-                        <p className="text-center p-4 text-color-medium-emphasis">No results found</p>
+                        <p className="text-center p-4 text-color-medium-emphasis">
+                            No results found
+                        </p>
                     )}
                     {filteredChannels.map((cn, index) => {
                         return (

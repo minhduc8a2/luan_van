@@ -20,7 +20,7 @@ const DocumentAttachment = memo(function ({
     className = "",
     noToolbar = false,
 }) {
-    const { publicAppUrl } = useSelector((state) => state.workspace);
+    const publicAppUrl = import.meta.env.VITE_PUBLIC_APP_URL
     const [isHovered, setIsHovered] = useState(false);
     const dispatch = useDispatch();
 

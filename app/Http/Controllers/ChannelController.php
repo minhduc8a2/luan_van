@@ -790,16 +790,10 @@ class ChannelController extends Controller
     {
         if ($request->user()->cannot('delete', $channel)) abort(403);
         try {
-            DB::beginTransaction();
-            $user = $request->user();
-            $copiedChannel = $channel->replicate();
-            $copiedChannel->id = $channel->id;
-            $channelUsers = $channel->users;
-            $workspace = $channel->workspace;
-            $channel->messages()->forceDelete();
-            $channel->permissions()->delete();
-            DeleteChannel::dispatch($channel->id)->delay(now()->addSeconds(2));
 
+            $user = $request->user();
+            $copiedChannel = ['id' => $channel->id, 'name' => $channel->name, 'type' => $channel->type];
+            $channelUsers = $channel->users;
             foreach ($channelUsers as $channelUser) {
                 $channelUser->notify(new ChannelsNotification(
                     $workspace,
@@ -808,9 +802,14 @@ class ChannelController extends Controller
                     ChannelEventsEnum::DELETE_CHANNEL->name
                 ));
             }
+            if ($copiedChannel['type'] == ChannelTypes::PUBLIC->name) {
 
-
-
+                broadcast(new WorkspaceEvent($workspace->id, ChannelEventsEnum::DELETE_CHANNEL->name, $copiedChannel['id']));
+            }
+            DB::beginTransaction();
+            $channel->messages()->forceDelete();
+            $channel->permissions()->delete();
+            $channel->delete();
             DB::commit();
             return Helper::createSuccessResponse();
         } catch (\Throwable $th) {

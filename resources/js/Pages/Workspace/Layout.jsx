@@ -143,7 +143,7 @@ function MainArea({ children }) {
 
 const MediaModal = memo(function MediaModal() {
     const { url, type, name } = useSelector((state) => state.media);
-    const { publicAppUrl } = useSelector((state) => state.workspace);
+    const publicAppUrl = import.meta.env.VITE_PUBLIC_APP_URL
     const [loading, setLoading] = useState(true);
     const dispatch = useDispatch();
     useEffect(() => {

@@ -41,7 +41,7 @@ import ThemeContext from "@/ThemeProvider";
 export default function BrowseFiles() {
     const { auth } = usePage().props;
     const { theme } = useContext(ThemeContext);
-
+    const containerRef = useRef(null)
     const dispatch = useDispatch();
     const [files, setFiles] = useState([]);
     const [searchFilter, setSearchFilter] = useState("");
@@ -417,6 +417,7 @@ export default function BrowseFiles() {
                         bottomHasMore={bottomHasMore}
                         topLoading={topLoading}
                         bottomLoading={bottomLoading}
+                        ref={containerRef}
                         className="flex flex-col  gap-y-4 mt-12  overflow-y-auto scrollbar flex-1"
                     >
                         {groupedFiles.map(({ date, fis }, pIndex) => {

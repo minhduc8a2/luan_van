@@ -80,7 +80,7 @@ class InvitationController extends Controller implements HasMiddleware
                 'user_id' => $request->user()->id,
                 'workspace_id' => $workspace->id,
             ]);
-            $invitationLink = env('PUBLIC_APP_URL') . '/invitations/' . $invitation->code;
+            $invitationLink = env('VITE_PUBLIC_APP_URL') . '/invitations/' . $invitation->code;
             DB::commit();
             return ['invitation_link' => $invitationLink];
         } catch (\Throwable $th) {
@@ -100,7 +100,7 @@ class InvitationController extends Controller implements HasMiddleware
             $invitation = $workspace->invitations()->where('invitations.id', $validated['id'])->first();
             if ($invitation) {
                 $toUserName = Helper::nameFromEmail($invitation->email);
-                $invitationLink = env('PUBLIC_APP_URL') . '/invitations/' . $invitation->code;
+                $invitationLink = env('VITE_PUBLIC_APP_URL') . '/invitations/' . $invitation->code;
                 Mail::to($invitation->email)->send(new InvitationMail($invitationLink, $workspace->name, $request->user()->name, $toUserName));
 
                 return Helper::createSuccessResponse();
@@ -130,7 +130,7 @@ class InvitationController extends Controller implements HasMiddleware
                     'workspace_id' => $workspace->id,
                     'email' => $email,
                 ]);
-                $invitationLink = env('PUBLIC_APP_URL') . '/invitations/' . $invitation->code;
+                $invitationLink = env('VITE_PUBLIC_APP_URL') . '/invitations/' . $invitation->code;
                 Mail::to($email)->send(new InvitationMail($invitationLink, $workspace->name, $request->user()->name, $toUserName));
             }
             DB::commit();

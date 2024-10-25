@@ -20,7 +20,7 @@ import { setNotificationPopup } from "@/Store/notificationPopupSlice";
 import CustomedDialog from "@/Components/CustomedDialog";
 
 const Item = memo(function ({ file }) {
-    const { publicAppUrl } = useSelector((state) => state.workspace);
+    const publicAppUrl = import.meta.env.VITE_PUBLIC_APP_URL
     const [openOverlay, setOpenOverlay] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
     const [showConfirm, setShowConfirm] = useState(null);
@@ -119,12 +119,12 @@ const Item = memo(function ({ file }) {
                             <a
                                 href={file.url}
                                 target="_blank"
-                                className=" hover:bg-color/15 py-1 text-left px-4"
+                                className=" hover:bg-color/15 py-1 text-left px-4 text-color-medium-emphasis"
                             >
                                 Open in new tab
                             </a>
                             <button
-                                className=" hover:bg-color/15 py-1 text-left px-4"
+                                className=" hover:bg-color/15 py-1 text-left px-4 text-color-medium-emphasis"
                                 onClick={() => {
                                     copy(publicAppUrl + file.url);
                                     close();

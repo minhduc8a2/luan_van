@@ -62,7 +62,7 @@ class WorkspaceController extends Controller
                 return ['workspace' => $workspace];
         }
         return [
-            'publicAppUrl' => env('PUBLIC_APP_URL', ''),
+           
             'workspaces' => $workspaces(),
             'newNotificationsCount' => $newNotificationsCount(),
             'workspacePermissions' => $workspacePermissions(),

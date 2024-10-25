@@ -24,7 +24,7 @@ const Image = memo(function Image({
     deleteFn = () => {},
     noToolbar = false,
 }) {
-    const { publicAppUrl } = useSelector((state) => state.workspace);
+    const publicAppUrl = import.meta.env.VITE_PUBLIC_APP_URL
     const [loading, setLoading] = useState(true);
     const [largeLoading, setLargeLoading] = useState(true);
     const [isHovered, setIsHovered] = useState(false);
@@ -198,12 +198,12 @@ const Image = memo(function Image({
                                 <a
                                     href={url}
                                     target="_blank"
-                                    className=" hover:bg-color/15 py-1 text-left px-4"
+                                    className=" hover:bg-color/15 py-1 text-left px-4 text-color-medium-emphasis"
                                 >
                                     Open in new tab
                                 </a>
                                 <button
-                                    className=" hover:bg-color/15 py-1 text-left px-4"
+                                    className=" hover:bg-color/15 py-1 text-left px-4 text-color-medium-emphasis"
                                     onClick={() => {
                                         copy(publicAppUrl + url);
                                         close();

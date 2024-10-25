@@ -2,15 +2,16 @@
 
 namespace App\Notifications;
 
-use App\Models\Channel;
 use App\Models\User;
+use App\Models\Channel;
 use App\Models\Workspace;
 use Illuminate\Bus\Queueable;
 use Illuminate\Support\Carbon;
 use Illuminate\Notifications\Notification;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 
-class ChannelsNotification extends Notification
+class ChannelsNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -18,9 +19,9 @@ class ChannelsNotification extends Notification
      * Create a new notification instance.
      */
     public function __construct(
-        public Workspace $workspace,
-        public Channel $channel,
-        public User $byUser,
+        public  $workspace,
+        public  $channel,
+        public  $byUser,
         public string $changesType,
         public  $data = null
     ) {
@@ -53,7 +54,7 @@ class ChannelsNotification extends Notification
         return new BroadcastMessage([
             "workspace" => $this->workspace,
             "channel" => $this->channel,
-            "byUser"=>$this->byUser,
+            "byUser" => $this->byUser,
             "changesType" => $this->changesType,
             "data" => $this->data,
             "created_at" => Carbon::now()
@@ -71,7 +72,7 @@ class ChannelsNotification extends Notification
         return [
             "workspace" => $this->workspace,
             "channel" => $this->channel,
-            "byUser"=>$this->byUser,
+            "byUser" => $this->byUser,
             "changesType" => $this->changesType,
             "data" => $this->data,
         ];

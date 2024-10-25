@@ -28,7 +28,7 @@ export default function Video({
     deleteFn,
     noToolbar = false,
 }) {
-    const { publicAppUrl } = useSelector((state) => state.workspace);
+    const publicAppUrl = import.meta.env.VITE_PUBLIC_APP_URL
     const [smallLoaded, setSmallLoaded] = useState(false);
     const [largeLoaded, setLargeLoaded] = useState(false);
     const [playing, setPlaying] = useState(false);

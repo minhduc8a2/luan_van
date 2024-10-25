@@ -29,7 +29,7 @@ export default function Editor({
     const { auth } = usePage().props;
     const [focus, setFocus] = useState(1);
     const { channelId, workspaceId } = useParams();
-    const { publicAppUrl } = useSelector((state) => state.workspace);
+    const publicAppUrl = import.meta.env.VITE_PUBLIC_APP_URL
     const { channelUsers } = useChannelUsers(channelId);
     const [joining, setJoining] = useState(false);
     const joinChannel = useJoinChannel();

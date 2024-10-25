@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useCustomedForm } from "@/helpers/customHooks";
 import CustomedDialog from "@/Components/CustomedDialog";
 import { addNewChannelToChannelsStore } from "@/Store/channelsSlice";
+import { addJoinedChannelId } from "@/Store/joinedChannelIdsSlice";
 
 export function CreateChannelForm({ activateButtonNode, callback = () => {} }) {
     const [isOpen, setIsOpen] = useState(false);
@@ -28,6 +29,7 @@ export function CreateChannelForm({ activateButtonNode, callback = () => {} }) {
         e.preventDefault();
         submit().then((response) => {
             dispatch(addNewChannelToChannelsStore(response.data?.channel));
+            dispatch(addJoinedChannelId({ id: response.data?.channel?.id }));
             setIsOpen(false);
             reset();
             callback(response.data?.channel?.id);

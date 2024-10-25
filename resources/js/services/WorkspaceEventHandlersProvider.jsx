@@ -123,7 +123,7 @@ export default function WorkspaceEventHandlersProvider({ children }) {
                     }
                     break;
                 case WorkspaceEventsEnum.STORE_CHANNEL:
-                    const newChannel = e.data?.channel;
+                    const newChannel = e.data;
                     dispatch(addNewChannelToChannelsStore(newChannel));
 
                     break;

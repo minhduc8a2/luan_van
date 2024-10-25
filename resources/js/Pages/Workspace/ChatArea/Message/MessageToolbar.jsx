@@ -216,7 +216,7 @@ export default function MessageToolbar({
                                         {({ close }) => (
                                             <div className="">
                                                 <div className=" rounded-lg border border-color/15 mt-2  bg-foreground w-48 z-20 relative overflow-hidden text-sm">
-                                                    <button className="hover:bg-blue-500 hover:text-color px-4  py-2 w-full text-left">
+                                                    <button className="hover:bg-blue-500 hover:text-color px-4  py-2 w-full text-left text-color-medium-emphasis">
                                                         Pin to channel
                                                     </button>
 
@@ -226,7 +226,7 @@ export default function MessageToolbar({
                                                             <hr />
                                                             {!message.is_auto_generated && (
                                                                 <button
-                                                                    className="hover:bg-blue-500 hover:text-color px-4  py-2 w-full text-left"
+                                                                    className="hover:bg-blue-500 hover:text-color px-4  py-2 w-full text-left text-color-medium-emphasis"
                                                                     onClick={() => {
                                                                         setIsEditing(
                                                                             true
