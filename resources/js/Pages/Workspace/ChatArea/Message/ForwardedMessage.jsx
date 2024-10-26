@@ -33,7 +33,7 @@ export default function ForwardedMessage({
     noToolbar = false,
 }) {
     const { auth } = usePage().props;
-    const { channelId , workspaceId} = useParams();
+    const { channelId, workspaceId } = useParams();
     const { theme } = useContext(ThemeContext);
     const dispatch = useDispatch();
     const { channels } = useSelector((state) => state.channels);
@@ -182,7 +182,7 @@ export default function ForwardedMessage({
             )}
             {hasChanged || index == 0 ? (
                 <Avatar
-                    src={user.avatar_url}
+                    src={user?.avatar_url}
                     className="w-10 h-10"
                     noStatus={true}
                 />
@@ -194,12 +194,12 @@ export default function ForwardedMessage({
                     <div className="flex gap-x-2 items-baseline">
                         <div
                             className={`text-base font-bold leading-tight text-color-high-emphasis ${
-                                user.notMember ? "line-through" : ""
+                                user?.notMember ? "line-through" : ""
                             }`}
                         >
-                            {user.display_name || user.name}
+                            {user?.display_name || user?.name}
                         </div>
-                        {user.notMember && (
+                        {user?.notMember && (
                             <span className="text-xs leading-tight text-color/75 font-extralight">
                                 (Removed User)
                             </span>
@@ -243,17 +243,19 @@ export default function ForwardedMessage({
                         )}
                     </>
                 )}
-                {!message.deleted_at && <div className="border-l-4 border-l-color/15">
-                    <Message
-                        forwarded
-                        threadStyle={true}
-                        message={message.forwarded_message}
-                        user={forwardedMessageUser}
-                        forwardedMessageChannel={forwardedMessageChannel}
-                        hasChanged={true}
-                        index={0}
-                    />
-                </div>}
+                {!message.deleted_at && (
+                    <div className="border-l-4 border-l-color/15">
+                        <Message
+                            forwarded
+                            threadStyle={true}
+                            message={message.forwarded_message}
+                            user={forwardedMessageUser}
+                            forwardedMessageChannel={forwardedMessageChannel}
+                            hasChanged={true}
+                            index={0}
+                        />
+                    </div>
+                )}
                 <Reactions
                     groupedReactions={groupedReactions}
                     reactToMessage={reactToMessage}

@@ -222,7 +222,7 @@ export default function Message({
             )}
             {hasChanged || index == 0 ? (
                 <Avatar
-                    src={user.avatar_url}
+                    src={user?.avatar_url}
                     className="w-10 h-10"
                     noStatus={true}
                 />
@@ -234,13 +234,13 @@ export default function Message({
                     <div className="flex gap-x-2 items-baseline text-color/85">
                         <button
                             className={`text-base  hover:underline font-bold leading-tight ${
-                                user.notMember ? "line-through" : ""
+                                user?.notMember ? "line-through" : ""
                             }`}
-                            onClick={() => dispatch(setProfile(user.id))}
+                            onClick={() => dispatch(setProfile(user?.id))}
                         >
-                            {user.display_name || user.name}
+                            {user?.display_name || user?.name}
                         </button>
-                        {user.notMember && (
+                        {user?.notMember && (
                             <span className="text-xs leading-tight text-color/75 font-extralight">
                                 (Removed User)
                             </span>

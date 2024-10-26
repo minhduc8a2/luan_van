@@ -2,11 +2,17 @@ import { usePage } from "@inertiajs/react";
 import React, { useEffect, useRef } from "react";
 
 import ChannelEventsEnum from "./Enums/ChannelEventsEnum";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { addNotificationCount } from "@/Store/activitySlice";
+import {
+    addActivity,
+    addNotificationCount,
+    pushActivity,
+} from "@/Store/activitySlice";
 import {
     isChannelsNotificationBroadcast,
+    isHuddleInvitationNotificationType,
+    isMentionNotification,
     isWorkspaceNotificationBroadcast,
 } from "@/helpers/notificationTypeHelper";
 import {
@@ -23,6 +29,7 @@ import {
     removeJoinedChannelId,
 } from "@/Store/joinedChannelIdsSlice";
 import { updateWorkspace } from "@/Store/workspaceSlice";
+import useLoadWorkspaces from "@/helpers/useLoadWorkspaces";
 
 export default function UserNotificationEventHandlersProvider({ children }) {
     const { auth } = usePage().props;
@@ -42,7 +49,8 @@ export default function UserNotificationEventHandlersProvider({ children }) {
     //
     const { channelId: huddleChannelId } = useSelector((state) => state.huddle);
     const huddleChannelIdRef = useRef(null);
-
+    const navigate = useNavigate();
+    const loadWorkspaces = useLoadWorkspaces();
     useEffect(() => {
         huddleChannelIdRef.current = huddleChannelId;
     }, [huddleChannelId]);
@@ -82,13 +90,29 @@ export default function UserNotificationEventHandlersProvider({ children }) {
                             break;
                         case WorkspaceEventsEnum.DEACTIVATE_USER_UPDATED:
                             dispatch(updateWorkspace(workspace));
+                            break;
+                        case WorkspaceEventsEnum.WORKSPACE_DELETED:
+                            if (workspace.id == workspaceId) {
+                                loadWorkspaces().then(() =>
+                                    navigate("/workspaces")
+                                );
+                            }
                         default:
                             break;
                     }
                 }
+                if (isMentionNotification(notification.type)) {
+                    if (workspaceId != workspace.id) return;
+                    dispatch(addActivity(notification));
+                }
 
+                if (isHuddleInvitationNotificationType(notification.type)) {
+                    if (workspaceId != workspace.id) return;
+                    dispatch(addActivity(notification));
+                }
                 if (isChannelsNotificationBroadcast(notification.type)) {
                     if (workspaceId != workspace.id) return;
+                    dispatch(addActivity(notification));
                     switch (changesType) {
                         case ChannelEventsEnum.ADDED_TO_NEW_CHANNEL:
                             dispatch(addNewChannelToChannelsStore(channel));

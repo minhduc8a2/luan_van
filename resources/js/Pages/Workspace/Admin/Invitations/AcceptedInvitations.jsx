@@ -10,7 +10,12 @@ import { useSelector } from "react-redux";
 import Avatar from "@/Components/Avatar";
 
 export default function AcceptedInvitations() {
-    const { invitations, searchValue } = useContext(InvitationContext);
+    const { invitationsMap } = useSelector((state) => state.invitations);
+    const invitations = useMemo(
+        () => Object.values(invitationsMap),
+        [invitationsMap]
+    );
+    const { searchValue } = useContext(InvitationContext);
     const [sortBy, setSortBy] = useState({ type: "email", direction: true });
 
     function handleSortClick(type) {

@@ -11,8 +11,11 @@ import { useCustomedForm } from "@/helpers/customHooks";
 import { useParams } from "react-router-dom";
 
 export default function InviteLinks() {
-    const { invitations, searchValue } = useContext(InvitationContext);
-
+    const { invitationsMap } = useSelector((state) => state.invitations);
+    const invitations = useMemo(
+        () => Object.values(invitationsMap),
+        [invitationsMap]
+    );
     const invitationsLinks = useMemo(() => {
         return invitations.filter((invitation) => !invitation.email);
     }, [invitations]);
@@ -52,7 +55,7 @@ function HeaderItem({ children }) {
 function InvitationItem({ invitation }) {
     const { workspaceId } = useParams();
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
-    const { setInvitations, invitations } = useContext(InvitationContext);
+
     const numberOfJoiners = useMemo(() => {
         return workspaceUsers.reduce((acc, user) => {
             if (user.pivot.invitation_id == invitation.id) return acc + 1;
@@ -75,9 +78,7 @@ function InvitationItem({ invitation }) {
             }
         );
     function deactivate() {
-        deactivateSubmit().then(() => {
-            setInvitations((pre) => pre.filter((i) => i.id != invitation.id));
-        });
+        deactivateSubmit();
     }
     const { submit: renewSubmit, loading: renewLoading } = useCustomedForm(
         {},
@@ -90,19 +91,7 @@ function InvitationItem({ invitation }) {
         }
     );
     function renew() {
-        renewSubmit().then((response) => {
-            setInvitations((pre) => {
-                return pre.map((i) => {
-                    if (i.id == invitation.id) {
-                        return {
-                            ...invitation,
-                            expired_at: response.data?.invitation?.expired_at,
-                        };
-                    }
-                    return i;
-                });
-            });
-        });
+        renewSubmit();
     }
 
     return (

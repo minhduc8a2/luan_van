@@ -17,6 +17,7 @@ import workspaceReducer from "./workspaceSlice";
 import channelsDataReducer from "./channelsDataSlice";
 import isOnlineReducer from "./isOnlineSlice";
 import joinedChannelIdsReducer from "./joinedChannelIdsSlice";
+import invitationsReducer from "./invitationsSlice";
 export const makeStore = () => {
     return configureStore({
         reducer: {
@@ -26,7 +27,6 @@ export const makeStore = () => {
             activity: activityReducer,
             thread: threadReducer,
             mention: mentionReducer,
-
             page: pageReducer,
             notificationPopup: notificationPopupReducer,
             media: mediaReducer,
@@ -38,6 +38,7 @@ export const makeStore = () => {
             channelsData: channelsDataReducer,
             isOnline: isOnlineReducer,
             joinedChannelIds: joinedChannelIdsReducer,
+            invitations: invitationsReducer,
         },
     });
 };

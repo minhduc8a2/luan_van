@@ -19,6 +19,7 @@ import OnlineStatusProvider from "@/services/OnlineStatusProvider";
 import UserNotificationEventHandlersProvider from "@/services/UserNotificationEventHandlersProvider";
 import WorkspaceEventHandlersProvider from "@/services/WorkspaceEventHandlersProvider";
 import ChannelEventHandlersProvider from "@/services/ChannelEventHandlersProvider";
+import AdminEventHandlersProvider from "@/services/AdminEventHandlersProvider";
 
 export default function Index() {
     return (
@@ -39,7 +40,9 @@ export default function Index() {
                             <OnlineStatusProvider>
                                 <UserNotificationEventHandlersProvider>
                                     <WorkspaceEventHandlersProvider>
-                                        <Admin />
+                                        <AdminEventHandlersProvider>
+                                            <Admin />
+                                        </AdminEventHandlersProvider>
                                     </WorkspaceEventHandlersProvider>
                                 </UserNotificationEventHandlersProvider>
                             </OnlineStatusProvider>

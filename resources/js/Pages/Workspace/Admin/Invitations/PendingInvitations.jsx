@@ -12,7 +12,12 @@ import { InvitationContext } from "./Invitations";
 import { useSelector } from "react-redux";
 
 export default function PendingInvitations() {
-    const { invitations, searchValue } = useContext(InvitationContext);
+    const { invitationsMap } = useSelector((state) => state.invitations);
+    const invitations = useMemo(
+        () => Object.values(invitationsMap),
+        [invitationsMap]
+    );
+    const { searchValue } = useContext(InvitationContext);
     const [sortBy, setSortBy] = useState({ type: "email", direction: true });
     function handleSortClick(type) {
         if (sortBy.type === type) {
@@ -108,7 +113,7 @@ function InvitationItem({ invitation }) {
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
     const [alreadyResent, setAlreadyResent] = useState(false);
     const { workspaceId } = useParams();
-    const { setInvitations } = useContext(InvitationContext);
+
     const { submit: resendInvitationSumbit, loading: resendInvitationLoading } =
         useCustomedForm(
             { id: invitation.id },
@@ -131,9 +136,7 @@ function InvitationItem({ invitation }) {
         });
     }
     function revoke() {
-        revokeSumbit().then(() => {
-            setInvitations((pre) => pre.filter((i) => i.id != invitation.id));
-        });
+        revokeSumbit();
     }
     const creator = useMemo(() => {
         return workspaceUsers.find((user) => user.id == invitation.user_id);

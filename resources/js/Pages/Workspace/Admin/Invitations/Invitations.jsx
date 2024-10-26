@@ -8,19 +8,20 @@ import React, {
 } from "react";
 import { InvitationForm } from "../../Panel/InvitationForm";
 import Button from "@/Components/Button";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import SimpleSearchInput from "@/Components/Input/SimpleSearchInput";
 import { useParams } from "react-router-dom";
 import PendingInvitations from "./PendingInvitations";
 import AcceptedInvitations from "./AcceptedInvitations";
 import useLoadWorkspaceUsers from "@/helpers/useLoadWorkspaceUsers";
 import InviteLinks from "./InviteLinks";
+import { setInvitations } from "@/Store/invitationsSlice";
 export const InvitationContext = createContext(null);
 export default function Invitations() {
     const { workspaceId } = useParams();
-    const [searchValue,setSearchValue] = useState("")
+    const [searchValue, setSearchValue] = useState("");
     const [isInvitationFormOpen, setIsInvitationFormOpen] = useState(false);
-    const [invitations, setInvitations] = useState([]);
+    const dispatch = useDispatch();
     const [tabIndex, setTabIndex] = useState(0);
     const { workspace } = useSelector((state) => state.workspace);
     const inputRef = useRef(null);
@@ -49,12 +50,12 @@ export default function Invitations() {
         axios
             .get(route("workspaces.invitations", workspaceId))
             .then((response) => {
-                setInvitations(response.data.invitations);
+                dispatch(setInvitations(response.data.invitations));
             });
     }, []);
     return (
         <InvitationContext.Provider
-            value={{ tabIndex, setTabIndex, invitations, setInvitations, searchValue }}
+            value={{ tabIndex, setTabIndex, searchValue }}
         >
             <div className="bg-color-contrast h-full pt-8 px-8">
                 <InvitationForm
@@ -91,7 +92,7 @@ export default function Invitations() {
                     ref={inputRef}
                     className=" my-4"
                     placeholder={searchPlaceholder}
-                    onChange={(e)=>setSearchValue(e.target.value)}
+                    onChange={(e) => setSearchValue(e.target.value)}
                 />
                 <hr />
                 {tabIndex == 0 && <PendingInvitations />}

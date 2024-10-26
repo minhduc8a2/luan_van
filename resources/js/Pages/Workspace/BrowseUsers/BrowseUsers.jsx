@@ -11,12 +11,15 @@ import LoadingSpinner from "@/Components/LoadingSpinner";
 import FilterButton from "@/Components/FilterButton";
 import UserItem from "./UserItem";
 import { setProfile } from "@/Store/profileSlice";
+import { InvitationForm } from "../Panel/InvitationForm";
 export default function BrowseUsers() {
     // const [allUsers, setAllUsers] = useState([]);
+    const { workspace } = useSelector((state) => state.workspace);
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
     const [searchValue, setSearchValue] = useState("");
     const [filterLoading, setFilterLoading] = useState(false);
     const dispatch = useDispatch();
+    const [isInvitationFormOpen, setIsInvitationFormOpen] = useState(false);
     const sortList = [
         {
             inside: "A to Z",
@@ -152,13 +155,17 @@ export default function BrowseUsers() {
                             </div>
                         )}
                     </div>
-                    <CreateChannelForm
-                        activateButtonNode={
-                            <Button className=" font-bold border border-color/15 !bg-background">
-                                Create Channel
-                            </Button>
-                        }
+                    <InvitationForm
+                        isOpen={isInvitationFormOpen}
+                        workspace={workspace}
+                        onClose={() => setIsInvitationFormOpen(false)}
                     />
+                    <Button
+                        className=" font-bold border border-color/15 !bg-background"
+                        onClick={() => setIsInvitationFormOpen(true)}
+                    >
+                        Invite people
+                    </Button>
                 </div>
                 <SearchInput
                     placeholder="Search for users"

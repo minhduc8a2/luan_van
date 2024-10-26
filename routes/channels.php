@@ -21,4 +21,8 @@ Broadcast::channel('workspaces.{workspace}', WorkspaceChannel::class);
 Broadcast::channel('private_workspaces.{workspace}', function (User $user, Workspace $workspace) {
     return $user->can('view', [Workspace::class, $workspace]);
 });
+
+Broadcast::channel('private_workspace_admin.{workspace}', function (User $user, Workspace $workspace) {
+    return $user->can('update', [Workspace::class, $workspace]);
+});
 Broadcast::channel('huddles.{channel}', HuddleChannel::class);

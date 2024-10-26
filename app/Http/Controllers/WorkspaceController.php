@@ -62,7 +62,7 @@ class WorkspaceController extends Controller
                 return ['workspace' => $workspace];
         }
         return [
-           
+
             'workspaces' => $workspaces(),
             'newNotificationsCount' => $newNotificationsCount(),
             'workspacePermissions' => $workspacePermissions(),
@@ -261,7 +261,7 @@ class WorkspaceController extends Controller
                 $user->pivot->is_approved = true;
                 $user->workspaceRole = Role::find($user->pivot->role_id)->setVisible(["name"]);
                 $workspace->pivot = $user->pivot;
-                $user->notify(new WorkspaceNotification($workspace, "AcceptJoiningRequest"));
+                $user->notify(new WorkspaceNotification($workspace, WorkspaceEventsEnum::ACCEPT_JOINING_REQUEST->name));
                 array_push($acceptedUsers, $user);
             }
             broadcast(new WorkspaceEvent($workspace->id, WorkspaceEventsEnum::ACCEPT_JOINING_REQUEST->name,  data: $acceptedUsers));
@@ -292,9 +292,9 @@ class WorkspaceController extends Controller
 
                 $workspace->users()->updateExistingPivot($userId, ['is_deactivated' => $wantDeactivate]);
                 $user = $workspace->users()->where('users.id', $userId)->first();
-                $workspace->pivot=$user->pivot;
-                $user->notify(new WorkspaceNotification($workspace,WorkspaceEventsEnum::DEACTIVATE_USER_UPDATED->name));
-                broadcast(new WorkspaceEvent($workspace->id, WorkspaceEventsEnum::DEACTIVATE_USER_UPDATED->name, data:$user ));
+                $workspace->pivot = $user->pivot;
+                $user->notify(new WorkspaceNotification($workspace, WorkspaceEventsEnum::DEACTIVATE_USER_UPDATED->name));
+                broadcast(new WorkspaceEvent($workspace->id, WorkspaceEventsEnum::DEACTIVATE_USER_UPDATED->name, data: $user));
             }
             DB::commit();
             return Helper::createSuccessResponse();
@@ -350,20 +350,29 @@ class WorkspaceController extends Controller
         if (Hash::check($validated['current_password'], $request->user()->password)) {
             RateLimiter::clear($attemptKey);
             try {
+
                 DB::beginTransaction();
                 //delete user notifications belongs to workspace
-                $request->user()->notifications()->whereJsonContains('data->workspace->id', $workspace->id)->delete();
+                $workspaceUsers = $workspace->users;
+                $copiedWorkspace = ['id' => $workspace->id, 'name' => $workspace->name];
+                foreach ($workspaceUsers as $workspaceUser) {
+                    $workspaceUser->notifications()->whereJsonContains('data->workspace->id', $workspace->id)->delete();
+                    $workspaceUser->notify(new WorkspaceNotification($copiedWorkspace, WorkspaceEventsEnum::WORKSPACE_DELETED->name));
+                }
+              
                 //
                 //delete permissions because not cascading on delete
                 $channelIds = $workspace->channels()->pluck('id');
-
                 DB::table('permissions')->where('permissionable_type', Channel::class)->whereIn('permissionable_id', $channelIds)->delete();
                 $workspace->permissions()->delete();
                 //
                 $workspace->delete();
+
                 DB::commit();
+                return Helper::createSuccessResponse();
             } catch (\Throwable $th) {
                 DB::rollBack();
+                dd($th);
                 Helper::createErrorResponse();
             }
         } else {

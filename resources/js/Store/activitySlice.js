@@ -8,9 +8,8 @@ export const activitySlice = createSlice({
             state.notifications = [...action.payload];
         },
         setNotificationsCount(state, action) {
-            console.log("notifications count:",action.payload);
+            console.log("notifications count:", action.payload);
             state.new_count = action.payload;
-
         },
         addNotificationCount(state, action) {
             state.new_count += 1;
@@ -18,8 +17,6 @@ export const activitySlice = createSlice({
         },
         addActivity(state, action) {
             state.notifications.unshift(action.payload);
-            state.new_count += 1;
-            console.log("in add activity", state.new_count);
         },
         pushActivity(state, action) {
             state.notifications.push(action.payload);

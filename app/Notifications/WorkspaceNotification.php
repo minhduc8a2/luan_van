@@ -16,7 +16,7 @@ class WorkspaceNotification extends Notification
     /**
      * Create a new notification instance.
      */
-    public function __construct(public Workspace $workspace, public string $changesType, public  $data = null)
+    public function __construct(public $workspace=null, public string $changesType, public  $data = null)
     {
         //
     }
@@ -49,31 +49,6 @@ class WorkspaceNotification extends Notification
             "changesType" => $this->changesType,
             "data" => $this->data,
             "created_at" => Carbon::now()
-
-
         ]);
-    }
-    /**
-     * Get the array representation of the notification.
-     *
-     * @return array<string, mixed>
-     */
-    public function toArray(User $notifiable): array
-    {
-        return [
-            "workspace" => $this->workspace,
-            "changesType" => $this->changesType,
-            "data" => $this->data,
-        ];
-    }
-
-    /**
-     * Get the notification's database type.
-     *
-     * @return string
-     */
-    public function databaseType(User $notifiable): string
-    {
-        return 'WORKSPACE_NOTIFICATION';
     }
 }
