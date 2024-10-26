@@ -159,7 +159,7 @@ import EmojiPicker from "@emoji-mart/react";
 import { CiFaceSmile } from "react-icons/ci";
 import { IoMdSend } from "react-icons/io";
 import { FaAngleDown } from "react-icons/fa6";
-import { useRef, useState, useEffect, useId, useMemo } from "react";
+import { useRef, useState, useEffect, useId, useMemo, useContext } from "react";
 import { router, usePage } from "@inertiajs/react";
 import { isImage } from "@/helpers/fileHelpers";
 import SquareImage from "./SquareImage";
@@ -171,6 +171,7 @@ import { MentionList } from "./MentionList.jsx";
 import Button from "./Button";
 import { useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
+import ThemeContext from "@/ThemeProvider";
 export default function TipTapEditor({
     onSubmit,
 
@@ -184,6 +185,7 @@ export default function TipTapEditor({
 }) {
     const { auth } = usePage().props;
     const { workspaceId } = useParams();
+    const { theme } = useContext(ThemeContext);
     const inputId = useId();
     const serverResponseFileList = useRef([]);
     const [fileListMap, setFileListMap] = useState({});
@@ -409,10 +411,12 @@ export default function TipTapEditor({
         // }),
     ];
 
-    const content = message?.content && isEditMessage ? message.content : ``;
+    const content = message?.content && isEditMessage ? message?.content : ``;
     const editorProps = {
         attributes: {
-            class: "prose prose-invert  text-color-high-emphasis  focus:outline-none  ",
+            class: `prose ${
+                theme.mode ? "prose-invert" : ""
+            }  text-color-high-emphasis  focus:outline-none  `,
         },
         handleKeyDown: () => {},
     };
@@ -428,8 +432,8 @@ export default function TipTapEditor({
             // },
         },
         message
-            ? [channel.id, message.id, channelUsers]
-            : [channel.id, channelUsers]
+            ? [channel.id, message?.id, channelUsers,theme]
+            : [channel.id, channelUsers,theme]
     );
 
     useEffect(() => {

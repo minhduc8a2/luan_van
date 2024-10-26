@@ -33,7 +33,7 @@ export default function ForwardedMessage({
     noToolbar = false,
 }) {
     const { auth } = usePage().props;
-    const { channelId } = useParams();
+    const { channelId , workspaceId} = useParams();
     const { theme } = useContext(ThemeContext);
     const dispatch = useDispatch();
     const { channels } = useSelector((state) => state.channels);
@@ -84,6 +84,7 @@ export default function ForwardedMessage({
         let mentionsList = getMentionsFromContent(JSONContent);
 
         if (content == "<p></p>" && mentionsList.length == 0) return;
+        const oldContent = message.content;
         dispatch(
             editMessageInStore({
                 id: message.channel_id,
@@ -91,22 +92,30 @@ export default function ForwardedMessage({
             })
         );
         setIsEditing(false);
-        router.post(
-            route("message.update", message.id),
-            {
-                content,
-                mentionsList,
-            },
-            {
-                only: [],
-                preserveState: true,
-                preserveScroll: true,
-
-                headers: {
-                    "X-Socket-Id": Echo.socketId(),
+        axios
+            .post(
+                route("message.update", {
+                    workspace: workspaceId,
+                    message: message.id,
+                }),
+                {
+                    content,
+                    mentionsList,
                 },
-            }
-        );
+                {
+                    headers: {
+                        "X-Socket-Id": Echo.socketId(),
+                    },
+                }
+            )
+            .catch(() => {
+                dispatch(
+                    editMessageInStore({
+                        id: message.channel_id,
+                        data: { message_id: message.id, oldContent },
+                    })
+                );
+            });
     }
     function reactToMessage(emojiId) {
         const reaction = message.reactions.find(
@@ -208,6 +217,7 @@ export default function ForwardedMessage({
                 {isEditing ? (
                     <div className="border rounded-lg border-color/15 p-2 mt-2">
                         <TipTapEditor
+                            channel={channel}
                             message={message}
                             onSubmit={editMessage}
                             isEditMessage={true}
@@ -233,7 +243,7 @@ export default function ForwardedMessage({
                         )}
                     </>
                 )}
-                <div className="border-l-4 border-l-color/15">
+                {!message.deleted_at && <div className="border-l-4 border-l-color/15">
                     <Message
                         forwarded
                         threadStyle={true}
@@ -243,7 +253,7 @@ export default function ForwardedMessage({
                         hasChanged={true}
                         index={0}
                     />
-                </div>
+                </div>}
                 <Reactions
                     groupedReactions={groupedReactions}
                     reactToMessage={reactToMessage}

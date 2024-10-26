@@ -3,14 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Models\Channel;
-use App\Notifications\HuddleInvitationNotification;
-use Illuminate\Http\Request;
 use App\Helpers\Helper;
+use App\Models\Channel;
+use App\Models\Workspace;
+use Illuminate\Http\Request;
+use App\Notifications\HuddleInvitationNotification;
 
 class HuddleController extends Controller
 {
-    public function invite(Request $request, Channel $channel)
+    public function invite(Request $request,Workspace $workspace, Channel $channel)
     {
         if ($request->user()->cannot('view', $channel)) abort(403);
         try {

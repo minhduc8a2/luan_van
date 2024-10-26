@@ -10,7 +10,7 @@ import { useParams } from "react-router-dom";
 export default function HuddleInvitation({ close }) {
     const { flash } = usePage().props;
     const { auth } = usePage().props;
-    const { channelId } = useParams();
+    const { channelId, workspaceId } = useParams();
     const { channelUsers } = useChannelUsers(channelId);
     const { channels } = useSelector((state) => state.channels);
     const { channelId: huddleChannelId, userIds } = useSelector(
@@ -24,7 +24,7 @@ export default function HuddleInvitation({ close }) {
     const [success, setSuccess] = useState(false);
     function submit() {
         axios
-            .post(route("huddle.invitation", channel.id), {
+            .post(route("huddle.invitation",{workspace:workspaceId, channel:huddleChannelId}), {
                 users: [...Object.values(choosenUsers)],
             })
             .then(() => {

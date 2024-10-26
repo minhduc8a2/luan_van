@@ -9,18 +9,20 @@ import { useDispatch, useSelector } from "react-redux";
 import { getChannelName } from "@/helpers/channelHelper";
 import { useMemo } from "react";
 import { setNotificationPopup } from "@/Store/notificationPopupSlice";
+import { useParams } from "react-router-dom";
 export default function HuddleNotification({
     notification,
     handleNotificationClick,
 }) {
     const { auth } = usePage().props;
+    const {workspaceId} = useParams()
     const { workspace: currentWorkspace } = useSelector(
         (state) => state.workspace
     );
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
     const dispatch = useDispatch();
     const { channelId: huddleChannelId } = useSelector((state) => state.huddle);
-    const { fromUser, toUser, channel, workspace } =
+    const { byUser, channel, workspace } =
         isHuddleInvitationNotificationBroadcast(notification.type)
             ? notification
             : notification.data;
@@ -31,7 +33,7 @@ export default function HuddleNotification({
 
     function handleNotificationClickedPart() {
         axios
-            .get(route("channel.checkExists"), {
+            .get(route("channels.checkExists", workspaceId), {
                 params: { channelId: channel.id },
             })
             .then((response) => {
@@ -137,21 +139,21 @@ export default function HuddleNotification({
                 <div className="flex gap-x-2 justify-between">
                     <div className={`message-container  flex-1 `}>
                         <Avatar
-                            src={fromUser.avatar_url}
+                            src={byUser.avatar_url}
                             className="w-8 h-8"
                             noStatus={true}
                         />
                         <div className="mx-2 ">
                             <div className="flex gap-x-2 items-center">
                                 <div className="text-sm font-bold">
-                                    {fromUser.name}
+                                    {byUser.name}
                                 </div>
                                 <div className="text-xs">
                                     {UTCToDateTime(created_at)}
                                 </div>
                             </div>
                             <div className="text-left">
-                                {`${fromUser.name} has invited you to join huddle in channel `}{" "}
+                                {`${byUser.name} has invited you to join huddle in channel `}{" "}
                                 <span className="font-bold">
                                     #{channelName}
                                 </span>{" "}

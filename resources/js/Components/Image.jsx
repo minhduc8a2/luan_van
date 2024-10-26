@@ -138,7 +138,7 @@ const Image = memo(function Image({
                     <div className="absolute top-2 right-2 hidden gap-x-2 group-hover/image_fullscreen:flex z-30">
                         <a
                             href={url}
-                            download={name}
+                            download={name || "download"}
                             className=" p-2  rounded-lg text-white hover:text-white hover:bg-color/15  "
                         >
                             <MdDownload className="text-lg" />

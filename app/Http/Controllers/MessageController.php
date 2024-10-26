@@ -449,7 +449,7 @@ class MessageController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Message $message)
+    public function update(Request $request, Workspace $workspace, Message $message)
     {
         if ($request->user()->cannot('update', [Message::class, $message])) return abort(403);
         if ($message->is_auto_generated) return abort(403);
@@ -479,11 +479,11 @@ class MessageController extends Controller
 
 
             DB::commit();
-            back();
+            return Helper::createSuccessResponse();
         } catch (\Throwable $th) {
             DB::rollBack();
             dd($th);
-            return back()->withErrors(['server' => "Something went wrong, please try later!"]);
+            Helper::createErrorResponse();
         }
     }
 

@@ -60,7 +60,9 @@ export default function AutocompleInput({
                 const lowerCaseValue = inputValue.toLowerCase();
                 return (
                     inputValue != "" &&
-                    (user.display_name.toLowerCase().includes(lowerCaseValue) ||
+                    (user.display_name
+                        ?.toLowerCase()
+                        .includes(lowerCaseValue) ||
                         user.name.toLowerCase().includes(lowerCaseValue))
                 );
             }).length > 0 && (
@@ -70,7 +72,7 @@ export default function AutocompleInput({
                             const lowerCaseValue = inputValue.toLowerCase();
                             return (
                                 user.display_name
-                                    .toLowerCase()
+                                    ?.toLowerCase()
                                     .includes(lowerCaseValue) ||
                                 user.name.toLowerCase().includes(lowerCaseValue)
                             );
