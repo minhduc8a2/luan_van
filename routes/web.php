@@ -31,7 +31,7 @@ Route::get("/", function () {
 
 
 Route::post("/workspaces", [WorkspaceController::class, 'store'])->name('workspaces.store');
-Route::middleware(['auth', HandleWorkspaceRequests::class])->group(function () {
+Route::middleware(['auth','verified', HandleWorkspaceRequests::class])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

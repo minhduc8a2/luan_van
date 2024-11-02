@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import ChannelSettings from "./ChannelSettings/ChannelSettings";
-import {  FaPlus } from "react-icons/fa";
+import { FaPlus } from "react-icons/fa";
 import Avatar from "@/Components/Avatar";
 import { FiHeadphones } from "react-icons/fi";
 import { CgFileDocument } from "react-icons/cg";
@@ -17,11 +17,7 @@ import { useParams } from "react-router-dom";
 
 import CustomedDialog from "@/Components/CustomedDialog";
 
-export default function Header({
-    channelName,
-    loaded,
-   
-}) {
+export default function Header({ channelName, loaded }) {
     const { auth } = usePage().props;
     const { channelId } = useParams();
     const { channelId: huddleChannelId } = useSelector((state) => state.huddle);
@@ -73,70 +69,81 @@ export default function Header({
                 <div className="">
                     {!channel?.is_archived && (
                         <div className="flex items-center gap-x-4 ">
-                            <div className="flex items-center p-1 border  border-color/15 rounded-lg px-2">
-                                <ul className="flex">
-                                    {channelUsers.map((user) => (
-                                        <li
-                                            key={user.id}
-                                            className="-ml-2 first:ml-0  "
-                                        >
-                                            <Avatar
-                                                src={user.avatar_url}
-                                                noStatus={true}
-                                                className="w-6 h-6 border-2  border-background"
-                                                roundedClassName="rounded-lg"
-                                            />
-                                        </li>
-                                    ))}
-                                </ul>
+                            {channel.type != "SELF" && (
+                                <div className="flex items-center p-1 border  border-color/15 rounded-lg px-2">
+                                    <ul className="flex">
+                                        {channelUsers.map((user) => (
+                                            <li
+                                                key={user.id}
+                                                className="-ml-2 first:ml-0  "
+                                            >
+                                                <Avatar
+                                                    src={user.avatar_url}
+                                                    noStatus={true}
+                                                    className="w-6 h-6 border-2  border-background"
+                                                    roundedClassName="rounded-lg"
+                                                />
+                                            </li>
+                                        ))}
+                                    </ul>
 
-                                <div className="text-xs ml-2">
-                                    {channelUsers.length}
+                                    <div className="text-xs ml-2">
+                                        {channelUsers.length}
+                                    </div>
                                 </div>
-                            </div>
-                            <div
-                                className={`flex items-center p-1 border border-color/15 rounded-lg px-2 gap-x-3 font-normal  ${
-                                    huddleChannelId ? "bg-green-700 text-white" : " "
-                                }`}
-                            >
-                                {permissions?.huddle ? (
-                                    <button
-                                        className={`flex items-center gap-x-1 `}
-                                        onClick={handleHuddleButtonClicked}
-                                    >
-                                        <FiHeadphones className="text-xl" />
-                                        <div className={`text-sm font-bold`}>Huddle</div>
-                                    </button>
-                                ) : (
-                                    <>
+                            )}
+
+                            {channel.type != "SELF" && (
+                                <div
+                                    className={`flex items-center p-1 border border-color/15 rounded-lg px-2 gap-x-3 font-normal  ${
+                                        huddleChannelId
+                                            ? "bg-green-700 text-white"
+                                            : " "
+                                    }`}
+                                >
+                                    {permissions?.huddle ? (
                                         <button
                                             className={`flex items-center gap-x-1 `}
-                                            onClick={() => setIsOpen(true)}
+                                            onClick={handleHuddleButtonClicked}
                                         >
                                             <FiHeadphones className="text-xl" />
-                                            <div className={`text-sm `}>
+                                            <div
+                                                className={`text-sm font-bold`}
+                                            >
                                                 Huddle
                                             </div>
                                         </button>
-                                        <CustomedDialog
-                                            isOpen={isOpen}
-                                            onClose={() => setIsOpen(false)}
-                                        >
-                                            <h5 className="mb-4  text-color-high-emphasis">
-                                                You're not allowed to huddle in
-                                                channel. Contact Admins or
-                                                Channel managers for more
-                                                information!
-                                            </h5>
-                                            <CustomedDialog.CloseButton />
-                                        </CustomedDialog>
-                                    </>
-                                )}
-                                {/* <div className="flex items-center gap-x-1">
+                                    ) : (
+                                        <>
+                                            <button
+                                                className={`flex items-center gap-x-1 `}
+                                                onClick={() => setIsOpen(true)}
+                                            >
+                                                <FiHeadphones className="text-xl" />
+                                                <div className={`text-sm `}>
+                                                    Huddle
+                                                </div>
+                                            </button>
+                                            <CustomedDialog
+                                                isOpen={isOpen}
+                                                onClose={() => setIsOpen(false)}
+                                            >
+                                                <h5 className="mb-4  text-color-high-emphasis">
+                                                    You're not allowed to huddle
+                                                    in channel. Contact Admins
+                                                    or Channel managers for more
+                                                    information!
+                                                </h5>
+                                                <CustomedDialog.CloseButton />
+                                            </CustomedDialog>
+                                        </>
+                                    )}
+                                    {/* <div className="flex items-center gap-x-1">
               <span className="text-sm opacity-25 ">|</span>
               <FaAngleDown className="text-xs" />
           </div> */}
-                            </div>
+                                </div>
+                            )}
 
                             <div className="p-1 border border-color/15 rounded-lg ">
                                 <CgFileDocument className="text-xl" />
