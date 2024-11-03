@@ -41,12 +41,6 @@ export function EditDescriptionForm() {
                 <CustomedDialog.Title>{`${
                     channel.description ? "Edit" : "Add"
                 } Description`}</CustomedDialog.Title>
-                {!permissions.updateDescription && (
-                    <h3 className="text-lg my-4">
-                        ⚠️You are not allowed to edit channel description,
-                        contact admins or channel managers for more information.
-                    </h3>
-                )}
                 <TextArea
                     disabled={!permissions.updateDescription}
                     rows="2"

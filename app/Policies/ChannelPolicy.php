@@ -69,8 +69,7 @@ class ChannelPolicy
             if ($user->workspacePermissionCheck($channel->workspace, PermissionTypes::WORKSPACE_ALL->name) && $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_VIEW->name))
                 return true;
         }
-        return $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name)
-            || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_EDIT_DESCRIPTION->name);
+        return $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name);
     }
 
     public function updateName(User $user, Channel $channel): bool
@@ -86,8 +85,7 @@ class ChannelPolicy
                 return true;
         }
 
-        return  $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name)
-            || $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_EDIT_NAME->name);
+        return  $user->channelPermissionCheck($channel, PermissionTypes::CHANNEL_ALL->name);
     }
     public function changeType(User $user, Channel $channel): bool
     {

@@ -23,11 +23,11 @@ export default function ChannelNotification({
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
     // console.log(notification);
 
-    const { channel, workspace,byUser, data, changesType } =
+    const { channel, workspace, byUser, data, changesType } =
         isChannelsNotificationBroadcast(notification.type)
             ? notification
             : notification.data;
-    
+
     const read_at = notification.read_at;
     const created_at = notification.created_at;
     const view_at = notification.view_at;
@@ -178,6 +178,14 @@ export default function ChannelNotification({
                                 {channelName}
                             </div>
                         </div>
+                    </div>
+                );
+            case ChannelEventsEnum.CHANNEL_NAME_UPDATED:
+                return (
+                    <div className="text-left">
+                        {`${byUser.name} has changed channel name from`}{" "}
+                        <span className="font-bold">{data.oldName}</span> to{" "}
+                        <span className="font-bold">{data.newName}</span>
                     </div>
                 );
             default:

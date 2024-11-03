@@ -34,7 +34,7 @@ export default function ChangeChannelNameForm({ channelName }) {
         <>
             <SettingsButton
                 onClick={() => setIsOpen(true)}
-                disabled={!permissions.updateName || channel.type == "DIRECT"}
+                disabled={!permissions.updateName }
                 title="Channel name"
                 description={
                     <div className="flex items-baseline gap-x-1">

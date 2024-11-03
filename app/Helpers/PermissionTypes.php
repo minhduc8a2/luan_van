@@ -9,10 +9,8 @@ enum PermissionTypes
     case CHANNEL_CHAT;
     case CHANNEL_HUDDLE;
     case CHANNEL_INVITATION;
-    case CHANNEL_EDIT_DESCRIPTION;
-    case CHANNEL_EDIT_NAME;
     case CHANNEL_THREAD;
-    //workspace permissions
+        //workspace permissions
     case WORKSPACE_ALL;
     case WORKSPACE_INVITATION;
     case WORKSPACE_INVITATION_WITH_ADMIN_APPROVAL_REQUIRED;

@@ -11,6 +11,7 @@ enum ChannelEventsEnum
    case REMOVED_MANAGER_ROLE;
       //Property updated
    case CHANNEL_UPDATED;
+   case CHANNEL_NAME_UPDATED;
       //channel events
    case CHANGE_CHANNEL_TYPE;
    case REMOVE_USER_FROM_CHANNEL;

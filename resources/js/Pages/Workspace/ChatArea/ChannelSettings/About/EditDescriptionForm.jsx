@@ -38,6 +38,8 @@ export function EditDescriptionForm() {
                 title=" Description"
                 description={channel.description}
                 className="border-t-0"
+                hasEdit={permissions.updateDescription}
+                disabled={!permissions.updateDescription}
             />
             <CustomedDialog isOpen={isOpen} onClose={() => setIsOpen(false)}>
                 <CustomedDialog.Title>{`${

@@ -369,6 +369,9 @@ class ChannelController extends Controller
 
             $channel->description = $validated['description'] ?? "";
             $channel->save();
+
+            $user = $request->user();
+            Message::createStringMessageAndBroadcast($channel, $user, $user->name . " has changed channel description.");
             broadcast(new ChannelEvent($channel->id, ChannelEventsEnum::CHANNEL_UPDATED->name, $channel));
             DB::commit();
 
@@ -387,13 +390,24 @@ class ChannelController extends Controller
         $validated = $request->validate(['name' => "required|string"]);
         try {
             DB::beginTransaction();
-
+            $user = $request->user();
+            $oldName = $channel->name;
             $channel->name = $validated['name'];
             $channel->save();
             broadcast(new ChannelEvent($channel->id, ChannelEventsEnum::CHANNEL_UPDATED->name, $channel));
-
+            Message::createStringMessageAndBroadcast($channel, $user, $user->name . " has changed channel name from " . $oldName . " to " . $channel->name . ".");
+            $channelUsers = $channel->users;
+            foreach ($channelUsers as $channelUser) {
+                // if($channelUser->id==$user->id) continue;
+                $channelUser->notify(new ChannelsNotification(
+                    $workspace,
+                    $channel,
+                    $user,
+                    ChannelEventsEnum::CHANNEL_NAME_UPDATED->name,
+                    ['oldName' => $oldName, 'newName' => $channel->name]
+                ));
+            }
             DB::commit();
-
             return Helper::createSuccessResponse();
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -733,6 +747,14 @@ class ChannelController extends Controller
             $channel->is_archived = $validated['status'];
             $user = $request->user();
             $channel->save();
+            Message::createStringMessageAndBroadcast(
+                $channel,
+                $user,
+                $channel->is_archived ?
+                    $user->name . " has archived channel."
+                    :
+                    $user->name . " has unarchived channel."
+            );
             broadcast(new ChannelEvent($channel->id, $validated['status'] ? ChannelEventsEnum::ARCHIVE_CHANNEL->name : ChannelEventsEnum::UNARCHIVE_CHANNEL->name, $channel));
             $channelUsers = $channel->users;
             foreach ($channelUsers as $channelUser) {

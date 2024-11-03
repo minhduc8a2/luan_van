@@ -52,7 +52,7 @@ export default function ChatArea() {
 
     const { channel } = useChannel(channelId);
     // console.log(channel);
-    const { messageId: threadMessageId } = useSelector((state) => state.thread);
+   
     const { messageId, threadMessage: mentionThreadMessage } = useSelector(
         (state) => state.mention
     );
@@ -60,7 +60,7 @@ export default function ChatArea() {
     const dispatch = useDispatch();
     const [loaded, setLoaded] = useState(false);
 
-    const channelConnectionRef = useRef(null);
+   
     //Mention
     const [hasMention, setHasMention] = useState(false);
     const [mentionFulfilled, setMentionFulfilled] = useState(true);
@@ -281,7 +281,7 @@ export default function ChatArea() {
                 {}
             );
         };
-    }, [channelId]);
+    }, [channelId, messages]);
 
     //want to jump to a message
     useEffect(() => {
@@ -416,9 +416,11 @@ export default function ChatArea() {
 
                                     <div className="text-color/85 mt-2">
                                         {channel?.description}{" "}
-                                        <div className="inline-block">
-                                            <EditDescriptionForm />
-                                        </div>
+                                        {permissions.updateDescription && (
+                                            <div className="inline-block">
+                                                <EditDescriptionForm />
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             )}
