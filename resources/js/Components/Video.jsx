@@ -215,7 +215,7 @@ export default function Video({
                                         onClick={() =>
                                             playVideo(largeVideoRef.current)
                                         }
-                                        className="h-8 w-8 rounded flex justify-center items-center hover:bg-white/10 p-1"
+                                        className="h-8 w-8 text-white rounded flex justify-center items-center hover:bg-white/10 p-1"
                                     >
                                         {playing ? (
                                             <IoIosPause className="text-xl" />
@@ -233,15 +233,15 @@ export default function Video({
                                 </div>
                                 <div className="relative group/volume flex items-center">
                                     <button
-                                        className="group-hover/volume:invisible"
+                                        className="group-hover/volume:invisible "
                                         onClick={() =>
                                             toggleMute(largeVideoRef.current)
                                         }
                                     >
                                         {volume == 0 ? (
-                                            <HiVolumeOff className="text-xl" />
+                                            <HiVolumeOff className="text-xl text-white" />
                                         ) : (
-                                            <HiVolumeUp className="text-xl" />
+                                            <HiVolumeUp className="text-xl text-white" />
                                         )}
                                     </button>
                                     <div className="absolute hidden group-hover/volume:flex -bottom-full gap-x-2 -mb-[22px] -rotate-90 origin-left left-1/2  bg-white/10 p-4 rounded  items-center ">
@@ -255,9 +255,9 @@ export default function Video({
                                             }
                                         >
                                             {volume == 0 ? (
-                                                <HiVolumeOff className="text-xl" />
+                                                <HiVolumeOff className="text-xl text-white" />
                                             ) : (
-                                                <HiVolumeUp className="text-xl" />
+                                                <HiVolumeUp className="text-xl text-white" />
                                             )}
                                         </button>
                                         <input

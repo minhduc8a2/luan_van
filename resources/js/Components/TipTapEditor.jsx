@@ -191,17 +191,23 @@ export default function TipTapEditor({
     const [fileListMap, setFileListMap] = useState({});
     const mentionsListRef = useRef({});
     const abortControllers = useRef({});
-    const [uploadProgress, setUploadProgress] = useState([]);
+    const [uploadProgress, setUploadProgress] = useState({});
     const [uploading, setUploading] = useState(false);
     const uploadingRef = useRef(false);
     const inputFileRef = useRef(null);
 
     function handleRemoveFile(id) {
+        abortControllers.current[id]?.abort();
         setFileListMap((pre) => ({
             ...pre,
             [id]: null,
         }));
-        abortControllers.current[id]?.abort();
+        setUploadProgress((pre) => {
+            const temp = { ...pre };
+            temp[id] = null;
+            return temp;
+        });
+      
         serverResponseFileList.current = serverResponseFileList.current.filter(
             (f) => f.id != id
         );
@@ -242,9 +248,7 @@ export default function TipTapEditor({
         });
 
         setUploading(true);
-
-        setUploadProgress(Array(filesWithId.length).fill(0));
-
+        setUploadProgress({});
         await Promise.all(
             filesWithId.map((fileWithId, index) => {
                 const controller = new AbortController();
@@ -266,8 +270,8 @@ export default function TipTapEditor({
                                         100
                                 );
                                 setUploadProgress((pre) => {
-                                    const temp = [...pre];
-                                    temp[index] = percentCompleted;
+                                    const temp = { ...pre };
+                                    temp[fileWithId.id] = percentCompleted;
                                     return temp;
                                 });
                             },
@@ -432,17 +436,20 @@ export default function TipTapEditor({
             // },
         },
         message
-            ? [channel.id, message?.id, channelUsers,theme]
-            : [channel.id, channelUsers,theme]
+            ? [channel.id, message?.id, channelUsers, theme]
+            : [channel.id, channelUsers, theme]
     );
 
     useEffect(() => {
         if (editor) editor.commands.focus();
     }, [focus, editor]);
     const uploadAllProgress = useMemo(() => {
-        return uploadProgress.reduce(
+        const length = Object.values(uploadProgress).filter(
+            (item) => item != null
+        ).length;
+        return Object.values(uploadProgress).reduce(
             (pre, progress) =>
-                pre + Math.ceil(progress / uploadProgress.length),
+                progress != null ? pre + Math.ceil(progress / length) : pre,
             0
         );
     }, [uploadProgress]);
@@ -464,7 +471,7 @@ export default function TipTapEditor({
                                 key={id}
                                 removable={true}
                                 uploadable={true}
-                                percentage={uploadProgress[index]}
+                                percentage={uploadProgress[id]}
                                 remove={() => handleRemoveFile(id)}
                             />
                         );
@@ -477,7 +484,7 @@ export default function TipTapEditor({
                                     removable
                                     remove={() => handleRemoveFile(id)}
                                     uploadable={true}
-                                    percentage={uploadProgress[index]}
+                                    percentage={uploadProgress[id]}
                                 />
                             </div>
                         );
