@@ -95,7 +95,7 @@ export default function Managers() {
                     <div className="text-xl flex items-baseline gap-x-2 p-6 pb-0 font-bold text-color-high-emphasis">
                         People who can manage{" "}
                         <div className="flex items-center gap-x-1">
-                            {channel.type != "PUBLIC" ? (
+                            {channel.type == "PUBLIC" ? (
                                 <span className="text-lg">#</span>
                             ) : (
                                 <FaLock className="text-sm" />

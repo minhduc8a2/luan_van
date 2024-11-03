@@ -69,7 +69,7 @@ export default function Header({ channelName, loaded }) {
                 <div className="">
                     {!channel?.is_archived && (
                         <div className="flex items-center gap-x-4 ">
-                            {channel.type != "SELF" && (
+                            {channel?.type != "SELF" && (
                                 <div className="flex items-center p-1 border  border-color/15 rounded-lg px-2">
                                     <ul className="flex">
                                         {channelUsers.map((user) => (
@@ -80,7 +80,7 @@ export default function Header({ channelName, loaded }) {
                                                 <Avatar
                                                     src={user.avatar_url}
                                                     noStatus={true}
-                                                    className="w-6 h-6 border-2  border-background"
+                                                    className="w-6 h-6 drop-shadow border-background"
                                                     roundedClassName="rounded-lg"
                                                 />
                                             </li>
@@ -93,7 +93,7 @@ export default function Header({ channelName, loaded }) {
                                 </div>
                             )}
 
-                            {channel.type != "SELF" && (
+                            {channel?.type != "SELF" && (
                                 <div
                                     className={`flex items-center p-1 border border-color/15 rounded-lg px-2 gap-x-3 font-normal  ${
                                         huddleChannelId

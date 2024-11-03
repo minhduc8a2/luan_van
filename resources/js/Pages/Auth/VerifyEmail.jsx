@@ -6,7 +6,6 @@ export default function VerifyEmail({ status }) {
 
     const submit = (e) => {
         e.preventDefault();
-
         post(route("verification.send"));
     };
 
@@ -29,7 +28,7 @@ export default function VerifyEmail({ status }) {
                 )}
 
                 <div className="mt-4 flex items-center justify-between">
-                    <Button disabled={processing} onClick={submit} type="green">
+                    <Button loading={processing} onClick={submit} type="green">
                         Resend Verification Email
                     </Button>
 

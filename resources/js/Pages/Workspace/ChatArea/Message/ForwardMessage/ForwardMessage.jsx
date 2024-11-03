@@ -226,6 +226,7 @@ export default function ForwardMessage({ message, show, onClose }) {
                 <Message
                     noToolbar
                     threadStyle={true}
+                    forwarded
                     message={message}
                     user={user}
                     hasChanged={true}
