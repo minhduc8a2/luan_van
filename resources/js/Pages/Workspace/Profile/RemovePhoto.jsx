@@ -1,31 +1,27 @@
 import Button from "@/Components/Button";
 import CustomedDialog from "@/Components/CustomedDialog";
+import useErrorHandler from "@/helpers/useErrorHandler";
 
-import { router } from "@inertiajs/react";
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useParams } from "react-router-dom";
 
 export default function RemovePhoto({ user }) {
-  
+    const { workspaceId } = useParams();
     const [show, setShow] = useState(false);
-    const dispatch = useDispatch();
+
+    const errorHandler = useErrorHandler();
     function removePhoto() {
-        router.delete(route("users.deleteAvatar", user.id), {
-            only: [],
-            preserveState: true,
-
-            onError: (errors) =>
-                dispatch(
-                    setNotificationPopup({
-                        type: "error",
-                        messages: Object.values(errors),
-                    })
-                ),
-
-            onFinish: () => {
+        axios
+            .delete(
+                route("users.deleteAvatar", {
+                    workspace: workspaceId,
+                    user: user.id,
+                })
+            )
+            .then(() => {
                 setShow(false);
-            },
-        });
+            })
+            .catch(errorHandler);
     }
     if (!user.avatar_url) return "";
     return (
@@ -60,10 +56,7 @@ export default function RemovePhoto({ user }) {
                     </p>
                     <div className="flex justify-end gap-x-4 mt-8">
                         <Button onClick={() => setShow(false)}>Cancel</Button>
-                        <Button
-                            type="danger"
-                            onClick={removePhoto}
-                        >
+                        <Button type="danger" onClick={removePhoto}>
                             Yes, Remove Photo
                         </Button>
                     </div>

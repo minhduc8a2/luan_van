@@ -27,7 +27,12 @@ export default function EditProfile({ user, triggerButton }) {
             phone: user.phone,
             display_name: user.display_name || "",
         },
-        { url: route("profile.update"), method: "patch" }
+        {
+            url: route("profile.update", {
+                workspace: workspaceId,
+            }),
+            method: "patch",
+        }
     );
 
     useEffect(() => {
@@ -36,10 +41,16 @@ export default function EditProfile({ user, triggerButton }) {
         setUploadingAvatarFile(true);
         console.log(avatarFile);
         axios
-            .postForm(route("users.updateAvatar", user.id), {
-                avatarFile,
-                workspaceId: workspaceId,
-            })
+            .postForm(
+                route("users.updateAvatar", {
+                    workspace: workspaceId,
+                    user: user.id,
+                }),
+                {
+                    avatarFile,
+                    workspaceId: workspaceId,
+                }
+            )
             .catch(errorHandler)
             .finally(() => {
                 setUploadingAvatarFile(false);
@@ -122,6 +133,7 @@ export default function EditProfile({ user, triggerButton }) {
                         <Image
                             url={user.avatar_url || defaultAvatar}
                             dimensions="w-48 h-48"
+                            noToolbar
                         />
                         <label
                             className=" mt-4 text-center relative font-bold  block rounded-lg cursor-pointer border border-color/15 py-2 "

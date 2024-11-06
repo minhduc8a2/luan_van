@@ -22,8 +22,6 @@ class RoleSeeder extends Seeder
         Role::create(
             ['name' => 'MEMBER']
         );
-        Role::create(
-            ['name' => 'GUEST']
-        );
+       
     }
 }

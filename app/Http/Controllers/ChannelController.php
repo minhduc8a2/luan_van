@@ -683,22 +683,22 @@ class ChannelController extends Controller
             $whoCanPost = $validated['channelPostPermission'];
             switch ($whoCanPost) {
                 case 'everyone':
-                    $channel->createChannelGuestPermissions(PermissionTypes::CHANNEL_CHAT->name);
+                    // $channel->createChannelGuestPermissions(PermissionTypes::CHANNEL_CHAT->name);
                     $channel->createChannelMemberPermissions(PermissionTypes::CHANNEL_CHAT->name);
                     break;
-                case 'everyone_except_guests':
-                    $channel->createChannelMemberPermissions(PermissionTypes::CHANNEL_CHAT->name);
-                    $channel->deleteGuestPermission(PermissionTypes::CHANNEL_CHAT->name);
-                    break;
+                // case 'everyone_except_guests':
+                //     $channel->createChannelMemberPermissions(PermissionTypes::CHANNEL_CHAT->name);
+                //     $channel->deleteGuestPermission(PermissionTypes::CHANNEL_CHAT->name);
+                //     break;
                 case 'channel_managers_only':
-                    $channel->deleteGuestPermission(PermissionTypes::CHANNEL_CHAT->name);
+                    // $channel->deleteGuestPermission(PermissionTypes::CHANNEL_CHAT->name);
                     $channel->deleteMemberPermission(PermissionTypes::CHANNEL_CHAT->name);
                     break;
             }
             //who can add members
             $whoCanAddMembers = $validated['addChannelMembersPermission'];
             switch ($whoCanAddMembers) {
-                case 'everyone_except_guests':
+                case 'everyone':
                     $channel->createChannelMemberPermissions(PermissionTypes::CHANNEL_INVITATION->name);
                     break;
                 case 'channel_managers_only':
@@ -709,20 +709,20 @@ class ChannelController extends Controller
             //allow huddle
             $allowHuddle = $validated['allowHuddle'];
             if ($allowHuddle) {
-                $channel->createChannelGuestPermissions(PermissionTypes::CHANNEL_HUDDLE->name);
+                // $channel->createChannelGuestPermissions(PermissionTypes::CHANNEL_HUDDLE->name);
                 $channel->createChannelMemberPermissions(PermissionTypes::CHANNEL_HUDDLE->name);
             } else {
-                $channel->deleteGuestPermission(PermissionTypes::CHANNEL_HUDDLE->name);
+                // $channel->deleteGuestPermission(PermissionTypes::CHANNEL_HUDDLE->name);
                 $channel->deleteMemberPermission(PermissionTypes::CHANNEL_HUDDLE->name);
             }
 
             //allow thread
             $allowThread = $validated['allowThread'];
             if ($allowThread) {
-                $channel->createChannelGuestPermissions(PermissionTypes::CHANNEL_THREAD->name);
+                // $channel->createChannelGuestPermissions(PermissionTypes::CHANNEL_THREAD->name);
                 $channel->createChannelMemberPermissions(PermissionTypes::CHANNEL_THREAD->name);
             } else {
-                $channel->deleteGuestPermission(PermissionTypes::CHANNEL_THREAD->name);
+                // $channel->deleteGuestPermission(PermissionTypes::CHANNEL_THREAD->name);
                 $channel->deleteMemberPermission(PermissionTypes::CHANNEL_THREAD->name);
             }
             broadcast(new ChannelEvent($channel->id, ChannelEventsEnum::UPDATE_CHANNEL_PERMISSIONS->name));

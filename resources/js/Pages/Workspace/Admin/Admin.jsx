@@ -66,7 +66,7 @@ function Wrapper({ children }) {
                 </Link>
             </nav>
             <div className="grid grid-cols-5  bg-background   flex-1 ">
-                <div className="ml-8 pt-8 border-r border-r-color/15">
+                <div className="pl-8 pr-4 pt-8 border-r border-r-color/15">
                     <div className="flex gap-x-4">
                         <Avatar
                             src={auth.user.avatar_url}

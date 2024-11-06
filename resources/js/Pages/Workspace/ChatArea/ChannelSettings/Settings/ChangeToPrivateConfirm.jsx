@@ -90,7 +90,7 @@ export default function ChangeToPrivateConfirm({ channelName }) {
                     <li>
                         {channel.type == "PUBLIC"
                             ? " No changes will be made to the channel’s history or members."
-                            : "Anyone from your workspace (except guests) can see its message history and join."}
+                            : "Anyone from your workspace can see its message history and join."}
                     </li>
                     <li>
                         {channel.type == "PUBLIC"

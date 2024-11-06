@@ -23,10 +23,7 @@ export default function ChannelPermissions() {
             value: "everyone",
             title: "Everyone",
         },
-        {
-            value: "everyone_except_guests",
-            title: "Everyone, except guests",
-        },
+       
         {
             value: "channel_managers_only",
             title: "Channel Managers only",
@@ -67,8 +64,7 @@ export default function ChannelPermissions() {
         switch (permissions.channelPostPermission) {
             case "everyone":
                 return "Everyone can post";
-            case "everyone_except_guests":
-                return "Everyone, except guests, can post";
+           
 
             case "channel_managers_only":
                 return "Only channel managers can post.";
@@ -136,7 +132,7 @@ export default function ChannelPermissions() {
                     </h5>
                     <ul className="flex flex-col gap-y-2 mt-4">
                         {whoes.map((who, index) => {
-                            if (index == 0) return "";
+                           
                             return (
                                 <li
                                     className="flex gap-x-3 items-center"

@@ -10,7 +10,7 @@ class Role extends Model
 {
     use HasFactory;
     protected $fillable = ["name"];
-    public static $baseRole = ["ADMIN", "MANAGER", "MEMBER", "GUEST"];
+    public static $baseRole = ["ADMIN", "MANAGER", "MEMBER"];
 
 
     public static function getRoleByName(string $name)

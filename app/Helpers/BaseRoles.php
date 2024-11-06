@@ -7,6 +7,4 @@ enum BaseRoles
     case ADMIN;
     case MANAGER;
     case MEMBER;
-    case GUEST;
-   
 }

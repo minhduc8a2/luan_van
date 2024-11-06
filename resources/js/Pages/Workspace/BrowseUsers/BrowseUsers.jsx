@@ -48,11 +48,7 @@ export default function BrowseUsers() {
             title: "Regular members",
             value: "MEMBER",
         },
-        {
-            inside: "Guests",
-            title: "Guests",
-            value: "GUEST",
-        },
+       
     ];
     useEffect(() => {
         // Echo.private(`private_workspaces.${workspace.id}`).listen(
@@ -118,11 +114,7 @@ export default function BrowseUsers() {
                 );
 
                 break;
-            case "GUEST":
-                tempUsers = tempUsers.filter(
-                    (u) => u.workspaceRole.name == "GUEST"
-                );
-                break;
+            
         }
 
         switch (filter.sort) {

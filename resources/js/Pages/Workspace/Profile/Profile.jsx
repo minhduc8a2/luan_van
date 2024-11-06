@@ -80,6 +80,7 @@ export default function Profile() {
                     url={user.avatar_url || defaultAvatar}
                     dimensions="w-64 h-64"
                     className="mt-4 mx-auto"
+                    noToolbar
                 />
             )}
 

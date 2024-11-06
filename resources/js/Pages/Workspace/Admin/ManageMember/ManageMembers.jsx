@@ -59,11 +59,7 @@ export default function ManageMembers() {
             title: "Regular members",
             value: "MEMBER",
         },
-        {
-            inside: "Guests",
-            title: "Guests",
-            value: "GUEST",
-        },
+       
         {
             inside: "Requesting",
             title: "Requesting",
@@ -93,9 +89,7 @@ export default function ManageMembers() {
                 temp = temp.filter((u) => u.workspaceRole.name == "MEMBER");
 
                 break;
-            case "GUEST":
-                temp = temp.filter((u) => u.workspaceRole.name == "GUEST");
-                break;
+           
             case "REQUESTING":
                 temp = temp.filter((u) => !u.pivot?.is_approved);
                 break;

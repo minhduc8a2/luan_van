@@ -113,7 +113,7 @@ class UserController extends Controller
         }
         return Helper::createSuccessResponse();
     }
-    public function deleteAvatar(Request $request, User $user)
+    public function deleteAvatar(Request $request,Workspace $workspace, User $user)
     {
         if ($request->user()->id !== $user->id) return abort(403);
         if ($user->avatar_url == null) return back();
@@ -125,18 +125,18 @@ class UserController extends Controller
             if ($avatarFile) {
                 $oldAvatarFilePath = $avatarFile->path;
                 $avatarFile->delete();
-                $user->avatar_url = null;
-                $user->save();
             }
+            $user->avatar_url = null;
+            $user->save();
             DB::commit();
         } catch (\Throwable $th) {
             DB::rollBack();
-            return back()->withErrors(['server' => "Something went wrong! Please try later."]);
+            Helper::createErrorResponse();
         }
         if ($oldAvatarFilePath) {
             Storage::delete($oldAvatarFilePath);
         }
-        return back();
+        return Helper::createSuccessResponse();
     }
 
     public function hide(Request $request, Workspace $workspace)
