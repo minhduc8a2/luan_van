@@ -307,9 +307,7 @@ export default function Huddle() {
                     peersRef.current.delete(user.id);
                     otherUserStreams.current.delete(user.id);
                 })
-                .listen("HuddleEvent", (e) => {
-                    // setlocalMessages((pre) => [...pre, e.message]);
-                })
+                
                 .error((error) => {
                     console.error(error);
                 });

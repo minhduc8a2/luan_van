@@ -4,6 +4,7 @@ import UpdateEmailForm from "./UpdateEmailForm";
 import SettingsTabs from "../SettingsTabs";
 import UpdatePasswordForm from "./UpdatePasswordForm";
 import UpdateProfileForm from "./UpdateProfileForm";
+import { Head } from "@inertiajs/react";
 
 export default function AccountAndProfile() {
     const tabs = ["Settings", "Profile"];
@@ -21,6 +22,7 @@ export default function AccountAndProfile() {
     ];
     return (
         <div className="pl-16 pt-16">
+             <Head title="Account" />
             <div className="flex gap-x-3">
                 <LuUser2 className="text-dark-green text-4xl" />
                 <h1 className="text-4xl font-bold text-color-high-emphasis">

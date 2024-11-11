@@ -16,6 +16,7 @@ import AcceptedInvitations from "./AcceptedInvitations";
 import useLoadWorkspaceUsers from "@/helpers/useLoadWorkspaceUsers";
 import InviteLinks from "./InviteLinks";
 import { setInvitations } from "@/Store/invitationsSlice";
+import { Head } from "@inertiajs/react";
 export const InvitationContext = createContext(null);
 export default function Invitations() {
     const { workspaceId } = useParams();
@@ -58,6 +59,7 @@ export default function Invitations() {
             value={{ tabIndex, setTabIndex, searchValue }}
         >
             <div className="bg-color-contrast h-full pt-8 px-8">
+                <Head title="Invitations" />
                 <InvitationForm
                     workspace={workspace}
                     isOpen={isInvitationFormOpen}

@@ -9,9 +9,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Redirect;
-use Laravel\Socialite\Facades\Socialite;
 use App\Http\Controllers\HuddleController;
-use App\Http\Controllers\ThreadController;
 use App\Http\Controllers\ChannelController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ProfileController;
@@ -19,9 +17,7 @@ use App\Http\Controllers\ReactionController;
 use App\Http\Controllers\WorkspaceController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\Auth\ProviderController;
 use App\Http\Middleware\HandleWorkspaceRequests;
-use App\Models\Channel;
 use App\Models\Workspace;
 
 

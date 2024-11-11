@@ -8,6 +8,7 @@ import FilterButton from "@/Components/FilterButton";
 import SimpleSearchInput from "@/Components/Input/SimpleSearchInput";
 import useSuccessHandler from "@/helpers/useSuccessHandler";
 import { useCustomedForm } from "@/helpers/customHooks";
+import { Head } from "@inertiajs/react";
 
 export default function ManageMembers() {
     const { workspaceUsers } = useSelector((state) => state.workspaceUsers);
@@ -108,6 +109,7 @@ export default function ManageMembers() {
     );
     return (
         <div className="bg-color-contrast h-full pt-8">
+             <Head title="Manage Members" />
             <InvitationForm
                 workspace={workspace}
                 isOpen={isInvitationFormOpen}

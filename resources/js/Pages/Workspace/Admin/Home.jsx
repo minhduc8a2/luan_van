@@ -1,4 +1,4 @@
-import { usePage } from "@inertiajs/react";
+import { Head, usePage } from "@inertiajs/react";
 import React from "react";
 import { IoIosArrowForward } from "react-icons/io";
 import { IoSettingsOutline } from "react-icons/io5";
@@ -14,6 +14,7 @@ export default function Home() {
 
     return (
         <div className="pl-16 pt-16">
+            <Head title="Home" />
             <div className="flex gap-x-3">
                 <LuUser2 className=" text-4xl text-color-medium-emphasis" />
                 <h1 className="text-4xl font-bold text-color-high-emphasis">

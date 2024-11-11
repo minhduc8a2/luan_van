@@ -4,6 +4,7 @@ import AdminsAndOwners from "./AdminsAndOwners";
 import { IoMdInformationCircleOutline } from "react-icons/io";
 import useLoadWorkspaceUsers from "@/helpers/useLoadWorkspaceUsers";
 import { useEffect } from "react";
+import { Head } from "@inertiajs/react";
 
 export default function AccountAndProfile() {
     const tabs = ["Overview", "Admins & Owners"];
@@ -21,6 +22,7 @@ export default function AccountAndProfile() {
     }, []);
     return (
         <div className="pl-16 pt-16">
+            <Head title="About Workspace" />
             <div className="flex gap-x-3">
                 <IoMdInformationCircleOutline className=" text-4xl text-color-medium-emphasis" />
 

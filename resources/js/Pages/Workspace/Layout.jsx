@@ -21,6 +21,7 @@ import CustomedDialog from "@/Components/CustomedDialog";
 import LoadingSpinner from "@/Components/LoadingSpinner";
 import { IoMdCloudDownload } from "react-icons/io";
 import NotificationPopup from "@/Components/NotificationPopup";
+import { Head } from "@inertiajs/react";
 export default function Layout() {
     const { channelId } = useParams();
     const dispatch = useDispatch();
@@ -89,6 +90,7 @@ function Wrapper({ children }) {
     const [loaded, setLoaded] = useState(false);
     return (
         <>
+            <Head title="Workspace" />
             <InitData loaded={loaded} setLoaded={(value) => setLoaded(value)} />
             {loaded && (
                 <>
