@@ -393,7 +393,7 @@ export default function Message({
                         </button>
                     </div>
                 )}
-                {message.thread_messages_count > 0 &&
+                {message.thread_messages_count>0 && !message.deleted_at  &&
                     !threadStyle &&
                     !forwarded && (
                         <button

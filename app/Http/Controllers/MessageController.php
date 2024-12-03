@@ -495,7 +495,7 @@ class MessageController extends Controller
         if ($request->user()->cannot('delete', [Message::class, $message])) return abort(403);
         try {
             DB::beginTransaction();
-            $isChannelMessage = $message->thread_message_id == null;;
+            $isChannelMessage = $message->thread_message_id == null;
             $copiedMessage = $message->replicate();
             $copiedMessage->id = $message->id;
             if ($isChannelMessage) {

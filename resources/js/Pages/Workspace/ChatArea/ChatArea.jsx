@@ -112,7 +112,7 @@ export default function ChatArea() {
                 })
                 .listen("ThreadMessageEvent", (e) => {
                     if (
-                        e.type == "newMessageCreated" &&
+                        e.type == ChannelEventsEnum.NEW_MESSAGE_CREATED &&
                         !isHiddenUser(workspaceUsers, e.message?.user_id)
                     )
                         dispatch(
@@ -122,7 +122,7 @@ export default function ChatArea() {
                             })
                         );
                     else if (
-                        e.type == "messageDeleted" &&
+                        e.type == ChannelEventsEnum.MESSAGE_DELETED &&
                         !isHiddenUser(workspaceUsers, e.message?.user_id)
                     )
                         dispatch(
