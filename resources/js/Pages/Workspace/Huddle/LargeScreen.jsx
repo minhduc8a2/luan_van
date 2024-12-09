@@ -83,7 +83,7 @@ export default function LargeScreen({
                     <MdOutlineZoomInMap className="text-white/85" />
                 </button>
             </div>
-            <div className=" flex justify-center gap-2 pb-4 mx-4 rounded-lg flex-wrap flex-1">
+            <div className=" flex max-h-full min-h-0 justify-center gap-2 pb-4 mx-4 rounded-lg flex-wrap flex-1">
                 {Array.from(otherUserStreams.current.entries()).map(
                     ([userId, stream]) => {
                         if (
@@ -106,7 +106,7 @@ export default function LargeScreen({
                     }
                 )}
 
-                <div className="flex-1  group/main_stream gap-4 relative overflow-hidden flex items-center justify-center">
+                <div className="flex-1 max-h-full min-h-0  group/main_stream gap-4 relative overflow-hidden flex items-center justify-center">
                     {(!mainStream || !streamHasVideoTracks(mainStream)) &&
                         users.map((user) => {
                             if (user.id == auth.user.id)
