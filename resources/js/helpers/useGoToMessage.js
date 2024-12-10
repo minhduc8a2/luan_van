@@ -25,6 +25,7 @@ const useGoToMessage = () => {
                 console.error("is thread message, not have channel data");
                 loadRelatedChannelData(channel.id).then(() => {
                     loadSpecificMessagesById(
+                        channel.workspace_id,
                         message.id,
                         channel.id,
                         message.threaded_message_id
@@ -50,6 +51,8 @@ const useGoToMessage = () => {
                 console.error("is thread message,have channel data");
 
                 loadSpecificMessagesById(
+                    channel.workspace_id,
+
                     message.id,
                     channel.id,
                     message.threaded_message_id
@@ -88,7 +91,12 @@ const useGoToMessage = () => {
                     });
                 }
             } else {
-                loadSpecificMessagesById(message.id, channel.id)
+                loadSpecificMessagesById(
+                    channel.workspace_id,
+
+                    message.id,
+                    channel.id
+                )
                     .then((data) => {
                         dispatch(
                             setChannelData({
@@ -107,7 +115,12 @@ const useGoToMessage = () => {
                 console.error(
                     "normal message, load specific messages for channel, have some channel data"
                 );
-                loadSpecificMessagesById(message.id, channel.id)
+                loadSpecificMessagesById(
+                    channel.workspace_id,
+
+                    message.id,
+                    channel.id
+                )
                     .then((data) => {
                         dispatch(
                             setChannelData({

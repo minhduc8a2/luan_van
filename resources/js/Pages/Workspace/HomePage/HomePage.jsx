@@ -20,7 +20,7 @@ export default function HomePage() {
             dispatch(setWorkspaces({ workspaces: response.data.workspaces }));
         });
     }, []);
-   
+
     return (
         <div className="min-h-screen bg-color-contrast">
             <InvitationRequest />
@@ -76,7 +76,7 @@ export default function HomePage() {
                     <div className="px-4 text-color-medium-emphasis">
                         Workspaces for{" "}
                         <span className="font-bold text-color-high-emphasis">
-                            {auth.user.email}
+                            {auth.user.name}
                         </span>
                     </div>
                     <hr className="mt-4" />
